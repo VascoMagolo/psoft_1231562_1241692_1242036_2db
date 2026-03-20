@@ -1,0 +1,150 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+hide circle
+
+' --- Enums & Value Objects ---
+
+enum Role <<Enum>> {
+  ADMIN
+  BACKOFFICE_OPERATOR
+  ATCC
+  MAINTENANCE_TECHNICIAN
+  MAINTENANCE_SUPERVISOR
+}
+
+enum AircraftStatus <<Enum>> {
+  ACTIVE
+  INACTIVE
+  UNDER_MAINTENANCE
+  IN_FLIGHT
+}
+
+enum RouteStatus <<Enum>> {
+  ACTIVE
+  DEACTIVATED
+}
+
+enum MaintenanceType <<Enum>> {
+  INSPECTION
+  SCHEDULED_MAINTENANCE
+  OVERHAUL
+  MODIFICATION
+}
+
+enum MaintenanceComponent <<Enum>> {
+  ENGINE
+  AIRFRAME
+  AVIONICS
+  INTERIOR
+  EXTERIOR
+}
+
+class IataCode <<ValueObject>> {
+  - code : String
+}
+
+class Coordinates <<ValueObject>> {
+  - latitude : Double
+  - longitude : Double
+}
+
+class Runway <<ValueObject>> {
+  - name : String
+  - length : Integer
+  - orientation : String
+}
+
+' --- Entities (Aggregates) ---
+
+class User <<Entity>> <<Root>> {
+  - id : UUID
+  - username : String
+  - passwordHash : String
+  - role : Role
+}
+
+class AircraftModel <<Entity>> <<Root>> {
+  - modelName : String
+  - manufacturer : String
+  - seatCapacity : Integer
+  - fuelCapacity : Double
+  - maxRange : Double
+  - cruisingSpeed : Double
+  - imagePath : String
+}
+
+class Aircraft <<Entity>> <<Root>> {
+  - registrationNumber : String
+  - manufacturingDate : Date
+  - status : AircraftStatus
+}
+
+class Airport <<Entity>> <<Root>> {
+  - name : String
+  - city : String
+  - country : String
+  - timezone : String
+  - operationalStatus : String
+}
+
+class AirportCertification <<Entity>> {
+  - id : UUID
+}
+
+class Route <<Entity>> <<Root>> {
+  - id : UUID
+  - estimatedFlightTime : Integer
+  - minRangeRequirement : Double
+  - minCapacityRequirement : Integer
+  - status : RouteStatus
+}
+
+class ScheduledFlight <<Entity>> <<Root>> {
+  - id : UUID
+  - departureDateTime : DateTime
+  - status : String
+}
+
+class MaintenanceTemplate <<Entity>> <<Root>> {
+  - name : String
+  - templateType : MaintenanceType
+  - checklist : List<String>
+}
+
+class MaintenanceRecord <<Entity>> <<Root>> {
+  - id : UUID
+  - description : String
+  - startDate : Date
+  - expectedDuration : Integer
+  - notes : String
+  - component : MaintenanceComponent
+  - isCompleted : Boolean
+}
+
+' --- Relationships ---
+
+' Airports
+Airport *-- IataCode
+Airport *-- Coordinates
+Airport *-- Runway
+
+' Aircrafts
+Aircraft "1" --> "1" AircraftModel : is of model
+AircraftModel "1" <-- "*" AirportCertification : certifies
+Airport "1" <-- "*" AirportCertification : certified at
+
+' Routes
+Route "1" --> "1" Airport : origin
+Route "1" --> "1" Airport : destination
+
+' Scheduled Flights
+ScheduledFlight "1" --> "1" Route : follows
+ScheduledFlight "1" --> "1" Aircraft : uses
+
+' Maintenance
+MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
+MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
+MaintenanceRecord "*" --> "1" Aircraft : performed on
+
+@enduml
