@@ -20,6 +20,12 @@ enum AircraftStatus <<Enum>> {
   IN_FLIGHT
 }
 
+enum FlightStatus <<Enum>> {
+  DELAYED
+  ON_TIME
+  CANCELED
+}
+
 enum RouteStatus <<Enum>> {
   ACTIVE
   DEACTIVATED
@@ -38,6 +44,19 @@ enum MaintenanceComponent <<Enum>> {
   AVIONICS
   INTERIOR
   EXTERIOR
+}
+
+enum AirportStatus <<Enum>> {
+   OPERATIONAL
+   UNDER_MAINTENANCE
+   CLOSED
+}
+
+enum AircraftFeatures <<Enum>> {
+    WIFI,
+    ELETRIC,
+    DIESEL,
+    ...
 }
 
 class IataCode <<ValueObject>> {
@@ -78,6 +97,8 @@ class Aircraft <<Entity>> <<Root>> {
   - registrationNumber : String
   - manufacturingDate : Date
   - status : AircraftStatus
+  - model : AircraftModel
+  - features : List<AircraftFeatures>
 }
 
 class Airport <<Entity>> <<Root>> {
@@ -85,15 +106,19 @@ class Airport <<Entity>> <<Root>> {
   - city : String
   - country : String
   - timezone : String
-  - operationalStatus : String
+  - imagePath : String
+  - operationalHours : String
+  - contactInformation : String
+  - facilityInformation : List<String>
+  - operationalStatus : AirportStatus
 }
 
-class AirportCertification <<Entity>> {
-  - id : UUID
+class AirplaneCertification <<Entity>> {
+  - id : Integer
 }
 
 class Route <<Entity>> <<Root>> {
-  - id : UUID
+  - id : Integer
   - estimatedFlightTime : Integer
   - minRangeRequirement : Double
   - minCapacityRequirement : Integer
@@ -101,19 +126,19 @@ class Route <<Entity>> <<Root>> {
 }
 
 class ScheduledFlight <<Entity>> <<Root>> {
-  - id : UUID
   - departureDateTime : DateTime
-  - status : String
+  - status : FlightStatus
 }
 
 class MaintenanceTemplate <<Entity>> <<Root>> {
   - name : String
   - templateType : MaintenanceType
+  - applicableModels : List<AircraftModel>
   - checklist : List<String>
 }
 
 class MaintenanceRecord <<Entity>> <<Root>> {
-  - id : UUID
+  - id : Integer
   - description : String
   - startDate : Date
   - expectedDuration : Integer
@@ -131,8 +156,8 @@ Airport *-- Runway
 
 ' Aircrafts
 Aircraft "1" --> "1" AircraftModel : is of model
-AircraftModel "1" <-- "*" AirportCertification : certifies
-Airport "1" <-- "*" AirportCertification : certified at
+AircraftModel "1" <-- "*" AirplaneCertification : certifies
+Airport "1" <-- "*" AirplaneCertification : certified at
 
 ' Routes
 Route "1" --> "1" Airport : origin
