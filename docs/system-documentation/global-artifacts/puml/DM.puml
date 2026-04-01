@@ -3,8 +3,6 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 hide circle
 
-' --- Enums & Value Objects ---
-
 enum Role <<Enum>> {
   ADMIN
   BACKOFFICE_OPERATOR
@@ -14,15 +12,17 @@ enum Role <<Enum>> {
 }
 
 enum AircraftStatus <<Enum>> {
-  ACTIVE
+  AVAILABLE
   INACTIVE
   UNDER_MAINTENANCE
   IN_FLIGHT
 }
 
 enum FlightStatus <<Enum>> {
+  SCHEDULED
   DELAYED
-  ON_TIME
+  IN_FLIGHT
+  COMPLETED
   CANCELED
 }
 
@@ -52,11 +52,11 @@ enum AirportStatus <<Enum>> {
    CLOSED
 }
 
-enum AircraftFeatures <<Enum>> {
-    WIFI,
-    ELETRIC,
-    DIESEL,
-    ...
+enum ContactType <<Enum>> {
+   PHONE
+   EMAIL
+   FAX
+   OTHER
 }
 
 class IataCode <<ValueObject>> {
@@ -74,7 +74,23 @@ class Runway <<ValueObject>> {
   - orientation : String
 }
 
-' --- Entities (Aggregates) ---
+class Contact <<ValueObject>> {
+  - type : ContactType
+  - value : String
+  - description : String
+}
+
+class Terminal <<ValueObject>> {
+  - name : String
+}
+
+class Gate <<ValueObject>> {
+  - identifier : String
+}
+
+class Service <<ValueObject>> {
+  - description : String
+}
 
 class User <<Entity>> <<Root>> {
   - id : UUID
@@ -86,7 +102,6 @@ class User <<Entity>> <<Root>> {
 class AircraftModel <<Entity>> <<Root>> {
   - modelName : String
   - manufacturer : String
-  - seatCapacity : Integer
   - fuelCapacity : Double
   - maxRange : Double
   - cruisingSpeed : Double
@@ -97,19 +112,19 @@ class Aircraft <<Entity>> <<Root>> {
   - registrationNumber : String
   - manufacturingDate : Date
   - status : AircraftStatus
+  - seatCapacity : Integer
+  - features : List<String>
   - model : AircraftModel
-  - features : List<AircraftFeatures>
 }
 
 class Airport <<Entity>> <<Root>> {
   - name : String
   - city : String
   - country : String
+  - region : String
   - timezone : String
   - imagePath : String
   - operationalHours : String
-  - contactInformation : String
-  - facilityInformation : List<String>
   - operationalStatus : AirportStatus
 }
 
@@ -119,6 +134,7 @@ class AirplaneCertification <<Entity>> {
 
 class Route <<Entity>> <<Root>> {
   - id : Integer
+  - distance : Double
   - estimatedFlightTime : Integer
   - minRangeRequirement : Double
   - minCapacityRequirement : Integer
@@ -147,27 +163,31 @@ class MaintenanceRecord <<Entity>> <<Root>> {
   - isCompleted : Boolean
 }
 
-' --- Relationships ---
+class MaintenancePart <<Entity>> <<Root>> {
+  - partNumber : String
+  - name : String
+  - description : String
+  - stockQuantity : Integer
+}
 
-' Airports
 Airport *-- IataCode
 Airport *-- Coordinates
-Airport *-- Runway
+Airport *-- "*" Runway
+Airport *-- "*" Contact
+Airport *-- "*" Terminal
+Airport *-- "*" Gate
+Airport *-- "*" Service
 
-' Aircrafts
 Aircraft "1" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AirplaneCertification : certifies
 Airport "1" <-- "*" AirplaneCertification : certified at
 
-' Routes
 Route "1" --> "1" Airport : origin
 Route "1" --> "1" Airport : destination
 
-' Scheduled Flights
 ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses
 
-' Maintenance
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
 MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
 MaintenanceRecord "*" --> "1" Aircraft : performed on
