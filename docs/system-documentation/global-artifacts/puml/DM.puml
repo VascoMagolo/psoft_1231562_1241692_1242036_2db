@@ -168,6 +168,7 @@ class MaintenancePart <<Entity>> <<Root>> {
   - name : String
   - description : String
   - stockQuantity : Integer
+  - minimumThreshold : Integer
 }
 
 Airport *-- IataCode
