@@ -31,6 +31,13 @@ enum RouteStatus <<Enum>> {
   DEACTIVATED
 }
 
+enum MaintenanceStatus <<Enum>> {
+   PLANNED
+   IN_PROGRESS
+   COMPLETED
+   CANCELED
+}
+
 enum MaintenanceType <<Enum>> {
   INSPECTION
   SCHEDULED_MAINTENANCE
@@ -160,7 +167,7 @@ class MaintenanceRecord <<Entity>> <<Root>> {
   - expectedDuration : Integer
   - notes : String
   - component : MaintenanceComponent
-  - isCompleted : Boolean
+  - status : MaintenanceStatus
 }
 
 class MaintenancePart <<Entity>> <<Root>> {
