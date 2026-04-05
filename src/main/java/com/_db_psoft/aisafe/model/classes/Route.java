@@ -4,7 +4,7 @@ import com._db_psoft.aisafe.model.enums.RouteStatus;
 
 public class Route {
     private Integer id;
-    private Integer distance;
+    private Double distance;
     private Integer estimatedFlightTime;
     private Double minRangeRequirement;
     private Integer minCapacityRequirement;

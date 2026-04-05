@@ -1,8 +1,3 @@
-
-# Glossary
-
-**Terms, Expressions and Acronyms (TEA) must be organized alphabetically.**
-
 # Glossary
 
 **Terms, Expressions and Acronyms (TEA) — sorted alphabetically by TEA (PT)**

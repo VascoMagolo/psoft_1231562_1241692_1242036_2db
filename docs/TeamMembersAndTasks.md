@@ -10,7 +10,7 @@ The team consists of the students listed in the table below.
 | **1241692**    | Diogo Nogueira  |
 | **1242036**    | Pedro Guilherme |
 
-# 2. Task Distribution ###
+# 2. Task Distribution 
 
 Throughout the project development period, the distribution of tasks, requirements, and features among team members was
 organized as shown in the table below.

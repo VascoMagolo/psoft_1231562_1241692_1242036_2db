@@ -100,7 +100,7 @@ class Service <<ValueObject>> {
 }
 
 class User <<Entity>> <<Root>> {
-  - id : UUID
+  - id : Integer
   - username : String
   - passwordHash : String
   - role : Role
