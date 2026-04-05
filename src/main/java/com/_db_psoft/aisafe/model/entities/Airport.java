@@ -4,6 +4,8 @@ import com._db_psoft.aisafe.model.enums.AirportStatus;
 import com._db_psoft.aisafe.model.valueObject.*;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 
 public class Airport {
@@ -24,13 +26,13 @@ public class Airport {
     @Embedded
     private IataCode iataCode;
     @Embedded
-    private Runway runway;
-    @Embedded
     private Contact contact;
     @Embedded
-    private Terminal terminal;
-    @Embedded
-    private Gate gate;
-    @Embedded
     private Service service;
+    @ElementCollection
+    private List<Terminal> terminals;
+    @ElementCollection
+    private List<Gate> gates;
+    @ElementCollection
+    private List<Runway> runways;
 }

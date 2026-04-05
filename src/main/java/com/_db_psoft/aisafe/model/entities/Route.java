@@ -10,8 +10,7 @@ import jakarta.persistence.Id;
 public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id1;
-    private Integer id;
+    private Long id;
     private Double distance;
     private Integer estimatedFlightTime;
     private Double minRangeRequirement;

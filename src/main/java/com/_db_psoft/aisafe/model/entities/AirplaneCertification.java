@@ -11,6 +11,5 @@ import jakarta.persistence.Id;
 public class AirplaneCertification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id1;
-    private Integer id;
+    private Long id;
 }

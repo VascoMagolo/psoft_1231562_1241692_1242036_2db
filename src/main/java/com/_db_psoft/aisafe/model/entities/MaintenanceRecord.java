@@ -15,8 +15,7 @@ import java.util.Date;
 public class MaintenanceRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id1;
-    private Integer id;
+    private Long id;
     private String description;
     private Date startDate;
     private Integer expectedDuration;
