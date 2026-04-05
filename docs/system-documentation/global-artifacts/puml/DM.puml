@@ -1,0 +1,203 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+hide circle
+
+enum Role <<Enum>> {
+  ADMIN
+  BACKOFFICE_OPERATOR
+  ATCC
+  MAINTENANCE_TECHNICIAN
+  MAINTENANCE_SUPERVISOR
+}
+
+enum AircraftStatus <<Enum>> {
+  AVAILABLE
+  INACTIVE
+  UNDER_MAINTENANCE
+  IN_FLIGHT
+}
+
+enum FlightStatus <<Enum>> {
+  SCHEDULED
+  DELAYED
+  IN_FLIGHT
+  COMPLETED
+  CANCELED
+}
+
+enum RouteStatus <<Enum>> {
+  ACTIVE
+  DEACTIVATED
+}
+
+enum MaintenanceStatus <<Enum>> {
+   PLANNED
+   IN_PROGRESS
+   COMPLETED
+   CANCELED
+}
+
+enum MaintenanceType <<Enum>> {
+  INSPECTION
+  SCHEDULED_MAINTENANCE
+  OVERHAUL
+  MODIFICATION
+}
+
+enum MaintenanceComponent <<Enum>> {
+  ENGINE
+  AIRFRAME
+  AVIONICS
+  INTERIOR
+  EXTERIOR
+}
+
+enum AirportStatus <<Enum>> {
+   OPERATIONAL
+   UNDER_MAINTENANCE
+   CLOSED
+}
+
+enum ContactType <<Enum>> {
+   PHONE
+   EMAIL
+   FAX
+   OTHER
+}
+
+class IataCode <<ValueObject>> {
+  - code : String
+}
+
+class Coordinates <<ValueObject>> {
+  - latitude : Double
+  - longitude : Double
+}
+
+class Runway <<ValueObject>> {
+  - name : String
+  - length : Integer
+  - orientation : String
+}
+
+class Contact <<ValueObject>> {
+  - type : ContactType
+  - value : String
+  - description : String
+}
+
+class Terminal <<ValueObject>> {
+  - name : String
+}
+
+class Gate <<ValueObject>> {
+  - identifier : String
+}
+
+class Service <<ValueObject>> {
+  - description : String
+}
+
+class User <<Entity>> <<Root>> {
+  - id : Integer
+  - username : String
+  - passwordHash : String
+  - role : Role
+}
+
+class AircraftModel <<Entity>> <<Root>> {
+  - modelName : String
+  - manufacturer : String
+  - fuelCapacity : Double
+  - maxRange : Double
+  - cruisingSpeed : Double
+  - imagePath : String
+}
+
+class Aircraft <<Entity>> <<Root>> {
+  - registrationNumber : String
+  - manufacturingDate : Date
+  - status : AircraftStatus
+  - seatCapacity : Integer
+  - features : List<String>
+  - model : AircraftModel
+}
+
+class Airport <<Entity>> <<Root>> {
+  - name : String
+  - city : String
+  - country : String
+  - region : String
+  - timezone : String
+  - imagePath : String
+  - operationalHours : String
+  - operationalStatus : AirportStatus
+}
+
+class AirplaneCertification <<Entity>> {
+  - id : Integer
+}
+
+class Route <<Entity>> <<Root>> {
+  - id : Integer
+  - distance : Double
+  - estimatedFlightTime : Integer
+  - minRangeRequirement : Double
+  - minCapacityRequirement : Integer
+  - status : RouteStatus
+}
+
+class ScheduledFlight <<Entity>> <<Root>> {
+  - departureDateTime : DateTime
+  - status : FlightStatus
+}
+
+class MaintenanceTemplate <<Entity>> <<Root>> {
+  - name : String
+  - templateType : MaintenanceType
+  - applicableModels : List<AircraftModel>
+  - checklist : List<String>
+}
+
+class MaintenanceRecord <<Entity>> <<Root>> {
+  - id : Integer
+  - description : String
+  - startDate : Date
+  - expectedDuration : Integer
+  - notes : String
+  - component : MaintenanceComponent
+  - status : MaintenanceStatus
+}
+
+class MaintenancePart <<Entity>> <<Root>> {
+  - partNumber : String
+  - name : String
+  - description : String
+  - stockQuantity : Integer
+  - minimumThreshold : Integer
+}
+
+Airport *-- IataCode
+Airport *-- Coordinates
+Airport *-- "*" Runway
+Airport *-- "*" Contact
+Airport *-- "*" Terminal
+Airport *-- "*" Gate
+Airport *-- "*" Service
+
+Aircraft "1" --> "1" AircraftModel : is of model
+AircraftModel "1" <-- "*" AirplaneCertification : certifies
+Airport "1" <-- "*" AirplaneCertification : certified at
+
+Route "1" --> "1" Airport : origin
+Route "1" --> "1" Airport : destination
+
+ScheduledFlight "1" --> "1" Route : follows
+ScheduledFlight "1" --> "1" Aircraft : uses
+
+MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
+MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
+MaintenanceRecord "*" --> "1" Aircraft : performed on
+
+@enduml
