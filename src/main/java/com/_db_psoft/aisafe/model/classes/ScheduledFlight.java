@@ -2,25 +2,10 @@ package com._db_psoft.aisafe.model.classes;
 
 import com._db_psoft.aisafe.model.enums.FlightStatus;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 public class ScheduledFlight {
-    public Date departureDateTime;
-    protected FlightStatus status;
+    private OffsetDateTime  departureDateTime;
+    private FlightStatus status;
 
-    public Date getDepartureDateTime() {
-        return departureDateTime;
-    }
-
-    public void setDepartureDateTime(Date departureDateTime) {
-        this.departureDateTime = departureDateTime;
-    }
-
-    public FlightStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(FlightStatus status) {
-        this.status = status;
-    }
 }
