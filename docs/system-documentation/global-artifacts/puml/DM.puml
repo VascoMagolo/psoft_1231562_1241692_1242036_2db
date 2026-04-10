@@ -3,8 +3,11 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 hide circle
 
+<<<<<<< HEAD
 ' --- Enums & Value Objects ---
 
+=======
+>>>>>>> origin/1231562
 enum Role <<Enum>> {
   ADMIN
   BACKOFFICE_OPERATOR
@@ -14,15 +17,26 @@ enum Role <<Enum>> {
 }
 
 enum AircraftStatus <<Enum>> {
+<<<<<<< HEAD
   ACTIVE
+=======
+  AVAILABLE
+>>>>>>> origin/1231562
   INACTIVE
   UNDER_MAINTENANCE
   IN_FLIGHT
 }
 
 enum FlightStatus <<Enum>> {
+<<<<<<< HEAD
   DELAYED
   ON_TIME
+=======
+  SCHEDULED
+  DELAYED
+  IN_FLIGHT
+  COMPLETED
+>>>>>>> origin/1231562
   CANCELED
 }
 
@@ -31,6 +45,16 @@ enum RouteStatus <<Enum>> {
   DEACTIVATED
 }
 
+<<<<<<< HEAD
+=======
+enum MaintenanceStatus <<Enum>> {
+   PLANNED
+   IN_PROGRESS
+   COMPLETED
+   CANCELED
+}
+
+>>>>>>> origin/1231562
 enum MaintenanceType <<Enum>> {
   INSPECTION
   SCHEDULED_MAINTENANCE
@@ -52,11 +76,19 @@ enum AirportStatus <<Enum>> {
    CLOSED
 }
 
+<<<<<<< HEAD
 enum AircraftFeatures <<Enum>> {
     WIFI,
     ELETRIC,
     DIESEL,
     ...
+=======
+enum ContactType <<Enum>> {
+   PHONE
+   EMAIL
+   FAX
+   OTHER
+>>>>>>> origin/1231562
 }
 
 class IataCode <<ValueObject>> {
@@ -74,10 +106,33 @@ class Runway <<ValueObject>> {
   - orientation : String
 }
 
+<<<<<<< HEAD
 ' --- Entities (Aggregates) ---
 
 class User <<Entity>> <<Root>> {
   - id : UUID
+=======
+class Contact <<ValueObject>> {
+  - type : ContactType
+  - value : String
+  - description : String
+}
+
+class Terminal <<ValueObject>> {
+  - name : String
+}
+
+class Gate <<ValueObject>> {
+  - identifier : String
+}
+
+class Service <<ValueObject>> {
+  - description : String
+}
+
+class User <<Entity>> <<Root>> {
+  - id : Integer
+>>>>>>> origin/1231562
   - username : String
   - passwordHash : String
   - role : Role
@@ -86,7 +141,10 @@ class User <<Entity>> <<Root>> {
 class AircraftModel <<Entity>> <<Root>> {
   - modelName : String
   - manufacturer : String
+<<<<<<< HEAD
   - seatCapacity : Integer
+=======
+>>>>>>> origin/1231562
   - fuelCapacity : Double
   - maxRange : Double
   - cruisingSpeed : Double
@@ -97,19 +155,32 @@ class Aircraft <<Entity>> <<Root>> {
   - registrationNumber : String
   - manufacturingDate : Date
   - status : AircraftStatus
+<<<<<<< HEAD
   - model : AircraftModel
   - features : List<AircraftFeatures>
+=======
+  - seatCapacity : Integer
+  - features : List<String>
+  - model : AircraftModel
+>>>>>>> origin/1231562
 }
 
 class Airport <<Entity>> <<Root>> {
   - name : String
   - city : String
   - country : String
+<<<<<<< HEAD
   - timezone : String
   - imagePath : String
   - operationalHours : String
   - contactInformation : String
   - facilityInformation : List<String>
+=======
+  - region : String
+  - timezone : String
+  - imagePath : String
+  - operationalHours : String
+>>>>>>> origin/1231562
   - operationalStatus : AirportStatus
 }
 
@@ -119,6 +190,10 @@ class AirplaneCertification <<Entity>> {
 
 class Route <<Entity>> <<Root>> {
   - id : Integer
+<<<<<<< HEAD
+=======
+  - distance : Double
+>>>>>>> origin/1231562
   - estimatedFlightTime : Integer
   - minRangeRequirement : Double
   - minCapacityRequirement : Integer
@@ -144,6 +219,7 @@ class MaintenanceRecord <<Entity>> <<Root>> {
   - expectedDuration : Integer
   - notes : String
   - component : MaintenanceComponent
+<<<<<<< HEAD
   - isCompleted : Boolean
 }
 
@@ -155,10 +231,32 @@ Airport *-- Coordinates
 Airport *-- Runway
 
 ' Aircrafts
+=======
+  - status : MaintenanceStatus
+}
+
+class MaintenancePart <<Entity>> <<Root>> {
+  - partNumber : String
+  - name : String
+  - description : String
+  - stockQuantity : Integer
+  - minimumThreshold : Integer
+}
+
+Airport *-- IataCode
+Airport *-- Coordinates
+Airport *-- "*" Runway
+Airport *-- "*" Contact
+Airport *-- "*" Terminal
+Airport *-- "*" Gate
+Airport *-- "*" Service
+
+>>>>>>> origin/1231562
 Aircraft "1" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AirplaneCertification : certifies
 Airport "1" <-- "*" AirplaneCertification : certified at
 
+<<<<<<< HEAD
 ' Routes
 Route "1" --> "1" Airport : origin
 Route "1" --> "1" Airport : destination
@@ -168,6 +266,14 @@ ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses
 
 ' Maintenance
+=======
+Route "1" --> "1" Airport : origin
+Route "1" --> "1" Airport : destination
+
+ScheduledFlight "1" --> "1" Route : follows
+ScheduledFlight "1" --> "1" Aircraft : uses
+
+>>>>>>> origin/1231562
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
 MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
 MaintenanceRecord "*" --> "1" Aircraft : performed on
