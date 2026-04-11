@@ -1,8 +1,10 @@
 package com._db_psoft.aisafe.model.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class AircraftModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -17,11 +17,13 @@ public class Aircraft {
 
     @Column(updatable = false)
     private LocalDate manufacturingDate;
+    @Enumerated(EnumType.STRING)
     private AircraftStatus status;
     private Integer seatCapacity;
 
     @ManyToOne
     @JoinColumn(name = "model_id")
     private AircraftModel model;
+    @ElementCollection
     private List<String> features;
 }

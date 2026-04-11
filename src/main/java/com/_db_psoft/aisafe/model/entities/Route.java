@@ -1,10 +1,7 @@
 package com._db_psoft.aisafe.model.entities;
 
 import com._db_psoft.aisafe.model.enums.RouteStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Route {
@@ -15,6 +12,7 @@ public class Route {
     private Integer estimatedFlightTime;
     private Double minRangeRequirement;
     private Integer minCapacityRequirement;
+    @Enumerated(EnumType.STRING)
     private RouteStatus status;
 
 }

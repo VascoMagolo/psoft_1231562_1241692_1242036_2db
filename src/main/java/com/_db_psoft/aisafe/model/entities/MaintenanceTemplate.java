@@ -1,10 +1,7 @@
 package com._db_psoft.aisafe.model.entities;
 
 import com._db_psoft.aisafe.model.enums.MaintenanceType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.List;
 
@@ -15,6 +12,10 @@ public class MaintenanceTemplate {
     private Long id;
     private String name;
     private MaintenanceType templateType;
+    @ManyToMany
     private List<AircraftModel> applicableModels;
+    @ElementCollection
     private List<String> checklist;
+    private Integer intervalFlightHours;
+    private Integer intervalDays;
 }

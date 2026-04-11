@@ -19,16 +19,17 @@ public class Airport {
     private String timezone;
     private String imagePath;
     private String operationalHours;
+    @Enumerated(EnumType.STRING)
     private AirportStatus operationalStatus;
 
     @Embedded
     private Coordinates coordinates;
     @Embedded
     private IataCode iataCode;
-    @Embedded
-    private Contact contact;
-    @Embedded
-    private Service service;
+    @ElementCollection
+    private List<Contact> contact;
+    @ElementCollection
+    private List<Service> service;
     @ElementCollection
     private List<Terminal> terminals;
     @ElementCollection
