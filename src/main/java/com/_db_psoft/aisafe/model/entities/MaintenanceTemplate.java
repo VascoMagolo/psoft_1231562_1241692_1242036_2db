@@ -11,6 +11,7 @@ public class MaintenanceTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Enumerated(EnumType.STRING)
     private MaintenanceType templateType;
     @ManyToMany
     private List<AircraftModel> applicableModels;

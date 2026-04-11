@@ -13,7 +13,7 @@ package "User Aggregate" <<Aggregate>> {
   }
 
   class User <<Entity>> <<Root>> {
-    - id : Integer
+    - id : Long
     - username : String
     - passwordHash : String
     - role : Role
@@ -112,7 +112,7 @@ package "Airport Aggregate" <<Aggregate>> {
   }
 
   class AirplaneCertification <<Entity>> {
-    - id : Integer
+    - id : Long
   }
 
   Airport --> AirportStatus : current status
@@ -134,7 +134,7 @@ package "Route Aggregate" <<Aggregate>> {
   }
 
   class Route <<Entity>> <<Root>> {
-    - id : Integer
+    - id : Long
     - distance : Double
     - estimatedFlightTime : Integer
     - minRangeRequirement : Double
@@ -197,7 +197,7 @@ package "Maintenance Aggregate" <<Aggregate>> {
   }
 
   class MaintenanceRecord <<Entity>> <<Root>> {
-    - id : Integer
+    - id : Long
     - description : String
     - startDate : Date
     - expectedDuration : Integer

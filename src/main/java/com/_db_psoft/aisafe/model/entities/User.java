@@ -3,7 +3,6 @@ package com._db_psoft.aisafe.model.entities;
 import com._db_psoft.aisafe.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

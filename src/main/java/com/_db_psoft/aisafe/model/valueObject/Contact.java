@@ -18,7 +18,6 @@ public class Contact {
     private ContactType type;
     @Column(nullable = false)
     private String value;
-    @Column(nullable = false)
     private String description;
 
     // regEX for contact types
@@ -31,10 +30,13 @@ public class Contact {
         if (type == null) {
             throw new InvalidContactException("Contact type cannot be null.");
         }
+        if (value == null) {
+            throw new InvalidContactException("Contact value cannot be null.");
+        }
+        value = value.trim();
         if (value.isEmpty()) {
             throw new InvalidContactException("Contact value cannot be empty.");
         }
-        value = value.trim();
         switch (type){
             case PHONE, FAX:
                 if (!PHONE_PATTERN.matcher(value).matches()){
@@ -54,5 +56,7 @@ public class Contact {
         this.type = type;
         this.description = (description != null) ? description.trim() : null;;
         this.value = value;
+
+
     }
 }
