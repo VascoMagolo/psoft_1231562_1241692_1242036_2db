@@ -3,181 +3,223 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 hide circle
 
-enum Role <<Enum>> {
-  ADMIN
-  BACKOFFICE_OPERATOR
-  ATCC
-  MAINTENANCE_TECHNICIAN
-  MAINTENANCE_SUPERVISOR
+package "User Aggregate" <<Aggregate>> {
+  enum Role <<Enum>> {
+    ADMIN
+    BACKOFFICE_OPERATOR
+    ATCC
+    MAINTENANCE_TECHNICIAN
+    MAINTENANCE_SUPERVISOR
+  }
+
+  class User <<Entity>> <<Root>> {
+    - id : Long
+    - username : String
+    - passwordHash : String
+    - role : Role
+  }
+
+  User --> Role : has
 }
 
-enum AircraftStatus <<Enum>> {
-  AVAILABLE
-  INACTIVE
-  UNDER_MAINTENANCE
-  IN_FLIGHT
+package "Aircraft Model Aggregate" <<Aggregate>> {
+  class AircraftModel <<Entity>> <<Root>> {
+    - modelName : String
+    - manufacturer : String
+    - fuelCapacity : Double
+    - maxRange : Double
+    - cruisingSpeed : Double
+    - imagePath : String
+  }
 }
 
-enum FlightStatus <<Enum>> {
-  SCHEDULED
-  DELAYED
-  IN_FLIGHT
-  COMPLETED
-  CANCELED
+package "Aircraft Aggregate" <<Aggregate>> {
+  enum AircraftStatus <<Enum>> {
+    AVAILABLE
+    INACTIVE
+    UNDER_MAINTENANCE
+    IN_FLIGHT
+  }
+
+  class Aircraft <<Entity>> <<Root>> {
+    - registrationNumber : String
+    - manufacturingDate : Date
+    - status : AircraftStatus
+    - seatCapacity : Integer
+    - features : List<String>
+    - model : AircraftModel
+  }
+
+  Aircraft --> AircraftStatus : current status
 }
 
-enum RouteStatus <<Enum>> {
-  ACTIVE
-  DEACTIVATED
+package "Airport Aggregate" <<Aggregate>> {
+  enum AirportStatus <<Enum>> {
+     OPERATIONAL
+     UNDER_MAINTENANCE
+     CLOSED
+  }
+
+  enum ContactType <<Enum>> {
+     PHONE
+     EMAIL
+     FAX
+     OTHER
+  }
+
+  class IataCode <<ValueObject>> {
+    - code : String
+  }
+
+  class Coordinates <<ValueObject>> {
+    - latitude : Double
+    - longitude : Double
+  }
+
+  class Runway <<ValueObject>> {
+    - name : String
+    - length : Integer
+    - orientation : String
+  }
+
+  class Contact <<ValueObject>> {
+    - type : ContactType
+    - value : String
+    - description : String
+  }
+
+  class Terminal <<ValueObject>> {
+    - name : String
+  }
+
+  class Gate <<ValueObject>> {
+    - identifier : String
+  }
+
+  class Service <<ValueObject>> {
+    - description : String
+  }
+
+  class Airport <<Entity>> <<Root>> {
+    - name : String
+    - city : String
+    - country : String
+    - region : String
+    - timezone : String
+    - imagePath : String
+    - operationalHours : String
+    - operationalStatus : AirportStatus
+  }
+
+  class AirplaneCertification <<Entity>> {
+    - id : Long
+  }
+
+  Airport --> AirportStatus : current status
+  Contact --> ContactType : is of type
+
+  Airport *-- IataCode
+  Airport *-- Coordinates
+  Airport *-- "*" Runway
+  Airport *-- "*" Contact
+  Airport *-- "*" Terminal
+  Airport *-- "*" Gate
+  Airport *-- "*" Service
 }
 
-enum MaintenanceType <<Enum>> {
-  INSPECTION
-  SCHEDULED_MAINTENANCE
-  OVERHAUL
-  MODIFICATION
+package "Route Aggregate" <<Aggregate>> {
+  enum RouteStatus <<Enum>> {
+    ACTIVE
+    DEACTIVATED
+  }
+
+  class Route <<Entity>> <<Root>> {
+    - id : Long
+    - distance : Double
+    - estimatedFlightTime : Integer
+    - minRangeRequirement : Double
+    - minCapacityRequirement : Integer
+    - status : RouteStatus
+  }
+
+  Route --> RouteStatus : current status
 }
 
-enum MaintenanceComponent <<Enum>> {
-  ENGINE
-  AIRFRAME
-  AVIONICS
-  INTERIOR
-  EXTERIOR
+
+package "Flight Aggregate" <<Aggregate>> {
+  enum FlightStatus <<Enum>> {
+    SCHEDULED
+    DELAYED
+    IN_FLIGHT
+    COMPLETED
+    CANCELED
+  }
+
+  class ScheduledFlight <<Entity>> <<Root>> {
+    - departureDateTime : DateTime
+    - status : FlightStatus
+  }
+
+  ScheduledFlight --> FlightStatus : current status
 }
 
-enum AirportStatus <<Enum>> {
-   OPERATIONAL
-   UNDER_MAINTENANCE
-   CLOSED
+
+package "Maintenance Aggregate" <<Aggregate>> {
+  enum MaintenanceStatus <<Enum>> {
+     PLANNED
+     IN_PROGRESS
+     COMPLETED
+     CANCELED
+  }
+
+  enum MaintenanceType <<Enum>> {
+    INSPECTION
+    SCHEDULED_MAINTENANCE
+    OVERHAUL
+    MODIFICATION
+  }
+
+  enum MaintenanceComponent <<Enum>> {
+    ENGINE
+    AIRFRAME
+    AVIONICS
+    INTERIOR
+    EXTERIOR
+  }
+
+  class MaintenanceTemplate <<Entity>> <<Root>> {
+    - name : String
+    - templateType : MaintenanceType
+    - applicableModels : List<AircraftModel>
+    - checklist : List<String>
+    - intervalFlightHours : Integer
+    - intervalDays : Integer
+  }
+
+  class MaintenanceRecord <<Entity>> <<Root>> {
+    - id : Long
+    - description : String
+    - startDate : Date
+    - expectedDuration : Integer
+    - notes : String
+    - status : MaintenanceStatus
+    - parts : List<MaintenancePart>
+  }
+
+  class MaintenancePart <<Entity>> <<Root>> {
+    - partNumber : String
+    - name : String
+    - description : String
+    - stockQuantity : Integer
+    - minimumThreshold : Integer
+    - component : MaintenanceComponent
+  }
+
+  MaintenanceTemplate --> MaintenanceType : applies type
+  MaintenanceRecord --> MaintenanceStatus : current status
+  MaintenancePart --> MaintenanceComponent : targets
 }
 
-enum ContactType <<Enum>> {
-   PHONE
-   EMAIL
-   FAX
-   OTHER
-}
-
-class IataCode <<ValueObject>> {
-  - code : String
-}
-
-class Coordinates <<ValueObject>> {
-  - latitude : Double
-  - longitude : Double
-}
-
-class Runway <<ValueObject>> {
-  - name : String
-  - length : Integer
-  - orientation : String
-}
-
-class Contact <<ValueObject>> {
-  - type : ContactType
-  - value : String
-  - description : String
-}
-
-class Terminal <<ValueObject>> {
-  - name : String
-}
-
-class Gate <<ValueObject>> {
-  - identifier : String
-}
-
-class Service <<ValueObject>> {
-  - description : String
-}
-
-class User <<Entity>> <<Root>> {
-  - id : UUID
-  - username : String
-  - passwordHash : String
-  - role : Role
-}
-
-class AircraftModel <<Entity>> <<Root>> {
-  - modelName : String
-  - manufacturer : String
-  - fuelCapacity : Double
-  - maxRange : Double
-  - cruisingSpeed : Double
-  - imagePath : String
-}
-
-class Aircraft <<Entity>> <<Root>> {
-  - registrationNumber : String
-  - manufacturingDate : Date
-  - status : AircraftStatus
-  - seatCapacity : Integer
-  - features : List<String>
-  - model : AircraftModel
-}
-
-class Airport <<Entity>> <<Root>> {
-  - name : String
-  - city : String
-  - country : String
-  - region : String
-  - timezone : String
-  - imagePath : String
-  - operationalHours : String
-  - operationalStatus : AirportStatus
-}
-
-class AirplaneCertification <<Entity>> {
-  - id : Integer
-}
-
-class Route <<Entity>> <<Root>> {
-  - id : Integer
-  - distance : Double
-  - estimatedFlightTime : Integer
-  - minRangeRequirement : Double
-  - minCapacityRequirement : Integer
-  - status : RouteStatus
-}
-
-class ScheduledFlight <<Entity>> <<Root>> {
-  - departureDateTime : DateTime
-  - status : FlightStatus
-}
-
-class MaintenanceTemplate <<Entity>> <<Root>> {
-  - name : String
-  - templateType : MaintenanceType
-  - applicableModels : List<AircraftModel>
-  - checklist : List<String>
-}
-
-class MaintenanceRecord <<Entity>> <<Root>> {
-  - id : Integer
-  - description : String
-  - startDate : Date
-  - expectedDuration : Integer
-  - notes : String
-  - component : MaintenanceComponent
-  - isCompleted : Boolean
-}
-
-class MaintenancePart <<Entity>> <<Root>> {
-  - partNumber : String
-  - name : String
-  - description : String
-  - stockQuantity : Integer
-  - minimumThreshold : Integer
-}
-
-Airport *-- IataCode
-Airport *-- Coordinates
-Airport *-- "*" Runway
-Airport *-- "*" Contact
-Airport *-- "*" Terminal
-Airport *-- "*" Gate
-Airport *-- "*" Service
 
 Aircraft "1" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AirplaneCertification : certifies
@@ -190,6 +232,7 @@ ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses
 
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
+MaintenanceRecord "1" --> "*" MaintenancePart : needs
 MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
 MaintenanceRecord "*" --> "1" Aircraft : performed on
 
