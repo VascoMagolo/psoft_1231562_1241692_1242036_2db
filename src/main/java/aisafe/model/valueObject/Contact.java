@@ -54,7 +54,7 @@ public class Contact {
                 break;
         }
         this.type = type;
-        this.description = (description != null) ? description.trim() : null;;
+        this.description = (description != null) ? description.trim() : null;
         this.value = value;
 
 

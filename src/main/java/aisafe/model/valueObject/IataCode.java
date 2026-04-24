@@ -19,11 +19,11 @@ public class IataCode {
 
     public IataCode(String code) {
         if (code == null || code.trim().isEmpty()) {
-            throw new InvalidIataCodeException("Iata_Code cannot be null or empty.");
+            throw new InvalidIataCodeException("IATA code cannot be null or empty.");
         }
         code = code.trim().toUpperCase();
         if (!IATA_PATTERN.matcher(code).matches()){
-            throw new InvalidIataCodeException("Invalid Iata_Code format.");
+            throw new InvalidIataCodeException("Invalid IATA code format.");
         }
 
         this.code = code;

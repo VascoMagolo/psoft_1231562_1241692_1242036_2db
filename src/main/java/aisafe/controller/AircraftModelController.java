@@ -4,10 +4,9 @@ import aisafe.model.entities.AircraftModel;
 import aisafe.services.AircraftModelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/aircraft-models")
@@ -23,5 +22,11 @@ public class AircraftModelController {
         AircraftModel savedModel = service.registerAircraftModel(model);
 
         return new ResponseEntity<>(savedModel, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AircraftModel>> getAllModels() {
+        List<AircraftModel> models = service.findAll();
+        return ResponseEntity.ok(models);
     }
 }
