@@ -58,14 +58,21 @@ public class MaintenanceRecord {
         this.status = MaintenanceStatus.IN_PROGRESS;
     }
 
+    private String validateNotes(String notes, String fieldName) {
+        if (notes == null || notes.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be null or blank.");
+        }
+        return notes;
+    }
+
     public void completeMaintenance(String notes) {
         this.status = MaintenanceStatus.COMPLETED;
-        this.notes = notes;
+        this.notes = validateNotes(notes,"Notes");
     }
 
     public void cancelMaintenance(String reason) {
         this.status = MaintenanceStatus.CANCELED;
-        this.notes = reason;
+        this.notes = validateNotes(reason,"Reason");
     }
 
 }

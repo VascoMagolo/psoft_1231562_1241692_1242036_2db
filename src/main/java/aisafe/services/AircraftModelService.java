@@ -1,6 +1,7 @@
 package aisafe.services;
 
 
+import aisafe.DomainException;
 import aisafe.model.entities.AircraftModel;
 import aisafe.repositories.AircraftModelRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class AircraftModelService {
 
     public AircraftModel registerAircraftModel(AircraftModel newModel){
         if (newModel.getMaxRange() == null || newModel.getMaxRange() <= 0){
-            throw new IllegalArgumentException("Max Range is invalid");
+            throw new DomainException("Max Range is invalid");
         } // need to add more validations later
 
         return repository.save(newModel);

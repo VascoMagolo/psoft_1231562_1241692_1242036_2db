@@ -13,7 +13,7 @@ public class Service {
     protected Service() {}
 
     public Service(String description) {
-        if (description.trim().isEmpty()) throw new IllegalArgumentException("Service description cannot be empty");
+        if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Service description cannot be empty");
         this.description = description;
     }
 }

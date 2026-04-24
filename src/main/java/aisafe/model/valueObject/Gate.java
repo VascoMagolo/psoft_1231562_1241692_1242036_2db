@@ -13,7 +13,7 @@ public class Gate {
     protected Gate() {}
 
     public Gate(String identifier) {
-        if(identifier.trim().isEmpty()) throw new IllegalArgumentException("Gate identifier cannot be empty");
+        if(identifier == null||identifier.trim().isEmpty()) throw new IllegalArgumentException("Gate identifier cannot be empty");
         this.identifier = identifier;
     }
 }

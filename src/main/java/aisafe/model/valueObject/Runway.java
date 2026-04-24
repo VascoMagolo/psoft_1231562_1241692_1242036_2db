@@ -17,7 +17,7 @@ public class Runway {
     protected Runway() {}
 
     public Runway(String name, Integer length, String orientation) {
-        if (name.trim().isEmpty() || orientation.trim().isEmpty() || length == null){
+        if (name == null || orientation == null ||name.trim().isEmpty() || orientation.trim().isEmpty() || length == null){
             throw new IllegalArgumentException("Name, length or orientation cannot be null");
         }
         this.length = length;

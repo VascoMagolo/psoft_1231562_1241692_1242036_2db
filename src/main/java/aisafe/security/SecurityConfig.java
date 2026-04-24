@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/maintenance/**").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR")
                         .requestMatchers("/api/aircraft/**").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
-                        .requestMatchers("/api/aircraftModels/**").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
+                        .requestMatchers("/api/aircraft-models/**").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers("/h2-console/**").permitAll()
                         // add more later
                         .anyRequest().authenticated()
