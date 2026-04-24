@@ -8,7 +8,7 @@
 		<version>4.0.4</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.2db_psoft</groupId>
+	<groupId>aisafe</groupId>
 	<artifactId>aisafe</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
@@ -50,7 +50,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
