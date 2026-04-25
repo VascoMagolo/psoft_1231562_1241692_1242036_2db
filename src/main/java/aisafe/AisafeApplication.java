@@ -1,4 +1,4 @@
-package com._db_psoft.aisafe;
+package aisafe;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com._db_psoft.aisafe.model.enums;
+package aisafe.security.domain;
 
 public enum Role {
     ADMIN,
