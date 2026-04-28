@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // WP #1A – Aircraft Management
                         .requestMatchers("/api/aircrafts/register").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers("/api/aircrafts/viewByRegistration").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
