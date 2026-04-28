@@ -3,7 +3,7 @@ package aisafe.aircrafts.infrastructure;
 import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.UpdateStatusRequest;
 import aisafe.aircrafts.domain.Aircraft;
-import aisafe.model.enums.AircraftStatus;
+import aisafe.aircrafts.domain.AircraftStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

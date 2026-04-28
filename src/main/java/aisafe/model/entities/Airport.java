@@ -1,6 +1,6 @@
 package aisafe.model.entities;
 
-import aisafe.model.enums.AirportStatus;
+import aisafe.aircrafts.domain.AirportStatus;
 import aisafe.model.valueObject.*;
 import jakarta.persistence.*;
 

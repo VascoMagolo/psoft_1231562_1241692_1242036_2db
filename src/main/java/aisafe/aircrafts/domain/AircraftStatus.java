@@ -1,4 +1,4 @@
-package aisafe.model.enums;
+package aisafe.aircrafts.domain;
 
 public enum AircraftStatus {
     AVAILABLE,

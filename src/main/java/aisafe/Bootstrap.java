@@ -8,18 +8,21 @@ import aisafe.security.domain.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Profile("dev")
+//@Profile("dev")
 public class Bootstrap implements ApplicationRunner {
     private final UserRepository userRepository;
     private final AircraftModelRepository aircraftModelRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public Bootstrap(UserRepository userRepository, AircraftModelRepository aircraftModelRepository) {
+    public Bootstrap(UserRepository userRepository, AircraftModelRepository aircraftModelRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.aircraftModelRepository = aircraftModelRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -30,7 +33,7 @@ public class Bootstrap implements ApplicationRunner {
            aircraftModelRepository.save(new AircraftModel("Boeing 737 MAX", "Boeing", 25941.0, 6570.0, 839.0, "images/b737max.png"));
         }
         if (userRepository.count() == 0){
-            userRepository.save(new User("admin", "admin123"    , Role.ADMIN));
+            userRepository.save(new User("admin", passwordEncoder.encode("admin123"), Role.ADMIN));
         }
     }
 }

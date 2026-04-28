@@ -1,6 +1,5 @@
 package aisafe.aircrafts.domain;
 
-import aisafe.model.enums.AircraftStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

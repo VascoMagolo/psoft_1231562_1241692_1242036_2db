@@ -3,7 +3,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
 import aisafe.aircrafts.domain.Aircraft;
-import aisafe.model.enums.AircraftStatus;
+import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.AircraftRepository;
 import org.springframework.transaction.annotation.Transactional;
 
