@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Backoffice Operator" as BO
+actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
+
+rectangle "Aircraft Management (WP #1A)" {
+  usecase "US101 - Register aircraft model" as UC101
+  usecase "US102 - Register specific aircraft instance" as UC102
+  usecase "US103 - View aircraft details" as UC103
+  usecase "US104 - Search for aircraft" as UC104
+  usecase "US105 - Update aircraft operational status" as UC105
+}
+
+BO --> UC101
+BO --> UC103
+
+ATCC --> UC102
+ATCC --> UC103
+ATCC --> UC104
+ATCC --> UC105
+
+@enduml
