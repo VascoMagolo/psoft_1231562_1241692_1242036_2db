@@ -2,8 +2,8 @@ package aisafe.services;
 
 
 import aisafe.DomainException;
-import aisafe.model.entities.AircraftModel;
-import aisafe.repositories.AircraftModelRepository;
+import aisafe.aircrafts.domain.AircraftModel;
+import aisafe.aircrafts.domain.AircraftModelRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

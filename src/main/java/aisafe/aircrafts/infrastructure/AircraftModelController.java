@@ -1,6 +1,6 @@
-package aisafe.controller;
+package aisafe.aircrafts.infrastructure;
 
-import aisafe.model.entities.AircraftModel;
+import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.services.AircraftModelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/aircraft-models")
+@RequestMapping("/api/aircraftModels")
 public class AircraftModelController {
     private final AircraftModelService service;
 

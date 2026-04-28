@@ -22,7 +22,7 @@ package "User Aggregate" <<Aggregate>> {
   User --> Role : has
 }
 
-package "Aircraft Model Aggregate" <<Aggregate>> {
+package "Aircraft Aggregate" <<Aggregate>> {
   class AircraftModel <<Entity>> <<Root>> {
     - modelName : String
     - manufacturer : String
@@ -31,9 +31,7 @@ package "Aircraft Model Aggregate" <<Aggregate>> {
     - cruisingSpeed : Double
     - imagePath : String
   }
-}
 
-package "Aircraft Aggregate" <<Aggregate>> {
   enum AircraftStatus <<Enum>> {
     AVAILABLE
     INACTIVE

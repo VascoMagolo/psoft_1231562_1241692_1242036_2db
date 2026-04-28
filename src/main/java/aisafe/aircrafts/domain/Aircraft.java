@@ -1,11 +1,14 @@
-package com._db_psoft.aisafe.model.entities;
+package aisafe.aircrafts.domain;
 
-import com._db_psoft.aisafe.model.enums.AircraftStatus;
+import aisafe.model.enums.AircraftStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Getter
 @Entity
 public class Aircraft {
     @Id
@@ -18,6 +21,7 @@ public class Aircraft {
     @Column(updatable = false)
     private LocalDate manufacturingDate;
     @Enumerated(EnumType.STRING)
+    @Setter
     private AircraftStatus status;
     private Integer seatCapacity;
 

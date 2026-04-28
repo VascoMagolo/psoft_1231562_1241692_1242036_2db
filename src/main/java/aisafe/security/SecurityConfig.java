@@ -33,10 +33,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/maintenance/**").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR")
-                        .requestMatchers("/api/aircraft/**").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
-                        .requestMatchers("/api/aircraft-models/**").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers("/h2-console/**").permitAll()
+                        // WP #1A – Aircraft Management
+                        .requestMatchers("/api/aircrafts/register").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers("/api/aircrafts/viewByRegistration").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
+                        .requestMatchers("/api/aircraftModels/register").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
+                        .requestMatchers("/api/aircrafts/search**").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers("/api/aircrafts/*/status").hasAnyRole("ATCC", "ADMIN")
+                        // etc
+                        .requestMatchers("/api/maintenance/**").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR")
                         // add more later
                         .anyRequest().authenticated()
                 )

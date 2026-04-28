@@ -1,6 +1,5 @@
-package aisafe.repositories;
+package aisafe.aircrafts.domain;
 
-import aisafe.model.entities.AircraftModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
