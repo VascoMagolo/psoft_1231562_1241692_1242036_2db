@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "RegisterAircraftUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : POST /api/aircrafts/register (JSON)
+activate Ctrl
+
+Ctrl -> UC : execute(aircraft)
+activate UC
+
+UC -> Repo : save(aircraft)
+activate Repo
+Repo -> DB : INSERT INTO aircraft
+activate DB
+DB --> Repo : saved record (with ID)
+deactivate DB
+Repo --> UC : savedAircraft
+deactivate Repo
+
+UC --> Ctrl : savedAircraft
+deactivate UC
+
+Ctrl --> ATCC : 201 Created (JSON)
+deactivate Ctrl
+@enduml

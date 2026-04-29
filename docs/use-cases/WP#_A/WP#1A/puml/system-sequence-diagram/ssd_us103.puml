@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Operator / ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : getAircraftDetails(registrationNumber)
+activate Sys
+Sys --> Actor : returns Aircraft full details
+deactivate Sys
+@enduml

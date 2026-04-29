@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "SearchAircraftUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/aircrafts/search?modelId=X&status=Y&year=Z
+activate Ctrl
+
+Ctrl -> UC : execute(modelId, status, year)
+activate UC
+
+UC -> Repo : searchAircrafts(modelId, status, year)
+activate Repo
+Repo -> DB : SELECT * FROM aircraft WHERE ... (Dynamic Query)
+activate DB
+DB --> Repo : list of records
+deactivate DB
+Repo --> UC : List<Aircraft>
+deactivate Repo
+
+UC --> Ctrl : results
+deactivate UC
+
+Ctrl --> ATCC : 200 OK (JSON Array)
+deactivate Ctrl
+@enduml
