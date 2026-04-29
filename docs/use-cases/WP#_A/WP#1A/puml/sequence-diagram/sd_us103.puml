@@ -1,0 +1,33 @@
+@startuml
+autonumber
+actor "BO / ATCC" as Actor
+participant "AircraftController" as Ctrl
+participant "ViewAircraftDetailsUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/aircrafts/{registration}
+activate Ctrl
+
+Ctrl -> UC : execute(registration)
+activate UC
+
+UC -> Repo : findByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT * FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : record data
+deactivate DB
+Repo --> UC : Optional<Aircraft>
+deactivate Repo
+
+alt if aircraft not found
+    UC -> UC : throw AircraftNotFoundException
+end
+
+UC --> Ctrl : aircraft
+deactivate UC
+
+Ctrl --> Actor : 200 OK (JSON)
+deactivate Ctrl
+@enduml

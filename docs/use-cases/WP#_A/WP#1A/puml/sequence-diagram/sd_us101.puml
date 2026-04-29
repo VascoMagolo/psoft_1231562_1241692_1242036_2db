@@ -1,0 +1,37 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AircraftModelController" as Ctrl
+participant "RegisterAircraftModelUseCase" as UC
+participant "AircraftModel" as Entity
+participant "AircraftModelRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : POST /api/aircraftModels (JSON)
+activate Ctrl
+
+Ctrl -> UC : execute(model)
+activate UC
+
+UC -> Entity : getMaxRange()
+activate Entity
+Entity --> UC : range
+deactivate Entity
+
+note right of UC: Validates if range > 0
+
+UC -> Repo : save(model)
+activate Repo
+Repo -> DB : INSERT INTO aircraft_model
+activate DB
+DB --> Repo : saved record (with ID)
+deactivate DB
+Repo --> UC : savedModel
+deactivate Repo
+
+UC --> Ctrl : savedModel
+deactivate UC
+
+Ctrl --> BO : 201 Created (JSON)
+deactivate Ctrl
+@enduml

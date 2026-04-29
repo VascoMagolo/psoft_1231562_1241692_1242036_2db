@@ -1,0 +1,44 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "UpdateAircraftStatusUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "Aircraft" as Entity
+database "Database" as DB
+
+ATCC -> Ctrl : PATCH /api/aircrafts/{reg}/status (JSON)
+activate Ctrl
+
+Ctrl -> UC : execute(reg, newStatus)
+activate UC
+
+UC -> Repo : findByRegistrationNumber(reg)
+activate Repo
+Repo -> DB : SELECT * FROM aircraft
+activate DB
+DB --> Repo : record data
+deactivate DB
+Repo --> UC : Optional<Aircraft>
+deactivate Repo
+
+UC -> Entity : setStatus(newStatus)
+activate Entity
+Entity --> UC
+deactivate Entity
+
+UC -> Repo : save(aircraft)
+activate Repo
+Repo -> DB : UPDATE aircraft SET status = ?
+activate DB
+DB --> Repo : success
+deactivate DB
+Repo --> UC : updatedAircraft
+deactivate Repo
+
+UC --> Ctrl : updatedAircraft
+deactivate UC
+
+Ctrl --> ATCC : 200 OK (JSON)
+deactivate Ctrl
+@enduml

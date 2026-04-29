@@ -1,5 +1,6 @@
 package aisafe.model.entities;
 
+import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.model.enums.MaintenanceType;
 import jakarta.persistence.*;
 

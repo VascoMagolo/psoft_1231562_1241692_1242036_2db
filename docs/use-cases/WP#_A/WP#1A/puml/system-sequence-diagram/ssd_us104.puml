@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "System" as Sys
+
+ATCC -> Sys : searchAircrafts(modelId?, status?, manufacturingYear?)
+activate Sys
+Sys --> ATCC : returns list of matching Aircrafts
+deactivate Sys
+@enduml

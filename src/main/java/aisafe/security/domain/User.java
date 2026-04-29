@@ -19,9 +19,8 @@ public class User implements UserDetails {
 
     @Getter
     @Column(nullable = false, unique = true)
-    private UUID userID = UUID.randomUUID();
+    private final UUID userID = UUID.randomUUID();
 
-    @Getter
     @Column(nullable = false)
     private String username;
 
