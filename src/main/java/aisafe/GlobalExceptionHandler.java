@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     /** 404 Not Found - ex. aircraft not found */
+    // can be added more later
     @ExceptionHandler(AircraftNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound (RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -35,6 +36,7 @@ public class GlobalExceptionHandler {
     }
 
     /** 401 Bad Request - Invalid args.*/
+    // can be added more later
     @ExceptionHandler({
             DomainException.class,
             IllegalArgumentException.class,
