@@ -22,16 +22,7 @@ package "User Aggregate" <<Aggregate>> {
   User --> Role : has
 }
 
-package "Aircraft Model Aggregate" <<Aggregate>> {
-  class AircraftModel <<Entity>> <<Root>> {
-    - modelName : String
-    - manufacturer : String
-    - fuelCapacity : Double
-    - maxRange : Double
-    - cruisingSpeed : Double
-    - imagePath : String
-  }
-}
+
 
 package "Aircraft Aggregate" <<Aggregate>> {
   enum AircraftStatus <<Enum>> {
@@ -48,6 +39,15 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - seatCapacity : Integer
     - features : List<String>
     - model : AircraftModel
+  }
+
+  class AircraftModel <<Entity>> <<Root>> {
+    - modelName : String
+    - manufacturer : String
+    - fuelCapacity : Double
+    - maxRange : Double
+    - cruisingSpeed : Double
+    - imagePath : String
   }
 
   Aircraft --> AircraftStatus : current status
@@ -127,24 +127,29 @@ package "Airport Aggregate" <<Aggregate>> {
   Airport *-- "*" Service
 }
 
-package "Route Aggregate" <<Aggregate>> {
+package "Route Aggregate" {
   enum RouteStatus <<Enum>> {
     ACTIVE
     DEACTIVATED
   }
 
   class Route <<Entity>> <<Root>> {
-    - id : Long
+    - id : Integer
+    - status : RouteStatus
+  }
+
+  class RouteVersion <<Entity>> {
+    - versionNumber : Integer
     - distance : Double
     - estimatedFlightTime : Integer
     - minRangeRequirement : Double
     - minCapacityRequirement : Integer
-    - status : RouteStatus
+    - validFrom : DateTime
   }
 
+  Route "1" *-- "*" RouteVersion : history
   Route --> RouteStatus : current status
 }
-
 
 package "Flight Aggregate" <<Aggregate>> {
   enum FlightStatus <<Enum>> {
@@ -156,7 +161,9 @@ package "Flight Aggregate" <<Aggregate>> {
   }
 
   class ScheduledFlight <<Entity>> <<Root>> {
+    - id : Integer
     - departureDateTime : DateTime
+    - arrivalDateTime : DateTime
     - status : FlightStatus
   }
 
@@ -202,8 +209,8 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - startDate : Date
     - expectedDuration : Integer
     - notes : String
-    - component : MaintenanceComponent
     - status : MaintenanceStatus
+    - parts : List<MaintenancePart>
   }
 
   class MaintenancePart <<Entity>> <<Root>> {
@@ -212,17 +219,18 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - description : String
     - stockQuantity : Integer
     - minimumThreshold : Integer
+    - component : MaintenanceComponent
   }
 
   MaintenanceTemplate --> MaintenanceType : applies type
   MaintenanceRecord --> MaintenanceStatus : current status
-  MaintenanceRecord --> MaintenanceComponent : targets
+  MaintenancePart --> MaintenanceComponent : targets
 }
 
 
-Aircraft "1" --> "1" AircraftModel : is of model
+Aircraft "*" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AirplaneCertification : certifies
-Airport "1" <-- "*" AirplaneCertification : certified at
+Airport "1" <-up- "*" AirplaneCertification : certified at
 
 Route "1" --> "1" Airport : origin
 Route "1" --> "1" Airport : destination
@@ -231,6 +239,7 @@ ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses
 
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
+MaintenanceRecord "1" --> "*" MaintenancePart : needs
 MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
 MaintenanceRecord "*" --> "1" Aircraft : performed on
 
