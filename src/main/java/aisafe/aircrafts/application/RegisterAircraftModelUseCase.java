@@ -1,9 +1,7 @@
 package aisafe.aircrafts.application;
 
-import aisafe.DomainException;
 import aisafe.UseCase;
-import aisafe.aircrafts.domain.AircraftModel;
-import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @UseCase
@@ -17,11 +15,22 @@ public class RegisterAircraftModelUseCase {
     }
 
     public AircraftModel execute(AircraftModel newModel) {
-        // add more validations later
         if (newModel.getMaxRange() == null || newModel.getMaxRange() <= 0) {
-            throw new DomainException("Max Range is invalid");
+            throw new AircraftModelInvalidFieldException("Max Range is invalid");
         }
-
+        if (newModel.getModelName() == null) {
+            throw new AircraftModelInvalidFieldException("Model name is required");
+        }
+        if (newModel.getFuelCapacity() == null || newModel.getFuelCapacity() <= 0) {
+            throw new AircraftModelInvalidFieldException("Fuel Range is invalid");
+        }
+        if (newModel.getCruisingSpeed() == null || newModel.getCruisingSpeed() <= 0) {
+            throw new AircraftModelInvalidFieldException("Cruising speed is invalid");
+        }
+        // manufacturer validation maybe be changed, maybe manufacturer is a VO (value-object)
+        if (newModel.getManufacturer() == null ) {
+            throw new AircraftModelInvalidFieldException("Manufacturer name is missing");
+        }
         return repository.save(newModel);
     }
 }

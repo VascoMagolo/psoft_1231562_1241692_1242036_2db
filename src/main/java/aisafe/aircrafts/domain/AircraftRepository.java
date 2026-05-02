@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface AircraftRepository extends JpaRepository<Aircraft,Long> {
-    Optional<Aircraft> findByRegistrationNumber(String registrationNumber);
+    Optional<Aircraft> findByRegistrationNumber(RegistrationNumber registrationNumber);
 
     @Query("SELECT a FROM Aircraft a WHERE " +
             "(:modelId IS NULL OR a.model.id = :modelId) AND " +
