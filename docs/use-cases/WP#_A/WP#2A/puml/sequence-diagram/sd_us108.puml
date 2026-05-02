@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AirportController" as Ctrl
+participant "SearchAirportUseCase" as UC
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/airports/search?name=X&city=Y&country=Z
+activate Ctrl
+
+Ctrl -> UC : execute(name, city, country)
+activate UC
+
+UC -> Repo : searchAirports(name, city, country)
+activate Repo
+Repo -> DB : SELECT FROM airport WHERE name LIKE ? AND city LIKE ? AND country LIKE ? (Dynamic Query)
+activate DB
+DB --> Repo : list of records
+deactivate DB
+Repo --> UC : List<Airport>
+deactivate Repo
+
+UC --> Ctrl : results
+deactivate UC
+
+Ctrl --> ATCC : 200 OK (JSON Array)
+deactivate Ctrl
+@enduml

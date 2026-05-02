@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+BO -> Sys : registerAirport(iataCode, name, city, country, timezone, latitude, longitude, runways, imagePath, operationalHours, services, terminals, gates)
+activate Sys
+Sys --> BO : returns created Airport details (with facilities)
+deactivate Sys
+@enduml

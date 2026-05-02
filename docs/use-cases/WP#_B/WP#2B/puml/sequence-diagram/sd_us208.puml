@@ -1,0 +1,45 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "UpdateAirportDetailsUseCase" as UC
+participant "Airport" as Entity
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : PATCH /api/airports/{iataCode}/details (JSON)
+activate Ctrl
+
+Ctrl -> UC : execute(iataCode, request)
+activate UC
+
+UC -> Repo : findByIataCodeCode(iataCode)
+activate Repo
+Repo -> DB : SELECT FROM airport WHERE code = ?
+activate DB
+DB --> Repo : airport record
+deactivate DB
+Repo --> UC : Airport
+deactivate Repo
+
+UC -> Entity : updateDetails(operationalHours, contacts, imagePath, services, terminals, gates)
+activate Entity
+note right of Entity : Only non-null fields\nare updated
+Entity --> UC
+deactivate Entity
+
+UC -> Repo : save(airport)
+activate Repo
+Repo -> DB : UPDATE airport + collection tables
+activate DB
+DB --> Repo : updated record
+deactivate DB
+Repo --> UC : updatedAirport
+deactivate Repo
+
+UC --> Ctrl : updatedAirport
+deactivate UC
+
+Ctrl --> BO : 200 OK (JSON)
+deactivate Ctrl
+@enduml

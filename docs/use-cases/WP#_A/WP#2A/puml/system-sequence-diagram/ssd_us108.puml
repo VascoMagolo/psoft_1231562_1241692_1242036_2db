@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "System" as Sys
+
+ATCC -> Sys : searchAirports(name, city, country)
+activate Sys
+Sys --> ATCC : returns list of matching Airports
+deactivate Sys
+@enduml
