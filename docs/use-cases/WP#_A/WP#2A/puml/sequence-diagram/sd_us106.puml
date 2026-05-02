@@ -1,0 +1,36 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "RegisterAirportUseCase" as UC
+participant "Airport" as Entity
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : POST /api/airports (JSON)
+activate Ctrl
+
+Ctrl -> UC : execute(request)
+activate UC
+
+UC -> Entity : new Airport(iataCode, name, city, country, region, timezone, lat, lon, runways)
+activate Entity
+note right of Entity : Validates IATA format,\nnon-blank fields, coordinate\nranges, at least one runway
+Entity --> UC : airport
+deactivate Entity
+
+UC -> Repo : save(airport)
+activate Repo
+Repo -> DB : INSERT INTO airport
+activate DB
+DB --> Repo : saved record (with ID)
+deactivate DB
+Repo --> UC : savedAirport
+deactivate Repo
+
+UC --> Ctrl : savedAirport
+deactivate UC
+
+Ctrl --> BO : 201 Created (JSON)
+deactivate Ctrl
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+autonumber
+actor "Backoffice Operator / ATCC" as Actor
+participant "AirportController" as Ctrl
+participant "ViewAirportDetailsUseCase" as UC
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/airports/{iataCode}
+activate Ctrl
+
+Ctrl -> UC : execute(iataCode)
+activate UC
+
+UC -> Repo : findByIataCodeCode(iataCode)
+activate Repo
+Repo -> DB : SELECT FROM airport WHERE code = ?
+activate DB
+DB --> Repo : airport record
+deactivate DB
+Repo --> UC : Optional<Airport>
+deactivate Repo
+
+alt Airport found
+  UC --> Ctrl : Airport
+  Ctrl --> Actor : 200 OK (JSON)
+else Airport not found
+  UC --> Ctrl : throws AirportNotFoundException
+  Ctrl --> Actor : 404 Not Found
+end
+
+deactivate UC
+deactivate Ctrl
+@enduml
