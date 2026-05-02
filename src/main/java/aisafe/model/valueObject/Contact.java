@@ -16,7 +16,7 @@ public class Contact {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContactType type;
-    @Column(nullable = false)
+    @Column(name = "contact_value", nullable = false)
     private String value;
     private String description;
 
