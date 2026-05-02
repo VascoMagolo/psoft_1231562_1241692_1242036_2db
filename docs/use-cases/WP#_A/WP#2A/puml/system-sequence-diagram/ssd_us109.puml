@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+BO -> Sys : updateAirportStatus(iataCode, status)
+activate Sys
+Sys --> BO : returns updated Airport details
+deactivate Sys
+@enduml

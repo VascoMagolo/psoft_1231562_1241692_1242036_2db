@@ -1,6 +1,7 @@
 package aisafe;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
+import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.exceptions.InvalidContactException;
 import aisafe.exceptions.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
@@ -27,10 +28,9 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-    /** 404 Not Found - ex. aircraft not found */
-    // can be added more later
-    @ExceptionHandler(AircraftNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound (RuntimeException ex) {
+    /** 404 Not Found */
+    @ExceptionHandler({AircraftNotFoundException.class, AirportNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage()));
     }

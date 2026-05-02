@@ -4,6 +4,7 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.UpdateStatusRequest;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftStatus;
+import aisafe.aircrafts.domain.RegistrationNumber;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,7 @@ public class AircraftController {
     }
 
     @GetMapping("/{registration}")
-    public ResponseEntity<Aircraft> getAircraftByRegistrationNumber(@PathVariable String registration){
+    public ResponseEntity<Aircraft> getAircraftByRegistrationNumber(@PathVariable RegistrationNumber registration){
         Aircraft aircraft = viewAircraftDetails.execute(registration);
         return ResponseEntity.ok(aircraft);
     }
@@ -58,9 +59,9 @@ public class AircraftController {
 
     @PatchMapping("/{registration}/status")
     public ResponseEntity<Aircraft> updateAircraftStatus(
-            @PathVariable String registration,
+            @PathVariable RegistrationNumber registration,
             @RequestBody UpdateStatusRequest request) {
-        Aircraft updatedAircraft = updateAircraftStatus.execute(registration, request.status());
+        Aircraft updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()));
 
         return ResponseEntity.ok(updatedAircraft);
     }

@@ -33,7 +33,6 @@ package "Aircraft Aggregate" <<Aggregate>> {
   }
 
   class Aircraft <<Entity>> <<Root>> {
-    - registrationNumber : String
     - manufacturingDate : Date
     - status : AircraftStatus
     - seatCapacity : Integer
@@ -43,14 +42,20 @@ package "Aircraft Aggregate" <<Aggregate>> {
 
   class AircraftModel <<Entity>> <<Root>> {
     - modelName : String
-    - manufacturer : String
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
     - imagePath : String
   }
-
+  class RegistrationNumber <<ValueObject>> {
+    - registrationNumber : String
+  }
+  class Manufacturer <<ValueObject>> {
+    - manufacturer : String
+  }
   Aircraft --> AircraftStatus : current status
+  RegistrationNumber "1"-->"1" Aircraft
+  Manufacturer *-->"1" AircraftModel
 }
 
 package "Airport Aggregate" <<Aggregate>> {

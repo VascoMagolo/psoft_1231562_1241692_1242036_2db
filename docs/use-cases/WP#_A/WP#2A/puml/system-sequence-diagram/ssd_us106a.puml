@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator / ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : addAirplaneCertification(iataCode, aircraftModelId)
+activate Sys
+Sys --> Actor : returns created AirplaneCertification details
+deactivate Sys
+@enduml

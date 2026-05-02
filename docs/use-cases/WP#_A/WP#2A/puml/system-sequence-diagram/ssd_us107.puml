@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator / ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : viewAirportDetails(iataCode)
+activate Sys
+Sys --> Actor : returns Airport details
+deactivate Sys
+@enduml

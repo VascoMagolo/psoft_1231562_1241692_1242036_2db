@@ -15,7 +15,8 @@ public class Aircraft {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String registrationNumber;
+    @Embedded
+    private RegistrationNumber registrationNumber;
 
     @Column(updatable = false)
     private LocalDate manufacturingDate;

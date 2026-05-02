@@ -1,0 +1,41 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "AirportStatisticsUseCase" as UC
+participant "AirportRepository" as AirportRepo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/airports/statistics/busiest
+activate Ctrl
+
+Ctrl -> UC : execute()
+activate UC
+
+UC -> AirportRepo : findAll()
+activate AirportRepo
+AirportRepo -> DB : SELECT FROM airport
+activate DB
+DB --> AirportRepo : all airports
+deactivate DB
+AirportRepo --> UC : List<Airport>
+deactivate AirportRepo
+
+UC -> RouteRepo : findAll()
+activate RouteRepo
+RouteRepo -> DB : SELECT FROM route
+activate DB
+DB --> RouteRepo : all routes
+deactivate DB
+RouteRepo --> UC : List<Route>
+deactivate RouteRepo
+
+note right of UC : Counts routes per airport\n(origin OR destination),\nthen sorts descending
+
+UC --> Ctrl : List<AirportStatisticsResponse>
+deactivate UC
+
+Ctrl --> BO : 200 OK (JSON Array)
+deactivate Ctrl
+@enduml

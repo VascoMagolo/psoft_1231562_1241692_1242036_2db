@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "System" as Sys
+
+ATCC -> Sys : viewAirportRoutes(iataCode)
+activate Sys
+Sys --> ATCC : returns list of Routes departing from or arriving at airport
+deactivate Sys
+@enduml

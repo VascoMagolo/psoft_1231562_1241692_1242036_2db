@@ -1,0 +1,39 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AirportController" as Ctrl
+participant "ViewAirportRoutesUseCase" as UC
+participant "AirportRepository" as AirportRepo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/airports/{iataCode}/routes
+activate Ctrl
+
+Ctrl -> UC : execute(iataCode)
+activate UC
+
+UC -> AirportRepo : existsByIataCodeCode(iataCode)
+activate AirportRepo
+AirportRepo -> DB : SELECT COUNT(*) FROM airport WHERE code = ?
+activate DB
+DB --> AirportRepo : 1
+deactivate DB
+AirportRepo --> UC : true
+deactivate AirportRepo
+
+UC -> RouteRepo : findByOriginAirportIataCodeCodeOrDestinationAirportIataCodeCode(iataCode, iataCode)
+activate RouteRepo
+RouteRepo -> DB : SELECT FROM route WHERE origin_airport_id = ? OR destination_airport_id = ?
+activate DB
+DB --> RouteRepo : list of records
+deactivate DB
+RouteRepo --> UC : List<Route>
+deactivate RouteRepo
+
+UC --> Ctrl : routes
+deactivate UC
+
+Ctrl --> ATCC : 200 OK (JSON Array)
+deactivate Ctrl
+@enduml

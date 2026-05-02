@@ -1,0 +1,31 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AirportController" as Ctrl
+participant "ListAirportsByRegionUseCase" as UC
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/airports/grouped?by=region
+activate Ctrl
+
+Ctrl -> UC : execute(by)
+activate UC
+
+UC -> Repo : findAll()
+activate Repo
+Repo -> DB : SELECT FROM airport
+activate DB
+DB --> Repo : all airports
+deactivate DB
+Repo --> UC : List<Airport>
+deactivate Repo
+
+note right of UC : Groups airports by region\n(or country if by=country),\nthen sorts groups alphabetically
+
+UC --> Ctrl : List<AirportGroupResponse>
+deactivate UC
+
+Ctrl --> ATCC : 200 OK (JSON Array)
+deactivate Ctrl
+@enduml
