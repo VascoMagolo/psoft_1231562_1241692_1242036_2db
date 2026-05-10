@@ -1,6 +1,7 @@
 package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
+import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.UpdateStatusRequest;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftStatus;
@@ -29,9 +30,9 @@ public class AircraftController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Aircraft> registerAircraft(@RequestBody Aircraft aircraft) {
-        Aircraft savedAircraft = registerAircraft.execute(aircraft);
-        return new ResponseEntity<>(savedAircraft, HttpStatus.CREATED);
+    public ResponseEntity<Aircraft> registerAircraft(
+            @RequestBody RegisterAircraftRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerAircraft.execute(request));
 
     }
 
@@ -42,7 +43,8 @@ public class AircraftController {
     }
 
     @GetMapping("/{registration}")
-    public ResponseEntity<Aircraft> getAircraftByRegistrationNumber(@PathVariable RegistrationNumber registration){
+    public ResponseEntity<Aircraft> getAircraftByRegistrationNumber(
+            @PathVariable RegistrationNumber registration){
         Aircraft aircraft = viewAircraftDetails.execute(registration);
         return ResponseEntity.ok(aircraft);
     }

@@ -35,7 +35,7 @@ public class Bootstrap implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         if (aircraftModelRepository.count() == 0) {
-            aircraftModelRepository.save(new AircraftModel("Boeing 737 MAX", "Boeing", 25941.0, 6570.0, 839.0, "images/b737max.png"));
+            aircraftModelRepository.save(new AircraftModel("Boeing 737 MAX", "Boeing", 25941.0, 6570.0, 839.0, "images/b737max.png", 300));
         }
         if (userRepository.count() == 0) {
             userRepository.save(new User("admin", passwordEncoder.encode("admin123"), Role.ADMIN));

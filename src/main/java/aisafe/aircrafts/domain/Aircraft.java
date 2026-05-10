@@ -29,5 +29,18 @@ public class Aircraft {
     @JoinColumn(name = "model_id")
     private AircraftModel model;
     @ElementCollection
+    @CollectionTable(name = "aircraft_features", joinColumns = @JoinColumn(name = "aircraft_id"))
+    @Column(name = "feature")
     private List<String> features;
+
+    public Aircraft() {}
+
+    public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model, RegistrationNumber registrationNumber, Integer seatCapacity, List<String> features) {
+        this.status = status;
+        this.manufacturingDate = manufacturingDate;
+        this.model = model;
+        this.registrationNumber = registrationNumber;
+        this.seatCapacity = seatCapacity;
+        this.features = features;
+    }
 }
