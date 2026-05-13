@@ -1,4 +1,7 @@
 package aisafe.aircrafts.application.dtos;
+/**
+ * Request payload used to register a new aircraft model.
+ */
 
 public record RegisterAircraftModelRequest(
         String modelName,

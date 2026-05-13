@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.util.Assert;
 
+/**
+ * Represents an aircraft model template. It stores the manufacturer data and capacity limits used when registering individual aircraft.
+ */
 @Entity
 @Getter
 public class AircraftModel {

@@ -9,6 +9,9 @@ import lombok.Getter;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+/**
+ * Value object for aircraft registration numbers. It normalizes the value to uppercase and enforces the expected `XX-XXX` format.
+ */
 @Getter
 @Embeddable
 public class RegistrationNumber {

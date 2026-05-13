@@ -4,6 +4,9 @@ import aisafe.UseCase;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Updates the status of an aircraft identified by its registration number.
+ */
 @UseCase
 @Transactional
 public class UpdateAircraftStatusUseCase {
@@ -24,7 +27,7 @@ public class UpdateAircraftStatusUseCase {
             throw new AircraftInvalidFieldException("Invalid status provided: " + newStatus + ". Valid values are: " + java.util.Arrays.toString(AircraftStatus.values()));
         }
         Aircraft aircraft = repository.findByRegistrationNumber(registrationNumber)
-                .orElseThrow(() -> new AircraftNotFoundException("Airplane with registration number: " + registrationNumber + " not found."));
+                .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber + " not found."));
         aircraft.setStatus(parsedStatus);
         return repository.save(aircraft);
     }

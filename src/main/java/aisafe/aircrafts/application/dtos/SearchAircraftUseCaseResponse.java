@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Detailed aircraft view returned when looking up an aircraft by registration number.
+ * Read model returned by the aircraft search use case.
  */
-public record ViewAircraftDetailsResponse(
+public record SearchAircraftUseCaseResponse(
         String registrationNumber,
         String model,
         String manufacturer,
@@ -16,5 +16,5 @@ public record ViewAircraftDetailsResponse(
         AircraftStatus status,
         Integer seatCapacity,
         List<String> features
-) {
+    ){
 }

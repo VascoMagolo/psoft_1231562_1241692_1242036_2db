@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Represents an individual aircraft tracked by the system, including its registration number, model, status, seat capacity, manufacturing date, and configured features.
+ */
 @Getter
 @Entity
 public class Aircraft {
