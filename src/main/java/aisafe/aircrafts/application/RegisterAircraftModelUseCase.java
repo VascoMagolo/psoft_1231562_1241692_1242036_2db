@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
-import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest; // <-- DTO CORRETO!
+import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 

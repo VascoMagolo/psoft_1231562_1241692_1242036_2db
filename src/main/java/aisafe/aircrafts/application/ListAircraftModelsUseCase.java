@@ -1,8 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
-import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
-import aisafe.aircrafts.domain.AircraftModel;
+import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +15,25 @@ import java.util.List;
 public class ListAircraftModelsUseCase {
 
     private final AircraftModelRepository repository;
-    private ListAircraftsUseCaseResponse response;
     public ListAircraftModelsUseCase(AircraftModelRepository repository) {
         this.repository = repository;
     }
 
-    public List<AircraftModel> execute() {
-        return repository.findAll();
+    /**
+     * Return all aircraft models as lightweight DTOs used by the API/UI.
+     */
+    public List<ListAircraftModelsUseCaseResponse> execute() {
+        return repository.findAll().stream()
+                .map(m -> new ListAircraftModelsUseCaseResponse(
+                        m.getId(),
+                        m.getModelName(),
+                        m.getManufacturer(),
+                        m.getFuelCapacity(),
+                        m.getMaxRange(),
+                        m.getCruisingSpeed(),
+                        m.getMaximumSeatingCapacity(),
+                        m.getImagePath()
+                ))
+                .toList();
     }
 }

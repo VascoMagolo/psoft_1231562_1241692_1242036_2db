@@ -3,6 +3,7 @@ package aisafe.aircrafts.infrastructure;
 import aisafe.aircrafts.application.ListAircraftModelsUseCase;
 import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,10 @@ import java.util.List;
 @RequestMapping("/api/aircraftModels")
 public class AircraftModelController {
     private final RegisterAircraftModelUseCase registerAircraftModel;
-    private final ListAircraftModelsUseCase ListAircraftModels;
+    private final ListAircraftModelsUseCase listAircraftModels;
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel, ListAircraftModelsUseCase listAircraftModels) {
         this.registerAircraftModel = registerAircraftModel;
-        this.ListAircraftModels = listAircraftModels;
+        this.listAircraftModels = listAircraftModels;
     }
 
     @PostMapping
@@ -32,8 +33,8 @@ public class AircraftModelController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AircraftModel>> getAllModels() {
-        List<AircraftModel> models = ListAircraftModels.execute();
+    public ResponseEntity<List<ListAircraftModelsUseCaseResponse>> getAllModels() {
+        List<ListAircraftModelsUseCaseResponse> models = listAircraftModels.execute();
         return ResponseEntity.ok(models);
     }
 }

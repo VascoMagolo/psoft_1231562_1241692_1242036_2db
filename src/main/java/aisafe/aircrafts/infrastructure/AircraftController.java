@@ -17,11 +17,11 @@ import java.util.List;
 
 /**
  * REST controller that exposes aircraft registration, listing, lookup, search, and status update endpoints.
- * {@link #viewAircraftDetails} - GET /api/aircrafts/{registration} - Look up an aircraft by registration number and return detailed information.
- * {@link #listAircraft} - GET /api/aircrafts - List all registered aircraft with summary information.
- * {@link #registerAircraft} - POST /api/aircrafts/register - Register a new aircraft with the provided details.
- * {@link #searchAircraft} - GET /api/aircrafts/search - Search for aircraft based on optional criteria like model, status, and manufacturing year.
- * {@link #updateAircraftStatus} - PATCH /api/aircrafts/{registration}/status - Update the status of an existing aircraft.
+ * {@link #getAircraftByRegistrationNumber(RegistrationNumber)} - GET /api/aircrafts/{registration} - Look up an aircraft by registration number and return detailed information.
+ * {@link #getAllAircraft()} - GET /api/aircrafts - List all registered aircraft with summary information.
+ * {@link #registerAircraft(RegisterAircraftRequest)} - POST /api/aircrafts/register - Register a new aircraft with the provided details.
+ * {@link #searchAircrafts(Long, AircraftStatus, Integer)} - GET /api/aircrafts/search - Search for aircraft based on optional criteria like model, status, and manufacturing year.
+ * {@link #updateAircraftStatus(RegistrationNumber, UpdateStatusRequest)} - PATCH /api/aircrafts/{registration}/status - Update the status of an existing aircraft.
  */
 @RestController
 @RequestMapping("/api/aircrafts")

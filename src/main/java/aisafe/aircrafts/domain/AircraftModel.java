@@ -18,6 +18,8 @@ public class AircraftModel {
     private String modelName;
 
     @Column(nullable = false)
+    // manufacturer will later be changed to be a value object
+    // or maybe an enum since the client said that all the manufacturers will be known
     private String manufacturer;
     private Double fuelCapacity;
     private Double maxRange;
@@ -37,6 +39,7 @@ public class AircraftModel {
         Assert.notNull(fuelCapacity,"fuelCapacity must not be null");
         Assert.notNull(maxRange,"maxRange must not be null");
         Assert.notNull(cruisingSpeed,"cruisingSpeed must not be null");
+        Assert.notNull(maximumSeatingCapacity,"maximumSeatingCapacity must not be null");
         // maybe image path can be null, idk if it is really required
         Assert.hasText(imagePath,"imagePath must not be blank");
         Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");

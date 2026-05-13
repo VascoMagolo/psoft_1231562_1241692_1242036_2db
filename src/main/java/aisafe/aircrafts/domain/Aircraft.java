@@ -17,7 +17,6 @@ public class Aircraft {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     @Embedded
     private RegistrationNumber registrationNumber;
 
