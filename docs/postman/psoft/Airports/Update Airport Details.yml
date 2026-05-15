@@ -1,0 +1,59 @@
+info:
+  name: Update Airport Details
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{base_url}}/api/airports/{{airport_iata}}/details"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"operationalHours\": \"06:00-23:00\",\r
+
+      \    \"contacts\": [\r
+
+      \        {\r
+
+      \            \"type\": \"PHONE\",\r
+
+      \            \"value\": \"+351229432400\",\r
+
+      \            \"description\": \"General Information\"\r
+
+      \        },\r
+
+      \        {\r
+
+      \            \"type\": \"EMAIL\",\r
+
+      \            \"value\": \"info@aeroportoporto.pt\",\r
+
+      \            \"description\": \"Customer Support\"\r
+
+      \        }\r
+
+      \    ],\r
+
+      \    \"services\": [\"Parking\", \"Car Rental\", \"Restaurants\"],\r
+
+      \    \"terminals\": [\"Terminal A\"],\r
+
+      \    \"gates\": [\"A1\", \"A2\", \"A3\"]\r
+
+      }"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status is 200", () => expect(res.getStatus()).to.equal(200));
+        test("Has IATA code", () => expect(res.getBody().iataCode).to.exist);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

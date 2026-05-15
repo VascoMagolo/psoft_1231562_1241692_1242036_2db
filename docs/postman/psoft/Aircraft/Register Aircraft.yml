@@ -1,0 +1,39 @@
+info:
+  name: Register Aircraft
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/aircrafts/register"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"registrationNumber\": \"CS-TPA\",\r
+
+      \    \"manufacturingDate\": \"2023-05-20\",\r
+
+      \    \"status\": \"AVAILABLE\",\r
+
+      \    \"seatCapacity\": 180,\r
+
+      \    \"modelname\": \"Boeing 737 MAX\",\r
+
+      \    \"features\": [\"WiFi\", \"Extra Legroom\"]\r
+
+      }"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status is 201", () => expect(res.getStatus()).to.equal(201));
+        test("Has registration number", () => expect(res.getBody().registrationNumber).to.exist);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

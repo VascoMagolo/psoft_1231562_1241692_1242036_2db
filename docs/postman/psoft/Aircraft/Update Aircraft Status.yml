@@ -1,0 +1,29 @@
+info:
+  name: Update Aircraft Status
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{base_url}}/api/aircrafts/{{aircraft_registration}}/status"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"status\": \"INACTIVE\"\r
+
+      }"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status is 200", () => expect(res.getStatus()).to.equal(200));
+        test("Status updated", () => expect(res.getBody().status).to.equal("INACTIVE"));
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

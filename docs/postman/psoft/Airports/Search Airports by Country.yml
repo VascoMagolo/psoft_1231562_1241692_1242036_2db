@@ -1,0 +1,34 @@
+info:
+  name: Search Airports by Country
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{base_url}}/api/airports/search?country=Portugal"
+  params:
+    - name: country
+      value: Portugal
+      type: query
+    - name: name
+      value: ""
+      type: query
+      disabled: true
+    - name: city
+      value: ""
+      type: query
+      disabled: true
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status is 200", () => expect(res.getStatus()).to.equal(200));
+        test("Returns array", () => expect(res.getBody()).to.be.an('array'));
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
