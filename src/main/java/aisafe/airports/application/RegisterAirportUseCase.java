@@ -4,7 +4,10 @@ import aisafe.UseCase;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.valueObject.*;
+import aisafe.airports.domain.Gate;
+import aisafe.airports.domain.Runway;
+import aisafe.airports.domain.Service;
+import aisafe.airports.domain.Terminal;
 
 import java.util.List;
 

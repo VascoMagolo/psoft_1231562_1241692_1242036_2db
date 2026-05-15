@@ -1,4 +1,4 @@
-package aisafe.model.enums;
+package aisafe.airports.domain;
 
 public enum ContactType {
     PHONE,

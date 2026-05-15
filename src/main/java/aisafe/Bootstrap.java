@@ -4,7 +4,7 @@ import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.valueObject.Runway;
+import aisafe.airports.domain.Runway;
 import aisafe.security.domain.Role;
 import aisafe.security.domain.User;
 import aisafe.security.domain.UserRepository;

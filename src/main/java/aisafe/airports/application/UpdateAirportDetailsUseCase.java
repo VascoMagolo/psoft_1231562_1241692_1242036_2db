@@ -5,10 +5,10 @@ import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.valueObject.Contact;
-import aisafe.model.valueObject.Gate;
-import aisafe.model.valueObject.Service;
-import aisafe.model.valueObject.Terminal;
+import aisafe.airports.domain.Contact;
+import aisafe.airports.domain.Gate;
+import aisafe.airports.domain.Service;
+import aisafe.airports.domain.Terminal;
 
 import java.util.List;
 

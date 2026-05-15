@@ -1,4 +1,4 @@
-package aisafe.model.valueObject;
+package aisafe.airports.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,7 +13,8 @@ public class Service {
     protected Service() {}
 
     public Service(String description) {
-        if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Service description cannot be empty");
+        if (description == null || description.trim().isEmpty())
+            throw new IllegalArgumentException("Service description cannot be empty");
         this.description = description;
     }
 }
