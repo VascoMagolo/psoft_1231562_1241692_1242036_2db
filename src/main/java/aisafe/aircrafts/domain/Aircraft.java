@@ -3,6 +3,7 @@ package aisafe.aircrafts.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -38,6 +39,12 @@ public class Aircraft {
     public Aircraft() {}
 
     public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model, RegistrationNumber registrationNumber, Integer seatCapacity, List<String> features) {
+        Assert.notNull(status, "Status must not be null.");
+        Assert.notNull(manufacturingDate, "Manufacturing date must not be null.");
+        Assert.notNull(model, "Model must not be null.");
+        Assert.notNull(registrationNumber, "Registration number must not be null.");
+        Assert.notNull(seatCapacity, "Seat capacity must not be null.");
+        Assert.isTrue(seatCapacity > 0, "Seat capacity must be greater than zero.");
         this.status = status;
         this.manufacturingDate = manufacturingDate;
         this.model = model;

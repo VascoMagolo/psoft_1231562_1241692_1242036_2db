@@ -55,7 +55,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/status").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         // Maintenance
-                        .requestMatchers("/api/maintenance/**").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR")
+                        .requestMatchers("/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers("/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers("/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers("/api/maintenance/records/update").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers("/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers("/api/maintenance/records/*").hasAnyRole("ATCC", "ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

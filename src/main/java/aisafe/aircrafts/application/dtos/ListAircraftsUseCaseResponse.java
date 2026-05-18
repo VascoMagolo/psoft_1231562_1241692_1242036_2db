@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application.dtos;
 
 import aisafe.aircrafts.domain.AircraftStatus;
+import aisafe.aircrafts.domain.Manufacturer;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 public record ListAircraftsUseCaseResponse(
         String registrationNumber,
         String model,
-        String manufacturer,
+        Manufacturer manufacturer,
         LocalDate manufacturingDate,
         AircraftStatus status,
         Integer seatCapacity,

@@ -1,11 +1,14 @@
 package aisafe.aircrafts.application.dtos;
+
+import aisafe.aircrafts.domain.Manufacturer;
+
 /**
  * Request payload used to register a new aircraft model.
  */
 
 public record RegisterAircraftModelRequest(
         String modelName,
-        String manufacturer,
+        Manufacturer manufacturer,
         Double maxRange,
         Double fuelCapacity,
         Double cruisingSpeed,

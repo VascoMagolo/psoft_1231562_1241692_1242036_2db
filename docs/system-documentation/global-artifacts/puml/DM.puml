@@ -31,7 +31,13 @@ package "Aircraft Aggregate" <<Aggregate>> {
     UNDER_MAINTENANCE
     IN_FLIGHT
   }
-
+  enum Manufacturer <<Enum>> {
+    BOEING
+    AIRBUS
+    EMBRAER
+    BOMBARDIER
+    OTHER
+  }
   class Aircraft <<Entity>> <<Root>> {
     - manufacturingDate : Date
     - status : AircraftStatus
@@ -49,9 +55,6 @@ package "Aircraft Aggregate" <<Aggregate>> {
   }
   class RegistrationNumber <<ValueObject>> {
     - registrationNumber : String
-  }
-  class Manufacturer <<ValueObject>> {
-    - manufacturer : String
   }
   Aircraft --> AircraftStatus : current status
   RegistrationNumber "1"-->"1" Aircraft
