@@ -54,13 +54,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/status").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
-                        // Maintenance
-                        .requestMatchers("/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
-                        .requestMatchers("/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
-                        .requestMatchers("/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
-                        .requestMatchers("/api/maintenance/records/update").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
-                        .requestMatchers("/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
-                        .requestMatchers("/api/maintenance/records/*").hasAnyRole("ATCC", "ADMIN")
+                        // WP #4 - Maintenance
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/update").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/").hasAnyRole("ATCC", "ADMIN")
 
                         .anyRequest().authenticated()
                 )
