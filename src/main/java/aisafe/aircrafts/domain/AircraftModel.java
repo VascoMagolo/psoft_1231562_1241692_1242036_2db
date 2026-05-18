@@ -18,6 +18,7 @@ public class AircraftModel {
     private String modelName;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Manufacturer manufacturer;
     private Double fuelCapacity;
     private Double maxRange;

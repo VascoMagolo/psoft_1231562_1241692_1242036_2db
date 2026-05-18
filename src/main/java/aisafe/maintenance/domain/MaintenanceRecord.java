@@ -14,6 +14,9 @@ public class MaintenanceRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    private Long version;
     @Column(nullable = false)
     private String description;
     @Column(nullable = false)
@@ -45,6 +48,8 @@ public class MaintenanceRecord {
         Assert.isTrue(expectedDuration > 0, "Expected duration must be greater than zero.");
         Assert.notNull(part, "Maintenance part must not be null.");
         Assert.notNull(aircraft, "Record must have an aircraft");
+        Assert.notNull(template, "Maintenance template must not be null.");
+        Assert.notNull(status, "Maintenance status must not be null.");
         this.description = description;
         this.startDate = startDate;
         this.expectedDuration = expectedDuration;

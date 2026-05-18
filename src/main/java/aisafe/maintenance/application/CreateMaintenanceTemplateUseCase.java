@@ -41,7 +41,7 @@ public class CreateMaintenanceTemplateUseCase {
         );
 
         if(maintenanceTemplateRepository.existsByName(template.getName())){
-            throw new MaintenanceTemplateAlreadyExistsException("A template with the name");
+            throw new MaintenanceTemplateAlreadyExistsException("A template with the name " + template.getName() + " already exists.");
         }
 
         return maintenanceTemplateRepository.save(template);

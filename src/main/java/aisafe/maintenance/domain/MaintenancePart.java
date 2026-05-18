@@ -1,7 +1,7 @@
 package aisafe.maintenance.domain;
 
 
-import io.jsonwebtoken.lang.Assert;
+import org.springframework.util.Assert;
 import jakarta.persistence.*;
 import lombok.Getter;
 

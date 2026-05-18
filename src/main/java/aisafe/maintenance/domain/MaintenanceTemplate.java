@@ -21,7 +21,6 @@ public class MaintenanceTemplate {
     @Column ( nullable = false )
     private MaintenanceType templateType;
     @ManyToMany
-    @Column ( nullable = false )
     @CollectionTable(name = "maintenance_models", joinColumns = @JoinColumn(name = "maintenance_id"))
     private List<AircraftModel> applicableModels = new ArrayList<>();
     @ElementCollection
