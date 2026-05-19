@@ -1,8 +1,8 @@
-package aisafe.model.enums;
+package aisafe.maintenance.domain;
 
 public enum MaintenanceType {
     INSPECTION,
     SCHEDULED_MAINTENANCE,
     OVERHAUL,
-    MODIFICATION
+    MODIFICATION;
 }

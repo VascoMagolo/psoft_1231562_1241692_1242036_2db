@@ -1,11 +1,13 @@
 package aisafe.aircrafts.application;
 
-import aisafe.DomainException;
 import aisafe.UseCase;
-import aisafe.aircrafts.domain.AircraftModel;
-import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Registers a new aircraft model after ensuring the model name is unique.
+ */
 @UseCase
 @Transactional
 public class RegisterAircraftModelUseCase {
@@ -16,12 +18,19 @@ public class RegisterAircraftModelUseCase {
         this.repository = repository;
     }
 
-    public AircraftModel execute(AircraftModel newModel) {
-        // add more validations later
-        if (newModel.getMaxRange() == null || newModel.getMaxRange() <= 0) {
-            throw new DomainException("Max Range is invalid");
+    public AircraftModel execute(RegisterAircraftModelRequest request) {
+        AircraftModel newModel = new AircraftModel(
+                request.modelName(),
+                request.manufacturer(),
+                request.fuelCapacity(),
+                request.maxRange(),
+                request.cruisingSpeed(),
+                request.imagePath(),
+                request.maximumSeatingCapacity()
+        );
+        if (repository.existsByModelName(newModel.getModelName())) {
+            throw new AircraftModelAlreadyExistsException("An aircraft model with name '" + newModel.getModelName() + "' already exists.");
         }
-
         return repository.save(newModel);
     }
 }

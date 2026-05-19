@@ -31,9 +31,14 @@ package "Aircraft Aggregate" <<Aggregate>> {
     UNDER_MAINTENANCE
     IN_FLIGHT
   }
-
+  enum Manufacturer <<Enum>> {
+    BOEING
+    AIRBUS
+    EMBRAER
+    BOMBARDIER
+    OTHER
+  }
   class Aircraft <<Entity>> <<Root>> {
-    - registrationNumber : String
     - manufacturingDate : Date
     - status : AircraftStatus
     - seatCapacity : Integer
@@ -43,14 +48,17 @@ package "Aircraft Aggregate" <<Aggregate>> {
 
   class AircraftModel <<Entity>> <<Root>> {
     - modelName : String
-    - manufacturer : String
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
     - imagePath : String
   }
-
+  class RegistrationNumber <<ValueObject>> {
+    - registrationNumber : String
+  }
   Aircraft --> AircraftStatus : current status
+  RegistrationNumber "1"-->"1" Aircraft
+  Manufacturer *-->"1" AircraftModel
 }
 
 package "Airport Aggregate" <<Aggregate>> {
