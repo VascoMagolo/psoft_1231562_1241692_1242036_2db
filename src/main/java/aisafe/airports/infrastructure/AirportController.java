@@ -3,7 +3,7 @@ package aisafe.airports.infrastructure;
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.airports.domain.Airport;
-import aisafe.airports.domain.AirplaneCertification;
+import aisafe.airports.domain.AircraftCertification;
 import aisafe.model.entities.Route;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +50,9 @@ public class AirportController {
         return ResponseEntity.status(HttpStatus.CREATED).body(registerAirport.execute(request));
     }
 
-    // US106a: Add airplane certification to airport
+    // US106a: Add aircraft certification to airport
     @PostMapping("/{iataCode}/certifications")
-    public ResponseEntity<AirplaneCertification> addCertification(
+    public ResponseEntity<AircraftCertification> addCertification(
             @PathVariable String iataCode,
             @RequestBody AddCertificationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Entity
 @Getter
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"airport_id", "aircraft_model_id"}))
-public class AirplaneCertification {
+public class AircraftCertification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,9 +20,9 @@ public class AirplaneCertification {
     @JoinColumn(name = "aircraft_model_id", nullable = false)
     private AircraftModel aircraftModel;
 
-    protected AirplaneCertification() {}
+    protected AircraftCertification() {}
 
-    public AirplaneCertification(Airport airport, AircraftModel aircraftModel) {
+    public AircraftCertification(Airport airport, AircraftModel aircraftModel) {
         this.airport = airport;
         this.aircraftModel = aircraftModel;
     }

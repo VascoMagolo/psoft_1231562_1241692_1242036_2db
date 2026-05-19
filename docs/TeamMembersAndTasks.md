@@ -52,7 +52,7 @@ Finally, keep in mind that each User Story is not isolated — it must be integr
 | [US206 - Total operational hours per aircraft](system-documentation/US206)         |      x       |                |                 |
 | **WP #2 - Airports**                                                               |              |                |                 |
 | [US106 - Register an airport](system-documentation/US106)                          |              |       x        |                 |
-| [US106a - Add airplane certification to airport](system-documentation/US106a)      |              |       x        |                 |
+| [US106a - Add aircraft certification to airport](system-documentation/US106a)      |              |       x        |                 |
 | [US107 - View airport details](system-documentation/US107)                         |              |       x        |                 |
 | [US108 - Search for airports](system-documentation/US108)                          |              |       x        |                 |
 | [US109 - Update airport operational status](system-documentation/US109)            |              |       x        |                 |

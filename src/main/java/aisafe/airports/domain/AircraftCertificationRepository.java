@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AirplaneCertificationRepository extends JpaRepository<AirplaneCertification, Long> {
-    List<AirplaneCertification> findByAirport(Airport airport);
+public interface AircraftCertificationRepository extends JpaRepository<AircraftCertification, Long> {
+    List<AircraftCertification> findByAirport(Airport airport);
 
     boolean existsByAirportAndAircraftModelId(Airport airport, Long aircraftModelId);
 }
