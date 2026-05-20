@@ -5,6 +5,7 @@ import aisafe.UseCase;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.airports.application.dtos.AddCertificationRequest;
+import aisafe.airports.application.dtos.AircraftCertificationResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AircraftCertification;
 import aisafe.airports.domain.AircraftCertificationRepository;
@@ -25,7 +26,7 @@ public class AddAirportCertificationUseCase {
         this.aircraftModelRepository = aircraftModelRepository;
     }
 
-    public AircraftCertification execute(String iataCode, AddCertificationRequest request) {
+    public AircraftCertificationResponse execute(String iataCode, AddCertificationRequest request) {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
 
@@ -36,6 +37,6 @@ public class AddAirportCertificationUseCase {
             throw new DomainException("Aircraft model '" + model.getModelName() + "' is already certified for airport " + iataCode + ".");
         }
 
-        return certificationRepository.save(new AircraftCertification(airport, model));
+        return AircraftCertificationResponse.from(certificationRepository.save(new AircraftCertification(airport, model)));
     }
 }

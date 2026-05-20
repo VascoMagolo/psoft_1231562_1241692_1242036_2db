@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.UseCase;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
@@ -20,7 +21,7 @@ public class UpdateAirportDetailsUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public Airport execute(String iataCode, UpdateAirportDetailsRequest request) {
+    public AirportResponse execute(String iataCode, UpdateAirportDetailsRequest request) {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
 
@@ -40,6 +41,6 @@ public class UpdateAirportDetailsUseCase {
 
         airport.updateDetails(request.operationalHours(), contacts, request.imagePath(), services, terminals, gates);
 
-        return airportRepository.save(airport);
+        return AirportResponse.from(airportRepository.save(airport));
     }
 }

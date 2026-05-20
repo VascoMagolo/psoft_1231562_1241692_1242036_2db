@@ -2,8 +2,6 @@ package aisafe.airports.infrastructure;
 
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
-import aisafe.airports.domain.Airport;
-import aisafe.airports.domain.AircraftCertification;
 import aisafe.model.entities.Route;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,13 +44,13 @@ public class AirportController {
 
     // US106 + US207: Register airport (basic fields + optional facilities/photo)
     @PostMapping
-    public ResponseEntity<Airport> registerAirport(@RequestBody RegisterAirportRequest request) {
+    public ResponseEntity<AirportResponse> registerAirport(@RequestBody RegisterAirportRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(registerAirport.execute(request));
     }
 
     // US106a: Add aircraft certification to airport
     @PostMapping("/{iataCode}/certifications")
-    public ResponseEntity<AircraftCertification> addCertification(
+    public ResponseEntity<AircraftCertificationResponse> addCertification(
             @PathVariable String iataCode,
             @RequestBody AddCertificationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -61,13 +59,13 @@ public class AirportController {
 
     // US107: View airport details by IATA code
     @GetMapping("/{iataCode}")
-    public ResponseEntity<Airport> getAirport(@PathVariable String iataCode) {
+    public ResponseEntity<AirportResponse> getAirport(@PathVariable String iataCode) {
         return ResponseEntity.ok(viewAirportDetails.execute(iataCode.toUpperCase()));
     }
 
     // US108: Search airports by city, country, or name
     @GetMapping("/search")
-    public ResponseEntity<List<Airport>> searchAirports(
+    public ResponseEntity<List<AirportResponse>> searchAirports(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String country) {
@@ -76,7 +74,7 @@ public class AirportController {
 
     // US109: Update airport operational status
     @PatchMapping("/{iataCode}/status")
-    public ResponseEntity<Airport> updateStatus(
+    public ResponseEntity<AirportResponse> updateStatus(
             @PathVariable String iataCode,
             @RequestBody UpdateAirportStatusRequest request) {
         return ResponseEntity.ok(updateAirportStatus.execute(iataCode.toUpperCase(), request.status()));
@@ -84,7 +82,7 @@ public class AirportController {
 
     // US208: Update airport operational hours and contact information
     @PatchMapping("/{iataCode}/details")
-    public ResponseEntity<Airport> updateDetails(
+    public ResponseEntity<AirportResponse> updateDetails(
             @PathVariable String iataCode,
             @RequestBody UpdateAirportDetailsRequest request) {
         return ResponseEntity.ok(updateAirportDetails.execute(iataCode.toUpperCase(), request));

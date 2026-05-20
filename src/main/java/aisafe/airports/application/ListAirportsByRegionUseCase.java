@@ -2,6 +2,7 @@ package aisafe.airports.application;
 
 import aisafe.UseCase;
 import aisafe.airports.application.dtos.AirportGroupResponse;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 
@@ -31,7 +32,10 @@ public class ListAirportsByRegionUseCase {
 
         return grouped.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .map(e -> new AirportGroupResponse(e.getKey(), e.getValue()))
+                .map(e -> new AirportGroupResponse(
+                        e.getKey(),
+                        e.getValue().stream().map(AirportResponse::from).toList()
+                ))
                 .toList();
     }
 }

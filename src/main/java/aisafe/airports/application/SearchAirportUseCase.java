@@ -1,7 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.UseCase;
-import aisafe.airports.domain.Airport;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportRepository;
 
 import java.util.List;
@@ -14,7 +14,9 @@ public class SearchAirportUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public List<Airport> execute(String name, String city, String country) {
-        return airportRepository.searchAirports(name, city, country);
+    public List<AirportResponse> execute(String name, String city, String country) {
+        return airportRepository.searchAirports(name, city, country).stream()
+                .map(AirportResponse::from)
+                .toList();
     }
 }

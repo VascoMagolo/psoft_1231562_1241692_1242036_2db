@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.UseCase;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
@@ -19,7 +20,7 @@ public class RegisterAirportUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public Airport execute(RegisterAirportRequest request) {
+    public AirportResponse execute(RegisterAirportRequest request) {
         List<Runway> runways = request.runways().stream()
                 .map(r -> new Runway(r.name(), r.length(), r.orientation()))
                 .toList();
@@ -45,6 +46,6 @@ public class RegisterAirportUseCase {
 
         airport.updateDetails(request.operationalHours(), null, request.imagePath(), services, terminals, gates);
 
-        return airportRepository.save(airport);
+        return AirportResponse.from(airportRepository.save(airport));
     }
 }
