@@ -1,9 +1,10 @@
 package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
+import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteHistory;
-import aisafe.routes.dtos.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

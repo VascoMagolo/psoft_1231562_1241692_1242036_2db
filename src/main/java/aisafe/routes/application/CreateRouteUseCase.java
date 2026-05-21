@@ -3,9 +3,10 @@ package aisafe.routes.application;
 import aisafe.UseCase;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.model.valueObject.IataCode;
+import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
-import aisafe.routes.dtos.CreateRouteRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +19,27 @@ public class CreateRouteUseCase {
 
     @Transactional
     public Route execute(CreateRouteRequest request) {
+        IataCode origin = new IataCode(request.originIataCode());
+        IataCode destination = new IataCode(request.destinationIataCode());
+        String originCode = request.originIataCode().trim().toUpperCase();
+        String destinationCode = request.destinationIataCode().trim().toUpperCase();
 
-        if (!airportRepository.existsByIataCode(request.getOriginIataCode())) {
-            throw new AirportNotFoundException(request.getOriginIataCode());
+        if (!airportRepository.existsByIataCodeCode(originCode)) {
+            throw new AirportNotFoundException(originCode);
         }
-        if (!airportRepository.existsByIataCode(request.getDestinationIataCode())) {
-            throw new AirportNotFoundException(request.getDestinationIataCode());
+        if (!airportRepository.existsByIataCodeCode(destinationCode)) {
+            throw new AirportNotFoundException(destinationCode);
+        }
+        if (routeRepository.existsByOriginAndDestination(origin, destination)) {
+            throw new IllegalArgumentException("Route already exists between origin and destination.");
         }
 
         Route route = new Route(
-                request.getOriginIataCode(),
-                request.getDestinationIataCode(),
-                request.getEstimatedFlightTime(),
-                request.getMinimumRange(),
-                request.getMinimumCapacity()
+                originCode,
+                destinationCode,
+                request.estimatedFlightTime(),
+                request.minimumRange(),
+                request.minimumCapacity()
         );
 
         return routeRepository.save(route);

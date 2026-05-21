@@ -18,6 +18,8 @@ public class SearchRoutesUseCase {
             return routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination));
         } else if (origin != null) {
             return routeRepository.findByOrigin(new IataCode(origin));
+        } else if (destination != null) {
+            return routeRepository.findByDestination(new IataCode(destination));
         }
         return routeRepository.findAll();
     }

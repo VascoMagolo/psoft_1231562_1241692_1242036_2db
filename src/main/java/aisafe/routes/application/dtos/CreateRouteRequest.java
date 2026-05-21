@@ -1,4 +1,4 @@
-package aisafe.routes.dtos;
+package aisafe.routes.application.dtos;
 
 public record CreateRouteRequest(
         String originIataCode,

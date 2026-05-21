@@ -1,4 +1,4 @@
-package aisafe.routes.dtos;
+package aisafe.routes.application.dtos;
 
 import java.time.LocalDateTime;
 
