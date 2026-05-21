@@ -50,7 +50,7 @@ deactivate DB
 CertRepo --> UC : savedCertification
 deactivate CertRepo
 
-UC --> Ctrl : savedCertification
+UC --> Ctrl : AircraftCertificationResponse
 deactivate UC
 
 Ctrl --> Actor : 201 Created (JSON)

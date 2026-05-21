@@ -22,7 +22,7 @@ Repo --> UC : Optional<Airport>
 deactivate Repo
 
 alt Airport found
-  UC --> Ctrl : Airport
+  UC --> Ctrl : AirportResponse
   Ctrl --> Actor : 200 OK (JSON)
 else Airport not found
   UC --> Ctrl : throws AirportNotFoundException

@@ -21,7 +21,7 @@ deactivate DB
 Repo --> UC : List<Airport>
 deactivate Repo
 
-UC --> Ctrl : results
+UC --> Ctrl : List<AirportResponse>
 deactivate UC
 
 Ctrl --> ATCC : 200 OK (JSON Array)

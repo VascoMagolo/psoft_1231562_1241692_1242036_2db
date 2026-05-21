@@ -37,7 +37,7 @@ deactivate DB
 Repo --> UC : updatedAirport
 deactivate Repo
 
-UC --> Ctrl : updatedAirport
+UC --> Ctrl : AirportResponse
 deactivate UC
 
 Ctrl --> BO : 200 OK (JSON)
