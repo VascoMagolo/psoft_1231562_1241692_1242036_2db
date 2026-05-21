@@ -374,8 +374,8 @@ function parsePaths(paths) {
       } else if (parts[0] === 'system-documentation') {
         sectionKey = 'system-documentation'; sectionLabel = MD_SECTIONS['system-documentation'];
         if (parts[1] === 'use-cases' && parts.length > 3) {
-          groupKey = parts[3];
-          groupMeta = { label: groupKey, short: groupKey.replace('WP#', '') };
+          groupKey = parts[2];
+          groupMeta = { label: groupKey, short: groupKey.replace('WP', '') };
         } else {
           groupKey = parts[1] || '__root__';
           groupMeta = MD_GROUPS[groupKey] || { label: groupKey.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), short: groupKey.slice(0,4).toUpperCase() };
@@ -400,8 +400,8 @@ function parsePaths(paths) {
       const ucIdx = parts.indexOf('use-cases');
       if (ucIdx !== -1) {
         sectionKey = 'system-documentation'; sectionLabel = MD_SECTIONS['system-documentation'];
-        groupKey = parts[ucIdx + 2];
-        groupMeta = { label: groupKey, short: groupKey.replace('WP#', '') };
+        groupKey = parts[ucIdx + 1];
+        groupMeta = { label: groupKey, short: groupKey.replace('WP', '') };
         const fn = fileName.toLowerCase();
         subgroupKey = fn.startsWith('ssd_') ? 'system-sequence-diagram'
                     : fn.startsWith('sd_')  ? 'sequence-diagram'

@@ -51,16 +51,16 @@ Finally, keep in mind that each User Story is not isolated — it must be integr
 | [US205 - Real-time aircraft availability](system-documentation/US205)              |      x       |                |                 |
 | [US206 - Total operational hours per aircraft](system-documentation/US206)         |      x       |                |                 |
 | **WP #2 - Airports**                                                               |              |                |                 |
-| [US106 - Register an airport](system-documentation/use-cases/WP#_A/WP#2A/US106)                          |              |       x        |                 |
-| [US106a - Add aircraft certification to airport](system-documentation/use-cases/WP#_A/WP#2A/US106a)      |              |       x        |                 |
-| [US107 - View airport details](system-documentation/use-cases/WP#_A/WP#2A/US107)                         |              |       x        |                 |
-| [US108 - Search for airports](system-documentation/use-cases/WP#_A/WP#2A/US108)                          |              |       x        |                 |
-| [US109 - Update airport operational status](system-documentation/use-cases/WP#_A/WP#2A/US109)            |              |       x        |                 |
-| [US207 - Register airport w/ detailed facilities](system-documentation/use-cases/WP#_B/WP#2B/US207)      |              |       x        |                 |
-| [US208 - Update airport details (hours/contact)](system-documentation/use-cases/WP#_B/WP#2B/US208)       |              |       x        |                 |
-| [US209 - View routes to/from specific airport](system-documentation/use-cases/WP#_B/WP#2B/US209)         |              |       x        |                 |
-| [US210 - Stats on busiest airports](system-documentation/use-cases/WP#_B/WP#2B/US210)                    |              |       x        |                 |
-| [US211 - View airports grouped by region](system-documentation/use-cases/WP#_B/WP#2B/US211)              |              |       x        |                 |
+| [US106 - Register an airport](system-documentation/use-cases/WP2A/US106)                          |              |       x        |                 |
+| [US106a - Add aircraft certification to airport](system-documentation/use-cases/WP2A/US106a)      |              |       x        |                 |
+| [US107 - View airport details](system-documentation/use-cases/WP2A/US107)                         |              |       x        |                 |
+| [US108 - Search for airports](system-documentation/use-cases/WP2A/US108)                          |              |       x        |                 |
+| [US109 - Update airport operational status](system-documentation/use-cases/WP2A/US109)            |              |       x        |                 |
+| [US207 - Register airport w/ detailed facilities](system-documentation/use-cases/WP2B/US207)      |              |       x        |                 |
+| [US208 - Update airport details (hours/contact)](system-documentation/use-cases/WP2B/US208)       |              |       x        |                 |
+| [US209 - View routes to/from specific airport](system-documentation/use-cases/WP2B/US209)         |              |       x        |                 |
+| [US210 - Stats on busiest airports](system-documentation/use-cases/WP2B/US210)                    |              |       x        |                 |
+| [US211 - View airports grouped by region](system-documentation/use-cases/WP2B/US211)              |              |       x        |                 |
 | **WP #3 - Flight Routes**                                                          |              |                |                 |
 | [US110 - Create a flight route](system-documentation/US110)                        |              |                |        x        |
 | [US111 - Keep track of route history](system-documentation/US111)                  |              |                |        x        |
