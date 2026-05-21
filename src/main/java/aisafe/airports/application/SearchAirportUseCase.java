@@ -3,8 +3,8 @@ package aisafe.airports.application;
 import aisafe.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportRepository;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @UseCase
 public class SearchAirportUseCase {
@@ -14,9 +14,8 @@ public class SearchAirportUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public List<AirportResponse> execute(String name, String city, String country) {
-        return airportRepository.searchAirports(name, city, country).stream()
-                .map(AirportResponse::from)
-                .toList();
+    public Page<AirportResponse> execute(String name, String city, String country, Pageable pageable) {
+        return airportRepository.searchAirports(name, city, country, pageable)
+                .map(AirportResponse::from);
     }
 }

@@ -8,9 +8,15 @@ import aisafe.security.domain.InvalidCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Centralised exception handler that translates domain and infrastructure exceptions into
@@ -62,6 +68,22 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("You do not have permission to access this resource."));
     }
 
+    /** 409 Conflict - optimistic locking collision (concurrent update detected) */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("The resource was modified by another request. Please retry."));
+    }
+
+    /** 400 Bad Request - bean validation failure (@Valid on request bodies) */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ValidationErrorResponse("Validation failed", errors));
+    }
+
     /** 500 Internal Server Error - Catch all for unexpected error */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllOtherExceptions(Exception ex) {
@@ -71,5 +93,8 @@ public class GlobalExceptionHandler {
 
     /** Error response body. */
     record ErrorResponse(String message) {}
+
+    /** Error response body for validation failures — includes per-field details. */
+    record ValidationErrorResponse(String message, Map<String, String> errors) {}
 
 }
