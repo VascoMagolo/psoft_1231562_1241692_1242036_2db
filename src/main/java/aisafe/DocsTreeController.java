@@ -1,5 +1,6 @@
 package aisafe;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,9 +15,12 @@ import java.util.stream.Stream;
 @RestController
 public class DocsTreeController {
 
+    @Value("${aisafe.docs.path:docs}")
+    private String docsPath;
+
     @GetMapping("/docs/tree")
     public ResponseEntity<List<String>> getTree() throws IOException {
-        Path root = Paths.get("docs");
+        Path root = Paths.get(docsPath);
         if (!Files.exists(root)) return ResponseEntity.ok(List.of());
         try (Stream<Path> stream = Files.walk(root)) {
             return ResponseEntity.ok(
