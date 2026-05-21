@@ -38,9 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/docs.html", "/docs/**").permitAll()
                         // WP #1A – Aircraft Management
-                        .requestMatchers(HttpMethod.POST, "/api/aircrafts/").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/search").hasAnyRole("ATCC", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/aircrafts/{registrationNumber}/status").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/aircrafts/*/status").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
@@ -59,9 +59,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/update").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/{registrationNumber}").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/aircraft/*").hasAnyRole("ATCC", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

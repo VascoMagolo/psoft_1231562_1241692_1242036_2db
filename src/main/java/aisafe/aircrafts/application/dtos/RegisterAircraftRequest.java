@@ -1,7 +1,5 @@
 package aisafe.aircrafts.application.dtos;
 
-import aisafe.aircrafts.domain.AircraftStatus;
-import aisafe.aircrafts.domain.RegistrationNumber;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
