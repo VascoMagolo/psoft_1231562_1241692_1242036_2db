@@ -1,4 +1,4 @@
-package aisafe.model.valueObject;
+package aisafe.airports.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -18,7 +18,6 @@ public class Coordinates {
         if (latitude == null || longitude == null) {
             throw new IllegalArgumentException("Latitude and longitude cannot be null.");
         }
-
         if (latitude < -90.0 || latitude > 90.0) {
             throw new IllegalArgumentException("Latitude must be between -90 and 90 degrees.");
         }

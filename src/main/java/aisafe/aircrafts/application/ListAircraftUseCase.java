@@ -1,40 +1,28 @@
 package aisafe.aircrafts.application;
 
-import aisafe.UseCase;
+import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
-import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-/**
- * Returns all registered aircraft as lightweight response DTOs.
- */
-@UseCase
-@Transactional(readOnly = true)
+@Service
 public class ListAircraftUseCase {
+
     private final AircraftRepository repository;
 
     public ListAircraftUseCase(AircraftRepository repository) {
         this.repository = repository;
     }
 
-    public List<ListAircraftsUseCaseResponse> execute() {
-        return repository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
-    }
+    public Page<ListAircraftsUseCaseResponse> execute(Pageable pageable) {
+        Page<Aircraft> aircraftPage = repository.findAll(pageable);
 
-    private ListAircraftsUseCaseResponse toResponse(Aircraft aircraft) {
-        return new ListAircraftsUseCaseResponse(
+        return aircraftPage.map(aircraft -> new ListAircraftsUseCaseResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
-                aircraft.getModel().getManufacturer(),
-                aircraft.getManufacturingDate(),
-                aircraft.getStatus(),
-                aircraft.getSeatCapacity(),
-                aircraft.getFeatures()
-        );
+                aircraft.getStatus().name()
+        ));
     }
 }

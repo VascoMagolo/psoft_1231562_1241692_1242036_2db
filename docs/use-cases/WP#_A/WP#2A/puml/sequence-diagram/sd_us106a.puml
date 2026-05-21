@@ -5,11 +5,13 @@ participant "AirportController" as Ctrl
 participant "AddAirportCertificationUseCase" as UC
 participant "AirportRepository" as AirportRepo
 participant "AircraftModelRepository" as ModelRepo
-participant "AirplaneCertificationRepository" as CertRepo
+participant "AircraftCertificationRepository" as CertRepo
 database "Database" as DB
 
 Actor -> Ctrl : POST /api/airports/{iataCode}/certifications (JSON)
 activate Ctrl
+
+note right of Ctrl : @Valid validates\naircraftModelId is not null
 
 Ctrl -> UC : execute(iataCode, request)
 activate UC
@@ -41,7 +43,7 @@ deactivate DB
 CertRepo --> UC : false
 deactivate CertRepo
 
-UC -> CertRepo : save(new AirplaneCertification(airport, model))
+UC -> CertRepo : save(new AircraftCertification(airport, model))
 activate CertRepo
 CertRepo -> DB : INSERT INTO airport_certification
 activate DB
@@ -50,9 +52,9 @@ deactivate DB
 CertRepo --> UC : savedCertification
 deactivate CertRepo
 
-UC --> Ctrl : savedCertification
+UC --> Ctrl : AircraftCertificationResponse
 deactivate UC
 
-Ctrl --> Actor : 201 Created (JSON)
+Ctrl --> Actor : 201 Created (JSON with _links)
 deactivate Ctrl
 @enduml

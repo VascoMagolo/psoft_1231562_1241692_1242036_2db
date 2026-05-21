@@ -1,6 +1,5 @@
 package aisafe.airports.domain;
 
-import aisafe.model.valueObject.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

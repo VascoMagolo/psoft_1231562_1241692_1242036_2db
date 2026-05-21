@@ -1,4 +1,4 @@
-package aisafe.model.valueObject;
+package aisafe.airports.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,7 +13,8 @@ public class Gate {
     protected Gate() {}
 
     public Gate(String identifier) {
-        if(identifier == null||identifier.trim().isEmpty()) throw new IllegalArgumentException("Gate identifier cannot be empty");
+        if (identifier == null || identifier.trim().isEmpty())
+            throw new IllegalArgumentException("Gate identifier cannot be empty");
         this.identifier = identifier;
     }
 }

@@ -37,9 +37,9 @@ deactivate DB
 Repo --> UC : updatedAirport
 deactivate Repo
 
-UC --> Ctrl : updatedAirport
+UC --> Ctrl : AirportResponse
 deactivate UC
 
-Ctrl --> BO : 200 OK (JSON)
+Ctrl --> BO : 200 OK (JSON with _links)
 deactivate Ctrl
 @enduml

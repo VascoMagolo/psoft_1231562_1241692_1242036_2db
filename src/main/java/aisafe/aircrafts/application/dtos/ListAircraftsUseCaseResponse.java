@@ -12,9 +12,5 @@ import java.util.List;
 public record ListAircraftsUseCaseResponse(
         String registrationNumber,
         String model,
-        Manufacturer manufacturer,
-        LocalDate manufacturingDate,
-        AircraftStatus status,
-        Integer seatCapacity,
-        List<String> features) {
+        String status) {
 }
