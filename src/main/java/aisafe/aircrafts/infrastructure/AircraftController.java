@@ -4,6 +4,11 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +25,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/aircrafts")
+@Tag(name = "Aircrafts", description = "Aircraft management — WP#1A and WP#2B")
 public class AircraftController {
 
     private final ViewAircraftDetailsUseCase viewAircraftDetails;
@@ -44,6 +50,14 @@ public class AircraftController {
         this.searchAssembler = searchAssembler;
     }
 
+    @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Aircraft successfully registered"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "409", description = "Aircraft with given registration number already exists")
+    })
     @PostMapping
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> registerAircraft(
             @Valid @RequestBody RegisterAircraftRequest request) {
@@ -54,6 +68,12 @@ public class AircraftController {
                 .body(toHateoasModel(createdAircraft, new RegistrationNumber(request.registrationNumber())));
     }
 
+    @Operation(summary = "Get all aircrafts with pagination", description = "Returns a paginated list of all registered aircrafts. Supports HATEOAS navigation links.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paginated list returned successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<ListAircraftsUseCaseResponse>>> getAllAircraft(
             @PageableDefault(size = 20) Pageable pageable) {
@@ -69,19 +89,33 @@ public class AircraftController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @Operation(summary = "Get aircraft details by registration number", description = "Returns complete technical and operational details for a specific aircraft using its unique registration identifier.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aircraft details found and returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
     @GetMapping("/{registration}")
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> getAircraftByRegistrationNumber(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
             @PathVariable RegistrationNumber registration) {
 
         ViewAircraftDetailsResponse aircraft = viewAircraftDetails.execute(registration);
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
+    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
     @GetMapping("/search")
     public ResponseEntity<PagedModel<EntityModel<SearchAircraftUseCaseResponse>>> searchAircrafts(
-            @RequestParam(required = false) Long modelId,
-            @RequestParam(required = false) AircraftStatus status,
-            @RequestParam(required = false) Integer year,
+            @Parameter(description = "Filter by technical model identification number") @RequestParam(required = false) Long modelId,
+            @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
+            @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
             @PageableDefault(size = 20) Pageable pageable) {
 
         Page<SearchAircraftUseCaseResponse> results = searchAircraft.execute(modelId, status, year, pageable);
@@ -95,10 +129,19 @@ public class AircraftController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    @Operation(summary = "Update aircraft operational status", description = "Updates the status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aircraft status updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid status configuration or missing required parameters"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft profile not found"),
+            @ApiResponse(responseCode = "409", description = "Conflict detected — The resource version has changed or matches a concurrency collision state")
+    })
     @PatchMapping("/{registration}/status")
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftStatus(
-            @PathVariable RegistrationNumber registration,
-            @RequestHeader(value = "If-Match") Long version,
+            @Parameter(description = "Registration identification key of the target aircraft") @PathVariable RegistrationNumber registration,
+            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match") Long version,
             @Valid @RequestBody UpdateStatusRequest request) {
 
         ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);

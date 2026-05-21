@@ -1,8 +1,10 @@
 package aisafe.maintenance.application;
 
 import aisafe.UseCase;
+import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
 import aisafe.maintenance.domain.*;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -12,31 +14,37 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UpdateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
-    private final MaintenancePartRepository partRepository;
-    private final MaintenanceTemplateRepository templateRepository;
 
-    public UpdateMaintenanceRecordUseCase(MaintenanceRecordRepository recordRepository, MaintenancePartRepository partRepository, MaintenanceTemplateRepository templateRepository) {
+    public UpdateMaintenanceRecordUseCase(MaintenanceRecordRepository recordRepository) {
         this.recordRepository = recordRepository;
-        this.partRepository = partRepository;
-        this.templateRepository = templateRepository;
     }
 
-    public MaintenanceRecord execute(UpdateMaintenanceRecordsRequest request) {
-        MaintenancePart part = partRepository.findByPartNumber(request.part())
-                .orElseThrow(() -> new MaintenancePartNotFoundException("Part '" + request.part() + "' not found."));
-        MaintenanceTemplate template = templateRepository.findByName(request.template())
-                .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Template '" + request.template() + "' not found."));
+    public MaintenanceRecordResponse execute(Long id, UpdateMaintenanceRecordsRequest request, Long clientVersion) {
         if (request.status() == null) {
             throw new MaintenanceInvalidFieldException("Status cannot be empty.");
         }
-        if (request.notes() == null || request.notes().trim().isEmpty()) {
-            throw new MaintenanceInvalidFieldException("Notes cannot be empty.");
-        }
-        MaintenanceRecord record = recordRepository.findByStartDateAndPartAndTemplate(request.startDate(),part,template)
-                .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record with the specified start date, part, and template not found."));
-        record.setStatus(request.status());
-        record.setNotes(request.notes());
-        return recordRepository.save(record);
-    }
 
+        MaintenanceRecord record = recordRepository.findById(id)
+                .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record with ID " + id + " not found."));
+
+        // Verificação de Concorrência
+        if (!record.getVersion().equals(clientVersion)) {
+            throw new ObjectOptimisticLockingFailureException(MaintenanceRecord.class, record.getId());
+        }
+
+        record.setStatus(request.status());
+        if (request.notes() != null && !request.notes().trim().isEmpty()) {
+            record.setNotes(request.notes());
+        }
+
+        MaintenanceRecord updatedRecord = recordRepository.save(record);
+
+        return new MaintenanceRecordResponse(
+                updatedRecord.getId(), updatedRecord.getDescription(), updatedRecord.getStartDate(),
+                updatedRecord.getExpectedDuration(), updatedRecord.getNotes(),
+                updatedRecord.getPart().getPartNumber(), updatedRecord.getTemplate().getName(),
+                updatedRecord.getStatus().name(), updatedRecord.getAircraft().getRegistrationNumber().getNumber(),
+                updatedRecord.getVersion()
+        );
+    }
 }
