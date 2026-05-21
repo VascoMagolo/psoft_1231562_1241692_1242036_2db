@@ -8,9 +8,9 @@ import java.util.List;
 
 @Schema(description = "Request body for registering a new airport")
 public record RegisterAirportRequest(
-        @Schema(description = "3-letter IATA airport code", example = "LIS")
+        @Schema(description = "3-character IATA airport code (letters or digits)", example = "LIS")
         @NotBlank(message = "IATA code is required")
-        @Pattern(regexp = "[A-Za-z]{3}", message = "IATA code must be exactly 3 letters")
+        @Pattern(regexp = "[A-Za-z0-9]{3}", message = "IATA code must be exactly 3 alphanumeric characters")
         String iataCode,
 
         @Schema(description = "Official airport name", example = "Lisbon Humberto Delgado Airport")

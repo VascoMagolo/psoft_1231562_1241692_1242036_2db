@@ -1,9 +1,10 @@
 package aisafe.airports.application;
 
-import aisafe.DomainException;
+import aisafe.DuplicateResourceException;
 import aisafe.UseCase;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.application.dtos.AddCertificationRequest;
 import aisafe.airports.application.dtos.AircraftCertificationResponse;
 import aisafe.airports.domain.Airport;
@@ -31,10 +32,10 @@ public class AddAirportCertificationUseCase {
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
 
         AircraftModel model = aircraftModelRepository.findById(request.aircraftModelId())
-                .orElseThrow(() -> new DomainException("Aircraft model with id '" + request.aircraftModelId() + "' not found."));
+                .orElseThrow(() -> new AircraftNotFoundException("Aircraft model with id '" + request.aircraftModelId() + "' not found."));
 
         if (certificationRepository.existsByAirportAndAircraftModelId(airport, request.aircraftModelId())) {
-            throw new DomainException("Aircraft model '" + model.getModelName() + "' is already certified for airport " + iataCode + ".");
+            throw new DuplicateResourceException("Aircraft model '" + model.getModelName() + "' is already certified for airport " + iataCode + ".");
         }
 
         return AircraftCertificationResponse.from(certificationRepository.save(new AircraftCertification(airport, model)));

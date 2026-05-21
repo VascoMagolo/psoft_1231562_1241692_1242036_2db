@@ -55,10 +55,12 @@ public class GlobalExceptionHandler {
     }
 
     /** 409 Conflict - duplicated information */
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConflict (DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("A resource with the given unique identifier already exists."));
+    @ExceptionHandler({DataIntegrityViolationException.class, DuplicateResourceException.class})
+    public ResponseEntity<ErrorResponse> handleConflict(RuntimeException ex) {
+        String msg = ex instanceof DuplicateResourceException
+                ? ex.getMessage()
+                : "A resource with the given unique identifier already exists.";
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(msg));
     }
 
     /** 403 Forbidden - Token is valid, but user doesnt have needed role */
