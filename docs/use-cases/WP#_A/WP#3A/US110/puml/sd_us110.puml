@@ -13,14 +13,14 @@ activate Ctrl
 Ctrl -> UC : execute(routeData)
 activate UC
 
-UC -> AirRepo : existsByIataCode(origin)
+UC -> AirRepo : existsByIataCodeCode(origin)
 activate AirRepo
 AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
 DB --> AirRepo : true/false
 AirRepo --> UC : boolean
 deactivate AirRepo
 
-UC -> AirRepo : existsByIataCode(destination)
+UC -> AirRepo : existsByIataCodeCode(destination)
 activate AirRepo
 AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
 DB --> AirRepo : true/false
