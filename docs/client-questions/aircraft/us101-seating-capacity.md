@@ -23,3 +23,5 @@ We are wondering if this is needed to prevent data entry errors (e.g.: if an Ope
 Thank you.
 
 ### Sub-answer
+
+Apologies for the delay. Yes. The seating capacity defined in the Aircraft Model represents the maximum structural capacity. This should be used to validate seating configurations.
