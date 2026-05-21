@@ -6,7 +6,7 @@
 
 ## Functional
 
-Functional requirements are captured as User Stories and documented in [`docs/system-documentation/use-cases/`](../use-cases/).
+Functional requirements are captured as User Stories and documented in [`docs/use-cases/`](../../use-cases/).
 
 Key domain constraints derived from client clarifications:
 
@@ -16,7 +16,6 @@ Key domain constraints derived from client clarifications:
 - Aircraft state transitions (e.g., to `IN_FLIGHT`) are manual operations, to be implemented in a future iteration. ([source](../../../client-questions/aircraft/us205-state-transitions.md))
 - Scheduled flight status lifecycle is planned but not yet in scope. ([source](../../../client-questions/flights/us212-scheduled-flight-states.md))
 - Aircraft manufacturers are not managed as entities; they come from a fixed list defined per application version. ([source](../../../client-questions/aircraft/us101-manufacturer-details.md))
-- The seating capacity on an Aircraft Model represents the maximum structural capacity; individual aircraft instances may have a lower configured seat count, but it must never exceed this limit. ([source](../../../client-questions/aircraft/us101-seating-capacity.md))
 - Maintenance part inventory is managed manually by the Maintenance Supervisor; automatic deduction on use is out of scope. ([source](../../../client-questions/maintenance/us226-part-relationships.md))
 - Maintenance check triggers are manual (user-initiated), not automatic or scheduled. ([source](../../../client-questions/maintenance/us222-maintenance-triggers.md))
 
