@@ -3,8 +3,8 @@ autonumber
 actor "Backoffice Operator / ATCC" as Actor
 participant "System" as Sys
 
-Actor -> Sys : addAirplaneCertification(iataCode, aircraftModelId)
+Actor -> Sys : addAircraftCertification(iataCode, aircraftModelId)
 activate Sys
-Sys --> Actor : returns created AirplaneCertification details
+Sys --> Actor : returns created AircraftCertification details
 deactivate Sys
 @enduml

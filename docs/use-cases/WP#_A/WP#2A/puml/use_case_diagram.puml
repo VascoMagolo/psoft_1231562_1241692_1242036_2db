@@ -7,7 +7,7 @@ actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
 
 rectangle "Airport Management (WP #2A)" {
   usecase "US106 - Register an airport" as UC106
-  usecase "US106a - Add airplane certification to airport" as UC106a
+  usecase "US106a - Add aircraft certification to airport" as UC106a
   usecase "US107 - View airport details" as UC107
   usecase "US108 - Search for airports" as UC108
   usecase "US109 - Update airport operational status" as UC109

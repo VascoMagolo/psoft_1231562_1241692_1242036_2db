@@ -33,7 +33,8 @@ public class User implements UserDetails {
     @Setter
     private Role role;
 
-    protected User() {}
+    protected User() {
+    }
 
     public User(String username, String passwordHash, Role role) {
         Assert.hasText(username, "username must not be blank");
@@ -59,15 +60,28 @@ public class User implements UserDetails {
         return this.username;
     }
 
-    public boolean isAccountNonExpired() { return true; }
-    public boolean isAccountNonLocked() { return true; }
-    public boolean isCredentialsNonExpired() { return true; }
-    public boolean isEnabled() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         User user = (User) o;
         return Objects.equals(userID, user.userID);
     }

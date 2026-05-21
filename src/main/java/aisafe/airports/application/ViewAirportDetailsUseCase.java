@@ -1,7 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.UseCase;
-import aisafe.airports.domain.Airport;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 
@@ -13,8 +13,10 @@ public class ViewAirportDetailsUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public Airport execute(String iataCode) {
-        return airportRepository.findByIataCodeCode(iataCode)
-                .orElseThrow(() -> new AirportNotFoundException(iataCode));
+    public AirportResponse execute(String iataCode) {
+        return AirportResponse.from(
+                airportRepository.findByIataCodeCode(iataCode)
+                        .orElseThrow(() -> new AirportNotFoundException(iataCode))
+        );
     }
 }

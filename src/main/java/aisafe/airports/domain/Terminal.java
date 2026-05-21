@@ -1,4 +1,4 @@
-package aisafe.model.valueObject;
+package aisafe.airports.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -12,8 +12,9 @@ public class Terminal {
 
     protected Terminal() {}
 
-    public Terminal(String name){
-        if (name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Terminal name cannot be empty");
+    public Terminal(String name) {
+        if (name == null || name.trim().isEmpty())
+            throw new IllegalArgumentException("Terminal name cannot be empty");
         this.name = name;
     }
 }

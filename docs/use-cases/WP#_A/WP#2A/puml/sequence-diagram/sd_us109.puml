@@ -10,6 +10,8 @@ database "Database" as DB
 BO -> Ctrl : PATCH /api/airports/{iataCode}/status (JSON)
 activate Ctrl
 
+note right of Ctrl : @Valid validates\nstatus is not null
+
 Ctrl -> UC : execute(iataCode, status)
 activate UC
 
@@ -29,16 +31,23 @@ deactivate Entity
 
 UC -> Repo : save(airport)
 activate Repo
-Repo -> DB : UPDATE airport SET status = ?
+Repo -> DB : UPDATE airport SET status = ? WHERE id = ? AND version = ?
 activate DB
-DB --> Repo : updated record
-deactivate DB
-Repo --> UC : updatedAirport
-deactivate Repo
 
-UC --> Ctrl : updatedAirport
-deactivate UC
+alt No concurrent modification (version matches)
+  DB --> Repo : updated record (version incremented)
+  deactivate DB
+  Repo --> UC : updatedAirport
+  deactivate Repo
+  UC --> Ctrl : AirportResponse
+  deactivate UC
+  Ctrl --> BO : 200 OK (JSON with _links)
+else Concurrent modification detected (version mismatch)
+  DB --> Repo : 0 rows affected
+  Repo --> UC : throws ObjectOptimisticLockingFailureException
+  UC --> Ctrl : exception propagates
+  Ctrl --> BO : 409 Conflict
+end
 
-Ctrl --> BO : 200 OK (JSON)
 deactivate Ctrl
 @enduml

@@ -1,5 +1,7 @@
 package aisafe.airports.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,9 +20,10 @@ public interface AirportRepository extends JpaRepository<Airport, Long> {
            "(:name IS NULL OR LOWER(a.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
            "(:city IS NULL OR LOWER(a.city) LIKE LOWER(CONCAT('%', :city, '%'))) AND " +
            "(:country IS NULL OR LOWER(a.country) LIKE LOWER(CONCAT('%', :country, '%')))")
-    List<Airport> searchAirports(@Param("name") String name,
+    Page<Airport> searchAirports(@Param("name") String name,
                                  @Param("city") String city,
-                                 @Param("country") String country);
+                                 @Param("country") String country,
+                                 Pageable pageable);
 
     List<Airport> findAllByCountry(String country);
 
