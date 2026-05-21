@@ -11,6 +11,8 @@ database "Database" as DB
 Actor -> Ctrl : POST /api/airports/{iataCode}/certifications (JSON)
 activate Ctrl
 
+note right of Ctrl : @Valid validates\naircraftModelId is not null
+
 Ctrl -> UC : execute(iataCode, request)
 activate UC
 
@@ -53,6 +55,6 @@ deactivate CertRepo
 UC --> Ctrl : AircraftCertificationResponse
 deactivate UC
 
-Ctrl --> Actor : 201 Created (JSON)
+Ctrl --> Actor : 201 Created (JSON with _links)
 deactivate Ctrl
 @enduml

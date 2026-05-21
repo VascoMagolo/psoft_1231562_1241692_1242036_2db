@@ -6,24 +6,24 @@ participant "SearchAirportUseCase" as UC
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/airports/search?name=X&city=Y&country=Z
+ATCC -> Ctrl : GET /api/airports/search?name=X&city=Y&country=Z&page=0&size=20
 activate Ctrl
 
-Ctrl -> UC : execute(name, city, country)
+Ctrl -> UC : execute(name, city, country, pageable)
 activate UC
 
-UC -> Repo : searchAirports(name, city, country)
+UC -> Repo : searchAirports(name, city, country, pageable)
 activate Repo
-Repo -> DB : SELECT FROM airport WHERE name LIKE ? AND city LIKE ? AND country LIKE ? (Dynamic Query)
+Repo -> DB : SELECT FROM airport WHERE name LIKE ? AND city LIKE ? AND country LIKE ?\n(Dynamic Query with LIMIT/OFFSET)
 activate DB
-DB --> Repo : list of records
+DB --> Repo : page of records
 deactivate DB
-Repo --> UC : List<Airport>
+Repo --> UC : Page<Airport>
 deactivate Repo
 
-UC --> Ctrl : List<AirportResponse>
+UC --> Ctrl : Page<AirportResponse>
 deactivate UC
 
-Ctrl --> ATCC : 200 OK (JSON Array)
+Ctrl --> ATCC : 200 OK (JSON Page with content[], totalElements, totalPages, number, size)
 deactivate Ctrl
 @enduml

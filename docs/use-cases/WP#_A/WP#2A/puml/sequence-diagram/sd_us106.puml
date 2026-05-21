@@ -10,12 +10,13 @@ database "Database" as DB
 BO -> Ctrl : POST /api/airports (JSON)
 activate Ctrl
 
+note right of Ctrl : @Valid validates IATA format,\nnon-blank fields, coordinate\nranges, at least one runway
+
 Ctrl -> UC : execute(request)
 activate UC
 
 UC -> Entity : new Airport(iataCode, name, city, country, region, timezone, lat, lon, runways)
 activate Entity
-note right of Entity : Validates IATA format,\nnon-blank fields, coordinate\nranges, at least one runway
 Entity --> UC : airport
 deactivate Entity
 
@@ -31,6 +32,6 @@ deactivate Repo
 UC --> Ctrl : AirportResponse
 deactivate UC
 
-Ctrl --> BO : 201 Created (JSON)
+Ctrl --> BO : 201 Created (JSON with _links)
 deactivate Ctrl
 @enduml

@@ -23,7 +23,7 @@ deactivate Repo
 
 alt Airport found
   UC --> Ctrl : AirportResponse
-  Ctrl --> Actor : 200 OK (JSON)
+  Ctrl --> Actor : 200 OK (JSON with _links)
 else Airport not found
   UC --> Ctrl : throws AirportNotFoundException
   Ctrl --> Actor : 404 Not Found

@@ -40,6 +40,6 @@ deactivate Repo
 UC --> Ctrl : AirportResponse
 deactivate UC
 
-Ctrl --> BO : 200 OK (JSON)
+Ctrl --> BO : 200 OK (JSON with _links)
 deactivate Ctrl
 @enduml
