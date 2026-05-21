@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "RouteController" as Ctrl
+participant "SearchRoutesUseCase" as UC
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/routes/search?origin=...&dest=...
+activate Ctrl
+
+Ctrl -> UC : execute(searchCriteria)
+activate UC
+
+UC -> Repo : searchRoutes(origin, destination)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE origin = ? AND destination = ?
+activate DB
+DB --> Repo : list of route records
+deactivate DB
+Repo --> UC : List<Route>
+deactivate Repo
+
+UC --> Ctrl : List<Route>
+Ctrl --> Actor : 200 OK (JSON Array)
+
+deactivate UC
+deactivate Ctrl
+@enduml

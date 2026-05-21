@@ -1,0 +1,39 @@
+@startuml
+autonumber
+actor "ATCC / Backoffice Operator" as Actor
+participant "RouteController" as Ctrl
+participant "UpdateRouteUseCase" as UC
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : PATCH /api/routes/{id} (updateData)
+activate Ctrl
+
+Ctrl -> UC : execute(id, updateData)
+activate UC
+
+UC -> Repo : findById(id)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE id = ?
+DB --> Repo : route record
+Repo --> UC : Optional<Route>
+deactivate Repo
+
+alt Route found
+    UC -> UC : applyUpdates(updateData)
+    UC -> Repo : save(updatedRoute)
+    activate Repo
+    Repo -> DB : UPDATE route SET ... WHERE id = ?
+    DB --> Repo : success
+    Repo --> UC : Route
+    deactivate Repo
+    UC --> Ctrl : Route
+    Ctrl --> Actor : 200 OK
+else Route not found
+    UC --> Ctrl : throws RouteNotFoundException
+    Ctrl --> Actor : 404 Not Found
+end
+
+deactivate UC
+deactivate Ctrl
+@enduml

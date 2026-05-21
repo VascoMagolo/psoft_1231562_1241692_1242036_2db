@@ -1,0 +1,52 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "RouteController" as Ctrl
+participant "ViewRouteDetailsUseCase" as UC
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+== View details by ID ==
+Actor -> Ctrl : GET /api/routes/{id}
+activate Ctrl
+
+Ctrl -> UC : getById(id)
+activate UC
+
+UC -> Repo : findById(id)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE id = ?
+activate DB
+DB --> Repo : record
+deactivate DB
+Repo --> UC : Optional<Route>
+deactivate Repo
+
+alt Route found
+  UC --> Ctrl : Route
+  Ctrl --> Actor : 200 OK
+else Route not found
+  UC --> Ctrl : throws RouteNotFoundException
+  Ctrl --> Actor : 404 Not Found
+end
+deactivate UC
+deactivate Ctrl
+
+== View all routes from a specific airport ==
+Actor -> Ctrl : GET /api/routes?origin={iataCode}
+activate Ctrl
+Ctrl -> UC : getByOrigin(iataCode)
+activate UC
+UC -> Repo : findByOriginCode(iataCode)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE origin_code = ?
+activate DB
+DB --> Repo : records
+deactivate DB
+Repo --> UC : List<Route>
+deactivate Repo
+UC --> Ctrl : List<Route>
+Ctrl --> Actor : 200 OK
+deactivate UC
+deactivate Ctrl
+@enduml

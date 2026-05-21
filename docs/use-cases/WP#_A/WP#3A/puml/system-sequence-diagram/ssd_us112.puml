@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC / Backoffice Operator" as Actor
+participant "System" as Sys
+
+Actor -> Sys : updateRoute(routeId, status, updatedDetails)
+activate Sys
+Sys --> Actor : returns updated Route details
+deactivate Sys
+@enduml
