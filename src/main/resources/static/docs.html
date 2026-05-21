@@ -104,6 +104,20 @@
     .grp-body { display: none; }
     .grp-body.open { display: block; }
 
+    .sub-btn {
+      width: 100%; background: none; border: none; cursor: pointer;
+      padding: 5px 14px 5px 40px; display: flex; align-items: center; gap: 5px;
+      font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+      text-align: left; transition: background .12s, color .12s; letter-spacing: 0.03em;
+    }
+    .sub-btn:hover { background: var(--bg-hover); color: var(--text); }
+    .sub-btn.open { color: var(--text); }
+    .sub-btn .caret { width: 8px; height: 8px; flex-shrink: 0; transition: transform .2s; opacity: .35; }
+    .sub-btn.open .caret { transform: rotate(90deg); opacity: .7; }
+    .sub-body { display: none; }
+    .sub-body.open { display: block; }
+    .sub-body .fi { padding-left: 54px; }
+
     .fi {
       width: 100%; background: none; border: none; cursor: pointer;
       padding: 5px 14px 5px 42px; display: flex; align-items: center; gap: 7px;
@@ -346,7 +360,7 @@ function parsePaths(paths) {
     const ext  = rawPath.split('.').pop().toLowerCase();
     const type = ['md','svg','pdf','json'].includes(ext) ? ext : null;
     if (!type) return;
-    let sectionKey, sectionLabel, groupKey, groupMeta, fileName;
+    let sectionKey, sectionLabel, groupKey, groupMeta, fileName, subgroupKey;
 
     if (type === 'md') {
       fileName = parts[parts.length - 1];
@@ -359,8 +373,13 @@ function parsePaths(paths) {
         groupMeta = MD_GROUPS[parts[1]] || { label: parts[1].replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), short: parts[1].slice(0,4).toUpperCase() };
       } else if (parts[0] === 'system-documentation') {
         sectionKey = 'system-documentation'; sectionLabel = MD_SECTIONS['system-documentation'];
-        groupKey = parts[1] || '__root__';
-        groupMeta = MD_GROUPS[groupKey] || { label: groupKey.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), short: groupKey.slice(0,4).toUpperCase() };
+        if (parts[1] === 'use-cases' && parts.length > 3) {
+          groupKey = parts[2];
+          groupMeta = { label: groupKey, short: groupKey.replace('WP', '') };
+        } else {
+          groupKey = parts[1] || '__root__';
+          groupMeta = MD_GROUPS[groupKey] || { label: groupKey.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), short: groupKey.slice(0,4).toUpperCase() };
+        }
       } else {
         sectionKey = parts[0]; sectionLabel = parts[0].replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
         groupKey = '__root__'; groupMeta = MD_GROUPS['__root__'];
@@ -370,13 +389,33 @@ function parsePaths(paths) {
       if (svgIdx === -1) return;
       const afterSvg = parts.slice(svgIdx + 1);
       fileName = afterSvg[afterSvg.length - 1];
-      groupKey = afterSvg.length > 1 ? afterSvg[0] : '__root__';
-      groupMeta = SVG_GROUPS[groupKey] || { label: groupKey, short: groupKey };
-      if (parts[0] === 'use-cases') {
-        sectionKey = parts[2]; sectionLabel = parts[2];
+      if (afterSvg.length > 1) {
+        groupKey = afterSvg[0];
       } else {
-        sectionKey = parts[1] || parts[0];
-        sectionLabel = sectionKey.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        const fn = afterSvg[0].toLowerCase();
+        groupKey = fn.startsWith('ssd_') ? 'system-sequence-diagram'
+                 : fn.startsWith('sd_')  ? 'sequence-diagram'
+                 : '__root__';
+      }
+      const ucIdx = parts.indexOf('use-cases');
+      if (ucIdx !== -1) {
+        sectionKey = 'system-documentation'; sectionLabel = MD_SECTIONS['system-documentation'];
+        groupKey = parts[ucIdx + 1];
+        groupMeta = { label: groupKey, short: groupKey.replace('WP', '') };
+        const fn = fileName.toLowerCase();
+        subgroupKey = fn.startsWith('ssd_') ? 'system-sequence-diagram'
+                    : fn.startsWith('sd_')  ? 'sequence-diagram'
+                    : 'use-case-diagram';
+      } else {
+        sectionKey = parts[0];
+        sectionLabel = MD_SECTIONS[sectionKey] || sectionKey.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        const subFolder = parts.length > 2 && parts[1] !== 'svg' ? parts[1] : null;
+        if (subFolder) {
+          groupKey = subFolder;
+          groupMeta = MD_GROUPS[subFolder] || { label: subFolder.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), short: subFolder.slice(0,4).toUpperCase() };
+        } else {
+          groupMeta = SVG_GROUPS[groupKey] || { label: groupKey, short: groupKey };
+        }
       }
     } else {
       fileName = parts[parts.length - 1];
@@ -390,11 +429,30 @@ function parsePaths(paths) {
     }
 
     if (!sections[sectionKey]) sections[sectionKey] = { id: sectionKey, label: sectionLabel, groups: {} };
-    if (!sections[sectionKey].groups[groupKey]) sections[sectionKey].groups[groupKey] = { id: groupKey, ...groupMeta, files: [] };
-    sections[sectionKey].groups[groupKey].files.push({ id: fileName, label: fileLabel(fileName), path, type });
+    if (!sections[sectionKey].groups[groupKey]) sections[sectionKey].groups[groupKey] = { id: groupKey, ...groupMeta, files: [], subgroups: {} };
+    const displayName = (fileName.toLowerCase() === 'readme.md' && parts.length >= 2) ? parts[parts.length - 2] : fileName;
+    const fileObj = { id: fileName, label: fileLabel(displayName), path, type };
+    if (subgroupKey) {
+      const subs = sections[sectionKey].groups[groupKey].subgroups;
+      const SUBGROUP_LABELS = {
+        'sequence-diagram':        { label: 'Sequence Diagrams',        short: 'SD'  },
+        'system-sequence-diagram': { label: 'System Sequence Diagrams', short: 'SSD' },
+        'use-case-diagram':        { label: 'Use Case Diagram',         short: 'UCD' },
+      };
+      if (!subs[subgroupKey]) subs[subgroupKey] = { id: subgroupKey, ...SUBGROUP_LABELS[subgroupKey], files: [] };
+      subs[subgroupKey].files.push(fileObj);
+    } else {
+      sections[sectionKey].groups[groupKey].files.push(fileObj);
+    }
   });
 
-  return Object.values(sections).map(s => ({ ...s, groups: Object.values(s.groups) }));
+  return Object.values(sections).map(s => ({
+    ...s,
+    groups: Object.values(s.groups).map(g => ({
+      ...g,
+      subgroups: Object.keys(g.subgroups).length ? Object.values(g.subgroups) : null
+    }))
+  }));
 }
 
 function escHtml(s) {
@@ -591,7 +649,10 @@ function buildTree(tree) {
   const root = document.getElementById('tree');
   root.innerHTML = '';
   tree.forEach(section => {
-    const totalFiles = section.groups.reduce((n, g) => n + g.files.length, 0);
+    const totalFiles = section.groups.reduce((n, g) => {
+      const sub = g.subgroups ? g.subgroups.reduce((s, sg) => s + sg.files.length, 0) : 0;
+      return n + g.files.length + sub;
+    }, 0);
     const block = document.createElement('div');
     block.className = 'wp-block';
 
@@ -623,6 +684,28 @@ function buildTree(tree) {
         fileRegistry.set(f.path, { f, section, grp, btn });
         grpBody.appendChild(btn);
       });
+
+      if (grp.subgroups) {
+        grp.subgroups.forEach(sub => {
+          const subBtn = document.createElement('button');
+          subBtn.className = 'sub-btn open';
+          subBtn.innerHTML = `${caret(8)}<span>${sub.label}</span>`;
+          const subBody = document.createElement('div');
+          subBody.className = 'sub-body open';
+          subBtn.onclick = () => { subBtn.classList.toggle('open'); subBody.classList.toggle('open'); };
+          sub.files.forEach(f => {
+            const btn = document.createElement('button');
+            btn.className = 'fi';
+            btn.dataset.id = f.id;
+            btn.innerHTML = `<div class="fi-dot"></div><span class="fi-label">${f.label}</span>`;
+            btn.onclick = () => load(f, section, grp, btn);
+            fileRegistry.set(f.path, { f, section, grp, btn });
+            subBody.appendChild(btn);
+          });
+          grpBody.appendChild(subBtn);
+          grpBody.appendChild(subBody);
+        });
+      }
 
       wpBody.appendChild(grpBtn);
       wpBody.appendChild(grpBody);

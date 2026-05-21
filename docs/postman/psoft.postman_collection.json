@@ -128,7 +128,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX\",\r\n    \"manufacturer\": \"Boeing\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
+              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX\",\r\n    \"manufacturer\": \"Boeing\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"maximumSeatingCapacity\": 230,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
