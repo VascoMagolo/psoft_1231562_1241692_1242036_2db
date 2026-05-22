@@ -1,7 +1,6 @@
 package aisafe.maintenance.application;
 
 import aisafe.UseCase;
-import aisafe.maintenance.application.dtos.ViewAllMaintenanceRecordsResponse;
 import aisafe.maintenance.application.dtos.ViewTotalMaintenanceHoursinFleetResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;

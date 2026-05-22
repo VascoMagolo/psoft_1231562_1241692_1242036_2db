@@ -1,0 +1,86 @@
+@startuml
+autonumber
+actor "ATCC / Backoffice Operator" as Actor
+participant "RouteController" as Ctrl
+participant "UpdateRouteUseCase" as UpdateUC
+participant "DesactivateRouteUseCase" as DeactivateUC
+participant "RouteRepository" as Repo
+participant "RouteHistoryRepository" as HistoryRepo
+database "Database" as DB
+
+alt Update route details
+Actor -> Ctrl : PUT /api/routes/{id} (updateData)
+activate Ctrl
+
+Ctrl -> UpdateUC : execute(id, updateData)
+activate UpdateUC
+
+UpdateUC -> Repo : findById(id)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE id = ?
+DB --> Repo : route record
+Repo --> UpdateUC : Optional<Route>
+deactivate Repo
+
+alt Route found
+    UpdateUC -> UpdateUC : applyUpdates(updateData)
+    UpdateUC -> Repo : save(updatedRoute)
+    activate Repo
+    Repo -> DB : UPDATE route SET ... WHERE id = ?
+    DB --> Repo : success
+    Repo --> UpdateUC : Route
+    deactivate Repo
+    UpdateUC -> HistoryRepo : save(historyEntry)
+    activate HistoryRepo
+    HistoryRepo -> DB : INSERT INTO route_history (...)
+    DB --> HistoryRepo : success
+    HistoryRepo --> UpdateUC : RouteHistory
+    deactivate HistoryRepo
+    UpdateUC --> Ctrl : Route
+    Ctrl --> Actor : 200 OK
+else Route not found
+    UpdateUC --> Ctrl : throws RouteNotFoundException
+    Ctrl --> Actor : 404 Not Found
+end
+
+deactivate UpdateUC
+deactivate Ctrl
+else Deactivate route
+Actor -> Ctrl : PATCH /api/routes/{id}/deactivate
+activate Ctrl
+
+Ctrl -> DeactivateUC : execute(id)
+activate DeactivateUC
+
+DeactivateUC -> Repo : findById(id)
+activate Repo
+Repo -> DB : SELECT FROM route WHERE id = ?
+DB --> Repo : route record
+Repo --> DeactivateUC : Optional<Route>
+deactivate Repo
+
+alt Route found
+    DeactivateUC -> DeactivateUC : mark route inactive
+    DeactivateUC -> Repo : save(deactivatedRoute)
+    activate Repo
+    Repo -> DB : UPDATE route SET active = false WHERE id = ?
+    DB --> Repo : success
+    Repo --> DeactivateUC : Route
+    deactivate Repo
+    DeactivateUC -> HistoryRepo : save(historyEntry)
+    activate HistoryRepo
+    HistoryRepo -> DB : INSERT INTO route_history (...)
+    DB --> HistoryRepo : success
+    HistoryRepo --> DeactivateUC : RouteHistory
+    deactivate HistoryRepo
+    DeactivateUC --> Ctrl : Route
+    Ctrl --> Actor : 200 OK
+else Route not found
+    DeactivateUC --> Ctrl : throws RouteNotFoundException
+    Ctrl --> Actor : 404 Not Found
+end
+
+deactivate DeactivateUC
+deactivate Ctrl
+end
+@enduml

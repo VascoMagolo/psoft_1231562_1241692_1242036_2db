@@ -1,0 +1,46 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "RouteController" as Ctrl
+participant "CreateRouteUseCase" as UC
+participant "AirportRepository" as AirRepo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+Actor -> Ctrl : POST /api/routes (origin, destination, time, etc.)
+activate Ctrl
+
+Ctrl -> UC : execute(routeData)
+activate UC
+
+UC -> AirRepo : existsByIataCodeCode(origin)
+activate AirRepo
+AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
+DB --> AirRepo : true/false
+AirRepo --> UC : boolean
+deactivate AirRepo
+
+UC -> AirRepo : existsByIataCodeCode(destination)
+activate AirRepo
+AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
+DB --> AirRepo : true/false
+AirRepo --> UC : boolean
+deactivate AirRepo
+
+alt Both Airports Exist
+    UC -> RouteRepo : save(newRoute)
+    activate RouteRepo
+    RouteRepo -> DB : INSERT INTO route (...)
+    DB --> RouteRepo : success
+    RouteRepo --> UC : Route
+    deactivate RouteRepo
+    UC --> Ctrl : Route
+    Ctrl --> Actor : 201 Created
+else Airport Not Found
+    UC --> Ctrl : throws AirportNotFoundException
+    Ctrl --> Actor : 404 Not Found
+end
+
+deactivate UC
+deactivate Ctrl
+@enduml

@@ -2,43 +2,56 @@ package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Registers a new aircraft after resolving its model, checking seat capacity
- * limits, and ensuring the registration number is unique.
- */
 @UseCase
 @Transactional
 public class RegisterAircraftUseCase {
-    private final AircraftRepository repository;
+
+    private final AircraftRepository aircraftRepository;
     private final AircraftModelRepository modelRepository;
 
-    public RegisterAircraftUseCase(AircraftRepository repository, AircraftModelRepository modelRepository) {
-        this.repository = repository;
+    public RegisterAircraftUseCase(AircraftRepository aircraftRepository, AircraftModelRepository modelRepository) {
+        this.aircraftRepository = aircraftRepository;
         this.modelRepository = modelRepository;
     }
 
-    public Aircraft execute(RegisterAircraftRequest request) {
-        AircraftModel model = modelRepository.findByModelName(request.modelName())
-                .orElseThrow(
-                        () -> new AircraftModelNotFoundException("Model '" + request.modelName() + "' not found."));
+    public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
+        AircraftModel model = modelRepository.findById(request.modelId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Model ID"));
+
+        RegistrationNumber regNum = new RegistrationNumber(request.registrationNumber());
+
+        if (aircraftRepository.existsByRegistrationNumber(regNum)) {
+            throw new AircraftAlreadyExistsException("Registration number already exists");
+        }
+        if (!AircraftStatus.isValid(request.status())) {
+            throw new AircraftInvalidFieldException("Invalid status value: " + request.status());
+        }
+        if (request.seatCapacity() > model.getMaximumSeatingCapacity()) {
+            throw new AircraftInvalidFieldException("Seat capacity cannot exceed model's maximum seating capacity");
+        }
         Aircraft aircraft = new Aircraft(
-                request.status(),
+                AircraftStatus.valueOf(request.status().toUpperCase()),
                 request.manufacturingDate(),
                 model,
-                request.registrationNumber(),
+                regNum,
                 request.seatCapacity(),
-                request.features());
-        if (aircraft.getSeatCapacity() > model.getMaximumSeatingCapacity()) {
-            throw new AircraftInvalidFieldException(
-                    "Seat capacity cannot exceed the maximum seating capacity of the model.");
-        }
-        if (repository.existsByRegistrationNumber(aircraft.getRegistrationNumber())) {
-            throw new AircraftAlreadyExistsException(
-                    "An aircraft with registration number '" + aircraft.getRegistrationNumber() + "' already exists.");
-        }
-        return repository.save(aircraft);
+                request.features()
+        );
+        Aircraft savedAircraft = aircraftRepository.save(aircraft);
+
+        return new ViewAircraftDetailsResponse(
+                savedAircraft.getRegistrationNumber().getNumber(),
+                savedAircraft.getModel().getModelName(),
+                savedAircraft.getModel().getManufacturer(),
+                savedAircraft.getManufacturingDate(),
+                savedAircraft.getStatus(),
+                savedAircraft.getSeatCapacity(),
+                savedAircraft.getFeatures(),
+                savedAircraft.getVersion()
+        );
     }
 }

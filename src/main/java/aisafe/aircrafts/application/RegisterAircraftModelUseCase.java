@@ -1,13 +1,11 @@
 package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Registers a new aircraft model after ensuring the model name is unique.
- */
 @UseCase
 @Transactional
 public class RegisterAircraftModelUseCase {
@@ -18,7 +16,11 @@ public class RegisterAircraftModelUseCase {
         this.repository = repository;
     }
 
-    public AircraftModel execute(RegisterAircraftModelRequest request) {
+    public AircraftModelResponse execute(RegisterAircraftModelRequest request) {
+        if (repository.existsByModelName(request.modelName())) {
+            throw new AircraftModelAlreadyExistsException("An aircraft model with name '" + request.modelName() + "' already exists.");
+        }
+
         AircraftModel newModel = new AircraftModel(
                 request.modelName(),
                 request.manufacturer(),
@@ -28,9 +30,18 @@ public class RegisterAircraftModelUseCase {
                 request.imagePath(),
                 request.maximumSeatingCapacity()
         );
-        if (repository.existsByModelName(newModel.getModelName())) {
-            throw new AircraftModelAlreadyExistsException("An aircraft model with name '" + newModel.getModelName() + "' already exists.");
-        }
-        return repository.save(newModel);
+
+        AircraftModel savedModel = repository.save(newModel);
+
+        return new AircraftModelResponse(
+                savedModel.getId(),
+                savedModel.getModelName(),
+                savedModel.getManufacturer(),
+                savedModel.getFuelCapacity(),
+                savedModel.getMaxRange(),
+                savedModel.getCruisingSpeed(),
+                savedModel.getImagePath(),
+                savedModel.getMaximumSeatingCapacity()
+        );
     }
 }

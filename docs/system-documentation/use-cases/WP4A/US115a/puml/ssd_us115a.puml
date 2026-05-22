@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as Actor
+participant "System" as Sys
+Actor -> Sys : createMaintenanceRecord(description, startDate, expectedDuration, part, template, status, registrationNumber)
+activate Sys
+Sys --> Actor : returns created MaintenanceRecordResponse
+deactivate Sys
+@enduml
+
+
