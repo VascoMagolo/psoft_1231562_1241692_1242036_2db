@@ -3,7 +3,8 @@ package aisafe.airports.application;
 import aisafe.UseCase;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.entities.Route;
+import aisafe.airports.domain.IataCode;
+import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class ViewAirportRoutesUseCase {
         if (!airportRepository.existsByIataCodeCode(iataCode)) {
             throw new AirportNotFoundException(iataCode);
         }
-        return routeRepository.findByOriginAirportIataCodeCodeOrDestinationAirportIataCodeCode(iataCode, iataCode);
+        IataCode code = new IataCode(iataCode);
+        return routeRepository.findByOriginOrDestination(code, code);
     }
 }

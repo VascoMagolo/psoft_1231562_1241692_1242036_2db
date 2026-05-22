@@ -1,6 +1,6 @@
 package aisafe.routes.domain;
 
-import aisafe.model.valueObject.IataCode;
+import aisafe.airports.domain.IataCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -13,13 +13,13 @@ public class Route {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "code", column = @Column(name = "origin_iata_code"))
+        @AttributeOverride(name = "code", column = @Column(name = "origin_iata_code", length = 3, nullable = false))
     })
     private IataCode origin;
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "code", column = @Column(name = "destination_iata_code"))
+        @AttributeOverride(name = "code", column = @Column(name = "destination_iata_code", length = 3, nullable = false))
     })
     private IataCode destination;
 

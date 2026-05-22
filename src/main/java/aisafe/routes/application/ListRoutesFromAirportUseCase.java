@@ -3,7 +3,7 @@ package aisafe.routes.application;
 import aisafe.UseCase;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.valueObject.IataCode;
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;

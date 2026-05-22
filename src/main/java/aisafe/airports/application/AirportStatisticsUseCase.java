@@ -4,7 +4,7 @@ import aisafe.UseCase;
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.model.entities.Route;
+import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 
 import java.util.Comparator;
@@ -27,12 +27,13 @@ public class AirportStatisticsUseCase {
         List<Route> routes = routeRepository.findAll();
 
         Map<Long, Long> routeCountById = airports.stream()
-                .collect(Collectors.toMap(Airport::getId, airport ->
-                        routes.stream().filter(r ->
-                                (r.getOriginAirport() != null && r.getOriginAirport().getId().equals(airport.getId())) ||
-                                (r.getDestinationAirport() != null && r.getDestinationAirport().getId().equals(airport.getId()))
-                        ).count()
-                ));
+                .collect(Collectors.toMap(Airport::getId, airport -> {
+                    String code = airport.getIataCode().getCode();
+                    return routes.stream().filter(r ->
+                            code.equals(r.getOrigin().getCode()) ||
+                            code.equals(r.getDestination().getCode())
+                    ).count();
+                }));
 
         return airports.stream()
                 .map(a -> new AirportStatisticsResponse(
