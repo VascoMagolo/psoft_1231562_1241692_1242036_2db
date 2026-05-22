@@ -1,9 +1,9 @@
 package aisafe.aircrafts.application;
 
-import aisafe.DomainException;
 import aisafe.UseCase;
-import aisafe.aircrafts.domain.AircraftModel;
-import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
+import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @UseCase
@@ -16,12 +16,32 @@ public class RegisterAircraftModelUseCase {
         this.repository = repository;
     }
 
-    public AircraftModel execute(AircraftModel newModel) {
-        // add more validations later
-        if (newModel.getMaxRange() == null || newModel.getMaxRange() <= 0) {
-            throw new DomainException("Max Range is invalid");
+    public AircraftModelResponse execute(RegisterAircraftModelRequest request) {
+        if (repository.existsByModelName(request.modelName())) {
+            throw new AircraftModelAlreadyExistsException("An aircraft model with name '" + request.modelName() + "' already exists.");
         }
 
-        return repository.save(newModel);
+        AircraftModel newModel = new AircraftModel(
+                request.modelName(),
+                request.manufacturer(),
+                request.fuelCapacity(),
+                request.maxRange(),
+                request.cruisingSpeed(),
+                request.imagePath(),
+                request.maximumSeatingCapacity()
+        );
+
+        AircraftModel savedModel = repository.save(newModel);
+
+        return new AircraftModelResponse(
+                savedModel.getId(),
+                savedModel.getModelName(),
+                savedModel.getManufacturer(),
+                savedModel.getFuelCapacity(),
+                savedModel.getMaxRange(),
+                savedModel.getCruisingSpeed(),
+                savedModel.getImagePath(),
+                savedModel.getMaximumSeatingCapacity()
+        );
     }
 }

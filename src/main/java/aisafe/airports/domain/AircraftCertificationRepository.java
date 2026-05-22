@@ -1,0 +1,13 @@
+package aisafe.airports.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface AircraftCertificationRepository extends JpaRepository<AircraftCertification, Long> {
+    List<AircraftCertification> findByAirport(Airport airport);
+
+    boolean existsByAirportAndAircraftModelId(Airport airport, Long aircraftModelId);
+}

@@ -9,3 +9,19 @@ Neste sentido, relativamente à capacidade de passageiros, se diferentes aviões
 ## Answer
 
 Aviões, mesmo sendo do mesmo modelo, podem ter capacidades diferentes.
+
+### Sub-question
+
+Hello,
+
+We understand that specific aircrafts of the same model can have different seat configurations. Because of this, the seating capacity will be registered individually for each aircraft.
+
+However, regarding the creation of the Aircraft Model itself (US101), should the model define a "maximum possible seating capacity"?
+
+We are wondering if this is needed to prevent data entry errors (e.g.: if an Operator registers a specific aircraft, should the system verify that the entered seats do not exceed the absolute maximum structural limit defined by that aircraft's model? Or should we assume any number entered by the operator is valid?
+
+Thank you.
+
+### Sub-answer
+
+Apologies for the delay. Yes. The seating capacity defined in the Aircraft Model represents the maximum structural capacity. This should be used to validate seating configurations.

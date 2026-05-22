@@ -1,0 +1,53 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "UpdateAirportStatusUseCase" as UC
+participant "Airport" as Entity
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : PATCH /api/airports/{iataCode}/status (JSON)
+activate Ctrl
+
+note right of Ctrl : @Valid validates\nstatus is not null
+
+Ctrl -> UC : execute(iataCode, status)
+activate UC
+
+UC -> Repo : findByIataCodeCode(iataCode)
+activate Repo
+Repo -> DB : SELECT FROM airport WHERE code = ?
+activate DB
+DB --> Repo : airport record
+deactivate DB
+Repo --> UC : Airport
+deactivate Repo
+
+UC -> Entity : setStatus(status)
+activate Entity
+Entity --> UC
+deactivate Entity
+
+UC -> Repo : save(airport)
+activate Repo
+Repo -> DB : UPDATE airport SET status = ? WHERE id = ? AND version = ?
+activate DB
+
+alt No concurrent modification (version matches)
+  DB --> Repo : updated record (version incremented)
+  deactivate DB
+  Repo --> UC : updatedAirport
+  deactivate Repo
+  UC --> Ctrl : AirportResponse
+  deactivate UC
+  Ctrl --> BO : 200 OK (JSON with _links)
+else Concurrent modification detected (version mismatch)
+  DB --> Repo : 0 rows affected
+  Repo --> UC : throws ObjectOptimisticLockingFailureException
+  UC --> Ctrl : exception propagates
+  Ctrl --> BO : 409 Conflict
+end
+
+deactivate Ctrl
+@enduml

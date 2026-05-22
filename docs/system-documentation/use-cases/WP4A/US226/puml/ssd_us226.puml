@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Supervisor" as Actor
+participant "System" as Sys
+Actor -> Sys : createMaintenancePart(partNumber, name, description, stockQuantity, minimumThreshold, component)
+activate Sys
+Sys --> Actor : returns created MaintenancePart
+deactivate Sys
+@enduml
+
+

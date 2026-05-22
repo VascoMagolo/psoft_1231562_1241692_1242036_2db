@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Supervisor" as Actor
+participant "System" as Sys
+Actor -> Sys : viewTotalMaintenanceHoursInFleet()
+activate Sys
+Sys --> Actor : returns the total maintenance hours in the fleet
+deactivate Sys
+@enduml
+
+

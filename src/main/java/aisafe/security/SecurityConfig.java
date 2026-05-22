@@ -36,8 +36,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/docs.html", "/docs/**").permitAll()
                         // WP #1A – Aircraft Management
-                        .requestMatchers(HttpMethod.POST, "/api/aircrafts/register").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/search").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/aircrafts/*/status").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
@@ -54,8 +55,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/status").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
-                        // Maintenance
-                        .requestMatchers("/api/maintenance/**").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR")
+                        // WP #4 - Maintenance
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/aircraft/*").hasAnyRole("ATCC", "ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

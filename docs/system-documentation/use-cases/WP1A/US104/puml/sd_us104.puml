@@ -1,0 +1,26 @@
+﻿@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "SearchAircraftUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+ATCC -> Ctrl : GET /api/aircrafts/search?modelId=X&status=Y&year=Z
+activate Ctrl
+Ctrl -> UC : execute(modelId, status, year, pageable)
+activate UC
+UC -> Repo : searchAircrafts(modelId, status, year, pageable)
+activate Repo
+Repo -> DB : SELECT * FROM aircraft WHERE ... (dynamic query)
+activate DB
+DB --> Repo : page of records
+deactivate DB
+Repo --> UC : Page<Aircraft>
+deactivate Repo
+UC --> Ctrl : Page<SearchAircraftUseCaseResponse>
+deactivate UC
+Ctrl --> ATCC : 200 OK (paged HATEOAS model)
+deactivate Ctrl
+@enduml
+
+

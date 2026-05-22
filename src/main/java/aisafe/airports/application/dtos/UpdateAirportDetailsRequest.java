@@ -1,6 +1,6 @@
 package aisafe.airports.application.dtos;
 
-import aisafe.model.enums.ContactType;
+import aisafe.airports.domain.ContactType;
 
 import java.util.List;
 

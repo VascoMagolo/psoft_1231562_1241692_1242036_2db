@@ -24,18 +24,30 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin123\",\r\n    \"role\": \"ADMIN\"\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           },
           "response": []
@@ -60,18 +72,30 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin123\"\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -104,13 +128,22 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX\",\r\n    \"manufacturer\": \"Boeing\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX\",\r\n    \"manufacturer\": \"Boeing\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"maximumSeatingCapacity\": 230,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/aircraftModels",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircraftModels"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircraftModels"
+              ]
             }
           },
           "response": []
@@ -134,8 +167,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircraftModels",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircraftModels"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircraftModels"
+              ]
             }
           },
           "response": []
@@ -165,12 +203,22 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"registrationNumber\": \"CS-TPA\",\r\n    \"manufacturingDate\": \"2023-05-20\",\r\n    \"status\": \"AVAILABLE\",\r\n    \"seatCapacity\": 180,\r\n    \"modelname\": \"Boeing 737 MAX\",\r\n    \"features\": [\"WiFi\", \"Extra Legroom\"]\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/aircrafts/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircrafts", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "register"
+              ]
             }
           },
           "response": []
@@ -194,8 +242,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircrafts"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts"
+              ]
             }
           },
           "response": []
@@ -219,8 +272,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircrafts", "{{aircraft_registration}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "{{aircraft_registration}}"
+              ]
             }
           },
           "response": []
@@ -247,12 +306,29 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts/search?status=AVAILABLE",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircrafts", "search"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "search"
+              ],
               "query": [
-                { "key": "status", "value": "AVAILABLE" },
-                { "key": "modelId", "value": "", "disabled": true },
-                { "key": "year", "value": "", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "AVAILABLE"
+                },
+                {
+                  "key": "modelId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "year",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           },
@@ -278,12 +354,23 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"status\": \"INACTIVE\"\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "aircrafts", "{{aircraft_registration}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "{{aircraft_registration}}",
+                "status"
+              ]
             }
           },
           "response": []
@@ -302,7 +389,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);"
+                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);",
+                  "pm.test(\"Has HATEOAS _links\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -312,13 +404,22 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"iataCode\": \"OPO\",\r\n    \"name\": \"Francisco Sá Carneiro Airport\",\r\n    \"city\": \"Porto\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 41.2481,\r\n    \"longitude\": -8.6814,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3480,\r\n            \"orientation\": \"030/210\"\r\n        }\r\n    ]\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\r\n    \"iataCode\": \"OPO\",\r\n    \"name\": \"Francisco S\u00e1 Carneiro Airport\",\r\n    \"city\": \"Porto\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 41.2481,\r\n    \"longitude\": -8.6814,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3480,\r\n            \"orientation\": \"030/210\"\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/airports",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports"
+              ]
             }
           },
           "response": []
@@ -332,7 +433,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);"
+                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);",
+                  "pm.test(\"Has HATEOAS _links\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -343,12 +449,21 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"iataCode\": \"LIS\",\r\n    \"name\": \"Humberto Delgado Airport\",\r\n    \"city\": \"Lisbon\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 38.7813,\r\n    \"longitude\": -9.1359,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3805,\r\n            \"orientation\": \"030/210\"\r\n        },\r\n        {\r\n            \"name\": \"17/35\",\r\n            \"length\": 2400,\r\n            \"orientation\": \"170/350\"\r\n        }\r\n    ],\r\n    \"imagePath\": \"images/lis.png\",\r\n    \"operationalHours\": \"00:00-23:59\",\r\n    \"services\": [\"Parking\", \"Car Rental\", \"Restaurants\", \"Duty Free\"],\r\n    \"terminals\": [\"Terminal 1\", \"Terminal 2\"],\r\n    \"gates\": [\"A1\", \"A2\", \"B1\", \"B2\", \"C1\"]\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/airports",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports"
+              ]
             }
           },
           "response": []
@@ -362,7 +477,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Has ID\", () => pm.expect(pm.response.json().id).to.exist);"
+                  "pm.test(\"Has ID\", () => pm.expect(pm.response.json().id).to.exist);",
+                  "pm.test(\"Has HATEOAS airport link\", () => {",
+                  "    pm.expect(pm.response.json()._links).to.exist;",
+                  "    pm.expect(pm.response.json()._links.airport).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -373,12 +492,23 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"aircraftModelId\": {{aircraft_model_id}}\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/certifications",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "{{airport_iata}}", "certifications"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "{{airport_iata}}",
+                "certifications"
+              ]
             }
           },
           "response": []
@@ -393,7 +523,12 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);",
-                  "pm.test(\"Has runways\", () => pm.expect(pm.response.json().runways).to.be.an('array').that.is.not.empty);"
+                  "pm.test(\"Has runways\", () => pm.expect(pm.response.json().runways).to.be.an('array').that.is.not.empty);",
+                  "pm.test(\"Has HATEOAS _links\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -403,8 +538,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "{{airport_iata}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "{{airport_iata}}"
+              ]
             }
           },
           "response": []
@@ -428,8 +569,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/ZZZ",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "ZZZ"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "ZZZ"
+              ]
             }
           },
           "response": []
@@ -443,7 +590,18 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns page object\", () => {",
+                  "    const page = pm.response.json();",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page.totalElements).to.be.a(\"number\");",
+                  "    pm.expect(page.totalPages).to.be.a(\"number\");",
+                  "});",
+                  "pm.test(\"Each airport has _links\", () => {",
+                  "    pm.response.json().content.forEach(a => {",
+                  "        pm.expect(a._links).to.exist;",
+                  "        pm.expect(a._links.self).to.exist;",
+                  "    });",
+                  "});"
                 ]
               }
             }
@@ -453,12 +611,37 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/search?city=Porto",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "search"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "search"
+              ],
               "query": [
-                { "key": "city", "value": "Porto" },
-                { "key": "name", "value": "", "disabled": true },
-                { "key": "country", "value": "", "disabled": true }
+                {
+                  "key": "city",
+                  "value": "Porto"
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "country",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             }
           },
@@ -473,7 +656,18 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns page object\", () => {",
+                  "    const page = pm.response.json();",
+                  "    pm.expect(page.content).to.be.an(\"array\");",
+                  "    pm.expect(page.totalElements).to.be.a(\"number\");",
+                  "    pm.expect(page.totalPages).to.be.a(\"number\");",
+                  "});",
+                  "pm.test(\"Each airport has _links\", () => {",
+                  "    pm.response.json().content.forEach(a => {",
+                  "        pm.expect(a._links).to.exist;",
+                  "        pm.expect(a._links.self).to.exist;",
+                  "    });",
+                  "});"
                 ]
               }
             }
@@ -483,12 +677,37 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/search?country=Portugal",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "search"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "search"
+              ],
               "query": [
-                { "key": "country", "value": "Portugal" },
-                { "key": "name", "value": "", "disabled": true },
-                { "key": "city", "value": "", "disabled": true }
+                {
+                  "key": "country",
+                  "value": "Portugal"
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             }
           },
@@ -503,7 +722,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Status updated\", () => pm.expect(pm.response.json().status).to.equal(\"CLOSED\"));"
+                  "pm.test(\"Status updated\", () => pm.expect(pm.response.json().status).to.equal(\"CLOSED\"));",
+                  "pm.test(\"Has HATEOAS _links\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -514,12 +738,23 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"status\": \"CLOSED\"\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "{{airport_iata}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "{{airport_iata}}",
+                "status"
+              ]
             }
           },
           "response": []
@@ -533,7 +768,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);"
+                  "pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);",
+                  "pm.test(\"Has HATEOAS _links\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -544,12 +784,23 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"operationalHours\": \"06:00-23:00\",\r\n    \"contacts\": [\r\n        {\r\n            \"type\": \"PHONE\",\r\n            \"value\": \"+351229432400\",\r\n            \"description\": \"General Information\"\r\n        },\r\n        {\r\n            \"type\": \"EMAIL\",\r\n            \"value\": \"info@aeroportoporto.pt\",\r\n            \"description\": \"Customer Support\"\r\n        }\r\n    ],\r\n    \"services\": [\"Parking\", \"Car Rental\", \"Restaurants\"],\r\n    \"terminals\": [\"Terminal A\"],\r\n    \"gates\": [\"A1\", \"A2\", \"A3\"]\r\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/details",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "{{airport_iata}}", "details"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "{{airport_iata}}",
+                "details"
+              ]
             }
           },
           "response": []
@@ -573,8 +824,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/routes",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "{{airport_iata}}", "routes"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "{{airport_iata}}",
+                "routes"
+              ]
             }
           },
           "response": []
@@ -604,8 +862,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/statistics/busiest",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "statistics", "busiest"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "statistics",
+                "busiest"
+              ]
             }
           },
           "response": []
@@ -635,9 +900,20 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/grouped?by=region",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "grouped"],
-              "query": [{ "key": "by", "value": "region" }]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "grouped"
+              ],
+              "query": [
+                {
+                  "key": "by",
+                  "value": "region"
+                }
+              ]
             }
           },
           "response": []
@@ -667,12 +943,65 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/grouped?by=country",
-              "host": ["{{base_url}}"],
-              "path": ["api", "airports", "grouped"],
-              "query": [{ "key": "by", "value": "country" }]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports",
+                "grouped"
+              ],
+              "query": [
+                {
+                  "key": "by",
+                  "value": "country"
+                }
+              ]
             }
           },
           "response": []
+        },
+        {
+          "name": "Register Airport - Validation Error (invalid IATA)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Has validation errors\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.errors).to.exist;",
+                  "    pm.expect(body.errors.iataCode).to.be.a(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"iataCode\": \"TOOLONG\",\n  \"name\": \"\",\n  \"city\": \"Lisbon\",\n  \"country\": \"Portugal\",\n  \"timezone\": \"Europe/Lisbon\",\n  \"latitude\": 38.77,\n  \"longitude\": -9.13,\n  \"runways\": [\n    {\n      \"name\": \"03/21\",\n      \"length\": 3805,\n      \"orientation\": \"030/210\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/airports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "airports"
+              ]
+            }
+          }
         }
       ]
     }
@@ -704,15 +1033,32 @@
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [""]
+        "exec": [
+          ""
+        ]
       }
     }
   ],
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "jwt_token", "value": "" },
-    { "key": "aircraft_model_id", "value": "1" },
-    { "key": "aircraft_registration", "value": "CS-TPA" },
-    { "key": "airport_iata", "value": "OPO" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    },
+    {
+      "key": "aircraft_model_id",
+      "value": "1"
+    },
+    {
+      "key": "aircraft_registration",
+      "value": "CS-TPA"
+    },
+    {
+      "key": "airport_iata",
+      "value": "OPO"
+    }
   ]
 }

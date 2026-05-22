@@ -31,9 +31,14 @@ package "Aircraft Aggregate" <<Aggregate>> {
     UNDER_MAINTENANCE
     IN_FLIGHT
   }
-
+  enum Manufacturer <<Enum>> {
+    BOEING
+    AIRBUS
+    EMBRAER
+    BOMBARDIER
+    OTHER
+  }
   class Aircraft <<Entity>> <<Root>> {
-    - registrationNumber : String
     - manufacturingDate : Date
     - status : AircraftStatus
     - seatCapacity : Integer
@@ -43,14 +48,17 @@ package "Aircraft Aggregate" <<Aggregate>> {
 
   class AircraftModel <<Entity>> <<Root>> {
     - modelName : String
-    - manufacturer : String
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
     - imagePath : String
   }
-
+  class RegistrationNumber <<ValueObject>> {
+    - registrationNumber : String
+  }
   Aircraft --> AircraftStatus : current status
+  RegistrationNumber "1"-->"1" Aircraft
+  Manufacturer *-->"1" AircraftModel
 }
 
 package "Airport Aggregate" <<Aggregate>> {
@@ -111,7 +119,7 @@ package "Airport Aggregate" <<Aggregate>> {
     - operationalStatus : AirportStatus
   }
 
-  class AirplaneCertification <<Entity>> {
+  class AircraftCertification <<Entity>> {
     - id : Long
   }
 
@@ -229,8 +237,8 @@ package "Maintenance Aggregate" <<Aggregate>> {
 
 
 Aircraft "*" --> "1" AircraftModel : is of model
-AircraftModel "1" <-- "*" AirplaneCertification : certifies
-Airport "1" <-up- "*" AirplaneCertification : certified at
+AircraftModel "1" <-- "*" AircraftCertification : certifies
+Airport "1" <-up- "*" AircraftCertification : certified at
 
 Route "1" --> "1" Airport : origin
 Route "1" --> "1" Airport : destination

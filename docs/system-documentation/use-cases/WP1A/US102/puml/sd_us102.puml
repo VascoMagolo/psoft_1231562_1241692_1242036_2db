@@ -1,0 +1,56 @@
+﻿@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "RegisterAircraftUseCase" as UC
+participant "AircraftModelRepository" as ModelRepo
+participant "AircraftRepository" as Repo
+participant "AircraftModel" as Model
+database "Database" as DB
+ATCC -> Ctrl : POST /api/aircrafts (JSON)
+activate Ctrl
+Ctrl -> UC : execute(request)
+activate UC
+UC -> ModelRepo : findById(request.modelId)
+activate ModelRepo
+ModelRepo -> DB : SELECT * FROM aircraft_model WHERE id = ?
+activate DB
+DB --> ModelRepo : model record
+deactivate DB
+ModelRepo --> UC : Optional<AircraftModel>
+deactivate ModelRepo
+alt model not found
+    UC -> UC : throw IllegalArgumentException("Invalid Model ID")
+else model found
+    UC -> Repo : existsByRegistrationNumber(regNum)
+    activate Repo
+    Repo -> DB : SELECT COUNT(*) FROM aircraft WHERE registration_number = ?
+    activate DB
+    DB --> Repo : count
+    deactivate DB
+    Repo --> UC : true/false
+    deactivate Repo
+    alt registration already exists
+        UC -> UC : throw AircraftAlreadyExistsException
+    else registration is unique
+        UC -> Model : validate seat capacity and status
+        activate Model
+        Model --> UC
+        deactivate Model
+        UC -> Repo : save(aircraft)
+        activate Repo
+        Repo -> DB : INSERT INTO aircraft
+        activate DB
+        DB --> Repo : saved record (with ID)
+        deactivate DB
+        Repo --> UC : savedAircraft
+        deactivate Repo
+    end
+end
+UC --> Ctrl : ViewAircraftDetailsResponse
+deactivate UC
+Ctrl --> ATCC : 201 Created (JSON with _links)
+deactivate Ctrl
+@enduml
+
+

@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : updateAircraftStatus(registrationNumber, newStatus)
+activate Sys
+Sys --> Actor : returns updated aircraft status
+deactivate Sys
+@enduml
+
+

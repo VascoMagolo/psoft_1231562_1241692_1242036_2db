@@ -1,0 +1,39 @@
+﻿@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AircraftModelController" as Ctrl
+participant "RegisterAircraftModelUseCase" as UC
+participant "AircraftModelRepository" as Repo
+database "Database" as DB
+BO -> Ctrl : POST /api/aircraftModels (JSON)
+activate Ctrl
+Ctrl -> UC : execute(request)
+activate UC
+note right of UC : Validates uniqueness by model name
+UC -> Repo : existsByModelName(request.modelName)
+activate Repo
+Repo -> DB : SELECT COUNT(*) FROM aircraft_model WHERE model_name = ?
+activate DB
+DB --> Repo : count
+deactivate DB
+Repo --> UC : true/false
+deactivate Repo
+alt model name already exists
+    UC -> UC : throw AircraftModelAlreadyExistsException
+else model name is unique
+    UC -> Repo : save(newModel)
+    activate Repo
+    Repo -> DB : INSERT INTO aircraft_model
+    activate DB
+    DB --> Repo : saved record (with ID)
+    deactivate DB
+    Repo --> UC : savedModel
+    deactivate Repo
+end
+UC --> Ctrl : AircraftModelResponse
+deactivate UC
+Ctrl --> BO : 201 Created (JSON with _links)
+deactivate Ctrl
+@enduml
+
+

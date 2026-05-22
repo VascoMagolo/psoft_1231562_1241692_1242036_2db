@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as Actor
+participant "System" as Sys
+Actor -> Sys : viewMaintenanceRecords(registrationNumber, pageable)
+activate Sys
+Sys --> Actor : returns a paginated list of maintenance records for the aircraft
+deactivate Sys
+@enduml
+
+

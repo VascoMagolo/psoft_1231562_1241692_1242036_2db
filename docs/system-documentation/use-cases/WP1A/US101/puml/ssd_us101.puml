@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
+Actor -> Sys : registerAircraftModel(modelName, manufacturer, maxRange, fuelCapacity, cruisingSpeed, maximumSeatingCapacity, imagePath)
+activate Sys
+Sys --> Actor : returns created AircraftModelResponse
+deactivate Sys
+@enduml
+
+
