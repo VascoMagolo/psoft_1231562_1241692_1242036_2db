@@ -2,10 +2,11 @@ package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
+import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Returns all stored aircraft models for the aircraft management screens and APIs.
@@ -22,18 +23,15 @@ public class ListAircraftModelsUseCase {
     /**
      * Return all aircraft models as lightweight DTOs used by the API/UI.
      */
-    public List<ListAircraftModelsUseCaseResponse> execute() {
-        return repository.findAll().stream()
-                .map(m -> new ListAircraftModelsUseCaseResponse(
-                        m.getId(),
-                        m.getModelName(),
-                        m.getManufacturer(),
-                        m.getFuelCapacity(),
-                        m.getMaxRange(),
-                        m.getCruisingSpeed(),
-                        m.getMaximumSeatingCapacity(),
-                        m.getImagePath()
-                ))
-                .toList();
+    public Page<ListAircraftModelsUseCaseResponse> execute(Pageable pageable) {
+
+        Page<AircraftModel> modelsPage = repository.findAll(pageable);
+
+        return modelsPage.map(model -> new ListAircraftModelsUseCaseResponse(
+                model.getId(),
+                model.getModelName(),
+                model.getManufacturer().name(),
+                model.getMaximumSeatingCapacity()
+        ));
     }
 }

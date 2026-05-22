@@ -1,0 +1,38 @@
+﻿@startuml
+autonumber
+actor "Maintenance Supervisor" as MS
+participant "MaintenanceController" as Ctrl
+participant "CreateMaintenancePartUseCase" as UC
+participant "MaintenancePartRepository" as Repo
+database "Database" as DB
+MS -> Ctrl : POST /api/maintenance/parts (JSON)
+activate Ctrl
+Ctrl -> UC : execute(request)
+activate UC
+UC -> Repo : existsByPartNumber(request.partNumber)
+activate Repo
+Repo -> DB : SELECT COUNT(*) FROM maintenance_part WHERE part_number = ?
+activate DB
+DB --> Repo : count
+deactivate DB
+Repo --> UC : true/false
+deactivate Repo
+alt part number already exists
+    UC -> UC : throw MaintenancePartAlreadyExistsException
+else part number is unique
+    UC -> Repo : save(part)
+    activate Repo
+    Repo -> DB : INSERT INTO maintenance_part
+    activate DB
+    DB --> Repo : saved record (with ID)
+    deactivate DB
+    Repo --> UC : savedPart
+    deactivate Repo
+end
+UC --> Ctrl : MaintenancePart
+deactivate UC
+Ctrl --> MS : 201 Created (JSON)
+deactivate Ctrl
+@enduml
+
+

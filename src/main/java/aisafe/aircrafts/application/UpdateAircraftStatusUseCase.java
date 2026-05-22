@@ -1,34 +1,48 @@
 package aisafe.aircrafts.application;
 
 import aisafe.UseCase;
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Updates the status of an aircraft identified by its registration number.
- */
 @UseCase
-@Transactional
+@Transactional(readOnly = true)
 public class UpdateAircraftStatusUseCase {
+
     private final AircraftRepository repository;
 
     public UpdateAircraftStatusUseCase(AircraftRepository repository) {
         this.repository = repository;
     }
 
-    public Aircraft execute(RegistrationNumber registrationNumber, String newStatus) {
-        if (newStatus == null || newStatus.trim().isEmpty()) {
-            throw new AircraftInvalidFieldException("Status cannot be empty.");
+    @Transactional
+    public ViewAircraftDetailsResponse execute(RegistrationNumber registration, String status, Long clientVersion) {
+        Aircraft aircraft = repository.findByRegistrationNumber(registration)
+                .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registration.getNumber()));
+
+        if (!aircraft.getVersion().equals(clientVersion)) {
+            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getId());
         }
-        AircraftStatus parsedStatus;
-        try {
-            parsedStatus = AircraftStatus.valueOf(newStatus.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new AircraftInvalidFieldException("Invalid status provided: " + newStatus + ". Valid values are: " + java.util.Arrays.toString(AircraftStatus.values()));
+        if (!AircraftStatus.isValid(status)) {
+            throw new AircraftInvalidFieldException("Invalid status value: " + status);
         }
-        Aircraft aircraft = repository.findByRegistrationNumber(registrationNumber)
-                .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber + " not found."));
-        aircraft.setStatus(parsedStatus);
-        return repository.save(aircraft);
+        aircraft.setStatus(AircraftStatus.valueOf(status.toUpperCase()));
+
+        Aircraft updatedAircraft = repository.save(aircraft);
+
+        return toDto(updatedAircraft);
+    }
+
+    private ViewAircraftDetailsResponse toDto(Aircraft aircraft) {
+        return new ViewAircraftDetailsResponse(
+                aircraft.getRegistrationNumber().getNumber(),
+                aircraft.getModel().getModelName(),
+                aircraft.getModel().getManufacturer(),
+                aircraft.getManufacturingDate(),
+                aircraft.getStatus(),
+                aircraft.getSeatCapacity(),
+                aircraft.getFeatures(),
+                aircraft.getVersion()
+        );
     }
 }

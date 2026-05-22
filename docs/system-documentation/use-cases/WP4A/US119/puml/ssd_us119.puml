@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as Actor
+participant "System" as Sys
+Actor -> Sys : updateMaintenanceRecord(id, status, notes)
+activate Sys
+Sys --> Actor : returns the updated maintenance record
+deactivate Sys
+@enduml
+
+

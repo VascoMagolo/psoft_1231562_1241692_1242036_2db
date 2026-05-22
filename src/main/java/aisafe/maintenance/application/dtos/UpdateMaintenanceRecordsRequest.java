@@ -1,8 +1,9 @@
 package aisafe.maintenance.application.dtos;
 
 import aisafe.maintenance.domain.MaintenanceStatus;
+import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
-
-public record UpdateMaintenanceRecordsRequest(LocalDateTime startDate, String part, String template, MaintenanceStatus status, String notes) {
+public record UpdateMaintenanceRecordsRequest(
+		@NotNull MaintenanceStatus status,
+		String notes) {
 }

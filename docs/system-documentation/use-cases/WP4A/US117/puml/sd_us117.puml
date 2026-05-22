@@ -1,0 +1,27 @@
+﻿@startuml
+autonumber
+actor "Maintenance Supervisor" as MS
+participant "MaintenanceController" as Ctrl
+participant "ViewTotalMaintenanceHoursInFleetUseCase" as UC
+participant "MaintenanceRecordRepository" as Repo
+database "Database" as DB
+MS -> Ctrl : GET /api/maintenance/records/hours
+activate Ctrl
+Ctrl -> UC : execute()
+activate UC
+UC -> Repo : findAll()
+activate Repo
+Repo -> DB : SELECT * FROM maintenance_record
+activate DB
+DB --> Repo : list of records
+deactivate DB
+Repo --> UC : List<MaintenanceRecord>
+deactivate Repo
+UC -> UC : sum expectedDuration values
+UC --> Ctrl : ViewTotalMaintenanceHoursinFleetResponse
+deactivate UC
+Ctrl --> MS : 200 OK (JSON)
+deactivate Ctrl
+@enduml
+
+

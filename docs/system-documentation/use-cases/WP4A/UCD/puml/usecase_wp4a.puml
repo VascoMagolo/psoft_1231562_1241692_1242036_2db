@@ -1,0 +1,41 @@
+@startuml usecase_wp4a
+left to right direction
+
+skinparam packageStyle rectangle
+
+actor "Maintenance Manager" as Manager
+actor "Technician" as Technician
+actor "Scheduler / System" as Scheduler
+
+package "Maintenance Subsystem (WP4A)" {
+    usecase "Create Maintenance Template" as UC_CreateTemplate
+    usecase "Register Maintenance Part" as UC_CreatePart
+    usecase "Create Maintenance Record" as UC_CreateRecord
+    usecase "Update Record Status & Notes" as UC_UpdateRecord
+    usecase "List / Search Maintenance Records" as UC_ListRecords
+    usecase "Get Maintenance Totals / Reports" as UC_Totals
+    usecase "Resolve Aircraft Model (name / id)" as UC_ResolveModel
+}
+
+Manager --> UC_CreateTemplate
+Manager --> UC_CreatePart
+Technician --> UC_CreateRecord
+Technician --> UC_UpdateRecord
+Manager --> UC_ListRecords
+Scheduler --> UC_CreateRecord
+
+UC_CreateTemplate .> UC_ResolveModel : <<include>>
+UC_CreateRecord .> UC_ResolveModel : <<include>>
+UC_ListRecords .> UC_Totals : <<extend>>
+
+note right of UC_CreateTemplate
+  Templates are associated to aircraft models
+  (API accepts model names; use-case resolves to domain entities)
+end note
+
+note left of UC_UpdateRecord
+  Updates enforce optimistic locking using ETag / If-Match
+end note
+
+@enduml
+

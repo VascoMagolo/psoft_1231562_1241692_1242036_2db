@@ -1,10 +1,11 @@
-@startuml
+﻿@startuml
 autonumber
-actor "ATCC" as ATCC
+actor "ATCC" as Actor
 participant "System" as Sys
-
-ATCC -> Sys : searchAircrafts(modelId?, status?, manufacturingYear?)
+Actor -> Sys : searchAircrafts(modelId?, status?, year?, pageable)
 activate Sys
-Sys --> ATCC : returns list of matching Aircrafts
+Sys --> Actor : returns a paginated list of matching aircraft
 deactivate Sys
 @enduml
+
+
