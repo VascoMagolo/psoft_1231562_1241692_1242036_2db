@@ -1,10 +1,11 @@
-@startuml
+﻿@startuml
 autonumber
-actor "Operator / ATCC" as Actor
+actor "ATCC / Backoffice Operator" as Actor
 participant "System" as Sys
-
 Actor -> Sys : getAircraftDetails(registrationNumber)
 activate Sys
-Sys --> Actor : returns Aircraft full details
+Sys --> Actor : returns aircraft full details
 deactivate Sys
 @enduml
+
+

@@ -23,7 +23,7 @@ public class UpdateAircraftStatusUseCase {
         if (!aircraft.getVersion().equals(clientVersion)) {
             throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getId());
         }
-        if (!aircraft.isValidStatus(status)) {
+        if (!AircraftStatus.isValid(status)) {
             throw new AircraftInvalidFieldException("Invalid status value: " + status);
         }
         aircraft.setStatus(AircraftStatus.valueOf(status.toUpperCase()));

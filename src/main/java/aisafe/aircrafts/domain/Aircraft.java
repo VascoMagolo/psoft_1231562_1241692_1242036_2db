@@ -53,21 +53,4 @@ public class Aircraft {
         this.seatCapacity = seatCapacity;
         this.features = features;
     }
-
-    /**
-     * Validates if the provided status is a valid AircraftStatus enum value
-     * @param status
-     * @return
-     */
-    public boolean isValidStatus(String status) {
-        if (status == null || status.trim().isEmpty()) {
-            return false;
-        }
-        for (AircraftStatus validStatus : AircraftStatus.values()) {
-            if (validStatus.name().equalsIgnoreCase(status)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

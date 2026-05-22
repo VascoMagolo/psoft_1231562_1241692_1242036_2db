@@ -1,0 +1,51 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as MT
+participant "MaintenanceController" as Ctrl
+participant "UpdateMaintenanceRecordUseCase" as UC
+participant "MaintenanceRecordRepository" as Repo
+participant "MaintenanceRecord" as Entity
+database "Database" as DB
+MT -> Ctrl : PATCH /api/maintenance/records/{id} (JSON)
+activate Ctrl
+Ctrl -> UC : execute(id, request, version)
+activate UC
+UC -> Repo : findById(id)
+activate Repo
+Repo -> DB : SELECT * FROM maintenance_record WHERE id = ?
+activate DB
+DB --> Repo : record data
+deactivate DB
+Repo --> UC : Optional<MaintenanceRecord>
+deactivate Repo
+alt record not found
+    UC -> UC : throw MaintenanceRecordNotFoundException
+else version mismatch
+    UC -> UC : throw ObjectOptimisticLockingFailureException
+else update allowed
+    UC -> Entity : setStatus(request.status)
+    activate Entity
+    Entity --> UC
+    deactivate Entity
+    opt notes provided and not blank
+        UC -> Entity : setNotes(request.notes)
+        activate Entity
+        Entity --> UC
+        deactivate Entity
+    end
+    UC -> Repo : save(record)
+    activate Repo
+    Repo -> DB : UPDATE maintenance_record SET status = ?, notes = ?
+    activate DB
+    DB --> Repo : updated record
+deactivate DB
+    Repo --> UC : updatedRecord
+    deactivate Repo
+end
+UC --> Ctrl : MaintenanceRecordResponse
+deactivate UC
+Ctrl --> MT : 200 OK (JSON with _links)
+deactivate Ctrl
+@enduml
+
+

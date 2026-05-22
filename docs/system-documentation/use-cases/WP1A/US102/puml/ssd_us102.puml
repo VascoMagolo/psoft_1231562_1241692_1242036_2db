@@ -1,10 +1,11 @@
-@startuml
+﻿@startuml
 autonumber
-actor "ATCC" as ATCC
+actor "ATCC" as Actor
 participant "System" as Sys
-
-ATCC -> Sys : registerAircraft(registrationNumber, modelId, manufacturingDate, status)
+Actor -> Sys : registerAircraft(registrationNumber, modelId, manufacturingDate, seatCapacity, status, features)
 activate Sys
-Sys --> ATCC : returns created Aircraft instance details
+Sys --> Actor : returns created aircraft details
 deactivate Sys
 @enduml
+
+

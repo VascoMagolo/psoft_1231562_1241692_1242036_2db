@@ -1,0 +1,39 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as MT
+participant "MaintenanceController" as Ctrl
+participant "ViewAllMaintenanceRecordsUseCase" as UC
+participant "AircraftRepository" as AircraftRepo
+participant "MaintenanceRecordRepository" as Repo
+database "Database" as DB
+MT -> Ctrl : GET /api/maintenance/records/aircraft/{registrationNumber}
+activate Ctrl
+Ctrl -> UC : execute(registrationNumber, pageable)
+activate UC
+UC -> AircraftRepo : findByRegistrationNumber(registrationNumber)
+activate AircraftRepo
+AircraftRepo -> DB : SELECT * FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> AircraftRepo : aircraft record
+deactivate DB
+AircraftRepo --> UC : Optional<Aircraft>
+deactivate AircraftRepo
+alt aircraft not found
+    UC -> UC : throw AircraftNotFoundException
+else aircraft exists
+    UC -> Repo : findByAircraftRegistrationNumber(registrationNumber, pageable)
+    activate Repo
+    Repo -> DB : SELECT * FROM maintenance_record WHERE registration_number = ?
+    activate DB
+    DB --> Repo : page of records
+    deactivate DB
+    Repo --> UC : Page<MaintenanceRecord>
+    deactivate Repo
+    UC --> Ctrl : Page<ViewAllMaintenanceRecordsResponse>
+end
+deactivate UC
+Ctrl --> MT : 200 OK (paged HATEOAS model)
+deactivate Ctrl
+@enduml
+
+

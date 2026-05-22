@@ -1,0 +1,11 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as Actor
+participant "System" as Sys
+Actor -> Sys : createMaintenanceTemplate(name, templateType, applicableModels, checklist, intervalFlightHours, intervalDays)
+activate Sys
+Sys --> Actor : returns created MaintenanceTemplate
+deactivate Sys
+@enduml
+
+

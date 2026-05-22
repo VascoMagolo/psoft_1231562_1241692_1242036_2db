@@ -1,0 +1,53 @@
+﻿@startuml
+autonumber
+actor "Maintenance Technician" as MT
+participant "MaintenanceController" as Ctrl
+participant "CreateMaintenanceTemplateUseCase" as UC
+participant "AircraftModelRepository" as ModelRepo
+participant "MaintenanceTemplateRepository" as Repo
+database "Database" as DB
+MT -> Ctrl : POST /api/maintenance/templates (JSON)
+activate Ctrl
+Ctrl -> UC : execute(request)
+activate UC
+loop for each model name
+    UC -> ModelRepo : findByModelName(modelName)
+    activate ModelRepo
+    ModelRepo -> DB : SELECT * FROM aircraft_model WHERE model_name = ?
+    activate DB
+    DB --> ModelRepo : model record
+    deactivate DB
+    ModelRepo --> UC : Optional<AircraftModel>
+    deactivate ModelRepo
+end
+alt one or more models not found
+    UC -> UC : throw AircraftModelNotFoundException
+else all models found
+    UC -> Repo : existsByName(request.name)
+    activate Repo
+    Repo -> DB : SELECT COUNT(*) FROM maintenance_template WHERE name = ?
+    activate DB
+    DB --> Repo : count
+    deactivate DB
+    Repo --> UC : true/false
+    deactivate Repo
+    alt template name already exists
+        UC -> UC : throw MaintenanceTemplateAlreadyExistsException
+    else template is unique
+        UC -> Repo : save(template)
+        activate Repo
+        Repo -> DB : INSERT INTO maintenance_template
+        activate DB
+        DB --> Repo : saved record (with ID)
+        deactivate DB
+        Repo --> UC : savedTemplate
+        deactivate Repo
+    end
+end
+UC --> Ctrl : MaintenanceTemplate
+deactivate UC
+Ctrl --> MT : 201 Created (JSON)
+deactivate Ctrl
+@enduml
+
+
