@@ -76,7 +76,7 @@ public class AircraftController {
         Page<ListAircraftsUseCaseResponse> aircraftPage = listAircraft.execute(pageable);
 
         PagedModel<EntityModel<ListAircraftsUseCaseResponse>> pagedModel =
-                assembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft) // <-- USADO AQUI
+                assembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft)
                         .add(linkTo(methodOn(AircraftController.class)
                                 .getAircraftByRegistrationNumber(new RegistrationNumber(aircraft.registrationNumber())))
                                 .withSelfRel()));
@@ -112,12 +112,11 @@ public class AircraftController {
             @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
             @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
             @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) { // <-- INJETADO AQUI
-
+            PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) {
         Page<SearchAircraftUseCaseResponse> results = searchAircraft.execute(modelId, status, year, pageable);
 
         PagedModel<EntityModel<SearchAircraftUseCaseResponse>> pagedModel =
-                assembler.toModel(results, aircraft -> EntityModel.of(aircraft) // <-- USADO AQUI
+                assembler.toModel(results, aircraft -> EntityModel.of(aircraft)
                         .add(linkTo(methodOn(AircraftController.class)
                                 .getAircraftByRegistrationNumber(new RegistrationNumber(aircraft.registrationNumber())))
                                 .withSelfRel()));
@@ -138,7 +137,7 @@ public class AircraftController {
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftStatus(
             @Parameter(description = "Registration identification key of the target aircraft") @PathVariable RegistrationNumber registration,
             @Parameter(description = "Current version entity state identifier for locking assessment")
-            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader, // Alterado para String e required = false
+            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateStatusRequest request) {
 
         Long version = parseEtagToVersion(ifMatchHeader);
@@ -151,7 +150,7 @@ public class AircraftController {
         EntityModel<ViewAircraftDetailsResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registration)).withSelfRel());
         model.add(linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged(), null)).withRel("all-aircrafts"));
-        model.add(linkTo(methodOn(AircraftController.class).updateAircraftStatus(registration, String.valueOf(response.version()), null)).withRel("update-status"));
+        model.add(linkTo(methodOn(AircraftController.class).updateAircraftStatus(registration, null, null)).withRel("update-status"));
         return model;
     }
 

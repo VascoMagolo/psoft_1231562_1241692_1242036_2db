@@ -106,8 +106,8 @@ public class MaintenanceController {
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateMaintenanceRecordsRequest request) {
         Long version = parseEtagToVersion(ifMatchHeader);
-        MaintenanceRecordResponse updatedAircraft = updateMaintenanceRecordUseCase.execute(id, request, version);
-        return ResponseEntity.ok(toHateoasModel(updatedAircraft));
+        MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(id, request, version);
+        return ResponseEntity.ok(toHateoasModel(updatedRecord));
     }
 
     @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number.")
@@ -147,7 +147,7 @@ public class MaintenanceController {
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {
         EntityModel<MaintenanceRecordResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(MaintenanceController.class)
-                .updateRecordStatusAndNotes(response.id(), String.valueOf(response.version()), null)).withRel("update-record"));
+                .updateRecordStatusAndNotes(response.id(), null, null)).withRel("update-record"));
         return model;
     }
     /**

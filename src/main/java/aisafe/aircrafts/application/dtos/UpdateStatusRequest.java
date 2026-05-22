@@ -7,5 +7,5 @@ import jakarta.validation.constraints.NotNull;
  * Request payload used to update an aircraft status.
  */
 public record UpdateStatusRequest(
-        @NotNull(message = "New status cannot be null")AircraftStatus status) {
+        @NotNull(message = "New status cannot be null") AircraftStatus status) {
 }
