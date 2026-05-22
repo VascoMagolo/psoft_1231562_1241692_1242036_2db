@@ -10,7 +10,7 @@ import java.util.List;
  */
 public record RegisterAircraftRequest(
 	@NotBlank(message = "Registration number is required")
-	@Pattern(regexp = "^[A-Z0-9-]{3,10}$", message = "Invalid registration format")
+	@Pattern(regexp = "^[A-Z]{2}-[A-Z]{3}$", message = "Invalid registration format, Expected XX-XXX")
 	String registrationNumber,
 	@NotNull(message = "Model ID is required")
 	Long modelId,

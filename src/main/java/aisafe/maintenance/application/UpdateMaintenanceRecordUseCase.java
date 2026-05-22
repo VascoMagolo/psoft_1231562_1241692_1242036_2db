@@ -27,7 +27,6 @@ public class UpdateMaintenanceRecordUseCase {
         MaintenanceRecord record = recordRepository.findById(id)
                 .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record with ID " + id + " not found."));
 
-        // Verificação de Concorrência
         if (!record.getVersion().equals(clientVersion)) {
             throw new ObjectOptimisticLockingFailureException(MaintenanceRecord.class, record.getId());
         }

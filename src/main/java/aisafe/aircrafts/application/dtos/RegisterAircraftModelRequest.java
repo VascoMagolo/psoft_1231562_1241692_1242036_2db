@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application.dtos;
 
 import aisafe.aircrafts.domain.Manufacturer;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,9 +13,9 @@ import jakarta.validation.constraints.NotNull;
 public record RegisterAircraftModelRequest(
         @NotBlank String modelName,
         @NotNull Manufacturer manufacturer,
-        @NotNull @Min(1) Double maxRange,
-        @NotNull @Min(1) Double fuelCapacity,
-        @NotNull @Min(1) Double cruisingSpeed,
+        @NotNull @DecimalMin("1.0") Double maxRange,
+        @NotNull @DecimalMin("1.0") Double fuelCapacity,
+        @NotNull @DecimalMin("1.0") Double cruisingSpeed,
         @NotNull @Min(1) Integer maximumSeatingCapacity,
         @NotBlank String imagePath
 ) {}

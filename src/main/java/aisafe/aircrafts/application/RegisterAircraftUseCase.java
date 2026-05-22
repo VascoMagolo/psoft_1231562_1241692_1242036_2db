@@ -27,7 +27,6 @@ public class RegisterAircraftUseCase {
         if (aircraftRepository.existsByRegistrationNumber(regNum)) {
             throw new AircraftAlreadyExistsException("Registration number already exists");
         }
-
         Aircraft aircraft = new Aircraft(
                 AircraftStatus.valueOf(request.status().toUpperCase()),
                 request.manufacturingDate(),
@@ -36,7 +35,9 @@ public class RegisterAircraftUseCase {
                 request.seatCapacity(),
                 request.features()
         );
-
+        if (aircraft.getSeatCapacity() > model.getMaximumSeatingCapacity()) {
+            throw new IllegalArgumentException("Seat capacity cannot exceed model's maximum seating capacity");
+        }
         Aircraft savedAircraft = aircraftRepository.save(aircraft);
 
         return new ViewAircraftDetailsResponse(

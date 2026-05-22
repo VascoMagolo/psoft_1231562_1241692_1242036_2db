@@ -102,9 +102,9 @@ public class MaintenanceController {
     @PatchMapping("/records/{id}")
     public ResponseEntity<EntityModel<MaintenanceRecordResponse>> updateRecordStatusAndNotes(
             @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id,
-            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match") Long version,
+            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match") String ifMatchHeader,
             @Valid @RequestBody UpdateMaintenanceRecordsRequest request) {
-
+        Long version = parseEtagToVersion(ifMatchHeader);
         MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(id, request, version);
         return ResponseEntity.ok(toHateoasModel(updatedRecord));
     }
@@ -146,7 +146,23 @@ public class MaintenanceController {
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {
         EntityModel<MaintenanceRecordResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(MaintenanceController.class)
-                .updateRecordStatusAndNotes(response.id(), response.version(), null)).withRel("update-record"));
+                .updateRecordStatusAndNotes(response.id(), String.valueOf(response.version()), null)).withRel("update-record"));
         return model;
+    }
+    /**
+     * Helper method to parse HTTP ETags securely.
+     * Extracts the numeric version from standard ETag formats like "5" or W/"5".
+     */
+    private Long parseEtagToVersion(String etag) {
+        if (etag == null || etag.isBlank()) {
+            throw new IllegalArgumentException("If-Match header cannot be empty.");
+        }
+        String cleanEtag = etag.replace("W/", "");
+        cleanEtag = cleanEtag.replace("\"", "").trim();
+        try {
+            return Long.parseLong(cleanEtag);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid If-Match ETag format. Expected a numeric entity version.");
+        }
     }
 }

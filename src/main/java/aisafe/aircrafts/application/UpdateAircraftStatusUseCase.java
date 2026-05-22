@@ -1,15 +1,12 @@
 package aisafe.aircrafts.application;
 
+import aisafe.UseCase;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
-import aisafe.aircrafts.domain.Aircraft;
-import aisafe.aircrafts.domain.AircraftNotFoundException;
-import aisafe.aircrafts.domain.AircraftRepository;
-import aisafe.aircrafts.domain.AircraftStatus;
-import aisafe.aircrafts.domain.RegistrationNumber;
-import org.springframework.stereotype.Service;
+import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@UseCase
+@Transactional(readOnly = true)
 public class UpdateAircraftStatusUseCase {
 
     private final AircraftRepository repository;
@@ -26,7 +23,9 @@ public class UpdateAircraftStatusUseCase {
         if (!aircraft.getVersion().equals(clientVersion)) {
             throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getId());
         }
-
+        if (!isValidStatus(status)) {
+            throw new AircraftInvalidFieldException("Invalid status value: " + status);
+        }
         aircraft.setStatus(AircraftStatus.valueOf(status.toUpperCase()));
 
         Aircraft updatedAircraft = repository.save(aircraft);
@@ -45,5 +44,22 @@ public class UpdateAircraftStatusUseCase {
                 aircraft.getFeatures(),
                 aircraft.getVersion()
         );
+    }
+
+    /**
+     * Validates if the provided status is a valid AircraftStatus enum value
+     * @param status
+     * @return
+     */
+    private boolean isValidStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return false;
+        }
+        for (AircraftStatus validStatus : AircraftStatus.values()) {
+            if (validStatus.name().equalsIgnoreCase(status)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

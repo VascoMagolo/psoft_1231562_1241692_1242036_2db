@@ -1,13 +1,15 @@
 package aisafe.aircrafts.application;
 
+import aisafe.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@UseCase
+@Transactional(readOnly = true)
 public class ListAircraftUseCase {
 
     private final AircraftRepository repository;

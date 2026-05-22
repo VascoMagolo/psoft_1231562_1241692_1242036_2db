@@ -28,6 +28,7 @@ public class ListAircraftModelsUseCase {
         Page<AircraftModel> modelsPage = repository.findAll(pageable);
 
         return modelsPage.map(model -> new ListAircraftModelsUseCaseResponse(
+                model.getId(),
                 model.getModelName(),
                 model.getManufacturer().name(),
                 model.getMaximumSeatingCapacity()
