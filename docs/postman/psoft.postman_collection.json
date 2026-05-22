@@ -24,30 +24,18 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin123\",\r\n    \"role\": \"ADMIN\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
             }
           },
           "response": []
@@ -72,30 +60,18 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
             }
           },
           "response": []
@@ -129,21 +105,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX\",\r\n    \"manufacturer\": \"Boeing\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"maximumSeatingCapacity\": 230,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/aircraftModels",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircraftModels"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircraftModels"]
             }
           },
           "response": []
@@ -167,13 +134,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircraftModels",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircraftModels"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircraftModels"]
             }
           },
           "response": []
@@ -202,23 +164,13 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"registrationNumber\": \"CS-TPA\",\r\n    \"manufacturingDate\": \"2023-05-20\",\r\n    \"status\": \"AVAILABLE\",\r\n    \"seatCapacity\": 180,\r\n    \"modelname\": \"Boeing 737 MAX\",\r\n    \"features\": [\"WiFi\", \"Extra Legroom\"]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\r\n    \"registrationNumber\": \"CS-TPA\",\r\n    \"modelId\": {{aircraft_model_id}},\r\n    \"manufacturingDate\": \"2023-05-20\",\r\n    \"status\": \"AVAILABLE\",\r\n    \"seatCapacity\": 180,\r\n    \"features\": [\"WiFi\", \"Extra Legroom\"]\r\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{base_url}}/api/aircrafts/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts",
-                "register"
-              ]
+              "raw": "{{base_url}}/api/aircrafts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircrafts"]
             }
           },
           "response": []
@@ -232,7 +184,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
+                  "});"
                 ]
               }
             }
@@ -242,13 +198,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircrafts"]
             }
           },
           "response": []
@@ -272,14 +223,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts",
-                "{{aircraft_registration}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircrafts", "{{aircraft_registration}}"]
             }
           },
           "response": []
@@ -293,9 +238,10 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));",
-                  "pm.test(\"All results match status filter\", () => {",
-                  "    pm.response.json().forEach(a => pm.expect(a.status).to.equal(\"AVAILABLE\"));",
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
                   "});"
                 ]
               }
@@ -306,29 +252,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/aircrafts/search?status=AVAILABLE",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts",
-                "search"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircrafts", "search"],
               "query": [
-                {
-                  "key": "status",
-                  "value": "AVAILABLE"
-                },
-                {
-                  "key": "modelId",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "year",
-                  "value": "",
-                  "disabled": true
-                }
+                { "key": "status", "value": "AVAILABLE" },
+                { "key": "modelId", "value": "", "disabled": true },
+                { "key": "year", "value": "", "disabled": true }
               ]
             }
           },
@@ -350,27 +279,18 @@
           ],
           "request": {
             "method": "PATCH",
-            "header": [],
+            "header": [
+              { "key": "If-Match", "value": "0" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"status\": \"INACTIVE\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/status",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts",
-                "{{aircraft_registration}}",
-                "status"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "aircrafts", "{{aircraft_registration}}", "status"]
             }
           },
           "response": []
@@ -404,22 +324,13 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"iataCode\": \"OPO\",\r\n    \"name\": \"Francisco S\u00e1 Carneiro Airport\",\r\n    \"city\": \"Porto\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 41.2481,\r\n    \"longitude\": -8.6814,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3480,\r\n            \"orientation\": \"030/210\"\r\n        }\r\n    ]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\r\n    \"iataCode\": \"OPO\",\r\n    \"name\": \"Francisco Sá Carneiro Airport\",\r\n    \"city\": \"Porto\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 41.2481,\r\n    \"longitude\": -8.6814,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3480,\r\n            \"orientation\": \"030/210\"\r\n        }\r\n    ]\r\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/airports",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports"]
             }
           },
           "response": []
@@ -449,21 +360,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"iataCode\": \"LIS\",\r\n    \"name\": \"Humberto Delgado Airport\",\r\n    \"city\": \"Lisbon\",\r\n    \"country\": \"Portugal\",\r\n    \"region\": \"Europe\",\r\n    \"timezone\": \"Europe/Lisbon\",\r\n    \"latitude\": 38.7813,\r\n    \"longitude\": -9.1359,\r\n    \"runways\": [\r\n        {\r\n            \"name\": \"03/21\",\r\n            \"length\": 3805,\r\n            \"orientation\": \"030/210\"\r\n        },\r\n        {\r\n            \"name\": \"17/35\",\r\n            \"length\": 2400,\r\n            \"orientation\": \"170/350\"\r\n        }\r\n    ],\r\n    \"imagePath\": \"images/lis.png\",\r\n    \"operationalHours\": \"00:00-23:59\",\r\n    \"services\": [\"Parking\", \"Car Rental\", \"Restaurants\", \"Duty Free\"],\r\n    \"terminals\": [\"Terminal 1\", \"Terminal 2\"],\r\n    \"gates\": [\"A1\", \"A2\", \"B1\", \"B2\", \"C1\"]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/airports",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports"]
             }
           },
           "response": []
@@ -492,23 +394,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"aircraftModelId\": {{aircraft_model_id}}\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/certifications",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "{{airport_iata}}",
-                "certifications"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "{{airport_iata}}", "certifications"]
             }
           },
           "response": []
@@ -538,14 +429,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "{{airport_iata}}"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "{{airport_iata}}"]
             }
           },
           "response": []
@@ -569,14 +454,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/ZZZ",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "ZZZ"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "ZZZ"]
             }
           },
           "response": []
@@ -611,37 +490,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/search?city=Porto",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "search"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "search"],
               "query": [
-                {
-                  "key": "city",
-                  "value": "Porto"
-                },
-                {
-                  "key": "name",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "country",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
+                { "key": "city", "value": "Porto" },
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "country", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
               ]
             }
           },
@@ -677,37 +533,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/search?country=Portugal",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "search"
-              ],
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "search"],
               "query": [
-                {
-                  "key": "country",
-                  "value": "Portugal"
-                },
-                {
-                  "key": "name",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "city",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
+                { "key": "country", "value": "Portugal" },
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "city", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
               ]
             }
           },
@@ -738,23 +571,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"status\": \"CLOSED\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/status",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "{{airport_iata}}",
-                "status"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "{{airport_iata}}", "status"]
             }
           },
           "response": []
@@ -784,23 +606,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"operationalHours\": \"06:00-23:00\",\r\n    \"contacts\": [\r\n        {\r\n            \"type\": \"PHONE\",\r\n            \"value\": \"+351229432400\",\r\n            \"description\": \"General Information\"\r\n        },\r\n        {\r\n            \"type\": \"EMAIL\",\r\n            \"value\": \"info@aeroportoporto.pt\",\r\n            \"description\": \"Customer Support\"\r\n        }\r\n    ],\r\n    \"services\": [\"Parking\", \"Car Rental\", \"Restaurants\"],\r\n    \"terminals\": [\"Terminal A\"],\r\n    \"gates\": [\"A1\", \"A2\", \"A3\"]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/details",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "{{airport_iata}}",
-                "details"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "{{airport_iata}}", "details"]
             }
           },
           "response": []
@@ -824,15 +635,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/{{airport_iata}}/routes",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "{{airport_iata}}",
-                "routes"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "{{airport_iata}}", "routes"]
             }
           },
           "response": []
@@ -862,15 +666,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/statistics/busiest",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "statistics",
-                "busiest"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "statistics", "busiest"]
             }
           },
           "response": []
@@ -900,20 +697,9 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/grouped?by=region",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "grouped"
-              ],
-              "query": [
-                {
-                  "key": "by",
-                  "value": "region"
-                }
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "grouped"],
+              "query": [{ "key": "by", "value": "region" }]
             }
           },
           "response": []
@@ -943,20 +729,9 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/airports/grouped?by=country",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports",
-                "grouped"
-              ],
-              "query": [
-                {
-                  "key": "by",
-                  "value": "country"
-                }
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports", "grouped"],
+              "query": [{ "key": "by", "value": "country" }]
             }
           },
           "response": []
@@ -981,27 +756,404 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"iataCode\": \"TOOLONG\",\n  \"name\": \"\",\n  \"city\": \"Lisbon\",\n  \"country\": \"Portugal\",\n  \"timezone\": \"Europe/Lisbon\",\n  \"latitude\": 38.77,\n  \"longitude\": -9.13,\n  \"runways\": [\n    {\n      \"name\": \"03/21\",\n      \"length\": 3805,\n      \"orientation\": \"030/210\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/airports",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "airports"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "airports"]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "Routes",
+      "item": [
+        {
+          "name": "Create Route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Has route ID\", () => pm.expect(jsonData.id).to.exist);",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set(\"route_id\", String(jsonData.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"originIataCode\": \"OPO\",\r\n    \"destinationIataCode\": \"LIS\",\r\n    \"estimatedFlightTime\": 45,\r\n    \"minimumRange\": 500.0,\r\n    \"minimumCapacity\": 100\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/routes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Route Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has origin and destination\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.origin).to.exist;",
+                  "    pm.expect(body.destination).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/{{route_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "{{route_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Route History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/{{route_id}}/history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "{{route_id}}", "history"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Flight time updated\", () => pm.expect(pm.response.json().estimatedFlightTime).to.equal(60));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"estimatedFlightTime\": 60,\r\n    \"minimumRange\": 600.0,\r\n    \"minimumCapacity\": 120\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/routes/{{route_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "{{route_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Route is deactivated\", () => pm.expect(pm.response.json().active).to.equal(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/{{route_id}}/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "{{route_id}}", "deactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Routes from Airport",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/airport/{{airport_iata}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "airport", "{{airport_iata}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Routes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/search?origin=OPO",
+              "host": ["{{base_url}}"],
+              "path": ["api", "routes", "search"],
+              "query": [
+                { "key": "origin", "value": "OPO" },
+                { "key": "destination", "value": "", "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Maintenance",
+      "item": [
+        {
+          "name": "Create Maintenance Template",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has name\", () => pm.expect(pm.response.json().name).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"100h Engine Check\",\r\n    \"templateType\": \"INSPECTION\",\r\n    \"applicableModels\": [\"Boeing 737 MAX\"],\r\n    \"checklist\": [\"Check oil levels\", \"Inspect fan blades\", \"Test fuel system\"],\r\n    \"intervalFlightHours\": 100,\r\n    \"intervalDays\": 30\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/templates",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Maintenance Part",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has part number\", () => pm.expect(pm.response.json().partNumber).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"partNumber\": \"ENG-001\",\r\n    \"name\": \"Engine Oil Filter\",\r\n    \"description\": \"High-performance oil filter for jet engines\",\r\n    \"stockQuantity\": 50,\r\n    \"minimumThreshold\": 10,\r\n    \"component\": \"ENGINE\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/parts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "parts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Maintenance Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Has record ID\", () => pm.expect(jsonData.id).to.exist);",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set(\"maintenance_record_id\", String(jsonData.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"description\": \"Routine 100h engine inspection\",\r\n    \"startDate\": \"2026-06-01T09:00:00\",\r\n    \"expectedDuration\": 8,\r\n    \"part\": \"ENG-001\",\r\n    \"notes\": \"Standard inspection as per maintenance schedule\",\r\n    \"template\": \"100h Engine Check\",\r\n    \"status\": \"PLANNED\",\r\n    \"registrationNumber\": \"{{aircraft_registration}}\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/records",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "records"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Maintenance Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Status updated\", () => pm.expect(pm.response.json().status).to.equal(\"IN_PROGRESS\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "If-Match", "value": "0" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"notes\": \"Inspection started, all systems nominal\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/records/{{maintenance_record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "records", "{{maintenance_record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Maintenance Records by Aircraft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/records/aircraft/{{aircraft_registration}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "records", "aircraft", "{{aircraft_registration}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Total Maintenance Hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has total hours\", () => pm.expect(pm.response.json().totalHours).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/records/hours",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "records", "hours"]
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -1033,32 +1185,17 @@
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     }
   ],
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "jwt_token",
-      "value": ""
-    },
-    {
-      "key": "aircraft_model_id",
-      "value": "1"
-    },
-    {
-      "key": "aircraft_registration",
-      "value": "CS-TPA"
-    },
-    {
-      "key": "airport_iata",
-      "value": "OPO"
-    }
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "jwt_token", "value": "" },
+    { "key": "aircraft_model_id", "value": "1" },
+    { "key": "aircraft_registration", "value": "CS-TPA" },
+    { "key": "airport_iata", "value": "OPO" },
+    { "key": "route_id", "value": "1" },
+    { "key": "maintenance_record_id", "value": "1" }
   ]
 }
