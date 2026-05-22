@@ -1,0 +1,69 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "RouteController" as Ctrl
+participant "ViewRouteDetailsUseCase" as DetailsUC
+participant "ListRoutesFromAirportUseCase" as ListUC
+participant "AirportRepository" as AirportRepo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+== View details by ID ==
+Actor -> Ctrl : GET /api/routes/{id}
+activate Ctrl
+
+Ctrl -> DetailsUC : execute(id)
+activate DetailsUC
+
+DetailsUC -> RouteRepo : findById(id)
+activate RouteRepo
+RouteRepo -> DB : SELECT FROM route WHERE id = ?
+activate DB
+DB --> RouteRepo : route record / empty
+deactivate DB
+RouteRepo --> DetailsUC : Optional<Route>
+deactivate RouteRepo
+
+alt Route found
+  DetailsUC --> Ctrl : Route
+  Ctrl --> Actor : 200 OK
+else Route not found
+  DetailsUC --> Ctrl : throws RouteNotFoundException
+  Ctrl --> Actor : 404 Not Found
+end
+deactivate DetailsUC
+deactivate Ctrl
+
+== View all routes from a specific airport ==
+Actor -> Ctrl : GET /api/routes/airport/{iataCode}
+activate Ctrl
+Ctrl -> ListUC : execute(iataCode)
+activate ListUC
+
+ListUC -> AirportRepo : existsByIataCodeCode(iataCode)
+activate AirportRepo
+AirportRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
+activate DB
+DB --> AirportRepo : true/false
+deactivate DB
+AirportRepo --> ListUC : boolean
+deactivate AirportRepo
+
+alt Airport found
+    ListUC -> RouteRepo : findByOrigin(iataCode)
+    activate RouteRepo
+    RouteRepo -> DB : SELECT FROM route WHERE origin_iata_code = ?
+    activate DB
+    DB --> RouteRepo : route records
+    deactivate DB
+    RouteRepo --> ListUC : List<Route>
+    deactivate RouteRepo
+    ListUC --> Ctrl : List<Route>
+    Ctrl --> Actor : 200 OK
+else Airport not found
+    ListUC --> Ctrl : throws AirportNotFoundException
+    Ctrl --> Actor : 404 Not Found
+end
+deactivate ListUC
+deactivate Ctrl
+@enduml
