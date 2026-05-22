@@ -1,6 +1,6 @@
 package aisafe.routes.domain;
 
-import aisafe.model.valueObject.IataCode;
+import aisafe.airports.domain.IataCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -11,4 +11,5 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     List<Route> findByDestination(IataCode destination);
     List<Route> findByOriginAndDestination(IataCode origin, IataCode destination);
     boolean existsByOriginAndDestination(IataCode origin, IataCode destination);
+    List<Route> findByOriginOrDestination(IataCode origin, IataCode destination);
 }

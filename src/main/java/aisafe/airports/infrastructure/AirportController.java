@@ -2,7 +2,7 @@ package aisafe.airports.infrastructure;
 
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
-import aisafe.model.entities.Route;
+import aisafe.routes.domain.Route;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
