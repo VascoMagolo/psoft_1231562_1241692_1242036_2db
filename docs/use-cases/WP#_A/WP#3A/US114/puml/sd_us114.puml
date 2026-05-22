@@ -1,0 +1,58 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "RouteController" as Ctrl
+participant "SearchRoutesUseCase" as UC
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/routes/search?origin=...&destination=...
+activate Ctrl
+
+Ctrl -> UC : execute(origin, destination)
+activate UC
+
+alt Origin and destination provided
+    UC -> Repo : findByOriginAndDestination(origin, destination)
+    activate Repo
+    Repo -> DB : SELECT FROM route WHERE origin = ? AND destination = ?
+    activate DB
+    DB --> Repo : route records
+    deactivate DB
+    Repo --> UC : List<Route>
+    deactivate Repo
+else Only origin provided
+    UC -> Repo : findByOrigin(origin)
+    activate Repo
+    Repo -> DB : SELECT FROM route WHERE origin = ?
+    activate DB
+    DB --> Repo : route records
+    deactivate DB
+    Repo --> UC : List<Route>
+    deactivate Repo
+else Only destination provided
+    UC -> Repo : findByDestination(destination)
+    activate Repo
+    Repo -> DB : SELECT FROM route WHERE destination = ?
+    activate DB
+    DB --> Repo : route records
+    deactivate DB
+    Repo --> UC : List<Route>
+    deactivate Repo
+else No filters provided
+    UC -> Repo : findAll()
+    activate Repo
+    Repo -> DB : SELECT FROM route
+    activate DB
+    DB --> Repo : route records
+    deactivate DB
+    Repo --> UC : List<Route>
+    deactivate Repo
+end
+
+UC --> Ctrl : List<Route>
+Ctrl --> Actor : 200 OK (JSON Array)
+
+deactivate UC
+deactivate Ctrl
+@enduml

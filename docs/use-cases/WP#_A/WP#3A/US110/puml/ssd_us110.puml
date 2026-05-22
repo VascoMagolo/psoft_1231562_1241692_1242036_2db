@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : createRoute(originAirport, destinationAirport, flightTime, range, capacity)
+activate Sys
+Sys --> Actor : returns created Route details
+deactivate Sys
+@enduml
