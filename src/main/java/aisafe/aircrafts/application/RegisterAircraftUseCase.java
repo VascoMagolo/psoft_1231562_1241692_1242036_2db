@@ -6,6 +6,11 @@ import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case for registering a new aircraft in the system.
+ * Validates input data, checks for duplicates, and saves the new aircraft to the repository.
+ * Returns a DTO with the details of the newly registered aircraft.
+ */
 @UseCase
 @Transactional
 public class RegisterAircraftUseCase {
@@ -18,6 +23,13 @@ public class RegisterAircraftUseCase {
         this.modelRepository = modelRepository;
     }
 
+    /**
+     * Registers a new aircraft based on the provided request.
+     * Validates that the registration number is unique, the model exists, and that the status and seat capacity are valid.
+     * Then creates and saves the new aircraft.
+     * @param request the details of the aircraft to register
+     * @return a DTO containing the details of the newly registered aircraft
+     */
     public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
         AircraftModel model = modelRepository.findById(request.modelId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Model ID"));

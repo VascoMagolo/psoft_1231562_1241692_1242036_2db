@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * Controller for managing aircraft models in the system. Provides endpoints for registering new models and listing existing ones.
+ */
 @RestController
 @RequestMapping("/api/aircraftModels")
 @Tag(name = "Aircraft Models", description = "Aircraft Model configurations and catalog — WP#1A")
@@ -36,6 +39,11 @@ public class AircraftModelController {
         this.listAircraftModels = listAircraftModels;
     }
 
+    /**
+     * Registers a new aircraft model in the system.
+     * @param request the details of the aircraft model to register
+     * @return a response entity containing the details of the newly registered aircraft model, along with HATEOAS links
+     */
     @Operation(summary = "Register a new aircraft model", description = "Creates a new technical model specification for aircrafts in the catalog. Requires Fleet Manager role.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Aircraft model successfully registered"),
@@ -54,6 +62,12 @@ public class AircraftModelController {
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
+    /**
+     * Retrieves a paginated list of all aircraft models in the system.
+     * @param pageable pagination and sorting information for the request
+     * @param assembler assembler to convert the page of results into a HATEOAS-compliant paged model
+     * @return a response entity containing a paginated list of aircraft models, along with HATEOAS links for navigation
+     */
     @Operation(summary = "Get all aircraft models with pagination", description = "Returns a paginated catalog of all supported aircraft models in the system. Supports HATEOAS.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Paginated catalog returned successfully"),
