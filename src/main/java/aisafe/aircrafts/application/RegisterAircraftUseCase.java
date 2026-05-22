@@ -35,6 +35,9 @@ public class RegisterAircraftUseCase {
                 request.seatCapacity(),
                 request.features()
         );
+        if (aircraft.isValidStatus(request.status())) {
+            throw new AircraftInvalidFieldException("Invalid status value: " + request.status());
+        }
         if (aircraft.getSeatCapacity() > model.getMaximumSeatingCapacity()) {
             throw new IllegalArgumentException("Seat capacity cannot exceed model's maximum seating capacity");
         }

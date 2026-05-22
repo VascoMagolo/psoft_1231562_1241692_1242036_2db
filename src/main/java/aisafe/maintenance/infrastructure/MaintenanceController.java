@@ -102,11 +102,12 @@ public class MaintenanceController {
     @PatchMapping("/records/{id}")
     public ResponseEntity<EntityModel<MaintenanceRecordResponse>> updateRecordStatusAndNotes(
             @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id,
-            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match") String ifMatchHeader,
+            @Parameter(description = "Current version entity state identifier for locking assessment")
+            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateMaintenanceRecordsRequest request) {
         Long version = parseEtagToVersion(ifMatchHeader);
-        MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(id, request, version);
-        return ResponseEntity.ok(toHateoasModel(updatedRecord));
+        MaintenanceRecordResponse updatedAircraft = updateMaintenanceRecordUseCase.execute(id, request, version);
+        return ResponseEntity.ok(toHateoasModel(updatedAircraft));
     }
 
     @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number.")

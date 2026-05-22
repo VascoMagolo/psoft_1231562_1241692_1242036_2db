@@ -23,7 +23,7 @@ public class UpdateAircraftStatusUseCase {
         if (!aircraft.getVersion().equals(clientVersion)) {
             throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getId());
         }
-        if (!isValidStatus(status)) {
+        if (!aircraft.isValidStatus(status)) {
             throw new AircraftInvalidFieldException("Invalid status value: " + status);
         }
         aircraft.setStatus(AircraftStatus.valueOf(status.toUpperCase()));
@@ -44,22 +44,5 @@ public class UpdateAircraftStatusUseCase {
                 aircraft.getFeatures(),
                 aircraft.getVersion()
         );
-    }
-
-    /**
-     * Validates if the provided status is a valid AircraftStatus enum value
-     * @param status
-     * @return
-     */
-    private boolean isValidStatus(String status) {
-        if (status == null || status.trim().isEmpty()) {
-            return false;
-        }
-        for (AircraftStatus validStatus : AircraftStatus.values()) {
-            if (validStatus.name().equalsIgnoreCase(status)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

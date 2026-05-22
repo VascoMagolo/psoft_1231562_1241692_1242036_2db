@@ -33,21 +33,15 @@ public class AircraftController {
     private final RegisterAircraftUseCase registerAircraft;
     private final SearchAircraftUseCase searchAircraft;
     private final UpdateAircraftStatusUseCase updateAircraftStatus;
-    private final PagedResourcesAssembler<ListAircraftsUseCaseResponse> listAssembler;
-    private final PagedResourcesAssembler<SearchAircraftUseCaseResponse> searchAssembler;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
-                              UpdateAircraftStatusUseCase updateAircraftStatus,
-                              PagedResourcesAssembler<ListAircraftsUseCaseResponse> listAssembler,
-                              PagedResourcesAssembler<SearchAircraftUseCaseResponse> searchAssembler) {
+                              UpdateAircraftStatusUseCase updateAircraftStatus) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
         this.searchAircraft = searchAircraft;
         this.updateAircraftStatus = updateAircraftStatus;
-        this.listAssembler = listAssembler;
-        this.searchAssembler = searchAssembler;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role.")
@@ -76,12 +70,13 @@ public class AircraftController {
     })
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<ListAircraftsUseCaseResponse>>> getAllAircraft(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<ListAircraftsUseCaseResponse> assembler) {
 
         Page<ListAircraftsUseCaseResponse> aircraftPage = listAircraft.execute(pageable);
 
         PagedModel<EntityModel<ListAircraftsUseCaseResponse>> pagedModel =
-                listAssembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft)
+                assembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft) // <-- USADO AQUI
                         .add(linkTo(methodOn(AircraftController.class)
                                 .getAircraftByRegistrationNumber(new RegistrationNumber(aircraft.registrationNumber())))
                                 .withSelfRel()));
@@ -116,12 +111,13 @@ public class AircraftController {
             @Parameter(description = "Filter by technical model identification number") @RequestParam(required = false) Long modelId,
             @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
             @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) { // <-- INJETADO AQUI
 
         Page<SearchAircraftUseCaseResponse> results = searchAircraft.execute(modelId, status, year, pageable);
 
         PagedModel<EntityModel<SearchAircraftUseCaseResponse>> pagedModel =
-                searchAssembler.toModel(results, aircraft -> EntityModel.of(aircraft)
+                assembler.toModel(results, aircraft -> EntityModel.of(aircraft) // <-- USADO AQUI
                         .add(linkTo(methodOn(AircraftController.class)
                                 .getAircraftByRegistrationNumber(new RegistrationNumber(aircraft.registrationNumber())))
                                 .withSelfRel()));
@@ -141,8 +137,11 @@ public class AircraftController {
     @PatchMapping("/{registration}/status")
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftStatus(
             @Parameter(description = "Registration identification key of the target aircraft") @PathVariable RegistrationNumber registration,
-            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match") Long version,
+            @Parameter(description = "Current version entity state identifier for locking assessment")
+            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader, // Alterado para String e required = false
             @Valid @RequestBody UpdateStatusRequest request) {
+
+        Long version = parseEtagToVersion(ifMatchHeader);
 
         ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);
         return ResponseEntity.ok(toHateoasModel(updatedAircraft, registration));
@@ -151,8 +150,26 @@ public class AircraftController {
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {
         EntityModel<ViewAircraftDetailsResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registration)).withSelfRel());
-        model.add(linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged())).withRel("all-aircrafts"));
-        model.add(linkTo(methodOn(AircraftController.class).updateAircraftStatus(registration, response.version(), null)).withRel("update-status"));
+        model.add(linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged(), null)).withRel("all-aircrafts"));
+        model.add(linkTo(methodOn(AircraftController.class).updateAircraftStatus(registration, String.valueOf(response.version()), null)).withRel("update-status"));
         return model;
+    }
+
+    /**
+     * Helper method to parse HTTP ETags securely.
+     * Extracts the numeric version from standard ETag formats like "5" or W/"5".
+     */
+    private Long parseEtagToVersion(String etag) {
+        if (etag == null || etag.isBlank()) {
+            throw new IllegalArgumentException("If-Match header is missing or empty. Please provide the current resource version.");
+        }
+
+        String cleanEtag = etag.replace("W/", "").replace("\"", "").trim();
+
+        try {
+            return Long.parseLong(cleanEtag);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid If-Match ETag format. Expected a numeric entity version.");
+        }
     }
 }
