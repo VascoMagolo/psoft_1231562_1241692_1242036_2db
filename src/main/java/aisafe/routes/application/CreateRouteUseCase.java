@@ -3,7 +3,7 @@ package aisafe.routes.application;
 import aisafe.UseCase;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportNotFoundException;
-import aisafe.model.valueObject.IataCode;
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;

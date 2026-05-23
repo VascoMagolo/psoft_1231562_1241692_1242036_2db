@@ -1,8 +1,9 @@
 package aisafe.routes.domain;
 
-import aisafe.model.valueObject.IataCode;
+import aisafe.airports.domain.IataCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
@@ -10,6 +11,7 @@ import java.util.List;
  */
 @Repository
 public interface RouteRepository extends JpaRepository<Route, Long> {
+
     /**
      * Find by origin list.
      *
@@ -43,4 +45,13 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
      * @return the boolean
      */
     boolean existsByOriginAndDestination(IataCode origin, IataCode destination);
+
+    /**
+     * Retrieves routes that match either the specified origin or destination IATA code.
+     *
+     * @param origin      the origin IATA code to search for
+     * @param destination the destination IATA code to search for
+     * @return a list of matching routes
+     */
+    List<Route> findByOriginOrDestination(IataCode origin, IataCode destination);
 }

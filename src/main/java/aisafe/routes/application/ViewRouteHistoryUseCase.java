@@ -8,9 +8,6 @@ import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-/**
- * Use case responsible for retrieving the change history of a specific route.
- */
 @UseCase
 @RequiredArgsConstructor
 public class ViewRouteHistoryUseCase {
