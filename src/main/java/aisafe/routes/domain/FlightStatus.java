@@ -1,4 +1,4 @@
-package aisafe.model.enums;
+package aisafe.routes.domain;
 
 public enum FlightStatus {
     SCHEDULED,
