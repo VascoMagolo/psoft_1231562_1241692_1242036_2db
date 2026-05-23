@@ -2,7 +2,7 @@ package aisafe.airports.infrastructure;
 
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
-import aisafe.routes.domain.Route;
+import aisafe.routes.application.dtos.RouteResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -221,7 +221,7 @@ public class AirportController {
             @ApiResponse(responseCode = "404", description = "Airport not found")
     })
     @GetMapping("/{iataCode}/routes")
-    public ResponseEntity<List<Route>> getRoutes(
+    public ResponseEntity<List<RouteResponse>> getRoutes(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode) {
         return ResponseEntity.ok(viewAirportRoutes.execute(iataCode.toUpperCase()));
     }
