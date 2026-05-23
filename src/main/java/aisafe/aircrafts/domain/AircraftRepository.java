@@ -15,6 +15,17 @@ import java.util.Optional;
 public interface AircraftRepository extends JpaRepository<Aircraft,Long> {
     Optional<Aircraft> findByRegistrationNumber(RegistrationNumber registrationNumber);
     boolean existsByRegistrationNumber(RegistrationNumber registrationNumber);
+
+    /**
+     * Searches for aircrafts based on optional criteria: model ID, status, and manufacturing year.
+     * The query dynamically applies filters only if the corresponding parameters are provided (non-null).
+     * Results are paginated according to the `Pageable` parameter.
+     * @param modelId the ID of the aircraft model to filter by (optional)
+     * @param status the status of the aircraft to filter by (optional)
+     * @param year the manufacturing year to filter by (optional)
+     * @param pageable pagination and sorting information
+     * @return a page of aircrafts matching the search criteria
+     */
     @Query("SELECT a FROM Aircraft a WHERE " +
             "(:modelId IS NULL OR a.model.id = :modelId) AND " +
             "(:status IS NULL OR a.status = :status) AND " +

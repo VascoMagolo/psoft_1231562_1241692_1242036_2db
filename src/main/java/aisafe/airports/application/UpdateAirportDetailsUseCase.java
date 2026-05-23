@@ -13,6 +13,9 @@ import aisafe.airports.domain.Terminal;
 
 import java.util.List;
 
+/**
+ * Use case for updating the details of an existing airport
+ */
 @UseCase
 public class UpdateAirportDetailsUseCase {
     private final AirportRepository airportRepository;
@@ -21,6 +24,12 @@ public class UpdateAirportDetailsUseCase {
         this.airportRepository = airportRepository;
     }
 
+    /**
+     * Updates the details of an existing airport based on the provided IATA code and request data.
+     * @param iataCode the IATA code of the airport to update
+     * @param request  the new details to update for the airport.
+     * @return a DTO containing the updated details of the airport after the update is applied
+     */
     public AirportResponse execute(String iataCode, UpdateAirportDetailsRequest request) {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));

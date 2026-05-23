@@ -8,9 +8,11 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * Repository interface for managing MaintenanceRecord entities.
+ */
 @Repository
 public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord, Long> {
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
-    Optional<MaintenanceRecord> findByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
     Page<MaintenanceRecord> findByAircraftRegistrationNumber(RegistrationNumber aircraft_registrationNumber, Pageable pageable);
 }

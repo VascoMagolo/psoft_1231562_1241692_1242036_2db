@@ -5,6 +5,15 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Request DTO for creating a new maintenance part.
+ * @param partNumber
+ * @param name
+ * @param description
+ * @param stockQuantity
+ * @param minimumThreshold
+ * @param component
+ */
 public record CreateMaintenancePartRequest(
 		@NotBlank String partNumber,
 		@NotBlank String name,

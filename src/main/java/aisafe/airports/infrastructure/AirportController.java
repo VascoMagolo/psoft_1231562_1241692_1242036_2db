@@ -21,6 +21,9 @@ import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+/**
+ * REST controller for managing airports, including registration, certification, details retrieval, searching, status updates, and statistics.
+ */
 @RestController
 @RequestMapping("/api/airports")
 @Tag(name = "Airports", description = "Airport management — WP#2A and WP#2B")
@@ -55,6 +58,11 @@ public class AirportController {
         this.listAirportsByRegion = listAirportsByRegion;
     }
 
+    /**
+     * Helper method to convert an AirportResponse DTO into an EntityModel with HATEOAS links for related actions and resources.
+     * @param airport the AirportResponse DTO to convert into an EntityModel
+     * @return an EntityModel containing the airport data and links to related actions and resources
+     */
     private EntityModel<AirportResponse> toModel(AirportResponse airport) {
         String code = airport.iataCode();
         return EntityModel.of(airport,
@@ -65,6 +73,11 @@ public class AirportController {
                 linkTo(methodOn(AirportController.class).addCertification(code, null)).withRel("certifications"));
     }
 
+    /**
+     * Registers a new airport with the provided details
+     * @param request the details of the airport to register
+     * @return a ResponseEntity containing the details of the newly registered airport along with appropriate HATEOAS links
+     */
     // US106 + US207
     @Operation(summary = "Register a new airport", description = "Creates an airport with runways and optional facilities. Requires Backoffice Operator role.")
     @ApiResponses({
@@ -80,6 +93,12 @@ public class AirportController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(registerAirport.execute(request)));
     }
 
+    /**
+     * Adds an aircraft certification to an airport, indicating that a specific aircraft model is certified to operate at that airport.
+     * @param iataCode the IATA code of the airport to which the certification will be added
+     * @param request the details of the aircraft certification to add
+     * @return a ResponseEntity containing the details of the added certification along with a link to the airport it was added to
+     */
     // US106a
     @Operation(summary = "Add aircraft certification to airport", description = "Certifies that a specific aircraft model can operate at this airport. Requires Backoffice Operator or ATCC role.")
     @ApiResponses({
@@ -100,6 +119,11 @@ public class AirportController {
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
+    /**
+     * Retrieves the details of a specific airport based on its IATA code
+     * @param iataCode the 3-letter IATA code of the airport to retrieve
+     * @return a ResponseEntity containing the details of the specified airport along with appropriate HATEOAS links to related actions and resources
+     */
     // US107
     @Operation(summary = "Get airport details by IATA code", description = "Returns full airport details including runways, contacts, and facilities. Requires Backoffice Operator or ATCC role.")
     @ApiResponses({
@@ -114,6 +138,14 @@ public class AirportController {
         return ResponseEntity.ok(toModel(viewAirportDetails.execute(iataCode.toUpperCase())));
     }
 
+    /**
+     * Searches for airports based on optional filters
+     * @param name (optional) Filter by airport name
+     * @param city (optional) Filter by city
+     * @param country (optional) Filter by country
+     * @param pageable Pagination information for the search results
+     * @return a ResponseEntity containing a page of search results matching the provided criteria
+     */
     // US108
     @Operation(summary = "Search airports", description = "Search airports by name, city, and/or country. All parameters are optional. Requires ATCC role.")
     @ApiResponses({
@@ -130,6 +162,12 @@ public class AirportController {
         return ResponseEntity.ok(searchAirport.execute(name, city, country, pageable).map(this::toModel));
     }
 
+    /**
+     * Updates the operational status of an airport, allowing it to be set to OPERATIONAL, CLOSED, or UNDER_MAINTENANCE.
+     * @param iataCode the 3-letter IATA code of the airport to update
+     * @param request the new status to set for the airport
+     * @return a ResponseEntity containing the updated details of the airport after the status change, along with appropriate HATEOAS links to related actions and resources
+     */
     // US109
     @Operation(summary = "Update airport operational status", description = "Changes the airport status to OPERATIONAL, CLOSED, or UNDER_MAINTENANCE. Requires Backoffice Operator role.")
     @ApiResponses({
@@ -147,6 +185,12 @@ public class AirportController {
         return ResponseEntity.ok(toModel(updateAirportStatus.execute(iataCode.toUpperCase(), request.status())));
     }
 
+    /**
+     * Updates the details of an existing airport
+     * @param iataCode the 3-letter IATA code of the airport to update
+     * @param request the new details to update for the airport
+     * @return a ResponseEntity containing the updated details of the airport after the update is applied, along with appropriate HATEOAS links to related actions and resources
+     */
     // US208
     @Operation(summary = "Update airport details", description = "Updates optional fields: operational hours, contact information, image, services, terminals, and gates. Requires Backoffice Operator role.")
     @ApiResponses({
@@ -163,6 +207,11 @@ public class AirportController {
         return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request)));
     }
 
+    /**
+     * Retrieves all routes that depart from or arrive at the specified airport, identified by its IATA code.
+     * @param iataCode the 3-letter IATA code of the airport for which to retrieve associated routes
+     * @return a ResponseEntity containing a list of Route objects representing all routes that depart from or arrive at the specified airport. The list may be empty if there are no associated routes.
+     */
     // US209
     @Operation(summary = "Get routes for an airport", description = "Returns all routes that depart from or arrive at the given airport. Requires ATCC role.")
     @ApiResponses({
@@ -177,6 +226,10 @@ public class AirportController {
         return ResponseEntity.ok(viewAirportRoutes.execute(iataCode.toUpperCase()));
     }
 
+    /**
+     * Retrieves statistics about the busiest airports based on the total number of associated routes.
+     * @return a ResponseEntity containing a list of AirportStatisticsResponse objects representing the busiest airports ranked by total number of associated routes.
+     */
     // US210
     @Operation(summary = "Get busiest airports by number of routes", description = "Returns airports ranked by total number of associated routes. Requires Backoffice Operator role.")
     @ApiResponses({
@@ -189,6 +242,11 @@ public class AirportController {
         return ResponseEntity.ok(airportStatistics.execute());
     }
 
+    /**
+     * Retrieves a list of airports grouped by either region or country, based on the specified grouping criterion.
+     * @param by the grouping criterion, which can be either "region" (default) or "country".
+     * @return a ResponseEntity containing a list of AirportGroupResponse objects representing airports grouped by the specified criterion.
+     */
     // US211
     @Operation(summary = "List airports grouped by region or country", description = "Returns airports grouped by region (default) or country. Use ?by=country to group by country. Requires ATCC role.")
     @ApiResponses({
