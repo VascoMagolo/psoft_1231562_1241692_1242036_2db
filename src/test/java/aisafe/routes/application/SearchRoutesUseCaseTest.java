@@ -7,6 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,44 +27,45 @@ class SearchRoutesUseCaseTest {
     private SearchRoutesUseCase searchRoutes;
 
     private final Route sample = new Route("OPO", "LIS", 45, 300.0, 150);
+    private final Pageable pageable = Pageable.unpaged();
 
     @Test
     void ensureSearchByOriginAndDestination() {
-        when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(List.of(sample));
+        when(routeRepository.findByOriginAndDestination(any(), any(), any())).thenReturn(new PageImpl<>(List.of(sample)));
 
-        List<Route> result = searchRoutes.execute("OPO", "LIS");
+        Page<Route> result = searchRoutes.execute("OPO", "LIS", pageable);
 
-        assertEquals(1, result.size());
-        verify(routeRepository).findByOriginAndDestination(any(), any());
+        assertEquals(1, result.getTotalElements());
+        verify(routeRepository).findByOriginAndDestination(any(), any(), any());
     }
 
     @Test
     void ensureSearchByOriginOnly() {
-        when(routeRepository.findByOrigin(any())).thenReturn(List.of(sample));
+        when(routeRepository.findByOrigin(any(), any())).thenReturn(new PageImpl<>(List.of(sample)));
 
-        List<Route> result = searchRoutes.execute("OPO", null);
+        Page<Route> result = searchRoutes.execute("OPO", null, pageable);
 
-        assertEquals(1, result.size());
-        verify(routeRepository).findByOrigin(any());
+        assertEquals(1, result.getTotalElements());
+        verify(routeRepository).findByOrigin(any(), any());
     }
 
     @Test
     void ensureSearchByDestinationOnly() {
-        when(routeRepository.findByDestination(any())).thenReturn(List.of(sample));
+        when(routeRepository.findByDestination(any(), any())).thenReturn(new PageImpl<>(List.of(sample)));
 
-        List<Route> result = searchRoutes.execute(null, "LIS");
+        Page<Route> result = searchRoutes.execute(null, "LIS", pageable);
 
-        assertEquals(1, result.size());
-        verify(routeRepository).findByDestination(any());
+        assertEquals(1, result.getTotalElements());
+        verify(routeRepository).findByDestination(any(), any());
     }
 
     @Test
     void ensureSearchWithNoParamsReturnsAll() {
-        when(routeRepository.findAll()).thenReturn(List.of(sample));
+        when(routeRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(sample)));
 
-        List<Route> result = searchRoutes.execute(null, null);
+        Page<Route> result = searchRoutes.execute(null, null, pageable);
 
-        assertEquals(1, result.size());
-        verify(routeRepository).findAll();
+        assertEquals(1, result.getTotalElements());
+        verify(routeRepository).findAll(any(Pageable.class));
     }
 }

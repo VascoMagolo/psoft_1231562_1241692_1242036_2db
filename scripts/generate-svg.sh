@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 find_all_puml_files() {
-    find "$SCRIPT_DIR" -name "*.puml" | sort
+    find "$REPO_ROOT" -name "*.puml" | sort
 }
 
 find_valid_puml_files() {
-    find "$SCRIPT_DIR" -name "*.puml" -path "*/puml/*" | sort
+    find "$REPO_ROOT" -name "*.puml" -path "*/puml/*" | sort
 }
 
 get_svg_path() {
     local puml_file="$1"
-    local relative="${puml_file#"$SCRIPT_DIR/"}"
+    local relative="${puml_file#"$REPO_ROOT/"}"
     local svg_relative
     svg_relative=$(echo "$relative" | sed 's|/puml/|/svg/|')
     svg_relative="${svg_relative%.puml}.svg"
-    echo "$SCRIPT_DIR/$svg_relative"
+    echo "$REPO_ROOT/$svg_relative"
 }
 
 warn_invalid_files() {
@@ -28,7 +28,7 @@ warn_invalid_files() {
                 echo "warning: the following .puml file(s) are not inside a /puml/ folder and will be skipped:" >&2
                 warned=1
             fi
-            echo "  skipped: ${f#"$SCRIPT_DIR/"}" >&2
+            echo "  skipped: ${f#"$REPO_ROOT/"}" >&2
         fi
     done < <(find_all_puml_files)
     if [[ $warned -eq 1 ]]; then echo "" >&2; fi
@@ -47,7 +47,7 @@ generate() {
         local svg_file svg_dir relative
         svg_file=$(get_svg_path "$puml_file")
         svg_dir=$(dirname "$svg_file")
-        relative="${puml_file#"$SCRIPT_DIR/"}"
+        relative="${puml_file#"$REPO_ROOT/"}"
 
         printf "  processing: %s ... " "$relative"
         mkdir -p "$svg_dir"
@@ -74,8 +74,8 @@ list() {
         local svg_file
         svg_file=$(get_svg_path "$puml_file")
         printf "  %s\n    -> %s\n" \
-            "${puml_file#"$SCRIPT_DIR/"}" \
-            "${svg_file#"$SCRIPT_DIR/"}"
+            "${puml_file#"$REPO_ROOT/"}" \
+            "${svg_file#"$REPO_ROOT/"}"
         count=$((count + 1))
     done < <(find_valid_puml_files)
 

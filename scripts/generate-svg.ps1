@@ -5,23 +5,24 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$RepoRoot = Split-Path -Parent $RepoRoot
 
 function Find-AllPumlFiles {
-    Get-ChildItem -Path $ScriptDir -Filter '*.puml' -Recurse | Sort-Object FullName
+    Get-ChildItem -Path $RepoRoot -Filter '*.puml' -Recurse | Sort-Object FullName
 }
 
 function Find-ValidPumlFiles {
-    Get-ChildItem -Path $ScriptDir -Filter '*.puml' -Recurse |
+    Get-ChildItem -Path $RepoRoot -Filter '*.puml' -Recurse |
             Where-Object { $_.FullName -replace '\\', '/' -match '/puml/' } |
             Sort-Object FullName
 }
 
 function Get-SvgPath($PumlFile) {
-    $relative = $PumlFile.FullName.Substring($ScriptDir.Length + 1)
+    $relative = $PumlFile.FullName.Substring($RepoRoot.Length + 1)
     $svgRelative = $relative -replace '\\puml\\', '\svg\'
     $svgRelative = [System.IO.Path]::ChangeExtension($svgRelative, '.svg')
-    Join-Path $ScriptDir $svgRelative
+    Join-Path $RepoRoot $svgRelative
 }
 
 function Invoke-WarnInvalidFiles {
@@ -33,7 +34,7 @@ function Invoke-WarnInvalidFiles {
                 Write-Warning "the following .puml file(s) are not inside a /puml/ folder and will be skipped:"
                 $warned = $true
             }
-            Write-Host "  skipped: $($f.FullName.Substring($ScriptDir.Length + 1))" -ForegroundColor Yellow
+            Write-Host "  skipped: $($f.FullName.Substring($RepoRoot.Length + 1))" -ForegroundColor Yellow
         }
     }
     if ($warned) { Write-Host '' }
@@ -51,7 +52,7 @@ function Invoke-Generate {
     foreach ($pumlFile in Find-ValidPumlFiles) {
         $svgFile = Get-SvgPath $pumlFile
         $svgDir  = Split-Path -Parent $svgFile
-        $relative = $pumlFile.FullName.Substring($ScriptDir.Length + 1)
+        $relative = $pumlFile.FullName.Substring($RepoRoot.Length + 1)
 
         Write-Host "  processing: $relative ... " -NoNewline
         if (-not (Test-Path $svgDir)) { New-Item -ItemType Directory -Path $svgDir | Out-Null }
@@ -78,8 +79,8 @@ function Invoke-List {
     $count = 0
     foreach ($pumlFile in Find-ValidPumlFiles) {
         $svgFile  = Get-SvgPath $pumlFile
-        $relPuml  = $pumlFile.FullName.Substring($ScriptDir.Length + 1)
-        $relSvg   = $svgFile.Substring($ScriptDir.Length + 1)
+        $relPuml  = $pumlFile.FullName.Substring($RepoRoot.Length + 1)
+        $relSvg   = $svgFile.Substring($RepoRoot.Length + 1)
         Write-Host "  $relPuml"
         Write-Host "    -> $relSvg"
         $count++

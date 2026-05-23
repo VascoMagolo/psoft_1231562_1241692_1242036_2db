@@ -4,7 +4,7 @@
 
 Bom dia,
 A US216 fala em procurar por rotas alternativas entre dois aeroportos.
-A questão é a seguinte: Quais seriam os possíveis critérios para a procura de rotas alternativas? Poderiam ser, por exemplo, custo monetários, distância, tempo de voo, número de escalas, etc.?    
+A questão é a seguinte: Quais seriam os possíveis critérios para a procura de rotas alternativas? Poderiam ser, por exemplo, custo monetários, distância, tempo de voo, número de escalas, etc.?
 
 ## Answer
 

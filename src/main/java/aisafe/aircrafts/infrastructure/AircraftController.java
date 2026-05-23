@@ -29,7 +29,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping("/api/aircrafts")
-@Tag(name = "Aircrafts", description = "Aircraft management — WP#1A and WP#2B")
+@Tag(name = "Aircrafts", description = "Aircraft management - WP#1A")
 public class AircraftController {
 
     private final ViewAircraftDetailsUseCase viewAircraftDetails;
@@ -53,7 +53,7 @@ public class AircraftController {
      * @param request the request containing the information to create a new aircraft profile
      * @return a response entity with the created aircraft details and appropriate HATEOAS links
      */
-    @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role.")
+    @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Aircraft successfully registered"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
@@ -104,7 +104,7 @@ public class AircraftController {
      * @param registration the unique registration number of the aircraft to retrieve details for
      * @return a response entity containing the detailed information of the requested aircraft along with HATEOAS links for navigation and related actions
      */
-    @Operation(summary = "Get aircraft details by registration number", description = "Returns complete technical and operational details for a specific aircraft using its unique registration identifier.")
+    @Operation(summary = "Get aircraft details by registration number", description = "Returns complete technical and operational details for a specific aircraft using its unique registration identifier. (US103)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Aircraft details found and returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -129,7 +129,7 @@ public class AircraftController {
      * @param assembler assembler to convert the Page of search results into a HATEOAS-compliant paged model with navigation links
      * @return a response entity containing the paginated list of aircrafts matching the search criteria with HATEOAS links for navigation and details access
      */
-    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support.")
+    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support. (US104)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -160,7 +160,7 @@ public class AircraftController {
      * @param request the request containing the new status to set for the aircraft
      * @return a response entity containing the updated aircraft details along with HATEOAS links for navigation and related actions, or an appropriate error response if the update fails due to validation errors, version conflicts, or if the aircraft is not found
      */
-    @Operation(summary = "Update aircraft operational status", description = "Updates the status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check.")
+    @Operation(summary = "Update aircraft operational status", description = "Updates the status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check. (US105)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Aircraft status updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid status configuration or missing required parameters"),

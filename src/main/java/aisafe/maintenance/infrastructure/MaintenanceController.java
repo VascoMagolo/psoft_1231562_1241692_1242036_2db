@@ -27,7 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping("/api/maintenance")
-@Tag(name = "Maintenance", description = "Aircraft Maintenance Management — WP#2B")
+@Tag(name = "Maintenance", description = "Aircraft Maintenance Management - WP#4")
 public class MaintenanceController {
 
     private final CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase;
@@ -56,7 +56,7 @@ public class MaintenanceController {
      * @param request the request body containing the details of the maintenance template to be created
      * @return a ResponseEntity containing the created MaintenanceTemplateResponse
      */
-    @Operation(summary = "Create maintenance template", description = "Registers a new maintenance template configuration in the system.")
+    @Operation(summary = "Create maintenance template", description = "Registers a new maintenance template configuration in the system. (US115b)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Template created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
@@ -74,7 +74,7 @@ public class MaintenanceController {
      * @param request the request body containing the details of the maintenance part to be registered
      * @return a ResponseEntity containing the created MaintenancePartResponse
      */
-    @Operation(summary = "Register a maintenance part", description = "Adds a new hardware component or part to the maintenance catalog.")
+    @Operation(summary = "Register a maintenance part", description = "Adds a new hardware component or part to the maintenance catalog. (US226)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Part registered successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
@@ -92,7 +92,7 @@ public class MaintenanceController {
      * @param request the request body containing the details of the maintenance record to be created
      * @return a ResponseEntity containing the created MaintenanceRecordResponse with HATEOAS links for further actions
      */
-    @Operation(summary = "Create a maintenance record", description = "Schedules or logs a new maintenance record for a specific aircraft.")
+    @Operation(summary = "Create a maintenance record", description = "Schedules or logs a new maintenance record for a specific aircraft. (US115a)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Maintenance record created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
@@ -115,7 +115,7 @@ public class MaintenanceController {
      * @param request the request body containing the new status and notes for the maintenance record
      * @return a ResponseEntity containing the updated MaintenanceRecordResponse with HATEOAS links for further actions
      */
-    @Operation(summary = "Update maintenance record", description = "Updates the operational status and notes of an existing maintenance record. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check.")
+    @Operation(summary = "Update maintenance record", description = "Updates the operational status and notes of an existing maintenance record. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check. (US119)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Record updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid data or missing If-Match header"),
@@ -142,7 +142,7 @@ public class MaintenanceController {
      * @param assembler the PagedResourcesAssembler used to convert the Page of responses into a HATEOAS-compliant paged model
      * @return a ResponseEntity containing a paginated list of maintenance records for the specified aircraft
      */
-    @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number.")
+    @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number. (US116)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Records retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -169,7 +169,7 @@ public class MaintenanceController {
      * Endpoint to calculate and retrieve the total amount of maintenance hours performed across the entire fleet.
      * @return a ResponseEntity containing the total maintenance hours in the fleet
      */
-    @Operation(summary = "Get total maintenance hours", description = "Calculates and returns the total amount of maintenance hours performed across the entire fleet.")
+    @Operation(summary = "Get total maintenance hours", description = "Calculates and returns the total amount of maintenance hours performed across the entire fleet. (US117)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Total hours calculated and returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),

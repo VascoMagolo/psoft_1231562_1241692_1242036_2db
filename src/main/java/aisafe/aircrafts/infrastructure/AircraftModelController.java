@@ -28,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping("/api/aircraftModels")
-@Tag(name = "Aircraft Models", description = "Aircraft Model configurations and catalog — WP#1A")
+@Tag(name = "Aircraft Models", description = "Aircraft Model configurations and catalog - WP#1A")
 public class AircraftModelController {
 
     private final RegisterAircraftModelUseCase registerAircraftModel;
@@ -45,7 +45,7 @@ public class AircraftModelController {
      * @param request the details of the aircraft model to register
      * @return a response entity containing the details of the newly registered aircraft model, along with HATEOAS links
      */
-    @Operation(summary = "Register a new aircraft model", description = "Creates a new technical model specification for aircrafts in the catalog. Requires Fleet Manager role.")
+    @Operation(summary = "Register a new aircraft model", description = "Creates a new technical model specification for aircrafts in the catalog. Requires Fleet Manager role. (US101)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Aircraft model successfully registered"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
