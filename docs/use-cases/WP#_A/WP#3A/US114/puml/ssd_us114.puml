@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : searchRoutes(origin, destination)
+activate Sys
+Sys --> Actor : returns matching routes list
+deactivate Sys
+@enduml
