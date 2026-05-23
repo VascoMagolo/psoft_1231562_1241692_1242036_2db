@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : getRouteHistory(routeId)
+activate Sys
+Sys --> Actor : returns route history list
+deactivate Sys
+@enduml
