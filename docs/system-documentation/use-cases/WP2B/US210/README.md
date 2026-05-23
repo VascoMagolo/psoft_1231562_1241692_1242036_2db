@@ -28,9 +28,9 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 4 | No airports registered | HTTP 200 with empty list |
+| Step | Condition              | System Response          |
+| ---- | ---------------------- | ------------------------ |
+| 4    | No airports registered | HTTP 200 with empty list |
 
 ## Design Justification
 

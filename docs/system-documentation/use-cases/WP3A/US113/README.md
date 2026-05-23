@@ -47,11 +47,11 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Airport not found | HTTP 404 |
-| 2 | Route not found | HTTP 404 |
-| 3 | No routes found | HTTP 200 with empty list |
+| Step | Condition         | System Response          |
+| ---- | ----------------- | ------------------------ |
+| 2    | Airport not found | HTTP 404                 |
+| 2    | Route not found   | HTTP 404                 |
+| 3    | No routes found   | HTTP 200 with empty list |
 
 ---
 

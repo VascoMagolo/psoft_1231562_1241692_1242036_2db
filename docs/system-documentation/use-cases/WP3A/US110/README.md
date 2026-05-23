@@ -47,14 +47,14 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Missing or invalid required field | HTTP 400 |
-| 2 | Estimated flight time <= 0 | HTTP 400 |
-| 2 | Minimum range or capacity <= 0 | HTTP 400 |
-| 3 | Origin airport does not exist | HTTP 404 |
-| 3 | Destination airport does not exist | HTTP 404 |
-| 3 | Origin and destination are the same | HTTP 400 |
+| Step | Condition                           | System Response |
+| ---- | ----------------------------------- | --------------- |
+| 2    | Missing or invalid required field   | HTTP 400        |
+| 2    | Estimated flight time <= 0          | HTTP 400        |
+| 2    | Minimum range or capacity <= 0      | HTTP 400        |
+| 3    | Origin airport does not exist       | HTTP 404        |
+| 3    | Destination airport does not exist  | HTTP 404        |
+| 3    | Origin and destination are the same | HTTP 400        |
 
 ---
 

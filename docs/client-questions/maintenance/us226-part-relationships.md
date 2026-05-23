@@ -25,6 +25,7 @@ What is a "Domain Model" ? I know about Flights, Airports, and Airplanes, sorry.
 Let me rephrase my question.
 
 Regarding the tracking of maintenance parts inventory (US226), we want to make sure the system works exactly how your mechanics and supervisors expect:
+
 1. When a mechanic performs maintenance on an airplane, do they need to log exactly which parts were used so the system can automatically deduct them from the inventory? Or is the inventory updated manually by a supervisor later?
 2. Are these maintenance parts universal, or do we need the system to restrict certain parts so they can only be used on specific airplane models?
 
