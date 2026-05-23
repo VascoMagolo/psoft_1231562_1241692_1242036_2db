@@ -4,6 +4,12 @@ import aisafe.model.valueObject.IataCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+/**
+ * Entity representing a flight route between two airports.
+ * Stores operational requirements such as flight time,
+ * minimum range and passenger capacity.
+ */
+
 @Entity
 @Getter
 public class Route {
@@ -37,6 +43,7 @@ public class Route {
 
     @Version
     private Long version;
+
 
     protected Route() {}
 
@@ -74,10 +81,6 @@ public class Route {
             if (capacity <= 0) throw new IllegalArgumentException("Invalid minimum capacity");
             this.minimumCapacity = capacity;
         }
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public void deactivate() {

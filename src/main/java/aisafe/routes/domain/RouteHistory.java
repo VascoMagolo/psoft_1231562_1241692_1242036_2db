@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import java.time.LocalDateTime;
 
+/**
+ * Entity responsible for storing the history of changes
+ * made to a flight route.
+ */
 @Entity
 @Getter
 public class RouteHistory {
@@ -25,6 +29,13 @@ public class RouteHistory {
 
     protected RouteHistory() {}
 
+    /**
+     * Creates a new route history entry.
+     *
+     * @param route associated route
+     * @param changeDescription description of the performed change
+     * @param changedBy user responsible for the change
+     */
     public RouteHistory(Route route, String changeDescription, String changedBy) {
         this.route = route;
         this.changeDescription = changeDescription;

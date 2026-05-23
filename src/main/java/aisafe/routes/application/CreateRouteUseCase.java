@@ -10,6 +10,9 @@ import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case responsible for creating a new route.
+ */
 @UseCase
 @RequiredArgsConstructor
 public class CreateRouteUseCase {
@@ -17,6 +20,12 @@ public class CreateRouteUseCase {
     private final RouteRepository routeRepository;
     private final AirportRepository airportRepository;
 
+    /**
+     * Validates and persists a new route based on the provided request.
+     *
+     * @param request the data required to create the route
+     * @return the created route
+     */
     @Transactional
     public Route execute(CreateRouteRequest request) {
         IataCode origin = new IataCode(request.originIataCode());
