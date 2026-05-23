@@ -9,5 +9,4 @@ class AisafeApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

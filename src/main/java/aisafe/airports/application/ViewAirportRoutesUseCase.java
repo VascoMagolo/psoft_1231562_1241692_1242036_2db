@@ -4,7 +4,7 @@ import aisafe.UseCase;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
-import aisafe.routes.domain.Route;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.RouteRepository;
 
 import java.util.List;
@@ -27,11 +27,21 @@ public class ViewAirportRoutesUseCase {
      * @param iataCode the IATA code of the airport for which to retrieve routes
      * @return a list of routes associated with the specified airport
      */
-    public List<Route> execute(String iataCode) {
+    public List<RouteResponse> execute(String iataCode) {
         if (!airportRepository.existsByIataCodeCode(iataCode)) {
             throw new AirportNotFoundException(iataCode);
         }
         IataCode code = new IataCode(iataCode);
-        return routeRepository.findByOriginOrDestination(code, code);
+        return routeRepository.findByOriginOrDestination(code, code).stream()
+                .map(r -> new RouteResponse(
+                        r.getId(),
+                        r.getOrigin().getCode(),
+                        r.getDestination().getCode(),
+                        r.getEstimatedFlightTime(),
+                        r.getMinimumRange(),
+                        r.getMinimumCapacity(),
+                        r.isActive()
+                ))
+                .toList();
     }
 }
