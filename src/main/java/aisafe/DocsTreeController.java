@@ -1,5 +1,6 @@
 package aisafe;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 /**
  * Controller for serving the documentation tree structure.
  */
+@Hidden
 @RestController
 public class DocsTreeController {
 

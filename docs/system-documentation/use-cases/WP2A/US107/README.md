@@ -26,9 +26,9 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Airport not found | HTTP 404 |
+| Step | Condition         | System Response |
+| ---- | ----------------- | --------------- |
+| 2    | Airport not found | HTTP 404        |
 
 ## Design Justification
 

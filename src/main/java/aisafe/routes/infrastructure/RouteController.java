@@ -27,7 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/routes")
-@Tag(name = "Routes", description = "Flight Routes Management")
+@Tag(name = "Routes", description = "Flight Routes Management - WP#3")
 public class RouteController {
 
     private final CreateRouteUseCase createRoute;

@@ -35,13 +35,13 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | IATA code format invalid or missing | HTTP 400 |
-| 2 | Required field missing (name, city, country, timezone) | HTTP 400 |
-| 2 | No runways provided | HTTP 400 |
-| 2 | Coordinates out of valid range | HTTP 400 |
-| 3 | IATA code already registered | HTTP 409 |
+| Step | Condition                                              | System Response |
+| ---- | ------------------------------------------------------ | --------------- |
+| 2    | IATA code format invalid or missing                    | HTTP 400        |
+| 2    | Required field missing (name, city, country, timezone) | HTTP 400        |
+| 2    | No runways provided                                    | HTTP 400        |
+| 2    | Coordinates out of valid range                         | HTTP 400        |
+| 3    | IATA code already registered                           | HTTP 409        |
 
 ## Design Justification
 

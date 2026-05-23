@@ -33,11 +33,11 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Airport not found | HTTP 404 |
-| 3 | Aircraft model not found | HTTP 404 |
-| 4 | Certification already exists | HTTP 409 |
+| Step | Condition                    | System Response |
+| ---- | ---------------------------- | --------------- |
+| 2    | Airport not found            | HTTP 404        |
+| 3    | Aircraft model not found     | HTTP 404        |
+| 4    | Certification already exists | HTTP 409        |
 
 ## Design Justification
 

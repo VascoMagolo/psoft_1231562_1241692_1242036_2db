@@ -818,8 +818,8 @@
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Has origin and destination\", () => {",
                   "    const body = pm.response.json();",
-                  "    pm.expect(body.origin).to.exist;",
-                  "    pm.expect(body.destination).to.exist;",
+                  "    pm.expect(body.originIataCode).to.exist;",
+                  "    pm.expect(body.destinationIataCode).to.exist;",
                   "});"
                 ]
               }
@@ -877,7 +877,9 @@
           ],
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              { "key": "If-Match", "value": "0" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"estimatedFlightTime\": 60,\r\n    \"minimumRange\": 600.0,\r\n    \"minimumCapacity\": 120\r\n}",
@@ -907,7 +909,9 @@
           ],
           "request": {
             "method": "PATCH",
-            "header": [],
+            "header": [
+              { "key": "If-Match", "value": "0" }
+            ],
             "url": {
               "raw": "{{base_url}}/api/routes/{{route_id}}/deactivate",
               "host": ["{{base_url}}"],
@@ -925,7 +929,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.content).to.be.an('array');",
+                  "    pm.expect(body.totalElements).to.be.a('number');",
+                  "});"
                 ]
               }
             }
@@ -950,7 +958,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.content).to.be.an('array');",
+                  "    pm.expect(body.totalElements).to.be.a('number');",
+                  "});"
                 ]
               }
             }

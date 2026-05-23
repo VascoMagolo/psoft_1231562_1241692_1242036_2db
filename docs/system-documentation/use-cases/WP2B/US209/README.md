@@ -29,10 +29,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Airport not found | HTTP 404 |
-| 4 | Airport exists but has no routes | HTTP 200 with empty list |
+| Step | Condition                        | System Response          |
+| ---- | -------------------------------- | ------------------------ |
+| 2    | Airport not found                | HTTP 404                 |
+| 4    | Airport exists but has no routes | HTTP 200 with empty list |
 
 ## Design Justification
 

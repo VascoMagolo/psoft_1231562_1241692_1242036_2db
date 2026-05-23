@@ -30,10 +30,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Required field missing or invalid | HTTP 400 |
-| 3 | IATA code already registered | HTTP 409 |
+| Step | Condition                         | System Response |
+| ---- | --------------------------------- | --------------- |
+| 2    | Required field missing or invalid | HTTP 400        |
+| 3    | IATA code already registered      | HTTP 409        |
 
 ## Design Justification
 

@@ -42,10 +42,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Route does not exist | HTTP 404 |
-| 3 | No history entries found | HTTP 200 with empty list |
+| Step | Condition                | System Response          |
+| ---- | ------------------------ | ------------------------ |
+| 2    | Route does not exist     | HTTP 404                 |
+| 3    | No history entries found | HTTP 200 with empty list |
 
 ---
 
