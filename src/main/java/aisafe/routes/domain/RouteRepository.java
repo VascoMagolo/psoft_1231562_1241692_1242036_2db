@@ -1,6 +1,8 @@
 package aisafe.routes.domain;
 
 import aisafe.airports.domain.IataCode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,29 +15,32 @@ import java.util.List;
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     /**
-     * Find by origin list.
+     * Find by origin page.
      *
-     * @param origin the origin
-     * @return the list
+     * @param origin   the origin
+     * @param pageable the pagination information
+     * @return the page
      */
-    List<Route> findByOrigin(IataCode origin);
+    Page<Route> findByOrigin(IataCode origin, Pageable pageable);
 
     /**
-     * Find by destination list.
+     * Find by destination page.
      *
      * @param destination the destination
-     * @return the list
+     * @param pageable    the pagination information
+     * @return the page
      */
-    List<Route> findByDestination(IataCode destination);
+    Page<Route> findByDestination(IataCode destination, Pageable pageable);
 
     /**
-     * Find by origin and destination list.
+     * Find by origin and destination page.
      *
      * @param origin      the origin
      * @param destination the destination
-     * @return the list
+     * @param pageable    the pagination information
+     * @return the page
      */
-    List<Route> findByOriginAndDestination(IataCode origin, IataCode destination);
+    Page<Route> findByOriginAndDestination(IataCode origin, IataCode destination, Pageable pageable);
 
     /**
      * Exists by origin and destination boolean.
