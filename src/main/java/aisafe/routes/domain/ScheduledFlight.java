@@ -1,6 +1,5 @@
-package aisafe.model.entities;
+package aisafe.routes.domain;
 
-import aisafe.model.enums.FlightStatus;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;

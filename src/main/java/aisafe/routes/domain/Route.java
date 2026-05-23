@@ -4,6 +4,12 @@ import aisafe.airports.domain.IataCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+/**
+ * Entity representing a flight route between two airports.
+ * Stores operational requirements such as flight time,
+ * minimum range and passenger capacity.
+ */
+
 @Entity
 @Getter
 public class Route {
