@@ -23,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/airports")
-@Tag(name = "Airports", description = "Airport management — WP#2A and WP#2B")
+@Tag(name = "Airports", description = "Airport management - WP#2A and WP#2B")
 public class AirportController {
     private final RegisterAirportUseCase registerAirport;
     private final AddAirportCertificationUseCase addCertification;

@@ -31,7 +31,8 @@ public class AircraftModelController {
     private final RegisterAircraftModelUseCase registerAircraftModel;
     private final ListAircraftModelsUseCase listAircraftModels;
 
-    public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel, ListAircraftModelsUseCase listAircraftModels) {
+    public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
+            ListAircraftModelsUseCase listAircraftModels) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
     }
@@ -49,7 +50,8 @@ public class AircraftModelController {
             @Valid @RequestBody RegisterAircraftModelRequest request) {
         AircraftModelResponse response = registerAircraftModel.execute(request);
         EntityModel<AircraftModelResponse> model = EntityModel.of(response);
-        model.add(linkTo(methodOn(AircraftModelController.class).getAllModels(Pageable.unpaged(), null)).withRel("all-models"));
+        model.add(linkTo(methodOn(AircraftModelController.class).getAllModels(Pageable.unpaged(), null))
+                .withRel("all-models"));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }

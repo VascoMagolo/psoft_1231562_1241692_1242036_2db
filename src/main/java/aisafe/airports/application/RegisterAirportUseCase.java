@@ -1,5 +1,6 @@
 package aisafe.airports.application;
 
+import aisafe.DuplicateResourceException;
 import aisafe.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
@@ -21,6 +22,10 @@ public class RegisterAirportUseCase {
     }
 
     public AirportResponse execute(RegisterAirportRequest request) {
+        if (airportRepository.existsByIataCodeCode(request.iataCode())) {
+            throw new DuplicateResourceException("Airport with IATA code '" + request.iataCode() + "' already exists.");
+        }
+
         List<Runway> runways = request.runways().stream()
                 .map(r -> new Runway(r.name(), r.length(), r.orientation()))
                 .toList();
