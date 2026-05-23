@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * REST controller for managing aircraft profiles in the system.
+ * Provides endpoints for creating, retrieving, searching, and updating aircraft information.
+ */
 @RestController
 @RequestMapping("/api/aircrafts")
 @Tag(name = "Aircrafts", description = "Aircraft management — WP#1A and WP#2B")
@@ -44,6 +48,11 @@ public class AircraftController {
         this.updateAircraftStatus = updateAircraftStatus;
     }
 
+    /**
+     * Registers a new aircraft in the system with the provided details.
+     * @param request the request containing the information to create a new aircraft profile
+     * @return a response entity with the created aircraft details and appropriate HATEOAS links
+     */
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Aircraft successfully registered"),
@@ -62,6 +71,12 @@ public class AircraftController {
                 .body(toHateoasModel(createdAircraft, new RegistrationNumber(request.registrationNumber())));
     }
 
+    /**
+     * Retrieves a paginated list of all registered aircrafts in the system.
+     * @param pageable pagination information for the request (page number, size, sorting)
+     * @param assembler assembler to convert the Page of aircraft responses into a HATEOAS-compliant paged model with navigation links
+     * @return a response entity containing the paginated list of aircrafts with HATEOAS links for navigation and details access.
+     */
     @Operation(summary = "Get all aircrafts with pagination", description = "Returns a paginated list of all registered aircrafts. Supports HATEOAS navigation links.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Paginated list returned successfully"),
@@ -84,6 +99,11 @@ public class AircraftController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    /**
+     * Retrieves detailed information about a specific aircraft using its unique registration number.
+     * @param registration the unique registration number of the aircraft to retrieve details for
+     * @return a response entity containing the detailed information of the requested aircraft along with HATEOAS links for navigation and related actions
+     */
     @Operation(summary = "Get aircraft details by registration number", description = "Returns complete technical and operational details for a specific aircraft using its unique registration identifier.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Aircraft details found and returned"),
@@ -100,6 +120,15 @@ public class AircraftController {
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
+    /**
+     * Performs a search for aircrafts based on optional filtering criteria.
+     * @param modelId the technical model identification number to filter by (optional)
+     * @param status the current operational status of the aircraft to filter by (optional)
+     * @param year the exact year the aircraft was manufactured to filter by (optional)
+     * @param pageable pagination information for the request (page number, size, sorting)
+     * @param assembler assembler to convert the Page of search results into a HATEOAS-compliant paged model with navigation links
+     * @return a response entity containing the paginated list of aircrafts matching the search criteria with HATEOAS links for navigation and details access
+     */
     @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
@@ -124,6 +153,13 @@ public class AircraftController {
         return ResponseEntity.ok(pagedModel);
     }
 
+    /**
+     * Updates the operational status of an existing aircraft.
+     * @param registration the unique registration number of the aircraft to update
+     * @param ifMatchHeader the value of the 'If-Match' header containing the current version of the aircraft resource for optimistic locking validation
+     * @param request the request containing the new status to set for the aircraft
+     * @return a response entity containing the updated aircraft details along with HATEOAS links for navigation and related actions, or an appropriate error response if the update fails due to validation errors, version conflicts, or if the aircraft is not found
+     */
     @Operation(summary = "Update aircraft operational status", description = "Updates the status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Aircraft status updated successfully"),
@@ -146,6 +182,12 @@ public class AircraftController {
         return ResponseEntity.ok(toHateoasModel(updatedAircraft, registration));
     }
 
+    /**
+     * Helper method to convert a ViewAircraftDetailsResponse DTO into an EntityModel with HATEOAS links for navigation and related actions.
+     * @param response the ViewAircraftDetailsResponse DTO to convert into an EntityModel
+     * @param registration the registration number of the aircraft, used to create links to the aircraft details and related actions
+     * @return an EntityModel containing the aircraft details and HATEOAS links for self, all aircrafts, and update status actions
+     */
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {
         EntityModel<ViewAircraftDetailsResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registration)).withSelfRel());

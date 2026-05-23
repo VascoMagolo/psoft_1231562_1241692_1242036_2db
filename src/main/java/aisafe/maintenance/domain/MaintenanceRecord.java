@@ -8,6 +8,9 @@ import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a maintenance record for an aircraft
+ */
 @Getter
 @Entity
 public class MaintenanceRecord {

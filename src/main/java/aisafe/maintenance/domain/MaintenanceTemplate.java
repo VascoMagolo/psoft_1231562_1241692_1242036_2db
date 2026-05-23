@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class MaintenanceTemplate {
     @Id
     @Column(name = "maintenance_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Getter
     @Column ( nullable = false )
     private String name;
     @Enumerated(EnumType.STRING)

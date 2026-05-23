@@ -13,6 +13,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Spring Security configuration class that sets up authentication and authorization rules for the application.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -25,6 +28,12 @@ public class SecurityConfig {
         this.authenticationProvider = authenticationProvider;
     }
 
+    /**
+     * Configures the security filter chain, defining which endpoints are publicly accessible and which require authentication and specific roles.
+     * @param http the HttpSecurity object used to configure security settings
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs while configuring the security filter chain
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

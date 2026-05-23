@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Use case for retrieving statistics about airports
+ */
 @UseCase
 public class AirportStatisticsUseCase {
     private final AirportRepository airportRepository;
@@ -22,10 +25,15 @@ public class AirportStatisticsUseCase {
         this.routeRepository = routeRepository;
     }
 
+    /**
+     * Executes the use case to retrieve airport statistics.
+     * @return a list of AirportStatisticsResponse DTOs containing the statistics for each airport
+     */
     public List<AirportStatisticsResponse> execute() {
         List<Airport> airports = airportRepository.findAll();
         List<Route> routes = routeRepository.findAll();
 
+        // Precompute the route count for each airport to avoid repeated filtering
         Map<Long, Long> routeCountById = airports.stream()
                 .collect(Collectors.toMap(Airport::getId, airport -> {
                     String code = airport.getIataCode().getCode();
@@ -34,7 +42,7 @@ public class AirportStatisticsUseCase {
                             code.equals(r.getDestination().getCode())
                     ).count();
                 }));
-
+        // Map each airport to its statistics response and sort by route count in descending order
         return airports.stream()
                 .map(a -> new AirportStatisticsResponse(
                         a.getIataCode().getCode(),

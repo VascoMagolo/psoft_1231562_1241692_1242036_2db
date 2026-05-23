@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Spring Data repository for `AircraftCertification` entities.
+ */
 @Repository
 public interface AircraftCertificationRepository extends JpaRepository<AircraftCertification, Long> {
     List<AircraftCertification> findByAirport(Airport airport);

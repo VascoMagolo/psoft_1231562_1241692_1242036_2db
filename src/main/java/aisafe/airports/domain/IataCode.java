@@ -1,12 +1,14 @@
 package aisafe.airports.domain;
 
-import aisafe.exceptions.InvalidIataCodeException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
 import java.util.regex.Pattern;
 
+/**
+ * Value object representing an IATA code for an airport.
+ */
 @Embeddable
 @Getter
 public class IataCode {

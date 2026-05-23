@@ -12,12 +12,20 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Controller for serving the documentation tree structure.
+ */
 @RestController
 public class DocsTreeController {
 
     @Value("${aisafe.docs.path:docs}")
     private String docsPath;
 
+    /**
+     * Endpoint to retrieve the list of documentation files in a tree structure.
+     * @return a ResponseEntity containing a list of file paths relative to the docs directory
+     * @throws IOException if an I/O error occurs while reading the documentation directory
+     */
     @GetMapping("/docs/tree")
     public ResponseEntity<List<String>> getTree() throws IOException {
         Path root = Paths.get(docsPath);

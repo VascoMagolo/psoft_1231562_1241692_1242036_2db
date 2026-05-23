@@ -9,6 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Searches for aircrafts based on various criteria such as model, status, and manufacturing year.
+ * This use case is read-only and supports pagination and sorting.
+ * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
+ */
 @UseCase
 @Transactional(readOnly = true)
 public class SearchAircraftUseCase {
@@ -19,6 +24,14 @@ public class SearchAircraftUseCase {
         this.repository = repository;
     }
 
+    /**
+     * Search for aircrafts based on the provided criteria.
+     * @param modelId the ID of the aircraft model to filter by (optional)
+     * @param status the status of the aircraft to filter by (optional)
+     * @param year the manufacturing year to filter by (optional)
+     * @param pageable pagination and sorting information
+     * @return a page of aircraft DTOs matching the search criteria
+     */
     public Page<SearchAircraftUseCaseResponse> execute(Long modelId, AircraftStatus status, Integer year, Pageable pageable) {
 
         Page<Aircraft> resultPage = repository.searchAircrafts(modelId, status, year, pageable);

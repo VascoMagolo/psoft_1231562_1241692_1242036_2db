@@ -8,6 +8,9 @@ import aisafe.security.domain.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case for registering a new user in the system.
+ */
 @UseCase
 @Transactional
 public class RegisterUserUseCase {
@@ -22,6 +25,11 @@ public class RegisterUserUseCase {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Registers a new user with the provided details
+     * @param request the registration request containing the information of the new user
+     * @return an authentication response containing a JWT token for the newly registered user
+     */
     public AuthResponse execute(RegisterRequest request) {
         User user = new User(
                 request.username(),

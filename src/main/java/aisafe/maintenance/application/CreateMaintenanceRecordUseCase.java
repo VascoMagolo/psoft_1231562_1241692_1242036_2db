@@ -7,6 +7,9 @@ import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case for creating a new maintenance record in the system.
+ */
 @UseCase
 @Transactional
 public class CreateMaintenanceRecordUseCase {
@@ -22,6 +25,11 @@ public class CreateMaintenanceRecordUseCase {
         this.aircraftRepository = aircraftRepository;
     }
 
+    /**
+     * Creates a new maintenance record based on the provided request data and saves it to the repository.
+     * @param request the request containing the details of the maintenance record to be created
+     * @return a response containing information of the created maintenance record
+     */
     public MaintenanceRecordResponse execute(CreateMaintenanceRecordRequest request) {
         MaintenancePart part = partRepository.findByPartNumber(request.part())
                 .orElseThrow(() -> new MaintenancePartNotFoundException("Part '" + request.part() + "' not found."));

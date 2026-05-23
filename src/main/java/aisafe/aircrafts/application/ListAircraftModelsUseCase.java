@@ -22,6 +22,8 @@ public class ListAircraftModelsUseCase {
 
     /**
      * Return all aircraft models as lightweight DTOs used by the API/UI.
+     * @param pageable pagination and sorting information
+     * @return a page of aircraft model DTOs
      */
     public Page<ListAircraftModelsUseCaseResponse> execute(Pageable pageable) {
 

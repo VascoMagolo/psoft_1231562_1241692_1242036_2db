@@ -10,7 +10,7 @@ public enum AircraftStatus {
     IN_FLIGHT;
 
     /**
-     * Valida se uma dada String corresponde a um estado válido.
+     * Checks if the provided status string corresponds to a valid AircraftStatus enum value.
      */
     public static boolean isValid(String status) {
         if (status == null || status.trim().isEmpty()) {
