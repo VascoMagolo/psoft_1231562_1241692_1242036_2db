@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Repository interface for managing MaintenanceTemplate entities in the database.
+ */
 @Repository
 public interface MaintenanceTemplateRepository extends JpaRepository<MaintenanceTemplate, Long> {
     boolean existsByName(String name);

@@ -25,6 +25,12 @@ public class ViewAllMaintenanceRecordsUseCase {
         this.aircraftRepository = aircraftRepository;
     }
 
+    /**
+     * Retrieves a paginated list of maintenance records for the specified aircraft registration number.
+     * @param registrationNumber the registration number of the aircraft for which to retrieve maintenance records
+     * @param pageable the pagination information for the query
+     * @return a paginated list of maintenance records for the specified aircraft
+     */
     public Page<ViewAllMaintenanceRecordsResponse> execute(RegistrationNumber registrationNumber, Pageable pageable) {
         aircraftRepository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber.getNumber() + " not found."));
@@ -34,6 +40,11 @@ public class ViewAllMaintenanceRecordsUseCase {
         return recordsPage.map(this::toResponse);
     }
 
+    /**
+     * Converts a MaintenanceRecord entity to a ViewAllMaintenanceRecordsResponse DTO.
+     * @param record the MaintenanceRecord entity to be converted
+     * @return a ViewAllMaintenanceRecordsResponse DTO containing the details of the maintenance record
+     */
     private ViewAllMaintenanceRecordsResponse toResponse(MaintenanceRecord record) {
         return new ViewAllMaintenanceRecordsResponse(
                 record.getPart().getPartNumber(),

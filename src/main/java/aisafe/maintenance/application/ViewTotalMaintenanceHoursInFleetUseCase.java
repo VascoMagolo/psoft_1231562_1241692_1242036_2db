@@ -1,7 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.UseCase;
-import aisafe.maintenance.application.dtos.ViewTotalMaintenanceHoursinFleetResponse;
+import aisafe.maintenance.application.dtos.ViewTotalMaintenanceHoursInFleetResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +18,15 @@ public class ViewTotalMaintenanceHoursInFleetUseCase {
         this.repository = repository;
     }
 
-    public ViewTotalMaintenanceHoursinFleetResponse execute() {
+    /**
+     * Calculates the total maintenance hours for the entire fleet by summing up the expected duration of all maintenance records.
+     * @return a response containing the total maintenance hours in the fleet
+     */
+    public ViewTotalMaintenanceHoursInFleetResponse execute() {
         Integer totalHours = repository.findAll().stream()
                 .map(MaintenanceRecord::getExpectedDuration)
                 .reduce(0, Integer::sum);
 
-        return new ViewTotalMaintenanceHoursinFleetResponse(totalHours);
+        return new ViewTotalMaintenanceHoursInFleetResponse(totalHours);
     }
 }

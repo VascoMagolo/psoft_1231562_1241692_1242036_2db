@@ -6,12 +6,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 @Entity
+@Getter
 public class MaintenancePart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column( nullable = false )
-    @Getter
     private String partNumber;
     @Column ( nullable = false )
     private String name;

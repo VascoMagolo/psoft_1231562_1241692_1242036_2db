@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
+/**
+ * Represents a service offered at an airport.
+ */
 @Embeddable
 @Getter
 public class Service {

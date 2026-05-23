@@ -7,6 +7,17 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+/**
+ * Request DTO for creating a new maintenance record.
+ * @param description
+ * @param startDate
+ * @param expectedDuration
+ * @param part
+ * @param notes
+ * @param template
+ * @param status
+ * @param registrationNumber
+ */
 public record CreateMaintenanceRecordRequest(
         @NotBlank String description,
         @NotNull LocalDateTime startDate,

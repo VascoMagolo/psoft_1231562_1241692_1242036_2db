@@ -13,6 +13,9 @@ import aisafe.airports.domain.AircraftCertificationRepository;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 
+/**
+ * Use case for adding a new aircraft certification to an airport.
+ */
 @UseCase
 public class AddAirportCertificationUseCase {
     private final AirportRepository airportRepository;
@@ -27,6 +30,12 @@ public class AddAirportCertificationUseCase {
         this.aircraftModelRepository = aircraftModelRepository;
     }
 
+    /**
+     * Adds a new aircraft certification to the specified airport.
+     * @param iataCode the IATA code of the airport to which the certification will be added
+     * @param request the details of the certification to add
+     * @return a DTO containing the details of the newly added certification
+     */
     public AircraftCertificationResponse execute(String iataCode, AddCertificationRequest request) {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));

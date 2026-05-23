@@ -12,6 +12,9 @@ import aisafe.airports.domain.Terminal;
 
 import java.util.List;
 
+/**
+ * Use case for registering a new airport in the system.
+ */
 @UseCase
 public class RegisterAirportUseCase {
     private final AirportRepository airportRepository;
@@ -20,6 +23,11 @@ public class RegisterAirportUseCase {
         this.airportRepository = airportRepository;
     }
 
+    /**
+     * Registers a new airport based on the provided request data.
+     * @param request the details of the airport to register.
+     * @return a DTO containing the details of the newly registered airport.
+     */
     public AirportResponse execute(RegisterAirportRequest request) {
         List<Runway> runways = request.runways().stream()
                 .map(r -> new Runway(r.name(), r.length(), r.orientation()))

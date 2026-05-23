@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller responsible for handling authentication-related HTTP requests
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -19,10 +22,22 @@ public class AuthController {
         this.AuthenticateUser = authenticateUser;
         this.registerUser = registerUser;
     }
+
+    /**
+     * Endpoint for user registration.
+     * @param request the registration request containing the user information
+     * @return an AuthResponse containing the authentication token for the newly registered user
+     */
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest request) {
         return registerUser.execute(request);
     }
+
+    /**
+     * Endpoint for user login.
+     * @param request the login request containing the username and password
+     * @return an AuthResponse containing the authentication token for the authenticated user
+     */
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return AuthenticateUser.execute(request);

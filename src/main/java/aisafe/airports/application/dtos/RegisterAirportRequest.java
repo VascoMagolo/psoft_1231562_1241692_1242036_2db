@@ -6,6 +6,21 @@ import jakarta.validation.constraints.*;
 
 import java.util.List;
 
+/**
+ * DTO for registering a new airport, with comprehensive validation and documentation.
+ * @param iataCode IATA code of the airport
+ * @param name Name of the airport
+ * @param city  City where the airport is located
+ * @param country Country where the airport is located
+ * @param region Region where the airport is located
+ * @param timezone Timezone of the airport
+ * @param imagePath Path to an image representing the airport
+ * @param operationalHours Operational hours of the airport
+ * @param runways List of runways at the airport, each with name, length, and orientation
+ * @param services List of services available at the airport
+ * @param terminals List of terminals at the airport
+ * @param gates List of gates at the airport
+ */
 @Schema(description = "Request body for registering a new airport")
 public record RegisterAirportRequest(
         @Schema(description = "3-character IATA airport code (letters or digits)", example = "LIS")
@@ -64,6 +79,12 @@ public record RegisterAirportRequest(
         @Schema(description = "List of gate identifiers (optional)", example = "[\"A1\", \"B3\"]")
         List<String> gates
 ) {
+    /**
+ * Nested record representing runway details within the airport registration request.
+ * @param name Runway name or identifier
+ * @param length Runway length in meters
+ * @param orientation Runway orientation
+ */
     @Schema(description = "Runway details")
     public record RunwayRequest(
             @Schema(description = "Runway name or identifier", example = "03/21")

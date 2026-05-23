@@ -9,6 +9,9 @@ import aisafe.routes.domain.RouteRepository;
 
 import java.util.List;
 
+/**
+ * Use case for viewing all routes associated with a specific airport
+ */
 @UseCase
 public class ViewAirportRoutesUseCase {
     private final AirportRepository airportRepository;
@@ -19,6 +22,11 @@ public class ViewAirportRoutesUseCase {
         this.routeRepository = routeRepository;
     }
 
+    /**
+     * Retrieves a list of all routes that either originate from or are destined for the specified airport.
+     * @param iataCode the IATA code of the airport for which to retrieve routes
+     * @return a list of routes associated with the specified airport
+     */
     public List<Route> execute(String iataCode) {
         if (!airportRepository.existsByIataCodeCode(iataCode)) {
             throw new AirportNotFoundException(iataCode);
