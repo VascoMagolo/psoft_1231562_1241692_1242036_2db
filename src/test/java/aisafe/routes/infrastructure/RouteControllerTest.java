@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -78,8 +80,8 @@ class RouteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.origin.code").value("OPO"))
-                .andExpect(jsonPath("$.destination.code").value("LIS"))
+                .andExpect(jsonPath("$.originIataCode").value("OPO"))
+                .andExpect(jsonPath("$.destinationIataCode").value("LIS"))
                 .andExpect(jsonPath("$.active").value(true));
     }
 
@@ -89,7 +91,7 @@ class RouteControllerTest {
 
         mockMvc.perform(get("/api/routes/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.origin.code").value("OPO"));
+                .andExpect(jsonPath("$.originIataCode").value("OPO"));
     }
 
     @Test
@@ -98,17 +100,19 @@ class RouteControllerTest {
         deactivated.deactivate();
         when(desactivateRoute.execute(anyLong())).thenReturn(deactivated);
 
-        mockMvc.perform(patch("/api/routes/1/deactivate"))
+        mockMvc.perform(patch("/api/routes/1/deactivate")
+                        .header("If-Match", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
     }
 
     @Test
     void ensureGetRoutesFromAirportReturns200() throws Exception {
-        when(listRoutesFromAirport.execute(anyString())).thenReturn(List.of(sampleRoute));
+        when(listRoutesFromAirport.execute(anyString(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(sampleRoute)));
 
         mockMvc.perform(get("/api/routes/airport/OPO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].origin.code").value("OPO"));
+                .andExpect(jsonPath("$.content[0].originIataCode").value("OPO"));
     }
 }
