@@ -9,9 +9,9 @@
 ## Acceptance Criteria
 
 - The system must support filtering routes by:
-    - origin airport
-    - destination airport
-    - both origin and destination
+  - origin airport
+  - destination airport
+  - both origin and destination
 - Search results must include route summaries.
 - If no routes match the criteria, the system returns an empty list.
 - On success the system returns HTTP 200.
@@ -41,10 +41,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Invalid filter format | HTTP 400 |
-| 3 | No matching routes found | HTTP 200 with empty list |
+| Step | Condition                | System Response          |
+| ---- | ------------------------ | ------------------------ |
+| 2    | Invalid filter format    | HTTP 400                 |
+| 3    | No matching routes found | HTTP 200 with empty list |
 
 ---
 

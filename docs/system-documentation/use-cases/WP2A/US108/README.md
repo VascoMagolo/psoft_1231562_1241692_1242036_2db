@@ -28,9 +28,9 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 3 | No airports match the filters | HTTP 200 with empty page |
+| Step | Condition                     | System Response          |
+| ---- | ----------------------------- | ------------------------ |
+| 3    | No airports match the filters | HTTP 200 with empty page |
 
 ## Design Justification
 

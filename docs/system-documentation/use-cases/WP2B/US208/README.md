@@ -33,10 +33,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Airport not found | HTTP 404 |
-| 4 | Optimistic locking version conflict | HTTP 409 |
+| Step | Condition                           | System Response |
+| ---- | ----------------------------------- | --------------- |
+| 2    | Airport not found                   | HTTP 404        |
+| 4    | Optimistic locking version conflict | HTTP 409        |
 
 ## Design Justification
 

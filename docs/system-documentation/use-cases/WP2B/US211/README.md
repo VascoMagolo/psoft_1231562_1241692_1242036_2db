@@ -29,10 +29,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 3 | No airports registered | HTTP 200 with empty list |
-| 3 | Airport has no region (region is null) | Airport placed in `"Unknown"` group |
+| Step | Condition                              | System Response                     |
+| ---- | -------------------------------------- | ----------------------------------- |
+| 3    | No airports registered                 | HTTP 200 with empty list            |
+| 3    | Airport has no region (region is null) | Airport placed in `"Unknown"` group |
 
 ## Design Justification
 

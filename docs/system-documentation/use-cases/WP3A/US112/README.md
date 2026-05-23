@@ -46,10 +46,10 @@
 
 ## Alternative / Exception Flows
 
-| Step | Condition | System Response |
-|------|-----------|-----------------|
-| 2 | Invalid request data | HTTP 400 |
-| 3 | Route not found | HTTP 404 |
+| Step | Condition            | System Response |
+| ---- | -------------------- | --------------- |
+| 2    | Invalid request data | HTTP 400        |
+| 3    | Route not found      | HTTP 404        |
 
 ---
 

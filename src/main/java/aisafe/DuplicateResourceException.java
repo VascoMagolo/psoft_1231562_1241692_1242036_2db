@@ -1,6 +1,6 @@
 package aisafe;
 
-public class DuplicateResourceException extends RuntimeException {
+public class DuplicateResourceException extends DomainException {
     public DuplicateResourceException(String message) {
         super(message);
     }
