@@ -1,6 +1,6 @@
 package aisafe.airports.domain;
 
-import aisafe.exceptions.InvalidContactException;
+import aisafe.airports.domain.InvalidContactException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

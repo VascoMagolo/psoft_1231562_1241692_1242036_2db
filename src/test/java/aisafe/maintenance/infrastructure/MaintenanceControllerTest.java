@@ -137,7 +137,7 @@ class MaintenanceControllerTest {
 
     @Test
     void ensureGetTotalHoursReturns200() throws Exception {
-        when(viewTotalMaintenanceHoursInFleetUseCase.execute()).thenReturn(new ViewTotalMaintenanceHoursinFleetResponse(120));
+        when(viewTotalMaintenanceHoursInFleetUseCase.execute()).thenReturn(new ViewTotalMaintenanceHoursInFleetResponse(120));
 
         mockMvc.perform(get("/api/maintenance/records/hours"))
                 .andExpect(status().isOk())

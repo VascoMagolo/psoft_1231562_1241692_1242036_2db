@@ -1,6 +1,6 @@
 package aisafe.maintenance.application;
 
-import aisafe.maintenance.application.dtos.ViewTotalMaintenanceHoursinFleetResponse;
+import aisafe.maintenance.application.dtos.ViewTotalMaintenanceHoursInFleetResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class ViewTotalMaintenanceHoursInFleetUseCaseTest {
     void ensureEmptyFleetReturnsZeroHours() {
         when(repository.findAll()).thenReturn(List.of());
 
-        ViewTotalMaintenanceHoursinFleetResponse result = viewTotalHours.execute();
+        ViewTotalMaintenanceHoursInFleetResponse result = viewTotalHours.execute();
 
         assertEquals(0, result.totalHours());
     }
@@ -40,7 +40,7 @@ class ViewTotalMaintenanceHoursInFleetUseCaseTest {
         when(r2.getExpectedDuration()).thenReturn(8);
         when(repository.findAll()).thenReturn(List.of(r1, r2));
 
-        ViewTotalMaintenanceHoursinFleetResponse result = viewTotalHours.execute();
+        ViewTotalMaintenanceHoursInFleetResponse result = viewTotalHours.execute();
 
         assertEquals(12, result.totalHours());
     }

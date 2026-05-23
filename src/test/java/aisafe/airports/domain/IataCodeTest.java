@@ -1,6 +1,6 @@
 package aisafe.airports.domain;
 
-import aisafe.exceptions.InvalidIataCodeException;
+import aisafe.airports.domain.InvalidIataCodeException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
