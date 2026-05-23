@@ -4,6 +4,10 @@ import aisafe.aircrafts.domain.AircraftModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+/**
+ * Represents the certification of an aircraft model at a specific airport.
+ * Each certification indicates that a particular aircraft model is approved for operation at the associated airport.
+ */
 @Entity
 @Getter
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"airport_id", "aircraft_model_id"}))

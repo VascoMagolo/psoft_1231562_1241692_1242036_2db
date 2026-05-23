@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entity representing an airport in the system.
+ */
 @Entity
 @Getter
 public class Airport {

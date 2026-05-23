@@ -10,6 +10,9 @@ import org.springframework.util.Assert;
 
 import java.util.*;
 
+/**
+ * Represents a user in the system with authentication and authorization details.
+ */
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

@@ -5,6 +5,10 @@ import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case for updating the status of an aircraft.
+ * The use case validates that the provided status is valid and that the client version matches the current
+ */
 @UseCase
 @Transactional(readOnly = true)
 public class UpdateAircraftStatusUseCase {
@@ -15,6 +19,14 @@ public class UpdateAircraftStatusUseCase {
         this.repository = repository;
     }
 
+    /**
+     * Updates the status of an aircraft.
+     * Validates that the provided status is valid and that the client version matches the current version of the aircraft to prevent lost updates.
+     * @param registration the registration number of the aircraft to update
+     * @param status the new status to set for the aircraft
+     * @param clientVersion the version of the aircraft data that the client has, used for optimistic locking
+     * @return a DTO containing the updated aircraft details
+     */
     @Transactional
     public ViewAircraftDetailsResponse execute(RegistrationNumber registration, String status, Long clientVersion) {
         Aircraft aircraft = repository.findByRegistrationNumber(registration)
@@ -33,6 +45,11 @@ public class UpdateAircraftStatusUseCase {
         return toDto(updatedAircraft);
     }
 
+    /**
+     * Converts an Aircraft entity to a ViewAircraftDetailsResponse DTO.
+     * @param aircraft the Aircraft entity to convert
+     * @return a ViewAircraftDetailsResponse DTO containing the details of the aircraft
+     */
     private ViewAircraftDetailsResponse toDto(Aircraft aircraft) {
         return new ViewAircraftDetailsResponse(
                 aircraft.getRegistrationNumber().getNumber(),

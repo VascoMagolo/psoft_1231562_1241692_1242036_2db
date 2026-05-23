@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
+/**
+ * Value object representing a gate at an airport.
+ */
 @Embeddable
 @Getter
 public class Gate {

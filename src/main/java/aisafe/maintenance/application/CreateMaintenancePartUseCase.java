@@ -2,11 +2,15 @@ package aisafe.maintenance.application;
 
 import aisafe.UseCase;
 import aisafe.maintenance.application.dtos.CreateMaintenancePartRequest;
+import aisafe.maintenance.application.dtos.MaintenancePartResponse;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Use case for creating a new maintenance part in the system.
+ */
 @UseCase
 @Transactional
 public class CreateMaintenancePartUseCase {
@@ -16,7 +20,12 @@ public class CreateMaintenancePartUseCase {
         this.maintenancePartRepository = maintenancePartRepository;
     }
 
-    public MaintenancePart execute(CreateMaintenancePartRequest request){
+    /**
+     * Creates a new maintenance part based on the provided request data and saves it to the repository.
+     * @param request the request containing the details of the maintenance part to be created
+     * @return a response containing information of the created maintenance part
+     */
+    public MaintenancePartResponse execute(CreateMaintenancePartRequest request){
         MaintenancePart part = new MaintenancePart(
                 request.partNumber(),
                 request.name(),
@@ -25,9 +34,17 @@ public class CreateMaintenancePartUseCase {
                 request.minimumThreshold(),
                 request.component()
         );
+
         if (maintenancePartRepository.existsByPartNumber(part.getPartNumber())) {
-            throw new MaintenancePartAlreadyExistsException("Part with the same part number already exists.");
+            throw new MaintenancePartAlreadyExistsException("Part with the same part number already exists: " + part.getPartNumber());
         }
-        return maintenancePartRepository.save(part);
+
+        MaintenancePart savedPart = maintenancePartRepository.save(part);
+
+        return new MaintenancePartResponse(
+                savedPart.getId(),
+                savedPart.getPartNumber(),
+                savedPart.getDescription()
+        );
     }
 }

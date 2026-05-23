@@ -1,6 +1,5 @@
 package aisafe.airports.domain;
 
-import aisafe.exceptions.InvalidContactException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
@@ -9,6 +8,9 @@ import lombok.Getter;
 
 import java.util.regex.Pattern;
 
+/**
+ * Embeddable class representing a contact method for an airport
+ */
 @Embeddable
 @Getter
 public class Contact {

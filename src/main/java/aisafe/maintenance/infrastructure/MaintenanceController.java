@@ -3,8 +3,6 @@ package aisafe.maintenance.infrastructure;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
 import aisafe.maintenance.application.dtos.*;
-import aisafe.maintenance.domain.MaintenancePart;
-import aisafe.maintenance.domain.MaintenanceTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+/**
+ * REST controller for managing aircraft maintenance operations
+ */
 @RestController
 @RequestMapping("/api/maintenance")
 @Tag(name = "Maintenance", description = "Aircraft Maintenance Management — WP#2B")
@@ -50,6 +51,11 @@ public class MaintenanceController {
         this.viewTotalMaintenanceHoursInFleetUseCase = viewTotalMaintenanceHoursInFleetUseCase;
     }
 
+    /**
+     * Endpoint to create a new maintenance template configuration in the system.
+     * @param request the request body containing the details of the maintenance template to be created
+     * @return a ResponseEntity containing the created MaintenanceTemplateResponse
+     */
     @Operation(summary = "Create maintenance template", description = "Registers a new maintenance template configuration in the system.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Template created successfully"),
@@ -58,10 +64,16 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/templates")
-    public ResponseEntity<MaintenanceTemplate> createMaintenanceTemplate(@Valid @RequestBody CreateMaintenanceTemplateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(createMaintenanceTemplateUseCase.execute(request));
+    public ResponseEntity<MaintenanceTemplateResponse> createMaintenanceTemplate(@Valid @RequestBody CreateMaintenanceTemplateRequest request) {
+        MaintenanceTemplateResponse response = createMaintenanceTemplateUseCase.execute(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Endpoint to register a new maintenance part in the system.
+     * @param request the request body containing the details of the maintenance part to be registered
+     * @return a ResponseEntity containing the created MaintenancePartResponse
+     */
     @Operation(summary = "Register a maintenance part", description = "Adds a new hardware component or part to the maintenance catalog.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Part registered successfully"),
@@ -70,10 +82,16 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/parts")
-    public ResponseEntity<MaintenancePart> createMaintenancePart(@Valid @RequestBody CreateMaintenancePartRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(createMaintenancePartUseCase.execute(request));
+    public ResponseEntity<MaintenancePartResponse> createMaintenancePart(@Valid @RequestBody CreateMaintenancePartRequest request) {
+        MaintenancePartResponse response = createMaintenancePartUseCase.execute(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Endpoint to create a new maintenance record for a specific aircraft
+     * @param request the request body containing the details of the maintenance record to be created
+     * @return a ResponseEntity containing the created MaintenanceRecordResponse with HATEOAS links for further actions
+     */
     @Operation(summary = "Create a maintenance record", description = "Schedules or logs a new maintenance record for a specific aircraft.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Maintenance record created successfully"),
@@ -90,6 +108,13 @@ public class MaintenanceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toHateoasModel(response));
     }
 
+    /**
+     * Endpoint to update the operational status and notes of an existing maintenance record.
+     * @param id the unique ID of the maintenance record to be updated
+     * @param ifMatchHeader the value of the 'If-Match' header containing the current version of the resource for Optimistic Concurrency Locking check
+     * @param request the request body containing the new status and notes for the maintenance record
+     * @return a ResponseEntity containing the updated MaintenanceRecordResponse with HATEOAS links for further actions
+     */
     @Operation(summary = "Update maintenance record", description = "Updates the operational status and notes of an existing maintenance record. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Record updated successfully"),
@@ -110,6 +135,13 @@ public class MaintenanceController {
         return ResponseEntity.ok(toHateoasModel(updatedRecord));
     }
 
+    /**
+     * Endpoint to retrieve all maintenance records associated with a specific aircraft registration number
+     * @param registrationNumber the unique registration number code of the aircraft
+     * @param pageable the pagination information for the request
+     * @param assembler the PagedResourcesAssembler used to convert the Page of responses into a HATEOAS-compliant paged model
+     * @return a ResponseEntity containing a paginated list of maintenance records for the specified aircraft
+     */
     @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Records retrieved successfully"),
@@ -128,11 +160,15 @@ public class MaintenanceController {
         Page<ViewAllMaintenanceRecordsResponse> recordsPage = viewAllMaintenanceRecordsUseCase.execute(regNum, pageable);
 
         PagedModel<EntityModel<ViewAllMaintenanceRecordsResponse>> pagedModel =
-                assembler.toModel(recordsPage, record -> EntityModel.of(record));
+                assembler.toModel(recordsPage, EntityModel::of);
 
         return ResponseEntity.ok(pagedModel);
     }
 
+    /**
+     * Endpoint to calculate and retrieve the total amount of maintenance hours performed across the entire fleet.
+     * @return a ResponseEntity containing the total maintenance hours in the fleet
+     */
     @Operation(summary = "Get total maintenance hours", description = "Calculates and returns the total amount of maintenance hours performed across the entire fleet.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Total hours calculated and returned"),
@@ -140,10 +176,15 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/records/hours")
-    public ResponseEntity<ViewTotalMaintenanceHoursinFleetResponse> getTotalMaintenanceHoursInFleet() {
+    public ResponseEntity<ViewTotalMaintenanceHoursInFleetResponse> getTotalMaintenanceHoursInFleet() {
         return ResponseEntity.ok(viewTotalMaintenanceHoursInFleetUseCase.execute());
     }
 
+    /**
+     * Helper method to convert a MaintenanceRecordResponse into an EntityModel with HATEOAS links for further actions related to the maintenance record.
+     * @param response the MaintenanceRecordResponse to be converted into an EntityModel
+     * @return an EntityModel containing the MaintenanceRecordResponse and HATEOAS links for related actions
+     */
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {
         EntityModel<MaintenanceRecordResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(MaintenanceController.class)

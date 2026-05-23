@@ -1,5 +1,8 @@
 package aisafe.aircrafts.domain;
 
+/**
+ * Represents the manufacturer of an aircraft.
+ */
 public enum Manufacturer {
     BOEING,
     AIRBUS,

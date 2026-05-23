@@ -19,6 +19,13 @@ public class UpdateMaintenanceRecordUseCase {
         this.recordRepository = recordRepository;
     }
 
+    /**
+     * Updates the status and notes of an existing maintenance record based on the provided request data and saves it to the repository.
+     * @param id the ID of the maintenance record to be updated
+     * @param request the request containing the new status and notes for the maintenance record
+     * @param clientVersion the version of the maintenance record that the client has, used for optimistic locking
+     * @return a response containing information of the updated maintenance record
+     */
     public MaintenanceRecordResponse execute(Long id, UpdateMaintenanceRecordsRequest request, Long clientVersion) {
         if (request.status() == null) {
             throw new MaintenanceInvalidFieldException("Status cannot be empty.");

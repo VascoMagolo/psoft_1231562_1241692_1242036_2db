@@ -2,8 +2,8 @@ package aisafe;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.AirportNotFoundException;
-import aisafe.exceptions.InvalidContactException;
-import aisafe.exceptions.InvalidIataCodeException;
+import aisafe.airports.domain.InvalidContactException;
+import aisafe.airports.domain.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
