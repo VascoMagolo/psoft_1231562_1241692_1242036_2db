@@ -1,6 +1,6 @@
 # AISafe
 
-A RESTful backend for aviation safety management — aircraft, airports, flight routes, and maintenance records.
+A RESTful backend for aviation safety management - aircraft, airports, flight routes, and maintenance records.
 
 ## About
 
@@ -17,7 +17,7 @@ The system is built around **role-based access control** with five distinct role
 |------------------------|----------------------------------------------------|
 | Admin                  | Full system access                                 |
 | Backoffice Operator    | Airport and aircraft management                    |
-| ATCC                   | Air Traffic Control — route and airport visibility |
+| ATCC                   | Air Traffic Control - route and airport visibility |
 | Maintenance Technician | Record maintenance operations                      |
 | Maintenance Supervisor | Manage parts, templates, and maintenance oversight |
 
@@ -35,7 +35,7 @@ All endpoints are authenticated via **JWT** and return **HAL-compliant** respons
 | API docs    | SpringDoc OpenAPI (Swagger UI)                       |
 | Validation  | Jakarta Validation + Hibernate Validator             |
 | Utilities   | Lombok                                               |
-| Build       | Maven (wrapper included — no local install required) |
+| Build       | Maven (wrapper included - no local install required) |
 
 ## Architecture
 
@@ -48,21 +48,21 @@ Requests flow through three layers within each bounded context:
 ┌─────────────────────────────────────────────────────────────┐
 │                      infrastructure/                        │
 │         Controllers, filters, Spring Security config        │
-│   AirportController, RouteController, MaintenanceController │
+│   AirportController, RouteController, etc.                  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       application/                          │
 │              One Use Case class per user action             │
-│   RegisterAirportUseCase, CreateRouteUseCase, …             │
+│   RegisterAirportUseCase, CreateRouteUseCase, etc.          │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                         domain/                             │
 │         Entities, value objects, repository interfaces      │
-│   Airport, Route, Aircraft, MaintenanceRecord, …            │
+│   Airport, Route, Aircraft, MaintenanceRecord, etc.         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -72,29 +72,29 @@ Each bounded context follows this same three-layer structure. Cross-cutting conc
 src/main/java/aisafe/
 ├── AisafeApplication.java
 ├── aircrafts/
-│   ├── domain/          # Aircraft, AircraftModel, RegistrationNumber, …
-│   ├── application/     # RegisterAircraftUseCase, ListAircraftUseCase, …
+│   ├── domain/          # Aircraft, AircraftModel, RegistrationNumber, etc.
+│   ├── application/     # RegisterAircraftUseCase, ListAircraftUseCase, etc.
 │   └── infrastructure/  # AircraftController, AircraftModelController
 ├── airports/
-│   ├── domain/          # Airport, Runway, IataCode, AirportStatus, …
-│   ├── application/     # RegisterAirportUseCase, SearchAirportUseCase, …
+│   ├── domain/          # Airport, Runway, IataCode, AirportStatus, etc.
+│   ├── application/     # RegisterAirportUseCase, SearchAirportUseCase, etc.
 │   └── infrastructure/  # AirportController
 ├── routes/
-│   ├── domain/          # Route, RouteHistory, RouteRepository, …
-│   ├── application/     # CreateRouteUseCase, SearchRoutesUseCase, …
+│   ├── domain/          # Route, RouteHistory, RouteRepository, etc.
+│   ├── application/     # CreateRouteUseCase, SearchRoutesUseCase, etc.
 │   └── infrastructure/  # RouteController
 ├── maintenance/
-│   ├── domain/          # MaintenanceRecord, MaintenancePart, MaintenanceTemplate, …
-│   ├── application/     # CreateMaintenanceRecordUseCase, …
+│   ├── domain/          # MaintenanceRecord, MaintenancePart, MaintenanceTemplate, etc.
+│   ├── application/     # CreateMaintenanceRecordUseCase, etc.
 │   └── infrastructure/  # MaintenanceController
 ├── security/
 │   ├── domain/          # User, Role, UserRepository
-│   ├── application/     # AuthenticateUserUseCase, JwtService, …
+│   ├── application/     # AuthenticateUserUseCase, JwtService, etc.
 │   └── infrastructure/  # JwtAuthenticationFilter, AuthController, SecurityConfig
 └── shared/
     ├── domain/          # DomainException, DuplicateResourceException
     ├── application/     # UseCase (base interface + annotations)
-    └── infrastructure/  # GlobalExceptionHandler, OpenApiConfig, Bootstrap, …
+    └── infrastructure/  # GlobalExceptionHandler, OpenApiConfig, Bootstrap, etc.
 ```
 
 ## Getting Started
@@ -133,7 +133,7 @@ JUnit tests are organised to mirror the same three-layer structure as the source
 ```
 src/test/java/aisafe/
 ├── aircrafts/
-│   ├── domain/          # Entity and value object rules (AircraftTest, RegistrationNumberTest, …)
+│   ├── domain/          # Entity and value object rules (AircraftTest, RegistrationNumberTest, etc.)
 │   ├── application/     # Use case behaviour with mocked repositories
 │   └── infrastructure/  # Controller slice tests (MockMvc)
 ├── airports/            # (same pattern)
@@ -151,7 +151,7 @@ To run all tests:
 
 ### Pre-commit Hook
 
-A hook runs before every commit to validate the `docs/` folder structure — enforcing that each work package has the required README, PlantUML sources, and generated SVGs. Install it once after cloning:
+A hook runs before every commit to validate the `docs/` folder structure - enforcing that each work package has the required README, PlantUML sources, and generated SVGs. Install it once after cloning:
 
 ```bash
 # Unix / macOS
@@ -183,4 +183,4 @@ Use the `-l` flag to preview which files would be converted without actually gen
 
 ## Documentation
 
-Full internal documentation — use cases, FURPS+, domain model, Postman collection, and client Q&A — is available at [`docs/README.md`](docs/README.md).
+Full internal documentation - use cases, FURPS+, domain model, Postman collection, and client Q&A - is available at [`docs/README.md`](docs/README.md).
