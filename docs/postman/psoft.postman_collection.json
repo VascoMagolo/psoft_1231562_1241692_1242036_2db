@@ -41,7 +41,7 @@
           "response": []
         },
         {
-          "name": "Login User",
+          "name": "Login as Admin",
           "event": [
             {
               "listen": "test",
@@ -53,7 +53,7 @@
                   "pm.test(\"Token received\", () => pm.expect(jsonData.token).to.be.a('string'));",
                   "if (jsonData.token) {",
                   "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
-                  "    console.log(\"Token saved successfully.\");",
+                  "    console.log(\"Logged in as Admin.\");",
                   "}"
                 ]
               }
@@ -75,6 +75,150 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Login as Backoffice Operator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token received\", () => pm.expect(jsonData.token).to.be.a('string'));",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"Logged in as Backoffice Operator.\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"operator\",\r\n    \"password\": \"operator123\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login as ATCC",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token received\", () => pm.expect(jsonData.token).to.be.a('string'));",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"Logged in as ATCC.\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"atcc\",\r\n    \"password\": \"atcc123\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Maintenance Technician",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token received\", () => pm.expect(jsonData.token).to.be.a('string'));",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"Logged in as Maintenance Technician.\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"technician\",\r\n    \"password\": \"technician123\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Maintenance Supervisor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token received\", () => pm.expect(jsonData.token).to.be.a('string'));",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"Logged in as Maintenance Supervisor.\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"supervisor\",\r\n    \"password\": \"supervisor123\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -82,7 +226,7 @@
       "name": "Aircraft Models",
       "item": [
         {
-          "name": "Register Aircraft Model",
+          "name": "Register Aircraft Model [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -116,7 +260,7 @@
           "response": []
         },
         {
-          "name": "List Aircraft Models",
+          "name": "List Aircraft Models [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -124,7 +268,12 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns HAL paged response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
+                  "});"
                 ]
               }
             }
@@ -146,7 +295,7 @@
       "name": "Aircraft",
       "item": [
         {
-          "name": "Register Aircraft",
+          "name": "Register Aircraft [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -176,7 +325,7 @@
           "response": []
         },
         {
-          "name": "List Aircraft",
+          "name": "List Aircraft [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -205,7 +354,7 @@
           "response": []
         },
         {
-          "name": "View Aircraft Details",
+          "name": "View Aircraft Details [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -230,7 +379,7 @@
           "response": []
         },
         {
-          "name": "Search Aircraft",
+          "name": "Search Aircraft [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -264,7 +413,7 @@
           "response": []
         },
         {
-          "name": "Update Aircraft Status",
+          "name": "Update Aircraft Status [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -301,7 +450,7 @@
       "name": "Airports",
       "item": [
         {
-          "name": "Register Airport",
+          "name": "Register Airport [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -336,7 +485,7 @@
           "response": []
         },
         {
-          "name": "Register Airport (with facilities)",
+          "name": "Register Airport (with facilities) [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -371,7 +520,7 @@
           "response": []
         },
         {
-          "name": "Add Airport Certification",
+          "name": "Add Airport Certification [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -405,7 +554,7 @@
           "response": []
         },
         {
-          "name": "View Airport Details",
+          "name": "View Airport Details [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -436,7 +585,7 @@
           "response": []
         },
         {
-          "name": "View Airport Details - Not Found",
+          "name": "View Airport Details - Not Found [BACKOFFICE_OPERATOR | ATCC]",
           "event": [
             {
               "listen": "test",
@@ -461,7 +610,7 @@
           "response": []
         },
         {
-          "name": "Search Airports by City",
+          "name": "Search Airports by City [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -469,14 +618,16 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns page object\", () => {",
-                  "    const page = pm.response.json();",
-                  "    pm.expect(page.content).to.be.an(\"array\");",
-                  "    pm.expect(page.totalElements).to.be.a(\"number\");",
-                  "    pm.expect(page.totalPages).to.be.a(\"number\");",
+                  "pm.test(\"Returns HAL paged response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a(\"number\");",
+                  "    pm.expect(body.page.totalPages).to.be.a(\"number\");",
                   "});",
                   "pm.test(\"Each airport has _links\", () => {",
-                  "    pm.response.json().content.forEach(a => {",
+                  "    const items = Object.values(pm.response.json()._embedded)[0];",
+                  "    items.forEach(a => {",
                   "        pm.expect(a._links).to.exist;",
                   "        pm.expect(a._links.self).to.exist;",
                   "    });",
@@ -504,7 +655,7 @@
           "response": []
         },
         {
-          "name": "Search Airports by Country",
+          "name": "Search Airports by Country [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -512,14 +663,16 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns page object\", () => {",
-                  "    const page = pm.response.json();",
-                  "    pm.expect(page.content).to.be.an(\"array\");",
-                  "    pm.expect(page.totalElements).to.be.a(\"number\");",
-                  "    pm.expect(page.totalPages).to.be.a(\"number\");",
+                  "pm.test(\"Returns HAL paged response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a(\"number\");",
+                  "    pm.expect(body.page.totalPages).to.be.a(\"number\");",
                   "});",
                   "pm.test(\"Each airport has _links\", () => {",
-                  "    pm.response.json().content.forEach(a => {",
+                  "    const items = Object.values(pm.response.json()._embedded)[0];",
+                  "    items.forEach(a => {",
                   "        pm.expect(a._links).to.exist;",
                   "        pm.expect(a._links.self).to.exist;",
                   "    });",
@@ -547,7 +700,7 @@
           "response": []
         },
         {
-          "name": "Update Airport Status",
+          "name": "Update Airport Status [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -582,7 +735,7 @@
           "response": []
         },
         {
-          "name": "Update Airport Details",
+          "name": "Update Airport Details [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -617,7 +770,7 @@
           "response": []
         },
         {
-          "name": "View Airport Routes",
+          "name": "View Airport Routes [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -625,7 +778,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -642,7 +799,7 @@
           "response": []
         },
         {
-          "name": "Busiest Airports Statistics",
+          "name": "Busiest Airports Statistics [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -650,9 +807,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body._links).to.exist;",
+                  "});",
                   "pm.test(\"Each entry has iataCode and routeCount\", () => {",
-                  "    pm.response.json().forEach(entry => {",
+                  "    const items = Object.values(pm.response.json()._embedded)[0];",
+                  "    items.forEach(entry => {",
                   "        pm.expect(entry.iataCode).to.be.a('string');",
                   "        pm.expect(entry.routeCount).to.be.a('number');",
                   "    });",
@@ -673,7 +835,7 @@
           "response": []
         },
         {
-          "name": "Airports Grouped by Region",
+          "name": "Airports Grouped by Region [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -681,9 +843,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body._links).to.exist;",
+                  "});",
                   "pm.test(\"Each group has 'group' and 'airports' fields\", () => {",
-                  "    pm.response.json().forEach(g => {",
+                  "    const items = Object.values(pm.response.json()._embedded)[0];",
+                  "    items.forEach(g => {",
                   "        pm.expect(g.group).to.be.a('string');",
                   "        pm.expect(g.airports).to.be.an('array');",
                   "    });",
@@ -705,7 +872,7 @@
           "response": []
         },
         {
-          "name": "Airports Grouped by Country",
+          "name": "Airports Grouped by Country [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -713,9 +880,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body._links).to.exist;",
+                  "});",
                   "pm.test(\"Each group has 'group' and 'airports' fields\", () => {",
-                  "    pm.response.json().forEach(g => {",
+                  "    const items = Object.values(pm.response.json()._embedded)[0];",
+                  "    items.forEach(g => {",
                   "        pm.expect(g.group).to.be.a('string');",
                   "        pm.expect(g.airports).to.be.an('array');",
                   "    });",
@@ -737,7 +909,7 @@
           "response": []
         },
         {
-          "name": "Register Airport - Validation Error (invalid IATA)",
+          "name": "Register Airport - Validation Error (invalid IATA) [BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -774,7 +946,7 @@
       "name": "Routes",
       "item": [
         {
-          "name": "Create Route",
+          "name": "Create Route [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -808,7 +980,7 @@
           "response": []
         },
         {
-          "name": "View Route Details",
+          "name": "View Route Details [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -837,7 +1009,7 @@
           "response": []
         },
         {
-          "name": "View Route History",
+          "name": "View Route History [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -845,7 +1017,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
                 ]
               }
             }
@@ -862,7 +1038,7 @@
           "response": []
         },
         {
-          "name": "Update Route",
+          "name": "Update Route [ATCC | BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -894,7 +1070,7 @@
           "response": []
         },
         {
-          "name": "Deactivate Route",
+          "name": "Deactivate Route [ATCC | BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -921,7 +1097,7 @@
           "response": []
         },
         {
-          "name": "List Routes from Airport",
+          "name": "List Routes from Airport [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -929,10 +1105,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns paginated response\", () => {",
+                  "pm.test(\"Returns HAL paged response\", () => {",
                   "    const body = pm.response.json();",
-                  "    pm.expect(body.content).to.be.an('array');",
-                  "    pm.expect(body.totalElements).to.be.a('number');",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
                   "});"
                 ]
               }
@@ -950,7 +1127,7 @@
           "response": []
         },
         {
-          "name": "Search Routes",
+          "name": "Search Routes [ATCC]",
           "event": [
             {
               "listen": "test",
@@ -958,10 +1135,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns paginated response\", () => {",
+                  "pm.test(\"Returns HAL paged response\", () => {",
                   "    const body = pm.response.json();",
-                  "    pm.expect(body.content).to.be.an('array');",
-                  "    pm.expect(body.totalElements).to.be.a('number');",
+                  "    pm.expect(body._embedded).to.exist;",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
                   "});"
                 ]
               }
@@ -988,7 +1166,7 @@
       "name": "Maintenance",
       "item": [
         {
-          "name": "Create Maintenance Template",
+          "name": "Create Maintenance Template [MAINTENANCE_TECHNICIAN]",
           "event": [
             {
               "listen": "test",
@@ -1018,7 +1196,7 @@
           "response": []
         },
         {
-          "name": "Register Maintenance Part",
+          "name": "Register Maintenance Part [MAINTENANCE_SUPERVISOR]",
           "event": [
             {
               "listen": "test",
@@ -1048,7 +1226,7 @@
           "response": []
         },
         {
-          "name": "Create Maintenance Record",
+          "name": "Create Maintenance Record [MAINTENANCE_TECHNICIAN]",
           "event": [
             {
               "listen": "test",
@@ -1082,7 +1260,7 @@
           "response": []
         },
         {
-          "name": "Update Maintenance Record",
+          "name": "Update Maintenance Record [MAINTENANCE_TECHNICIAN]",
           "event": [
             {
               "listen": "test",
@@ -1114,7 +1292,7 @@
           "response": []
         },
         {
-          "name": "Get Maintenance Records by Aircraft",
+          "name": "Get Maintenance Records by Aircraft [MAINTENANCE_TECHNICIAN]",
           "event": [
             {
               "listen": "test",
@@ -1143,7 +1321,7 @@
           "response": []
         },
         {
-          "name": "Get Total Maintenance Hours",
+          "name": "Get Total Maintenance Hours [ATCC]",
           "event": [
             {
               "listen": "test",

@@ -5,6 +5,8 @@ import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.Runway;
 import aisafe.maintenance.domain.*;
+import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteRepository;
 import aisafe.security.domain.Role;
 import aisafe.security.domain.User;
 import aisafe.security.domain.UserRepository;
@@ -30,10 +32,11 @@ public class Bootstrap implements ApplicationRunner {
     private final MaintenancePartRepository maintenancePartRepository;
     private final MaintenanceTemplateRepository maintenanceTemplateRepository;
     private final MaintenanceRecordRepository maintenanceRecordRepository;
+    private final RouteRepository routeRepository;
     private final PasswordEncoder passwordEncoder;
 
     public Bootstrap(UserRepository userRepository, AircraftModelRepository aircraftModelRepository, AircraftRepository aircraftRepository,
-                     AirportRepository airportRepository, MaintenancePartRepository maintenancePartRepository, MaintenanceTemplateRepository maintenanceTemplateRepository, MaintenanceRecordRepository maintenanceRecordRepository, PasswordEncoder passwordEncoder) {
+                     AirportRepository airportRepository, MaintenancePartRepository maintenancePartRepository, MaintenanceTemplateRepository maintenanceTemplateRepository, MaintenanceRecordRepository maintenanceRecordRepository, RouteRepository routeRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.aircraftModelRepository = aircraftModelRepository;
         this.aircraftRepository = aircraftRepository;
@@ -41,6 +44,7 @@ public class Bootstrap implements ApplicationRunner {
         this.maintenancePartRepository = maintenancePartRepository;
         this.maintenanceTemplateRepository = maintenanceTemplateRepository;
         this.maintenanceRecordRepository = maintenanceRecordRepository;
+        this.routeRepository = routeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -52,6 +56,8 @@ public class Bootstrap implements ApplicationRunner {
             userRepository.save(new User("admin", passwordEncoder.encode("admin123"), Role.ADMIN));
             userRepository.save(new User("operator", passwordEncoder.encode("operator123"), Role.BACKOFFICE_OPERATOR));
             userRepository.save(new User("atcc", passwordEncoder.encode("atcc123"), Role.ATCC));
+            userRepository.save(new User("technician", passwordEncoder.encode("technician123"), Role.MAINTENANCE_TECHNICIAN));
+            userRepository.save(new User("supervisor", passwordEncoder.encode("supervisor123"), Role.MAINTENANCE_SUPERVISOR));
         }
 
         // bootstrap for aircraft package
@@ -91,6 +97,21 @@ public class Bootstrap implements ApplicationRunner {
             airportRepository.save(new Airport("LHR", "Heathrow Airport", "London", "United Kingdom",
                     "Northern Europe", "Europe/London", 51.4775, -0.4614,
                     List.of(new Runway("09L/27R", 3902, "090/270"), new Runway("09R/27L", 3658, "090/270"))));
+        }
+
+        // bootstrap for routes package
+        if (routeRepository.count() == 0) {
+            routeRepository.save(new Route("OPO", "LIS", 45,  280.0,  100));
+            routeRepository.save(new Route("LIS", "OPO", 45,  280.0,  100));
+            routeRepository.save(new Route("LIS", "MAD", 60,  640.0,  120));
+            routeRepository.save(new Route("MAD", "LIS", 60,  640.0,  120));
+            routeRepository.save(new Route("LIS", "CDG", 135, 1730.0, 150));
+            routeRepository.save(new Route("CDG", "LIS", 135, 1730.0, 150));
+            routeRepository.save(new Route("LIS", "LHR", 150, 1560.0, 150));
+            routeRepository.save(new Route("LHR", "LIS", 150, 1560.0, 150));
+            routeRepository.save(new Route("OPO", "MAD", 90,  850.0,  100));
+            routeRepository.save(new Route("MAD", "CDG", 120, 1050.0, 120));
+            routeRepository.save(new Route("CDG", "LHR", 60,  340.0,  100));
         }
 
         // bootstrap for maintenance package
