@@ -1,6 +1,6 @@
 package aisafe.aircrafts.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;

@@ -1,6 +1,6 @@
 package aisafe.airports.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Raised when an invalid IATA code is provided for an airport.

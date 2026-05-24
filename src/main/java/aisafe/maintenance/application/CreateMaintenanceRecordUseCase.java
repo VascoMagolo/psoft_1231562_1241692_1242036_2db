@@ -1,6 +1,6 @@
 package aisafe.maintenance.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;

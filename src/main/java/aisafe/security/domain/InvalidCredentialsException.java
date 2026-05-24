@@ -1,6 +1,6 @@
 package aisafe.security.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Thrown when a login attempt fails due to an unrecognized username or incorrect password.

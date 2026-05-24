@@ -1,6 +1,6 @@
 package aisafe.aircrafts.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Raised when the requested aircraft cannot be found.

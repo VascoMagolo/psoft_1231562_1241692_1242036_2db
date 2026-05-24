@@ -1,6 +1,6 @@
 package aisafe.maintenance.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelRepository;

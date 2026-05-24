@@ -1,6 +1,5 @@
-package aisafe.security;
+package aisafe.security.infrastructure;
 
-import aisafe.security.infrastructure.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

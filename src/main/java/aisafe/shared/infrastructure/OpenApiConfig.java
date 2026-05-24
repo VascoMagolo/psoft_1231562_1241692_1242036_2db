@@ -1,4 +1,4 @@
-package aisafe;
+package aisafe.shared.infrastructure;
 
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.customizers.OpenApiCustomizer;

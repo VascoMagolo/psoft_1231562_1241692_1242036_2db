@@ -1,6 +1,6 @@
 package aisafe.maintenance.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Exception thrown when attempting to create a maintenance template that already exists in the system.
