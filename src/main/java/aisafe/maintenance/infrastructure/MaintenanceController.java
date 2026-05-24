@@ -64,9 +64,11 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/templates")
-    public ResponseEntity<MaintenanceTemplateResponse> createMaintenanceTemplate(@Valid @RequestBody CreateMaintenanceTemplateRequest request) {
+    public ResponseEntity<EntityModel<MaintenanceTemplateResponse>> createMaintenanceTemplate(@Valid @RequestBody CreateMaintenanceTemplateRequest request) {
         MaintenanceTemplateResponse response = createMaintenanceTemplateUseCase.execute(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EntityModel<MaintenanceTemplateResponse> model = EntityModel.of(response,
+                linkTo(methodOn(MaintenanceController.class).createMaintenanceRecord(null)).withRel("create-record"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     /**
@@ -82,9 +84,11 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/parts")
-    public ResponseEntity<MaintenancePartResponse> createMaintenancePart(@Valid @RequestBody CreateMaintenancePartRequest request) {
+    public ResponseEntity<EntityModel<MaintenancePartResponse>> createMaintenancePart(@Valid @RequestBody CreateMaintenancePartRequest request) {
         MaintenancePartResponse response = createMaintenancePartUseCase.execute(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        EntityModel<MaintenancePartResponse> model = EntityModel.of(response,
+                linkTo(methodOn(MaintenanceController.class).createMaintenanceRecord(null)).withRel("create-record"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     /**
@@ -176,8 +180,11 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/records/hours")
-    public ResponseEntity<ViewTotalMaintenanceHoursInFleetResponse> getTotalMaintenanceHoursInFleet() {
-        return ResponseEntity.ok(viewTotalMaintenanceHoursInFleetUseCase.execute());
+    public ResponseEntity<EntityModel<ViewTotalMaintenanceHoursInFleetResponse>> getTotalMaintenanceHoursInFleet() {
+        ViewTotalMaintenanceHoursInFleetResponse response = viewTotalMaintenanceHoursInFleetUseCase.execute();
+        EntityModel<ViewTotalMaintenanceHoursInFleetResponse> model = EntityModel.of(response,
+                linkTo(methodOn(MaintenanceController.class).getTotalMaintenanceHoursInFleet()).withSelfRel());
+        return ResponseEntity.ok(model);
     }
 
     /**

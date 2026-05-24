@@ -1,6 +1,6 @@
 package aisafe.airports.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Raised when the requested airport cannot be found.

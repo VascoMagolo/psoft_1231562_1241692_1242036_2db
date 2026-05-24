@@ -1,4 +1,6 @@
-package aisafe;
+package aisafe.shared.domain;
+
+import aisafe.shared.infrastructure.GlobalExceptionHandler;
 
 /**
  * Base class for all domain rule violations in this application.

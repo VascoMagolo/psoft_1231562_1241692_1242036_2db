@@ -1,4 +1,4 @@
-package aisafe.security;
+package aisafe.security.infrastructure;
 
 import aisafe.security.application.AuthenticateUserUseCase;
 import aisafe.security.application.RegisterUserUseCase;

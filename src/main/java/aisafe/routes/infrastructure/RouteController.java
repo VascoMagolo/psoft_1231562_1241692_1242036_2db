@@ -15,7 +15,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,8 +85,7 @@ public class RouteController {
                 r.getEstimatedFlightTime(),
                 r.getMinimumRange(),
                 r.getMinimumCapacity(),
-                r.isActive()
-        );
+                r.isActive());
         return toModel(response);
     }
 
@@ -122,25 +124,28 @@ public class RouteController {
             @ApiResponse(responseCode = "404", description = "Route not found")
     })
     @GetMapping("/{id}/history")
-    public ResponseEntity<List<RouteHistoryResponse>> getRouteHistory(
+    public ResponseEntity<CollectionModel<EntityModel<RouteHistoryResponse>>> getRouteHistory(
             @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
-        List<RouteHistoryResponse> response = viewRouteHistory.execute(id).stream()
-                .map(h -> new RouteHistoryResponse(
-                        h.getId(),
-                        h.getRoute().getId(),
-                        h.getChangeDescription(),
-                        h.getChangedAt(),
-                        h.getChangedBy()
-                ))
+        List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(id).stream()
+                .map(h -> {
+                    RouteHistoryResponse response = new RouteHistoryResponse(
+                            h.getId(), h.getRoute().getId(), h.getChangeDescription(),
+                            h.getChangedAt(), h.getChangedBy());
+                    return EntityModel.of(response,
+                            linkTo(methodOn(RouteController.class).getRouteDetails(response.routeId()))
+                                    .withRel("route"));
+                })
                 .toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CollectionModel.of(historyModels,
+                linkTo(methodOn(RouteController.class).getRouteHistory(id)).withSelfRel(),
+                linkTo(methodOn(RouteController.class).getRouteDetails(id)).withRel("route")));
     }
 
     /**
      * Updates the information of an existing route.
      *
      * @param id the unique identifier of the route to update
-     * @param request the request containing the updated route data
+        * @param request the request containing the updated route data
      * @return a response entity containing the updated route
      */
     // US112
@@ -184,10 +189,12 @@ public class RouteController {
     }
 
     /**
-     * Retrieves detailed information about a specific route.
+     * Retrieves all active routes departing from a specific airport.
      *
-     * @param id the unique identifier of the route
-     * @return a response entity containing the route details
+     * @param iataCode the IATA code of the origin airport
+     * @param pageable pagination parameters
+     * @param assembler the paged resources assembler
+     * @return a response entity containing the paginated routes
      */
     // US113
     @Operation(summary = "View route details", description = "Retrieves the full details of a specific route by its ID. (US113)")
@@ -218,12 +225,12 @@ public class RouteController {
             @ApiResponse(responseCode = "404", description = "Airport not found")
     })
     @GetMapping("/airport/{iataCode}")
-    public ResponseEntity<Page<EntityModel<RouteResponse>>> getRoutesFromAirport(
+    public ResponseEntity<PagedModel<EntityModel<RouteResponse>>> getRoutesFromAirport(
             @Parameter(description = "IATA code of the origin airport (e.g., LIS, OPO)") @PathVariable String iataCode,
-            @PageableDefault(size = 20) Pageable pageable) {
-        Page<EntityModel<RouteResponse>> response = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable)
-                .map(this::mapToModel);
-        return ResponseEntity.ok(response);
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<Route> assembler) {
+        Page<Route> routePage = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable);
+        return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 
     /**
@@ -231,7 +238,9 @@ public class RouteController {
      *
      * @param origin the origin airport or location filter
      * @param destination the destination airport or location filter
-     * @return a response entity containing the matching routes
+     * @param pageable pagination parameters
+     * @param assembler the paged resources assembler
+     * @return a response entity containing the matching paginated routes
      */
     // US114
     @Operation(summary = "Search routes", description = "Searches for flight routes based on origin and/or destination criteria. (US114)")
@@ -242,12 +251,12 @@ public class RouteController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/search")
-    public ResponseEntity<Page<EntityModel<RouteResponse>>> searchRoutes(
+    public ResponseEntity<PagedModel<EntityModel<RouteResponse>>> searchRoutes(
             @Parameter(description = "Origin location or IATA code") @RequestParam(required = false) String origin,
             @Parameter(description = "Destination location or IATA code") @RequestParam(required = false) String destination,
-            @PageableDefault(size = 20) Pageable pageable) {
-        Page<EntityModel<RouteResponse>> response = searchRoutes.execute(origin, destination, pageable)
-                .map(this::mapToModel);
-        return ResponseEntity.ok(response);
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<Route> assembler) {
+        Page<Route> routePage = this.searchRoutes.execute(origin, destination, pageable);
+        return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 }

@@ -74,7 +74,7 @@ class MaintenanceControllerTest {
         CreateMaintenanceTemplateRequest request = new CreateMaintenanceTemplateRequest(
                 "Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
 
-        when(createMaintenanceTemplateUseCase.execute(any())).thenReturn(null);
+        when(createMaintenanceTemplateUseCase.execute(any())).thenReturn(new MaintenanceTemplateResponse(1L, "Annual Check", null));
 
         mockMvc.perform(post("/api/maintenance/templates")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ class MaintenanceControllerTest {
         CreateMaintenancePartRequest request = new CreateMaintenancePartRequest(
                 "P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
 
-        when(createMaintenancePartUseCase.execute(any())).thenReturn(null);
+        when(createMaintenancePartUseCase.execute(any())).thenReturn(new MaintenancePartResponse(1L, "P001", null));
 
         mockMvc.perform(post("/api/maintenance/parts")
                         .contentType(MediaType.APPLICATION_JSON)

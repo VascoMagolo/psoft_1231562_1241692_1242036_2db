@@ -1,6 +1,6 @@
 package aisafe.aircrafts.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;

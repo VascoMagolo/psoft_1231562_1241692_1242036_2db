@@ -1,7 +1,7 @@
 package aisafe.airports.application;
 
-import aisafe.DuplicateResourceException;
-import aisafe.UseCase;
+import aisafe.shared.domain.DuplicateResourceException;
+import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
