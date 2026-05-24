@@ -37,7 +37,7 @@ deactivate Ctrl
 == View all routes from a specific airport ==
 Actor -> Ctrl : GET /api/routes/airport/{iataCode}
 activate Ctrl
-Ctrl -> ListUC : execute(iataCode)
+Ctrl -> ListUC : execute(iataCode, pageable)
 activate ListUC
 
 ListUC -> AirportRepo : existsByIataCodeCode(iataCode)
@@ -56,10 +56,10 @@ alt Airport found
     activate DB
     DB --> RouteRepo : route records
     deactivate DB
-    RouteRepo --> ListUC : List<Route>
+    RouteRepo --> ListUC : Page<Route>
     deactivate RouteRepo
-    ListUC --> Ctrl : List<Route>
-    Ctrl --> Actor : 200 OK
+    ListUC --> Ctrl : Page<Route>
+    Ctrl --> Actor : 200 OK (HAL+JSON with _embedded, _links, page)
 else Airport not found
     ListUC --> Ctrl : throws AirportNotFoundException
     Ctrl --> Actor : 404 Not Found

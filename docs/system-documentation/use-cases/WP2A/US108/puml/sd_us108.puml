@@ -24,6 +24,6 @@ deactivate Repo
 UC --> Ctrl : Page<AirportResponse>
 deactivate UC
 
-Ctrl --> ATCC : 200 OK (JSON Page with content[], totalElements, totalPages, number, size)
+Ctrl --> ATCC : 200 OK (HAL+JSON with _embedded, _links, page{number, size, totalElements, totalPages})
 deactivate Ctrl
 @enduml
