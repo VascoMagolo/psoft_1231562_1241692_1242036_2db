@@ -1,7 +1,7 @@
 package aisafe.airports.application;
 
-import aisafe.DuplicateResourceException;
-import aisafe.UseCase;
+import aisafe.shared.domain.DuplicateResourceException;
+import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.AircraftNotFoundException;

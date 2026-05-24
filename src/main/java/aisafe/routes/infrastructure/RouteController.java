@@ -1,7 +1,10 @@
 package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
-import aisafe.routes.application.dtos.*;
+import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.routes.application.dtos.RouteHistoryResponse;
+import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.Route;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +31,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RequestMapping("/api/routes")
 @Tag(name = "Routes", description = "Flight Routes Management")
 public class RouteController {
+
     private final CreateRouteUseCase createRoute;
     private final ViewRouteHistoryUseCase viewRouteHistory;
     private final UpdateRouteUseCase updateRoute;
@@ -48,12 +52,12 @@ public class RouteController {
      * @param searchRoutes          the search routes
      */
     public RouteController(CreateRouteUseCase createRoute,
-                           ViewRouteHistoryUseCase viewRouteHistory,
-                           UpdateRouteUseCase updateRoute,
-                           DesactivateRouteUseCase desactivateRoute,
-                           ViewRouteDetailsUseCase viewRouteDetails,
-                           ListRoutesFromAirportUseCase listRoutesFromAirport,
-                           SearchRoutesUseCase searchRoutes) {
+            ViewRouteHistoryUseCase viewRouteHistory,
+            UpdateRouteUseCase updateRoute,
+            DesactivateRouteUseCase desactivateRoute,
+            ViewRouteDetailsUseCase viewRouteDetails,
+            ListRoutesFromAirportUseCase listRoutesFromAirport,
+            SearchRoutesUseCase searchRoutes) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -120,18 +124,21 @@ public class RouteController {
             @ApiResponse(responseCode = "404", description = "Route not found")
     })
     @GetMapping("/{id}/history")
-    public ResponseEntity<List<RouteHistoryResponse>> getRouteHistory(
+    public ResponseEntity<CollectionModel<EntityModel<RouteHistoryResponse>>> getRouteHistory(
             @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
-        List<RouteHistoryResponse> response = viewRouteHistory.execute(id).stream()
-                .map(h -> new RouteHistoryResponse(
-                        h.getId(),
-                        h.getRoute().getId(),
-                        h.getChangeDescription(),
-                        h.getChangedAt(),
-                        h.getChangedBy()
-                ))
+        List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(id).stream()
+                .map(h -> {
+                    RouteHistoryResponse response = new RouteHistoryResponse(
+                            h.getId(), h.getRoute().getId(), h.getChangeDescription(),
+                            h.getChangedAt(), h.getChangedBy());
+                    return EntityModel.of(response,
+                            linkTo(methodOn(RouteController.class).getRouteDetails(response.routeId()))
+                                    .withRel("route"));
+                })
                 .toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CollectionModel.of(historyModels,
+                linkTo(methodOn(RouteController.class).getRouteHistory(id)).withSelfRel(),
+                linkTo(methodOn(RouteController.class).getRouteDetails(id)).withRel("route")));
     }
 
     /**
@@ -205,9 +212,7 @@ public class RouteController {
      * Retrieves all active routes departing from a specific airport.
      *
      * @param iataCode the IATA code of the origin airport
-     * @param pageable pagination parameters
-     * @param assembler the paged resources assembler
-     * @return a response entity containing the paginated routes
+     * @return a response entity containing the list of routes
      */
     // US113
     @Operation(summary = "View routes from airport", description = "Retrieves all active routes originating from a specific airport. (US113)")
@@ -232,9 +237,7 @@ public class RouteController {
      *
      * @param origin the origin airport or location filter
      * @param destination the destination airport or location filter
-     * @param pageable pagination parameters
-     * @param assembler the paged resources assembler
-     * @return a response entity containing the matching paginated routes
+     * @return a response entity containing the matching routes
      */
     // US114
     @Operation(summary = "Search routes", description = "Searches for flight routes based on origin and/or destination criteria. (US114)")

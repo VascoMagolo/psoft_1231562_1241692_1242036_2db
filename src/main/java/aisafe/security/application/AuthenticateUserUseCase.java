@@ -1,19 +1,20 @@
 package aisafe.security.application;
 
 
-import aisafe.UseCase;
-import aisafe.SuppressArgLogging;
+import aisafe.shared.application.UseCase;
+import aisafe.shared.infrastructure.SuppressArgLogging;
 import aisafe.security.application.dtos.AuthResponse;
 import aisafe.security.application.dtos.LoginRequest;
 import aisafe.security.domain.InvalidCredentialsException;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.infrastructure.UseCaseLoggingAdvice;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application use case that authenticates a patron by username and password and returns a JWT token.
  *
- * <p>Annotated with {@link SuppressArgLogging} so that {@link aisafe.UseCaseLoggingAdvice}
+ * <p>Annotated with {@link SuppressArgLogging} so that {@link UseCaseLoggingAdvice}
  * logs {@code [SUPPRESSED]} in place of the raw credentials instead of printing them to the
  * log. {@link UseCase} still applies, giving this class consistent transaction management,
  * Bean Validation, and timing logs.</p>

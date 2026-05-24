@@ -1,6 +1,6 @@
 package aisafe.security.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.security.application.dtos.AuthResponse;
 import aisafe.security.application.dtos.RegisterRequest;
 import aisafe.security.domain.User;

@@ -1,10 +1,12 @@
-package aisafe;
+package aisafe.shared.infrastructure;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.InvalidContactException;
 import aisafe.airports.domain.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
+import aisafe.shared.domain.DomainException;
+import aisafe.shared.domain.DuplicateResourceException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

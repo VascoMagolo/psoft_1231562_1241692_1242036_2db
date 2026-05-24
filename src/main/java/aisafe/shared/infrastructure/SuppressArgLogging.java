@@ -1,6 +1,7 @@
-package aisafe;
+package aisafe.shared.infrastructure;
 
 import aisafe.security.application.AuthenticateUserUseCase;
+import aisafe.shared.application.UseCase;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
