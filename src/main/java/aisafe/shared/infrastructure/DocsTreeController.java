@@ -1,4 +1,4 @@
-package aisafe;
+package aisafe.shared.infrastructure;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Value;

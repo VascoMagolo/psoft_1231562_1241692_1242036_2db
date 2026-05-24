@@ -1,6 +1,6 @@
 package aisafe.airports.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportRepository;
 import org.springframework.data.domain.Page;

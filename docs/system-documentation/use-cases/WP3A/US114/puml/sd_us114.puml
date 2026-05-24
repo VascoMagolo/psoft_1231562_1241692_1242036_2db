@@ -6,10 +6,10 @@ participant "SearchRoutesUseCase" as UC
 participant "RouteRepository" as Repo
 database "Database" as DB
 
-Actor -> Ctrl : GET /api/routes/search?origin=...&destination=...
+Actor -> Ctrl : GET /api/routes/search?origin=...&destination=...&page=0&size=20
 activate Ctrl
 
-Ctrl -> UC : execute(origin, destination)
+Ctrl -> UC : execute(origin, destination, pageable)
 activate UC
 
 alt Origin and destination provided
@@ -19,7 +19,7 @@ alt Origin and destination provided
     activate DB
     DB --> Repo : route records
     deactivate DB
-    Repo --> UC : List<Route>
+    Repo --> UC : Page<Route>
     deactivate Repo
 else Only origin provided
     UC -> Repo : findByOrigin(origin)
@@ -28,7 +28,7 @@ else Only origin provided
     activate DB
     DB --> Repo : route records
     deactivate DB
-    Repo --> UC : List<Route>
+    Repo --> UC : Page<Route>
     deactivate Repo
 else Only destination provided
     UC -> Repo : findByDestination(destination)
@@ -37,7 +37,7 @@ else Only destination provided
     activate DB
     DB --> Repo : route records
     deactivate DB
-    Repo --> UC : List<Route>
+    Repo --> UC : Page<Route>
     deactivate Repo
 else No filters provided
     UC -> Repo : findAll()
@@ -46,12 +46,12 @@ else No filters provided
     activate DB
     DB --> Repo : route records
     deactivate DB
-    Repo --> UC : List<Route>
+    Repo --> UC : Page<Route>
     deactivate Repo
 end
 
-UC --> Ctrl : List<Route>
-Ctrl --> Actor : 200 OK (JSON Array)
+UC --> Ctrl : Page<Route>
+Ctrl --> Actor : 200 OK (HAL+JSON with _embedded, _links, page)
 
 deactivate UC
 deactivate Ctrl

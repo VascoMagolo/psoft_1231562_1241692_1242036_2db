@@ -1,6 +1,6 @@
 package aisafe.airports.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportGroupResponse;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;

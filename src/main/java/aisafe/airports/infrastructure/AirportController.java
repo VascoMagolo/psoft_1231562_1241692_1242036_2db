@@ -3,6 +3,7 @@ package aisafe.airports.infrastructure;
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.infrastructure.RouteController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,7 +13,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -168,12 +172,14 @@ public class AirportController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/search")
-    public ResponseEntity<Page<EntityModel<AirportResponse>>> searchAirports(
+    public ResponseEntity<PagedModel<EntityModel<AirportResponse>>> searchAirports(
             @Parameter(description = "Filter by airport name (partial match)") @RequestParam(required = false) String name,
             @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
             @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
-            @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(searchAirport.execute(name, city, country, pageable).map(this::toModel));
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<AirportResponse> assembler) {
+        Page<AirportResponse> page = searchAirport.execute(name, city, country, pageable);
+        return ResponseEntity.ok(assembler.toModel(page, this::toModel));
     }
 
     /**
@@ -247,9 +253,16 @@ public class AirportController {
             @ApiResponse(responseCode = "404", description = "Airport not found")
     })
     @GetMapping("/{iataCode}/routes")
-    public ResponseEntity<List<RouteResponse>> getRoutes(
+    public ResponseEntity<CollectionModel<EntityModel<RouteResponse>>> getRoutes(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode) {
-        return ResponseEntity.ok(viewAirportRoutes.execute(iataCode.toUpperCase()));
+        List<EntityModel<RouteResponse>> routeModels = viewAirportRoutes.execute(iataCode.toUpperCase())
+                .stream()
+                .map(r -> EntityModel.of(r,
+                        linkTo(methodOn(RouteController.class).getRouteDetails(r.id())).withSelfRel()))
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(routeModels,
+                linkTo(methodOn(AirportController.class).getRoutes(iataCode)).withSelfRel(),
+                linkTo(methodOn(AirportController.class).getAirport(iataCode)).withRel("airport")));
     }
 
     /**
@@ -268,8 +281,14 @@ public class AirportController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/statistics/busiest")
-    public ResponseEntity<List<AirportStatisticsResponse>> getBusiestAirports() {
-        return ResponseEntity.ok(airportStatistics.execute());
+    public ResponseEntity<CollectionModel<EntityModel<AirportStatisticsResponse>>> getBusiestAirports() {
+        List<EntityModel<AirportStatisticsResponse>> items = airportStatistics.execute()
+                .stream()
+                .map(s -> EntityModel.of(s,
+                        linkTo(methodOn(AirportController.class).getAirport(s.iataCode())).withRel("airport")))
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(items,
+                linkTo(methodOn(AirportController.class).getBusiestAirports()).withSelfRel()));
     }
 
     /**
@@ -289,8 +308,10 @@ public class AirportController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/grouped")
-    public ResponseEntity<List<AirportGroupResponse>> getAirportsGrouped(
+    public ResponseEntity<CollectionModel<AirportGroupResponse>> getAirportsGrouped(
             @Parameter(description = "Grouping criterion: 'region' (default) or 'country'") @RequestParam(defaultValue = "region") String by) {
-        return ResponseEntity.ok(listAirportsByRegion.execute(by));
+        return ResponseEntity.ok(CollectionModel.of(
+                listAirportsByRegion.execute(by),
+                linkTo(methodOn(AirportController.class).getAirportsGrouped(by)).withSelfRel()));
     }
 }

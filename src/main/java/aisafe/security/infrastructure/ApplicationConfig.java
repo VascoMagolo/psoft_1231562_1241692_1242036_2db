@@ -1,4 +1,4 @@
-package aisafe.security;
+package aisafe.security.infrastructure;
 
 import aisafe.security.domain.UserRepository;
 import org.springframework.context.annotation.Bean;

@@ -1,6 +1,6 @@
 package aisafe.routes.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Raised when the requested route cannot be found.

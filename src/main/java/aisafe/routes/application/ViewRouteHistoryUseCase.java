@@ -1,6 +1,6 @@
 package aisafe.routes.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.routes.domain.RouteHistory;
 import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;

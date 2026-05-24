@@ -1,6 +1,6 @@
 package aisafe.aircrafts.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Raised when an aircraft with the same registration number already exists.

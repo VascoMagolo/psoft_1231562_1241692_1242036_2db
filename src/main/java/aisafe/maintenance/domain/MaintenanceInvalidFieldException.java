@@ -1,6 +1,6 @@
 package aisafe.maintenance.domain;
 
-import aisafe.DomainException;
+import aisafe.shared.domain.DomainException;
 
 /**
  * Thrown when an attempt is made to create or update a maintenance part with invalid field values

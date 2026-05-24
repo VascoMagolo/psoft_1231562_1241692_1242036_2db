@@ -1,4 +1,4 @@
-package aisafe;
+package aisafe.shared.infrastructure;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

@@ -113,6 +113,6 @@ class RouteControllerTest {
 
         mockMvc.perform(get("/api/routes/airport/OPO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].originIataCode").value("OPO"));
+                .andExpect(jsonPath("$._embedded.routeResponseList[0].originIataCode").value("OPO"));
     }
 }

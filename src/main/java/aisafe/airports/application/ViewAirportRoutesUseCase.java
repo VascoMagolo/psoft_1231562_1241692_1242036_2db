@@ -1,6 +1,6 @@
 package aisafe.airports.application;
 
-import aisafe.UseCase;
+import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
