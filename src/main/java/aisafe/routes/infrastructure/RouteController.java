@@ -53,12 +53,12 @@ public class RouteController {
      * @param searchRoutes          the search routes
      */
     public RouteController(CreateRouteUseCase createRoute,
-            ViewRouteHistoryUseCase viewRouteHistory,
-            UpdateRouteUseCase updateRoute,
-            DesactivateRouteUseCase desactivateRoute,
-            ViewRouteDetailsUseCase viewRouteDetails,
-            ListRoutesFromAirportUseCase listRoutesFromAirport,
-            SearchRoutesUseCase searchRoutes) {
+                           ViewRouteHistoryUseCase viewRouteHistory,
+                           UpdateRouteUseCase updateRoute,
+                           DesactivateRouteUseCase desactivateRoute,
+                           ViewRouteDetailsUseCase viewRouteDetails,
+                           ListRoutesFromAirportUseCase listRoutesFromAirport,
+                           SearchRoutesUseCase searchRoutes) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -144,8 +144,8 @@ public class RouteController {
     /**
      * Updates the information of an existing route.
      *
-     * @param id      the unique identifier of the route to update
-     * @param request the request containing the updated route data
+     * @param id the unique identifier of the route to update
+        * @param request the request containing the updated route data
      * @return a response entity containing the updated route
      */
     // US112
@@ -189,10 +189,12 @@ public class RouteController {
     }
 
     /**
-     * Retrieves detailed information about a specific route.
+     * Retrieves all active routes departing from a specific airport.
      *
-     * @param id the unique identifier of the route
-     * @return a response entity containing the route details
+     * @param iataCode the IATA code of the origin airport
+     * @param pageable pagination parameters
+     * @param assembler the paged resources assembler
+     * @return a response entity containing the paginated routes
      */
     // US113
     @Operation(summary = "View route details", description = "Retrieves the full details of a specific route by its ID. (US113)")
@@ -234,9 +236,11 @@ public class RouteController {
     /**
      * Searches for routes based on origin and destination filters.
      *
-     * @param origin      the origin airport or location filter
+     * @param origin the origin airport or location filter
      * @param destination the destination airport or location filter
-     * @return a response entity containing the matching routes
+     * @param pageable pagination parameters
+     * @param assembler the paged resources assembler
+     * @return a response entity containing the matching paginated routes
      */
     // US114
     @Operation(summary = "Search routes", description = "Searches for flight routes based on origin and/or destination criteria. (US114)")
