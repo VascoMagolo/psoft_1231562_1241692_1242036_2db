@@ -21,7 +21,9 @@ jobs:
           cache: maven
 
       - name: Run tests
-        run: ./mvnw test --no-transfer-progress
+        run: |
+          chmod +x mvnw
+          ./mvnw test --no-transfer-progress
 
       - name: Upload test report
         if: failure()
