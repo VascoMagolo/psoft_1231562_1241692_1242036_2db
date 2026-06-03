@@ -1,12 +1,17 @@
 package aisafe.routes.application;
 
 import aisafe.routes.domain.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +29,19 @@ class DesactivateRouteUseCaseTest {
 
     @InjectMocks
     private DesactivateRouteUseCase desactivateRoute;
+
+    @BeforeEach
+    void setUpSecurityContext() {
+        var auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
+        var ctx = SecurityContextHolder.createEmptyContext();
+        ctx.setAuthentication(auth);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void ensureRouteIsDeactivatedSuccessfully() {
