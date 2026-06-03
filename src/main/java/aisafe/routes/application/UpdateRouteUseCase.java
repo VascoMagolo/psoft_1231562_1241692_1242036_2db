@@ -8,6 +8,7 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -42,8 +43,9 @@ public class UpdateRouteUseCase {
             route.setActive(request.active());
         }
 
+        String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         Route updatedRoute = routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(updatedRoute, "Route details updated", "system"));
+        routeHistoryRepository.save(new RouteHistory(updatedRoute, "Route details updated", changedBy));
         return updatedRoute;
     }
 }

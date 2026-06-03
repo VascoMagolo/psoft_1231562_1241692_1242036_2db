@@ -7,6 +7,7 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,9 +31,10 @@ public class DesactivateRouteUseCase {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
 
+        String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         route.deactivate();
         Route deactivatedRoute = routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(deactivatedRoute, "Route deactivated", "system"));
+        routeHistoryRepository.save(new RouteHistory(deactivatedRoute, "Route deactivated", changedBy));
         return deactivatedRoute;
     }
 }
