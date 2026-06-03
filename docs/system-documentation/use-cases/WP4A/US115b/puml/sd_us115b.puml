@@ -1,53 +1,70 @@
-﻿@startuml
+@startuml
 autonumber
-actor "Maintenance Technician" as MT
+actor "Maintenance Supervisor" as MS
 participant "MaintenanceController" as Ctrl
 participant "CreateMaintenanceTemplateUseCase" as UC
 participant "AircraftModelRepository" as ModelRepo
 participant "MaintenanceTemplateRepository" as Repo
 database "Database" as DB
-MT -> Ctrl : POST /api/maintenance/templates (JSON)
+
+MS -> Ctrl : POST /api/maintenance/templates\n{ name, templateType, applicableModels: [String],\n  checklist: [String], intervalFlightHours,\n  intervalDays }
 activate Ctrl
-Ctrl -> UC : execute(request)
+
+note right of Ctrl
+  @Valid on CreateMaintenanceTemplateRequest:
+  - name: not blank
+  - templateType: not null (MaintenanceType enum)
+  - applicableModels: not empty, each not blank
+  - checklist: not empty, each not blank
+  - intervalFlightHours: >= 1
+  - intervalDays: >= 1
+end note
+
+Ctrl -> UC : execute(request: CreateMaintenanceTemplateRequest)
 activate UC
-loop for each model name
-    UC -> ModelRepo : findByModelName(modelName)
-    activate ModelRepo
-    ModelRepo -> DB : SELECT * FROM aircraft_model WHERE model_name = ?
-    activate DB
-    DB --> ModelRepo : model record
-    deactivate DB
-    ModelRepo --> UC : Optional<AircraftModel>
-    deactivate ModelRepo
+
+loop for each modelName in request.applicableModels()
+  UC -> ModelRepo : findByModelName(modelName)
+  activate ModelRepo
+  ModelRepo -> DB : SELECT FROM aircraft_model WHERE model_name = ?
+  activate DB
+  DB --> ModelRepo : model record
+  deactivate DB
+  ModelRepo --> UC : Optional<AircraftModel>
+  deactivate ModelRepo
 end
+
 alt one or more models not found
-    UC -> UC : throw AircraftModelNotFoundException
-else all models found
-    UC -> Repo : existsByName(request.name)
+  UC --> Ctrl : throws AircraftModelNotFoundException
+  Ctrl --> MS : 404 Not Found\n{ message: "Aircraft model '...' not found." }
+else all models resolved
+  UC -> Repo : existsByName(request.name())
+  activate Repo
+  Repo -> DB : SELECT COUNT(*) FROM maintenance_template WHERE name = ?
+  activate DB
+  DB --> Repo : count
+  deactivate DB
+  Repo --> UC : boolean
+  deactivate Repo
+
+  alt template name already exists
+    UC --> Ctrl : throws MaintenanceTemplateAlreadyExistsException
+    Ctrl --> MS : 409 Conflict\n{ message: "Maintenance template '...' already exists." }
+  else name is unique
+    UC -> Repo : save(new MaintenanceTemplate(name, templateType,\n  models, checklist, intervalFlightHours, intervalDays))
     activate Repo
-    Repo -> DB : SELECT COUNT(*) FROM maintenance_template WHERE name = ?
+    Repo -> DB : INSERT INTO maintenance_template
     activate DB
-    DB --> Repo : count
+    DB --> Repo : saved record (with generated ID)
     deactivate DB
-    Repo --> UC : true/false
+    Repo --> UC : MaintenanceTemplate
     deactivate Repo
-    alt template name already exists
-        UC -> UC : throw MaintenanceTemplateAlreadyExistsException
-    else template is unique
-        UC -> Repo : save(template)
-        activate Repo
-        Repo -> DB : INSERT INTO maintenance_template
-        activate DB
-        DB --> Repo : saved record (with ID)
-        deactivate DB
-        Repo --> UC : savedTemplate
-        deactivate Repo
-    end
+
+    UC --> Ctrl : MaintenanceTemplateResponse\n{ id, name, description }
+    deactivate UC
+    Ctrl --> MS : 201 Created\nEntityModel<MaintenanceTemplateResponse> with _links
+  end
 end
-UC --> Ctrl : MaintenanceTemplate
-deactivate UC
-Ctrl --> MT : 201 Created (JSON)
+
 deactivate Ctrl
 @enduml
-
-

@@ -31,11 +31,16 @@ deactivate DB
 RouteRepo --> UC : List<Route>
 deactivate RouteRepo
 
-note right of UC : Counts routes per airport\n(origin OR destination),\nthen sorts descending
+note right of UC
+  For each Airport:
+  counts routes where origin OR
+  destination matches iataCode,
+  then sorts descending by routeCount
+end note
 
-UC --> Ctrl : List<AirportStatisticsResponse>
+UC --> Ctrl : List<AirportStatisticsResponse>\n[{ iataCode, name, city,\n  country, routeCount }]
 deactivate UC
 
-Ctrl --> BO : 200 OK (JSON Array)
+Ctrl --> BO : 200 OK\nCollectionModel<EntityModel<AirportStatisticsResponse>>\nwith _links (airport ref per item)
 deactivate Ctrl
 @enduml

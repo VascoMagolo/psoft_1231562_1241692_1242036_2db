@@ -10,34 +10,35 @@ database "Database" as DB
 Actor -> Ctrl : GET /api/routes/{id}/history
 activate Ctrl
 
-Ctrl -> UC : execute(routeId)
+Ctrl -> UC : execute(routeId: Long)
 activate UC
 
 UC -> RouteRepo : findById(routeId)
 activate RouteRepo
 RouteRepo -> DB : SELECT FROM route WHERE id = ?
 activate DB
-DB --> RouteRepo : route record / empty
+DB --> RouteRepo : route record
 deactivate DB
 RouteRepo --> UC : Optional<Route>
 deactivate RouteRepo
 
-alt Route found
-    UC -> HistoryRepo : findAllByRouteId(routeId)
-    activate HistoryRepo
-    HistoryRepo -> DB : SELECT FROM route_history WHERE route_id = ?
-    activate DB
-    DB --> HistoryRepo : history records
-    deactivate DB
-    HistoryRepo --> UC : List<RouteHistory>
-    deactivate HistoryRepo
-    UC --> Ctrl : List<RouteHistory>
-    Ctrl --> Actor : 200 OK (JSON)
-else Route not found
-    UC --> Ctrl : throws RouteNotFoundException
-    Ctrl --> Actor : 404 Not Found
+alt route not found
+  UC --> Ctrl : throws RouteNotFoundException
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+else route found
+  UC -> HistoryRepo : findAllByRouteId(routeId)
+  activate HistoryRepo
+  HistoryRepo -> DB : SELECT FROM route_history WHERE route_id = ?
+  activate DB
+  DB --> HistoryRepo : history records
+  deactivate DB
+  HistoryRepo --> UC : List<RouteHistory>
+  deactivate HistoryRepo
+
+  UC --> Ctrl : List<RouteHistoryResponse>\n[{ id, routeId, changeDescription,\n   changedAt, changedBy }]
+  deactivate UC
+  Ctrl --> Actor : 200 OK\nCollectionModel<EntityModel<RouteHistoryResponse>>\nwith _links (self, route)
 end
 
-deactivate UC
 deactivate Ctrl
 @enduml

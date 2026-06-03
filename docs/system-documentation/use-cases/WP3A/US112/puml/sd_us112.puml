@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "ATCC / Backoffice Operator" as Actor
+actor "Backoffice Operator" as Actor
 participant "RouteController" as Ctrl
 participant "UpdateRouteUseCase" as UpdateUC
 participant "DesactivateRouteUseCase" as DeactivateUC
@@ -8,79 +8,93 @@ participant "RouteRepository" as Repo
 participant "RouteHistoryRepository" as HistoryRepo
 database "Database" as DB
 
-alt Update route details
-Actor -> Ctrl : PUT /api/routes/{id} (updateData)
+== Update route details ==
+Actor -> Ctrl : PUT /api/routes/{id}\n{ estimatedFlightTime?, minimumRange?,\n  minimumCapacity?, active? }
 activate Ctrl
 
-Ctrl -> UpdateUC : execute(id, updateData)
+Ctrl -> UpdateUC : execute(id: Long, request: UpdateRouteRequest)
 activate UpdateUC
 
 UpdateUC -> Repo : findById(id)
 activate Repo
 Repo -> DB : SELECT FROM route WHERE id = ?
+activate DB
 DB --> Repo : route record
+deactivate DB
 Repo --> UpdateUC : Optional<Route>
 deactivate Repo
 
-alt Route found
-    UpdateUC -> UpdateUC : applyUpdates(updateData)
-    UpdateUC -> Repo : save(updatedRoute)
-    activate Repo
-    Repo -> DB : UPDATE route SET ... WHERE id = ?
-    DB --> Repo : success
-    Repo --> UpdateUC : Route
-    deactivate Repo
-    UpdateUC -> HistoryRepo : save(historyEntry)
-    activate HistoryRepo
-    HistoryRepo -> DB : INSERT INTO route_history (...)
-    DB --> HistoryRepo : success
-    HistoryRepo --> UpdateUC : RouteHistory
-    deactivate HistoryRepo
-    UpdateUC --> Ctrl : Route
-    Ctrl --> Actor : 200 OK
-else Route not found
-    UpdateUC --> Ctrl : throws RouteNotFoundException
-    Ctrl --> Actor : 404 Not Found
+alt route not found
+  UpdateUC --> Ctrl : throws RouteNotFoundException
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+else route found
+  UpdateUC -> Repo : save(route.updateRoute(\n  flightTime, range, capacity))
+  activate Repo
+  Repo -> DB : UPDATE route SET ... WHERE id = ?
+  activate DB
+  DB --> Repo : updated record
+  deactivate DB
+  Repo --> UpdateUC : Route
+  deactivate Repo
+
+  UpdateUC -> HistoryRepo : save(new RouteHistory(route, changeDescription, changedBy))
+  activate HistoryRepo
+  HistoryRepo -> DB : INSERT INTO route_history
+  activate DB
+  DB --> HistoryRepo : saved record
+  deactivate DB
+  HistoryRepo --> UpdateUC : RouteHistory
+  deactivate HistoryRepo
+
+  UpdateUC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active }
+  deactivate UpdateUC
+  Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
 end
 
-deactivate UpdateUC
 deactivate Ctrl
-else Deactivate route
-Actor -> Ctrl : PATCH /api/routes/{id}/deactivate
+
+== Deactivate route ==
+Actor -> Ctrl : PATCH /api/routes/{id}/deactivate\nIf-Match: {version}
 activate Ctrl
 
-Ctrl -> DeactivateUC : execute(id)
+Ctrl -> DeactivateUC : execute(id: Long)
 activate DeactivateUC
 
 DeactivateUC -> Repo : findById(id)
 activate Repo
 Repo -> DB : SELECT FROM route WHERE id = ?
+activate DB
 DB --> Repo : route record
+deactivate DB
 Repo --> DeactivateUC : Optional<Route>
 deactivate Repo
 
-alt Route found
-    DeactivateUC -> DeactivateUC : mark route inactive
-    DeactivateUC -> Repo : save(deactivatedRoute)
-    activate Repo
-    Repo -> DB : UPDATE route SET active = false WHERE id = ?
-    DB --> Repo : success
-    Repo --> DeactivateUC : Route
-    deactivate Repo
-    DeactivateUC -> HistoryRepo : save(historyEntry)
-    activate HistoryRepo
-    HistoryRepo -> DB : INSERT INTO route_history (...)
-    DB --> HistoryRepo : success
-    HistoryRepo --> DeactivateUC : RouteHistory
-    deactivate HistoryRepo
-    DeactivateUC --> Ctrl : Route
-    Ctrl --> Actor : 200 OK
-else Route not found
-    DeactivateUC --> Ctrl : throws RouteNotFoundException
-    Ctrl --> Actor : 404 Not Found
+alt route not found
+  DeactivateUC --> Ctrl : throws RouteNotFoundException
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+else route found
+  DeactivateUC -> Repo : save(route.deactivate())
+  activate Repo
+  Repo -> DB : UPDATE route SET active = false WHERE id = ?
+  activate DB
+  DB --> Repo : updated record
+  deactivate DB
+  Repo --> DeactivateUC : Route
+  deactivate Repo
+
+  DeactivateUC -> HistoryRepo : save(new RouteHistory(route, "Route deactivated", changedBy))
+  activate HistoryRepo
+  HistoryRepo -> DB : INSERT INTO route_history
+  activate DB
+  DB --> HistoryRepo : saved record
+  deactivate DB
+  HistoryRepo --> DeactivateUC : RouteHistory
+  deactivate HistoryRepo
+
+  DeactivateUC --> Ctrl : RouteResponse\n{ id, ..., active: false }
+  deactivate DeactivateUC
+  Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
 end
 
-deactivate DeactivateUC
 deactivate Ctrl
-end
 @enduml

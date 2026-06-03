@@ -1,47 +1,65 @@
-﻿@startuml
+@startuml
 autonumber
-actor "ATCC" as ATCC
+actor "Backoffice Operator" as BO
 participant "AircraftController" as Ctrl
 participant "UpdateAircraftStatusUseCase" as UC
 participant "AircraftRepository" as Repo
 participant "Aircraft" as Entity
 database "Database" as DB
-ATCC -> Ctrl : PATCH /api/aircrafts/{reg}/status (JSON)
+
+BO -> Ctrl : PATCH /api/aircrafts/{registration}/status\n{ status: AircraftStatus }\nIf-Match: {version}
 activate Ctrl
-Ctrl -> UC : execute(reg, newStatus, version)
+
+note right of Ctrl
+  @Valid on UpdateStatusRequest:
+  - status: not null (enum)
+  If-Match header: current version for optimistic locking
+end note
+
+Ctrl -> UC : execute(registration: String,\n  request.status(): AircraftStatus,\n  version: Long)
 activate UC
-UC -> Repo : findByRegistrationNumber(reg)
+
+UC -> Repo : findByRegistrationNumber(registration)
 activate Repo
-Repo -> DB : SELECT * FROM aircraft WHERE registration_number = ?
+Repo -> DB : SELECT FROM aircraft WHERE registration_number = ?
 activate DB
-DB --> Repo : record data
+DB --> Repo : aircraft record
 deactivate DB
 Repo --> UC : Optional<Aircraft>
 deactivate Repo
+
 alt aircraft not found
-    UC -> UC : throw AircraftNotFoundException
-else version mismatch
-    UC -> UC : throw ObjectOptimisticLockingFailureException
-else invalid status
-    UC -> UC : throw AircraftInvalidFieldException
+  UC --> Ctrl : throws AircraftNotFoundException
+  Ctrl --> BO : 404 Not Found\n{ message: "Aircraft '...' not found." }
+else invalid status transition
+  UC --> Ctrl : throws AircraftInvalidFieldException
+  Ctrl --> BO : 400 Bad Request\n{ message: "Invalid status transition." }
 else update allowed
-    UC -> Entity : setStatus(newStatus)
-    activate Entity
-    Entity --> UC
-    deactivate Entity
-    UC -> Repo : save(aircraft)
-    activate Repo
-    Repo -> DB : UPDATE aircraft SET status = ?
-    activate DB
-    DB --> Repo : success
+  UC -> Entity : setStatus(status)
+  activate Entity
+  Entity --> UC
+  deactivate Entity
+
+  UC -> Repo : save(aircraft)
+  activate Repo
+  Repo -> DB : UPDATE aircraft SET status = ? WHERE id = ? AND version = ?
+  activate DB
+
+  alt version matches (no concurrent modification)
+    DB --> Repo : updated record (version incremented)
     deactivate DB
-    Repo --> UC : updatedAircraft
+    Repo --> UC : Aircraft
     deactivate Repo
+    UC --> Ctrl : ViewAircraftDetailsResponse\n{ registrationNumber, model, manufacturer,\n  manufacturingDate, status, seatCapacity,\n  features, version }
+    deactivate UC
+    Ctrl --> BO : 200 OK\nEntityModel<ViewAircraftDetailsResponse> with _links
+  else version mismatch (concurrent modification)
+    DB --> Repo : 0 rows affected
+    Repo --> UC : throws ObjectOptimisticLockingFailureException
+    UC --> Ctrl : exception propagates
+    Ctrl --> BO : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
+  end
 end
-UC --> Ctrl : ViewAircraftDetailsResponse
-deactivate UC
-Ctrl --> ATCC : 200 OK (JSON with _links)
+
 deactivate Ctrl
 @enduml
-
-

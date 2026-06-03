@@ -9,7 +9,7 @@ database "Database" as DB
 Actor -> Ctrl : GET /api/airports/{iataCode}
 activate Ctrl
 
-Ctrl -> UC : execute(iataCode)
+Ctrl -> UC : execute(iataCode: String)
 activate UC
 
 UC -> Repo : findByIataCodeCode(iataCode)
@@ -22,13 +22,13 @@ Repo --> UC : Optional<Airport>
 deactivate Repo
 
 alt Airport found
-  UC --> Ctrl : AirportResponse
-  Ctrl --> Actor : 200 OK (JSON with _links)
+  UC --> Ctrl : AirportResponse.from(airport)\n{ id, iataCode, name, city, country,\n  region, timezone, status, coordinates,\n  runways, contacts, services,\n  terminals, gates }
+  deactivate UC
+  Ctrl --> Actor : 200 OK\nEntityModel<AirportResponse> with _links:\n  self, update-status, update-details,\n  routes, certifications
 else Airport not found
   UC --> Ctrl : throws AirportNotFoundException
-  Ctrl --> Actor : 404 Not Found
+  Ctrl --> Actor : 404 Not Found\n{ message: "Airport with IATA code '...' not found." }
 end
 
-deactivate UC
 deactivate Ctrl
 @enduml

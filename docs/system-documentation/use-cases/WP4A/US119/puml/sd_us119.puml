@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 autonumber
 actor "Maintenance Technician" as MT
 participant "MaintenanceController" as Ctrl
@@ -6,46 +6,61 @@ participant "UpdateMaintenanceRecordUseCase" as UC
 participant "MaintenanceRecordRepository" as Repo
 participant "MaintenanceRecord" as Entity
 database "Database" as DB
-MT -> Ctrl : PATCH /api/maintenance/records/{id} (JSON)
+
+MT -> Ctrl : PATCH /api/maintenance/records/{id}\n{ status: MaintenanceStatus, notes? }\nIf-Match: {version}
 activate Ctrl
-Ctrl -> UC : execute(id, request, version)
+
+note right of Ctrl
+  @Valid on UpdateMaintenanceRecordsRequest:
+  - status: not null (MaintenanceStatus enum)
+  - notes: optional
+  If-Match header: current version for optimistic locking
+end note
+
+Ctrl -> UC : execute(id: Long,\n  request: UpdateMaintenanceRecordsRequest,\n  version: Long)
 activate UC
+
 UC -> Repo : findById(id)
 activate Repo
-Repo -> DB : SELECT * FROM maintenance_record WHERE id = ?
+Repo -> DB : SELECT FROM maintenance_record WHERE id = ?
 activate DB
 DB --> Repo : record data
 deactivate DB
 Repo --> UC : Optional<MaintenanceRecord>
 deactivate Repo
+
 alt record not found
-    UC -> UC : throw MaintenanceRecordNotFoundException
+  UC --> Ctrl : throws MaintenanceRecordNotFoundException
+  Ctrl --> MT : 404 Not Found\n{ message: "Maintenance record not found." }
 else version mismatch
-    UC -> UC : throw ObjectOptimisticLockingFailureException
+  UC --> Ctrl : throws ObjectOptimisticLockingFailureException
+  Ctrl --> MT : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
 else update allowed
-    UC -> Entity : setStatus(request.status)
+  UC -> Entity : setStatus(request.status())
+  activate Entity
+  Entity --> UC
+  deactivate Entity
+
+  opt notes provided and not blank
+    UC -> Entity : setNotes(request.notes())
     activate Entity
     Entity --> UC
     deactivate Entity
-    opt notes provided and not blank
-        UC -> Entity : setNotes(request.notes)
-        activate Entity
-        Entity --> UC
-        deactivate Entity
-    end
-    UC -> Repo : save(record)
-    activate Repo
-    Repo -> DB : UPDATE maintenance_record SET status = ?, notes = ?
-    activate DB
-    DB --> Repo : updated record
-deactivate DB
-    Repo --> UC : updatedRecord
-    deactivate Repo
+  end
+
+  UC -> Repo : save(record)
+  activate Repo
+  Repo -> DB : UPDATE maintenance_record\nSET status = ?, notes = ?\nWHERE id = ? AND version = ?
+  activate DB
+  DB --> Repo : updated record (version incremented)
+  deactivate DB
+  Repo --> UC : MaintenanceRecord
+  deactivate Repo
+
+  UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+  deactivate UC
+  Ctrl --> MT : 200 OK\nEntityModel<MaintenanceRecordResponse> with _links
 end
-UC --> Ctrl : MaintenanceRecordResponse
-deactivate UC
-Ctrl --> MT : 200 OK (JSON with _links)
+
 deactivate Ctrl
 @enduml
-
-
