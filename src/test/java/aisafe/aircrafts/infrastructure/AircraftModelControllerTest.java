@@ -42,6 +42,9 @@ class AircraftModelControllerTest {
     private ListAircraftModelsUseCase listAircraftModels;
 
     @MockitoBean
+    private DeleteAircraftModelUseCase deleteAircraftModel;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

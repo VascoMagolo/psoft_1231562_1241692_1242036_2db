@@ -55,6 +55,15 @@ class MaintenanceControllerTest {
     private ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase;
 
     @MockitoBean
+    private DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase;
+
+    @MockitoBean
+    private DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase;
+
+    @MockitoBean
+    private DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
