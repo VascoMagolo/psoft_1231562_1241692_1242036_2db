@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 autonumber
 actor "Maintenance Technician" as MT
 participant "MaintenanceController" as Ctrl
@@ -6,34 +6,47 @@ participant "ViewAllMaintenanceRecordsUseCase" as UC
 participant "AircraftRepository" as AircraftRepo
 participant "MaintenanceRecordRepository" as Repo
 database "Database" as DB
-MT -> Ctrl : GET /api/maintenance/records/aircraft/{registrationNumber}
+
+MT -> Ctrl : GET /api/maintenance/records/aircraft/{registrationNumber}\n?page=0&size=20
 activate Ctrl
-Ctrl -> UC : execute(registrationNumber, pageable)
+
+Ctrl -> UC : execute(registrationNumber: String,\n  pageable: Pageable)
 activate UC
+
 UC -> AircraftRepo : findByRegistrationNumber(registrationNumber)
 activate AircraftRepo
-AircraftRepo -> DB : SELECT * FROM aircraft WHERE registration_number = ?
+AircraftRepo -> DB : SELECT FROM aircraft WHERE registration_number = ?
 activate DB
 DB --> AircraftRepo : aircraft record
 deactivate DB
 AircraftRepo --> UC : Optional<Aircraft>
 deactivate AircraftRepo
+
 alt aircraft not found
-    UC -> UC : throw AircraftNotFoundException
-else aircraft exists
-    UC -> Repo : findByAircraftRegistrationNumber(registrationNumber, pageable)
-    activate Repo
-    Repo -> DB : SELECT * FROM maintenance_record WHERE registration_number = ?
-    activate DB
-    DB --> Repo : page of records
-    deactivate DB
-    Repo --> UC : Page<MaintenanceRecord>
-    deactivate Repo
-    UC --> Ctrl : Page<ViewAllMaintenanceRecordsResponse>
+  UC --> Ctrl : throws AircraftNotFoundException
+  Ctrl --> MT : 404 Not Found\n{ message: "Aircraft '...' not found." }
+else aircraft found
+  UC -> Repo : findByAircraftRegistrationNumber(registrationNumber, pageable)
+  activate Repo
+  Repo -> DB : SELECT FROM maintenance_record\nWHERE registration_number = ?\n(LIMIT ? OFFSET ?)
+  activate DB
+  DB --> Repo : page of records + total count
+  deactivate DB
+  Repo --> UC : Page<MaintenanceRecord>
+  deactivate Repo
+
+  UC --> Ctrl : page.map(ViewAllMaintenanceRecordsResponse::from)\n→ Page<ViewAllMaintenanceRecordsResponse>
+  deactivate UC
+
+  note right of Ctrl
+    PagedResourcesAssembler wraps
+    Page<ViewAllMaintenanceRecordsResponse> into
+    PagedModel<EntityModel<ViewAllMaintenanceRecordsResponse>>
+    adding _links and page metadata
+  end note
+
+  Ctrl --> MT : 200 OK (HAL+JSON)\n{\n  "_embedded": { "viewAllMaintenanceRecordsResponseList": [...] },\n  "_links": { "self", "next", "prev" },\n  "page": { number, size,\n    totalElements, totalPages }\n}
 end
-deactivate UC
-Ctrl --> MT : 200 OK (paged HATEOAS model)
+
 deactivate Ctrl
 @enduml
-
-

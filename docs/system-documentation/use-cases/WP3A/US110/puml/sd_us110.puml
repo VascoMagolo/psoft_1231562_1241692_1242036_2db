@@ -1,46 +1,63 @@
 @startuml
 autonumber
-actor "ATCC" as Actor
+actor "Backoffice Operator" as Actor
 participant "RouteController" as Ctrl
 participant "CreateRouteUseCase" as UC
 participant "AirportRepository" as AirRepo
 participant "RouteRepository" as RouteRepo
 database "Database" as DB
 
-Actor -> Ctrl : POST /api/routes (origin, destination, time, etc.)
+Actor -> Ctrl : POST /api/routes\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity }
 activate Ctrl
 
-Ctrl -> UC : execute(routeData)
+note right of Ctrl
+  CreateRouteRequest:
+  - originIataCode: not blank
+  - destinationIataCode: not blank
+  - estimatedFlightTime: > 0
+  - minimumRange: > 0.0
+  - minimumCapacity: > 0
+  - origin != destination (domain rule)
+end note
+
+Ctrl -> UC : execute(request: CreateRouteRequest)
 activate UC
 
-UC -> AirRepo : existsByIataCodeCode(origin)
+UC -> AirRepo : existsByIataCodeCode(request.originIataCode())
 activate AirRepo
 AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
-DB --> AirRepo : true/false
+activate DB
+DB --> AirRepo : boolean
+deactivate DB
 AirRepo --> UC : boolean
 deactivate AirRepo
 
-UC -> AirRepo : existsByIataCodeCode(destination)
+UC -> AirRepo : existsByIataCodeCode(request.destinationIataCode())
 activate AirRepo
 AirRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
-DB --> AirRepo : true/false
+activate DB
+DB --> AirRepo : boolean
+deactivate DB
 AirRepo --> UC : boolean
 deactivate AirRepo
 
-alt Both Airports Exist
-    UC -> RouteRepo : save(newRoute)
-    activate RouteRepo
-    RouteRepo -> DB : INSERT INTO route (...)
-    DB --> RouteRepo : success
-    RouteRepo --> UC : Route
-    deactivate RouteRepo
-    UC --> Ctrl : Route
-    Ctrl --> Actor : 201 Created
-else Airport Not Found
-    UC --> Ctrl : throws AirportNotFoundException
-    Ctrl --> Actor : 404 Not Found
+alt origin or destination airport not found
+  UC --> Ctrl : throws AirportNotFoundException
+  Ctrl --> Actor : 404 Not Found\n{ message: "Airport with IATA code '...' not found." }
+else both airports exist
+  UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity))
+  activate RouteRepo
+  RouteRepo -> DB : INSERT INTO route
+  activate DB
+  DB --> RouteRepo : saved record (with generated ID)
+  deactivate DB
+  RouteRepo --> UC : Route
+  deactivate RouteRepo
+
+  UC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active: true }
+  deactivate UC
+  Ctrl --> Actor : 201 Created\nEntityModel<RouteResponse> with _links
 end
 
-deactivate UC
 deactivate Ctrl
 @enduml
