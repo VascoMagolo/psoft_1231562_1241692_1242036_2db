@@ -1,5 +1,6 @@
 package aisafe.aircrafts.infrastructure;
 
+import aisafe.aircrafts.application.DeleteAircraftModelUseCase;
 import aisafe.aircrafts.application.ListAircraftModelsUseCase;
 import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
