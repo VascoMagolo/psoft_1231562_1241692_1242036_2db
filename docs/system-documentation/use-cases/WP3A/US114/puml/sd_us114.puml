@@ -6,53 +6,68 @@ participant "SearchRoutesUseCase" as UC
 participant "RouteRepository" as Repo
 database "Database" as DB
 
-Actor -> Ctrl : GET /api/routes/search?origin=...&destination=...&page=0&size=20
+Actor -> Ctrl : GET /api/routes/search\n?origin=OPO&destination=LIS&page=0&size=20
 activate Ctrl
 
-Ctrl -> UC : execute(origin, destination, pageable)
+note right of Ctrl
+  Query params (all optional):
+  - origin: String (IATA code)
+  - destination: String (IATA code)
+  - page, size, sort (Pageable)
+  Default page size: 20
+end note
+
+Ctrl -> UC : execute(origin: String, destination: String,\n  pageable: Pageable)
 activate UC
 
-alt Origin and destination provided
-    UC -> Repo : findByOriginAndDestination(origin, destination)
-    activate Repo
-    Repo -> DB : SELECT FROM route WHERE origin = ? AND destination = ?
-    activate DB
-    DB --> Repo : route records
-    deactivate DB
-    Repo --> UC : Page<Route>
-    deactivate Repo
-else Only origin provided
-    UC -> Repo : findByOrigin(origin)
-    activate Repo
-    Repo -> DB : SELECT FROM route WHERE origin = ?
-    activate DB
-    DB --> Repo : route records
-    deactivate DB
-    Repo --> UC : Page<Route>
-    deactivate Repo
-else Only destination provided
-    UC -> Repo : findByDestination(destination)
-    activate Repo
-    Repo -> DB : SELECT FROM route WHERE destination = ?
-    activate DB
-    DB --> Repo : route records
-    deactivate DB
-    Repo --> UC : Page<Route>
-    deactivate Repo
-else No filters provided
-    UC -> Repo : findAll()
-    activate Repo
-    Repo -> DB : SELECT FROM route
-    activate DB
-    DB --> Repo : route records
-    deactivate DB
-    Repo --> UC : Page<Route>
-    deactivate Repo
+alt origin and destination provided
+  UC -> Repo : findByOriginAndDestination(origin, destination, pageable)
+  activate Repo
+  Repo -> DB : SELECT FROM route\nWHERE origin_iata_code = ? AND destination_iata_code = ?\n(LIMIT ? OFFSET ?)
+  activate DB
+  DB --> Repo : route records + total count
+  deactivate DB
+  Repo --> UC : Page<Route>
+  deactivate Repo
+else only origin provided
+  UC -> Repo : findByOrigin(origin, pageable)
+  activate Repo
+  Repo -> DB : SELECT FROM route WHERE origin_iata_code = ?\n(LIMIT ? OFFSET ?)
+  activate DB
+  DB --> Repo : route records + total count
+  deactivate DB
+  Repo --> UC : Page<Route>
+  deactivate Repo
+else only destination provided
+  UC -> Repo : findByDestination(destination, pageable)
+  activate Repo
+  Repo -> DB : SELECT FROM route WHERE destination_iata_code = ?\n(LIMIT ? OFFSET ?)
+  activate DB
+  DB --> Repo : route records + total count
+  deactivate DB
+  Repo --> UC : Page<Route>
+  deactivate Repo
+else no filters provided
+  UC -> Repo : findAll(pageable)
+  activate Repo
+  Repo -> DB : SELECT FROM route (LIMIT ? OFFSET ?)
+  activate DB
+  DB --> Repo : route records + total count
+  deactivate DB
+  Repo --> UC : Page<Route>
+  deactivate Repo
 end
 
-UC --> Ctrl : Page<Route>
-Ctrl --> Actor : 200 OK (HAL+JSON with _embedded, _links, page)
-
+UC --> Ctrl : page.map(RouteResponse::from)\n→ Page<RouteResponse>
 deactivate UC
+
+note right of Ctrl
+  PagedResourcesAssembler wraps
+  Page<RouteResponse> into
+  PagedModel<EntityModel<RouteResponse>>
+  adding _links and page metadata
+end note
+
+Ctrl --> Actor : 200 OK (HAL+JSON)\n{\n  "_embedded": { "routeResponseList": [...] },\n  "_links": { "self", "next", "prev" },\n  "page": { number, size,\n    totalElements, totalPages }\n}
 deactivate Ctrl
 @enduml

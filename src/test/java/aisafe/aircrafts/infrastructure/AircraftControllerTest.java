@@ -52,6 +52,9 @@ class AircraftControllerTest {
     private UpdateAircraftStatusUseCase updateAircraftStatus;
 
     @MockitoBean
+    private DeleteAircraftUseCase deleteAircraft;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

@@ -6,24 +6,40 @@ participant "SearchAirportUseCase" as UC
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/airports/search?name=X&city=Y&country=Z&page=0&size=20
+ATCC -> Ctrl : GET /api/airports/search\n?name=X&city=Y&country=Z&page=0&size=20
 activate Ctrl
 
-Ctrl -> UC : execute(name, city, country, pageable)
+note right of Ctrl
+  Query params (all optional):
+  - name: String
+  - city: String
+  - country: String
+  - page, size, sort (Pageable)
+  Default page size: 20
+end note
+
+Ctrl -> UC : execute(name: String, city: String,\n  country: String, pageable: Pageable)
 activate UC
 
 UC -> Repo : searchAirports(name, city, country, pageable)
 activate Repo
-Repo -> DB : SELECT FROM airport WHERE name LIKE ? AND city LIKE ? AND country LIKE ?\n(Dynamic Query with LIMIT/OFFSET)
+Repo -> DB : SELECT FROM airport\nWHERE name LIKE ? AND city LIKE ? AND country LIKE ?\n(LIMIT ? OFFSET ?)
 activate DB
-DB --> Repo : page of records
+DB --> Repo : page of records + total count
 deactivate DB
 Repo --> UC : Page<Airport>
 deactivate Repo
 
-UC --> Ctrl : Page<AirportResponse>
+UC --> Ctrl : page.map(AirportResponse::from)\n→ Page<AirportResponse>
 deactivate UC
 
-Ctrl --> ATCC : 200 OK (HAL+JSON with _embedded, _links, page{number, size, totalElements, totalPages})
+note right of Ctrl
+  PagedResourcesAssembler wraps
+  Page<AirportResponse> into
+  PagedModel<EntityModel<AirportResponse>>
+  adding _links and page metadata
+end note
+
+Ctrl --> ATCC : 200 OK (HAL+JSON)\n{\n  "_embedded": { "airportResponseList": [...] },\n  "_links": { "self", "next", "prev" },\n  "page": { number, size,\n    totalElements, totalPages }\n}
 deactivate Ctrl
 @enduml
