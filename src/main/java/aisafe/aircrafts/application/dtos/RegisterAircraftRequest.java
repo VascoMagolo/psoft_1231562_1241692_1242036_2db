@@ -13,7 +13,7 @@ public record RegisterAircraftRequest(
 	@Pattern(regexp = "^[A-Z]{2}-[A-Z]{3}$", message = "Invalid registration format, Expected XX-XXX")
 	String registrationNumber,
 	@NotNull(message = "Model ID is required")
-	Long modelId,
+	String modelName,
 	@NotNull(message = "Manufacturing date is required")
 	LocalDate manufacturingDate,
 	@NotNull(message = "Seat capacity is required")

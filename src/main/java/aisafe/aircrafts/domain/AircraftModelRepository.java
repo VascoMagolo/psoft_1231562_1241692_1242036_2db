@@ -3,13 +3,18 @@ package aisafe.aircrafts.domain;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Spring Data repository for `AircraftModel` entities.
+ * Aircraft Model Repository
  */
 @Repository
-public interface AircraftModelRepository extends JpaRepository<AircraftModel, Long> {
+public interface AircraftModelRepository {
+    long count();
     Optional<AircraftModel> findByModelName(String modelName);
     boolean existsByModelName(String modelName);
+    List<AircraftModel> findAll(int pageNumber, int pageSize);
+    void save(AircraftModel model);
+    void delete(AircraftModel model);
 }

@@ -38,8 +38,7 @@ public class ViewAircraftDetailsUseCase {
                 aircraft.getManufacturingDate(),
                 aircraft.getStatus(),
                 aircraft.getSeatCapacity(),
-                aircraft.getFeatures(),
-                aircraft.getVersion()
+                aircraft.getFeatures()
         );
     }
 }

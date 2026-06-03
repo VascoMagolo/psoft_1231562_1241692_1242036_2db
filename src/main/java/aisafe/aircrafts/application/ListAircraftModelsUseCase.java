@@ -8,6 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Returns all stored aircraft models for the aircraft management screens and APIs.
  */
@@ -22,18 +25,18 @@ public class ListAircraftModelsUseCase {
 
     /**
      * Return all aircraft models as lightweight DTOs used by the API/UI.
-     * @param pageable pagination and sorting information
-     * @return a page of aircraft model DTOs
+     * @param pageNumber the current page index
+     * @param pageSize the number of items per page
+     * @return a plain Java List of aircraft model DTOs
      */
-    public Page<ListAircraftModelsUseCaseResponse> execute(Pageable pageable) {
+    public List<ListAircraftModelsUseCaseResponse> execute(int pageNumber, int pageSize) {
 
-        Page<AircraftModel> modelsPage = repository.findAll(pageable);
+        List<AircraftModel> modelsList = repository.findAll(pageNumber, pageSize);
 
-        return modelsPage.map(model -> new ListAircraftModelsUseCaseResponse(
-                model.getId(),
+        return modelsList.stream().map(model -> new ListAircraftModelsUseCaseResponse(
                 model.getModelName(),
                 model.getManufacturer().name(),
                 model.getMaximumSeatingCapacity()
-        ));
+        )).collect(Collectors.toList());
     }
 }

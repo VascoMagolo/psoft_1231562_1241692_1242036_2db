@@ -5,9 +5,10 @@ import aisafe.aircrafts.application.dtos.SearchAircraftUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Searches for aircrafts based on various criteria such as model, status, and manufacturing year.
@@ -25,22 +26,20 @@ public class SearchAircraftUseCase {
     }
 
     /**
-     * Search for aircrafts based on the provided criteria.
-     * @param modelId the ID of the aircraft model to filter by (optional)
-     * @param status the status of the aircraft to filter by (optional)
-     * @param year the manufacturing year to filter by (optional)
-     * @param pageable pagination and sorting information
-     * @return a page of aircraft DTOs matching the search criteria
+     * Search for aircrafts based on pure domain criteria.
+     * ZERO Spring Data Pageable imports!
      */
-    public Page<SearchAircraftUseCaseResponse> execute(Long modelId, AircraftStatus status, Integer year, Pageable pageable) {
+    public List<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
 
-        Page<Aircraft> resultPage = repository.searchAircrafts(modelId, status, year, pageable);
+        AircraftStatus status = statusStr != null ? AircraftStatus.valueOf(statusStr.toUpperCase()) : null;
 
-        return resultPage.map(aircraft -> new SearchAircraftUseCaseResponse(
+        List<Aircraft> results = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
+
+        return results.stream().map(aircraft -> new SearchAircraftUseCaseResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
                 aircraft.getStatus().name(),
                 aircraft.getManufacturingDate().getYear()
-        ));
+        )).collect(Collectors.toList());
     }
 }

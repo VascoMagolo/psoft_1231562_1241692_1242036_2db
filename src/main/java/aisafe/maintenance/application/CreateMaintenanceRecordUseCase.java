@@ -40,7 +40,7 @@ public class CreateMaintenanceRecordUseCase {
 
         MaintenanceRecord record = new MaintenanceRecord(
                 request.description(), request.startDate(), request.expectedDuration(),
-                part, request.notes(), template, request.status(), aircraft
+                part, request.notes(), template, request.status(), aircraft.getRegistrationNumber().getNumber()
         );
 
         if (recordRepository.existsByStartDateAndPartAndTemplate(record.getStartDate(), record.getPart(), record.getTemplate())) {
@@ -53,7 +53,7 @@ public class CreateMaintenanceRecordUseCase {
                 savedRecord.getId(), savedRecord.getDescription(), savedRecord.getStartDate(),
                 savedRecord.getExpectedDuration(), savedRecord.getNotes(),
                 savedRecord.getPart().getPartNumber(), savedRecord.getTemplate().getName(),
-                savedRecord.getStatus().name(), savedRecord.getAircraft().getRegistrationNumber().getNumber(),
+                savedRecord.getStatus().name(), request.registrationNumber(),
                 savedRecord.getVersion()
         );
     }

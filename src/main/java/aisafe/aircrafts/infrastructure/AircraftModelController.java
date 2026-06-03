@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -22,12 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-/**
- * Controller for managing aircraft models in the system. Provides endpoints for registering new models and listing existing ones.
- */
 @RestController
 @RequestMapping("/api/aircraftModels")
 @Tag(name = "Aircraft Models", description = "Aircraft Model configurations and catalog - WP#1A")
@@ -38,70 +38,68 @@ public class AircraftModelController {
     private final DeleteAircraftModelUseCase deleteAircraftModel;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
-            ListAircraftModelsUseCase listAircraftModels,
-            DeleteAircraftModelUseCase deleteAircraftModel) {
+                                   ListAircraftModelsUseCase listAircraftModels,
+                                   DeleteAircraftModelUseCase deleteAircraftModel) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
         this.deleteAircraftModel = deleteAircraftModel;
     }
 
-    /**
-     * Registers a new aircraft model in the system.
-     * @param request the details of the aircraft model to register
-     * @return a response entity containing the details of the newly registered aircraft model, along with HATEOAS links
-     */
-    @Operation(summary = "Register a new aircraft model", description = "Creates a new technical model specification for aircrafts in the catalog. Requires Fleet Manager role. (US101)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Aircraft model successfully registered"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "409", description = "An aircraft model with the given name already exists")
-    })
+    @Operation(summary = "Register a new aircraft model")
     @PostMapping
     public ResponseEntity<EntityModel<AircraftModelResponse>> createModel(
             @Valid @RequestBody RegisterAircraftModelRequest request) {
+
         AircraftModelResponse response = registerAircraftModel.execute(request);
         EntityModel<AircraftModelResponse> model = EntityModel.of(response);
-        model.add(linkTo(methodOn(AircraftModelController.class).getAllModels(Pageable.unpaged(), null))
+
+        model.add(linkTo(methodOn(AircraftModelController.class).getAllAircraftModels(Pageable.unpaged(), null))
                 .withRel("all-models"));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
-    /**
-     * Retrieves a paginated list of all aircraft models in the system.
-     * @param pageable pagination and sorting information for the request
-     * @param assembler assembler to convert the page of results into a HATEOAS-compliant paged model
-     * @return a response entity containing a paginated list of aircraft models, along with HATEOAS links for navigation
-     */
-    @Operation(summary = "Get all aircraft models with pagination", description = "Returns a paginated catalog of all supported aircraft models in the system. Supports HATEOAS.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Paginated catalog returned successfully"),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
-    })
+    @Operation(summary = "Get all aircraft models with pagination")
     @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>>> getAllModels(
+    public ResponseEntity<PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>>> getAllAircraftModels(
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<ListAircraftModelsUseCaseResponse> assembler) {
-        Page<ListAircraftModelsUseCaseResponse> page = listAircraftModels.execute(pageable);
-        PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>> pagedModel = assembler.toModel(page);
+
+        List<ListAircraftModelsUseCaseResponse> modelsList = listAircraftModels.execute(
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        Page<ListAircraftModelsUseCaseResponse> modelsPage = new PageImpl<>(modelsList, pageable, modelsList.size());
+
+        PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>> pagedModel =
+                assembler.toModel(modelsPage, model -> EntityModel.of(model)
+                        .add(linkTo(methodOn(AircraftModelController.class)
+                                .getAircraftModelByName(model.modelName()))
+                                .withSelfRel()));
 
         return ResponseEntity.ok(pagedModel);
     }
 
-    @Operation(summary = "Delete an aircraft model", description = "Permanently removes an aircraft model by ID. Requires Backoffice Operator or Admin role.")
+    @Operation(summary = "Delete an aircraft model", description = "Permanently removes an aircraft model by name. Requires Backoffice Operator or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Aircraft model deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Aircraft model not found")
     })
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{modelName}")
     public ResponseEntity<Void> deleteModel(
-            @Parameter(description = "Unique ID of the aircraft model") @PathVariable Long id) {
-        deleteAircraftModel.execute(id);
+            @Parameter(description = "Unique Name of the aircraft model") @PathVariable String modelName) {
+
+        deleteAircraftModel.execute(modelName);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get aircraft model details by name")
+    @GetMapping("/{modelName}")
+    public ResponseEntity<EntityModel<AircraftModelResponse>> getAircraftModelByName(
+            @PathVariable String modelName) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }

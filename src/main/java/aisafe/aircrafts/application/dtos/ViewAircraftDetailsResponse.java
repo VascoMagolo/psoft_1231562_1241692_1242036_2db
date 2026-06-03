@@ -16,7 +16,6 @@ public record ViewAircraftDetailsResponse(
         LocalDate manufacturingDate,
         AircraftStatus status,
         Integer seatCapacity,
-        List<String> features,
-        Long version
+        List<String> features
 ) {
 }

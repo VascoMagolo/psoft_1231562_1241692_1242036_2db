@@ -5,7 +5,6 @@ package aisafe.aircrafts.application.dtos;
  * Carries the essential fields displayed in the UI and returned by the API.
  */
 public record ListAircraftModelsUseCaseResponse(
-        Long id,
         String modelName,
         String manufacturer,
         Integer maximumSeatingCapacity

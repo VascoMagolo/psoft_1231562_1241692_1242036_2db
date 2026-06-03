@@ -20,9 +20,10 @@ public class MaintenanceTemplate {
     @Enumerated(EnumType.STRING)
     @Column ( nullable = false )
     private MaintenanceType templateType;
-    @ManyToMany
-    @CollectionTable(name = "maintenance_models", joinColumns = @JoinColumn(name = "maintenance_id"))
-    private List<AircraftModel> applicableModels = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "maintenance_template_models", joinColumns = @JoinColumn(name = "template_id"))
+    @Column(name = "model_name")
+    private List<String> applicableModelNames;
     @ElementCollection
     @Column ( nullable = false )
     private List<String> checklist;
@@ -32,17 +33,17 @@ public class MaintenanceTemplate {
     private Integer intervalDays;
 
     public MaintenanceTemplate() {}
-    public MaintenanceTemplate(String name, MaintenanceType templateType, List<AircraftModel> applicableModels, List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
+    public MaintenanceTemplate(String name, MaintenanceType templateType, List<String> applicableModelNames, List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
         Assert.notNull(name,"Name cannot be null");
         Assert.notNull(templateType, "Template cannot be null");
-        Assert.notNull(applicableModels,"Template must have applicable models");
+        Assert.notNull(applicableModelNames,"Template must have applicable models");
         Assert.notNull(checklist,"Template must have a checklist");
         Assert.notNull(intervalFlightHours,"Template must have an interval in flight hours");
         Assert.notNull(intervalDays,"Template must have an interval in days");
         Assert.hasText(name,"Name cannot be empty");
         this.name = name;
         this.templateType = templateType;
-        this.applicableModels = applicableModels;
+        this.applicableModelNames = applicableModelNames;
         this.checklist = checklist;
         this.intervalFlightHours = intervalFlightHours;
         this.intervalDays = intervalDays;

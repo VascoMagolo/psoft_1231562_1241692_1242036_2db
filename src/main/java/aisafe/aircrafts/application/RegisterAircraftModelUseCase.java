@@ -40,17 +40,16 @@ public class RegisterAircraftModelUseCase {
                 request.maximumSeatingCapacity()
         );
 
-        AircraftModel savedModel = repository.save(newModel);
+        repository.save(newModel);
 
         return new AircraftModelResponse(
-                savedModel.getId(),
-                savedModel.getModelName(),
-                savedModel.getManufacturer(),
-                savedModel.getFuelCapacity(),
-                savedModel.getMaxRange(),
-                savedModel.getCruisingSpeed(),
-                savedModel.getImagePath(),
-                savedModel.getMaximumSeatingCapacity()
+                newModel.getModelName(),
+                newModel.getManufacturer(),
+                newModel.getFuelCapacity(),
+                newModel.getMaxRange(),
+                newModel.getCruisingSpeed(),
+                newModel.getImagePath(),
+                newModel.getMaximumSeatingCapacity()
         );
     }
 }

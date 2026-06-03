@@ -38,19 +38,18 @@ public class MaintenanceRecord {
     @Enumerated(EnumType.STRING)
     @Setter
     private MaintenanceStatus status;
-    @ManyToOne
-    @JoinColumn(name = "aircraft_id")
-    private Aircraft aircraft;
+    @Column(name = "aircraft_registration", nullable = false)
+    private String aircraftRegistration;
 
     protected MaintenanceRecord() {}
 
-    public MaintenanceRecord(String description, LocalDateTime startDate, Integer expectedDuration, MaintenancePart part, String notes, MaintenanceTemplate template, MaintenanceStatus status,Aircraft aircraft) {
+    public MaintenanceRecord(String description, LocalDateTime startDate, Integer expectedDuration, MaintenancePart part, String notes, MaintenanceTemplate template, MaintenanceStatus status,String aircraftRegistration) {
         Assert.hasText(description, "Description must not be blank.");
         Assert.notNull(startDate, "Start date must not be null.");
         Assert.notNull(expectedDuration, "Expected duration must not be null.");
         Assert.isTrue(expectedDuration > 0, "Expected duration must be greater than zero.");
         Assert.notNull(part, "Maintenance part must not be null.");
-        Assert.notNull(aircraft, "Record must have an aircraft");
+        Assert.notNull(aircraftRegistration, "Record must have an aircraft registration number.");
         Assert.notNull(template, "Maintenance template must not be null.");
         Assert.notNull(status, "Maintenance status must not be null.");
         this.description = description;
@@ -60,7 +59,11 @@ public class MaintenanceRecord {
         this.notes = notes;
         this.template = template;
         this.status = status;
-        this.aircraft = aircraft;
+        this.aircraftRegistration = aircraftRegistration;
+    }
+
+    public String getAircraftRegistration() {
+        return this.aircraftRegistration;
     }
 }
 

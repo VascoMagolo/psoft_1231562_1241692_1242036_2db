@@ -13,9 +13,9 @@ public class DeleteAircraftModelUseCase {
         this.aircraftModelRepository = aircraftModelRepository;
     }
 
-    public void execute(Long id) {
-        AircraftModel model = aircraftModelRepository.findById(id)
-                .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model not found with id: " + id));
+    public void execute(String modelName) {
+        AircraftModel model = aircraftModelRepository.findByModelName(modelName)
+                .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model not found with name " + modelName));
         aircraftModelRepository.delete(model);
     }
 }

@@ -14,5 +14,5 @@ import java.util.Optional;
 @Repository
 public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord, Long> {
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
-    Page<MaintenanceRecord> findByAircraftRegistrationNumber(RegistrationNumber aircraft_registrationNumber, Pageable pageable);
+    Page<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);
 }
