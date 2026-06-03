@@ -42,6 +42,7 @@ public class AirportController {
     private final ViewAirportRoutesUseCase viewAirportRoutes;
     private final AirportStatisticsUseCase airportStatistics;
     private final ListAirportsByRegionUseCase listAirportsByRegion;
+    private final DeleteAirportUseCase deleteAirport;
 
     public AirportController(RegisterAirportUseCase registerAirport,
             AddAirportCertificationUseCase addCertification,
@@ -51,7 +52,8 @@ public class AirportController {
             UpdateAirportDetailsUseCase updateAirportDetails,
             ViewAirportRoutesUseCase viewAirportRoutes,
             AirportStatisticsUseCase airportStatistics,
-            ListAirportsByRegionUseCase listAirportsByRegion) {
+            ListAirportsByRegionUseCase listAirportsByRegion,
+            DeleteAirportUseCase deleteAirport) {
         this.registerAirport = registerAirport;
         this.addCertification = addCertification;
         this.viewAirportDetails = viewAirportDetails;
@@ -61,6 +63,7 @@ public class AirportController {
         this.viewAirportRoutes = viewAirportRoutes;
         this.airportStatistics = airportStatistics;
         this.listAirportsByRegion = listAirportsByRegion;
+        this.deleteAirport = deleteAirport;
     }
 
     /**
@@ -313,5 +316,19 @@ public class AirportController {
         return ResponseEntity.ok(CollectionModel.of(
                 listAirportsByRegion.execute(by),
                 linkTo(methodOn(AirportController.class).getAirportsGrouped(by)).withSelfRel()));
+    }
+
+    @Operation(summary = "Delete an airport", description = "Permanently removes an airport by IATA code. Requires Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Airport deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Airport not found")
+    })
+    @DeleteMapping("/{iataCode}")
+    public ResponseEntity<Void> deleteAirport(
+            @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode) {
+        deleteAirport.execute(iataCode.toUpperCase());
+        return ResponseEntity.noContent().build();
     }
 }
