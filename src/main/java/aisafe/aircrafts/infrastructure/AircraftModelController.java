@@ -1,10 +1,12 @@
 package aisafe.aircrafts.infrastructure;
 
+import aisafe.aircrafts.application.DeleteAircraftModelUseCase;
 import aisafe.aircrafts.application.ListAircraftModelsUseCase;
 import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -33,11 +35,14 @@ public class AircraftModelController {
 
     private final RegisterAircraftModelUseCase registerAircraftModel;
     private final ListAircraftModelsUseCase listAircraftModels;
+    private final DeleteAircraftModelUseCase deleteAircraftModel;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
-            ListAircraftModelsUseCase listAircraftModels) {
+            ListAircraftModelsUseCase listAircraftModels,
+            DeleteAircraftModelUseCase deleteAircraftModel) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
+        this.deleteAircraftModel = deleteAircraftModel;
     }
 
     /**
@@ -84,5 +89,19 @@ public class AircraftModelController {
         PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>> pagedModel = assembler.toModel(page);
 
         return ResponseEntity.ok(pagedModel);
+    }
+
+    @Operation(summary = "Delete an aircraft model", description = "Permanently removes an aircraft model by ID. Requires Backoffice Operator or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Aircraft model deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft model not found")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteModel(
+            @Parameter(description = "Unique ID of the aircraft model") @PathVariable Long id) {
+        deleteAircraftModel.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }

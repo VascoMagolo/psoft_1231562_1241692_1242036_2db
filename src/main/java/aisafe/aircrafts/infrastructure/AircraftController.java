@@ -37,15 +37,18 @@ public class AircraftController {
     private final RegisterAircraftUseCase registerAircraft;
     private final SearchAircraftUseCase searchAircraft;
     private final UpdateAircraftStatusUseCase updateAircraftStatus;
+    private final DeleteAircraftUseCase deleteAircraft;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
-                              UpdateAircraftStatusUseCase updateAircraftStatus) {
+                              UpdateAircraftStatusUseCase updateAircraftStatus,
+                              DeleteAircraftUseCase deleteAircraft) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
         this.searchAircraft = searchAircraft;
         this.updateAircraftStatus = updateAircraftStatus;
+        this.deleteAircraft = deleteAircraft;
     }
 
     /**
@@ -180,6 +183,21 @@ public class AircraftController {
 
         ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);
         return ResponseEntity.ok(toHateoasModel(updatedAircraft, registration));
+    }
+
+    @Operation(summary = "Delete an aircraft", description = "Permanently removes an aircraft by registration number. Requires ATCC or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Aircraft deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found")
+    })
+    @DeleteMapping("/{registration}")
+    public ResponseEntity<Void> deleteAircraft(
+            @Parameter(description = "Unique registration number of the aircraft (e.g. CS-TKA)")
+            @PathVariable RegistrationNumber registration) {
+        deleteAircraft.execute(registration);
+        return ResponseEntity.noContent().build();
     }
 
     /**

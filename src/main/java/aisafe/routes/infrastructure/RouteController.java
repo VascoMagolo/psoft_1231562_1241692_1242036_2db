@@ -40,25 +40,16 @@ public class RouteController {
     private final ViewRouteDetailsUseCase viewRouteDetails;
     private final ListRoutesFromAirportUseCase listRoutesFromAirport;
     private final SearchRoutesUseCase searchRoutes;
+    private final DeleteRouteUseCase deleteRoute;
 
-    /**
-     * Instantiates a new Route controller.
-     *
-     * @param createRoute           the create route
-     * @param viewRouteHistory      the view route history
-     * @param updateRoute           the update route
-     * @param desactivateRoute      the desactivate route
-     * @param viewRouteDetails      the view route details
-     * @param listRoutesFromAirport the list routes from airport
-     * @param searchRoutes          the search routes
-     */
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
                            UpdateRouteUseCase updateRoute,
                            DesactivateRouteUseCase desactivateRoute,
                            ViewRouteDetailsUseCase viewRouteDetails,
                            ListRoutesFromAirportUseCase listRoutesFromAirport,
-                           SearchRoutesUseCase searchRoutes) {
+                           SearchRoutesUseCase searchRoutes,
+                           DeleteRouteUseCase deleteRoute) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -66,6 +57,7 @@ public class RouteController {
         this.viewRouteDetails = viewRouteDetails;
         this.listRoutesFromAirport = listRoutesFromAirport;
         this.searchRoutes = searchRoutes;
+        this.deleteRoute = deleteRoute;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
@@ -74,7 +66,8 @@ public class RouteController {
                 linkTo(methodOn(RouteController.class).getRouteDetails(id)).withSelfRel(),
                 linkTo(methodOn(RouteController.class).getRouteHistory(id)).withRel("history"),
                 linkTo(methodOn(RouteController.class).updateRoute(id, null, null)).withRel("update"),
-                linkTo(methodOn(RouteController.class).deactivateRoute(id, null)).withRel("deactivate"));
+                linkTo(methodOn(RouteController.class).deactivateRoute(id, null)).withRel("deactivate"),
+                linkTo(methodOn(RouteController.class).deleteRoute(id)).withRel("delete"));
     }
 
     private EntityModel<RouteResponse> mapToModel(Route r) {
@@ -258,5 +251,19 @@ public class RouteController {
             PagedResourcesAssembler<Route> assembler) {
         Page<Route> routePage = this.searchRoutes.execute(origin, destination, pageable);
         return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
+    }
+
+    @Operation(summary = "Delete a route", description = "Permanently removes a flight route by ID. Requires Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Route deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Route not found")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRoute(
+            @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
+        deleteRoute.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }
