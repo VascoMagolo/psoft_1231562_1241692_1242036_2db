@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application.dtos;
 
+import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.Manufacturer;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,4 +14,15 @@ public record AircraftModelResponse(
         String imagePath,
         Integer maximumSeatingCapacity
 ) {
+    public static AircraftModelResponse from(AircraftModel model) {
+        return new AircraftModelResponse(
+                model.getModelName(),
+                model.getManufacturer() ,
+                model.getFuelCapacity(),
+                model.getMaxRange(),
+                model.getCruisingSpeed(),
+                model.getImagePath(),
+                model.getMaximumSeatingCapacity()
+        );
+    }
 }

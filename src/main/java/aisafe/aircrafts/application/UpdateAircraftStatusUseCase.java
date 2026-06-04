@@ -46,7 +46,8 @@ public class UpdateAircraftStatusUseCase {
                 aircraft.getManufacturingDate(),
                 aircraft.getStatus(),
                 aircraft.getSeatCapacity(),
-                aircraft.getFeatures()
+                aircraft.getFeatures(),
+                aircraft.getVersion()
         );
     }
 }

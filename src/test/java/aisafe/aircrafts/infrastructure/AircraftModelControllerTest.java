@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,7 +58,7 @@ class AircraftModelControllerTest {
                 "A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, "a320.jpg");
 
         AircraftModelResponse response = new AircraftModelResponse(
-                1L, "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+                 "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
 
         when(registerAircraftModel.execute(any())).thenReturn(response);
 
@@ -82,7 +83,7 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureGetAllModelsReturns200() throws Exception {
-        when(listAircraftModels.execute(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/aircraftModels"))
                 .andExpect(status().isOk());

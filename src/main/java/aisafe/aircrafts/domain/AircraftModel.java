@@ -10,11 +10,11 @@ public class AircraftModel {
 
     private final String modelName;
     private final Manufacturer manufacturer;
-    private final Double fuelCapacity;
-    private final Double maxRange;
-    private final Double cruisingSpeed;
-    private final Integer maximumSeatingCapacity;
-    private final String imagePath;
+    private Double fuelCapacity;
+    private Double maxRange;
+    private Double cruisingSpeed;
+    private Integer maximumSeatingCapacity;
+    private String imagePath;
 
     public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, String imagePath, Integer maximumSeatingCapacity) {
         Assert.hasText(modelName, "modelName must not be blank");
@@ -46,4 +46,10 @@ public class AircraftModel {
     public Double getCruisingSpeed() { return cruisingSpeed; }
     public Integer getMaximumSeatingCapacity() { return maximumSeatingCapacity; }
     public String getImagePath() { return imagePath; }
+
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+    public void setFuelCapacity(Double fuelCapacity) { this.fuelCapacity = fuelCapacity; }
+    public void setMaxRange(Double maxRange) { this.maxRange = maxRange; }
+    public void setCruisingSpeed(Double cruisingSpeed) { this.cruisingSpeed = cruisingSpeed; }
+    public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) { this.maximumSeatingCapacity = maximumSeatingCapacity; }
 }

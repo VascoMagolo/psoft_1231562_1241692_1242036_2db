@@ -10,7 +10,7 @@ public class AircraftMapper {
     public static Aircraft toDomain(AircraftJpaEntity entity, AircraftModel pureModel) {
         if (entity == null) return null;
 
-        return new Aircraft(
+        Aircraft aircraft = new Aircraft(
                 AircraftStatus.valueOf(entity.getStatus()),
                 entity.getManufacturingDate(),
                 pureModel,
@@ -18,6 +18,8 @@ public class AircraftMapper {
                 entity.getSeatCapacity(),
                 entity.getFeatures()
         );
+        aircraft.setVersion(entity.getVersion());
+        return aircraft;
     }
 
     public static AircraftJpaEntity toJpa(Aircraft domain, AircraftModelJpaEntity jpaModel) {

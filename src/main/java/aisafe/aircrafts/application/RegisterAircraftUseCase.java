@@ -32,7 +32,7 @@ public class RegisterAircraftUseCase {
      */
     public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
         AircraftModel model = modelRepository.findByModelName(request.modelName())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Model ID"));
+                .orElseThrow(() -> new AircraftInvalidFieldException("Invalid Model Name: " + request.modelName()));
 
         RegistrationNumber regNum = new RegistrationNumber(request.registrationNumber());
 
@@ -62,7 +62,8 @@ public class RegisterAircraftUseCase {
                 aircraft.getManufacturingDate(),
                 aircraft.getStatus(),
                 aircraft.getSeatCapacity(),
-                aircraft.getFeatures()
+                aircraft.getFeatures(),
+                aircraft.getVersion()
         );
     }
 }

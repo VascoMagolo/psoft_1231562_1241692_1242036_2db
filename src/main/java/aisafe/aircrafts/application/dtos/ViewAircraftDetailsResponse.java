@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application.dtos;
 
+import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.Manufacturer;
 
@@ -16,6 +17,19 @@ public record ViewAircraftDetailsResponse(
         LocalDate manufacturingDate,
         AircraftStatus status,
         Integer seatCapacity,
-        List<String> features
+        List<String> features,
+        Long version
 ) {
+    public static ViewAircraftDetailsResponse from(Aircraft aircraft) {
+        return new ViewAircraftDetailsResponse(
+                aircraft.getRegistrationNumber().getNumber(),
+                aircraft.getModel().getModelName(),
+                aircraft.getModel().getManufacturer(),
+                aircraft.getManufacturingDate(),
+                aircraft.getStatus(),
+                aircraft.getSeatCapacity(),
+                aircraft.getFeatures(),
+                aircraft.getVersion()
+        );
+    }
 }

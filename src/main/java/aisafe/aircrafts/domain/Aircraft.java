@@ -12,12 +12,12 @@ import java.util.List;
 public class Aircraft {
 
     private final RegistrationNumber registrationNumber;
-    private final LocalDate manufacturingDate;
+    private LocalDate manufacturingDate;
     private AircraftStatus status;
-    private final Integer seatCapacity;
-    private final AircraftModel model;
-    private final List<String> features;
-
+    private Integer seatCapacity;
+    private AircraftModel model;
+    private List<String> features;
+    private Long version;
     public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model,
                     RegistrationNumber registrationNumber, Integer seatCapacity, List<String> features) {
         Assert.notNull(status, "Status must not be null.");
@@ -46,4 +46,11 @@ public class Aircraft {
     public Integer getSeatCapacity() { return seatCapacity; }
     public AircraftModel getModel() { return model; }
     public List<String> getFeatures() { return Collections.unmodifiableList(features); }
+    public Long getVersion() { return version; }
+
+    public void setManufacturingDate(LocalDate manufacturingDate) {this.manufacturingDate = manufacturingDate; }
+    public void setSeatCapacity(Integer seatCapacity) { this.seatCapacity = seatCapacity; }
+    public void setModel(AircraftModel model) { this.model = model; }
+    public void setFeatures(List<String> features) { this.features = features; }
+    public void setVersion(Long version) { this.version = version; }
 }

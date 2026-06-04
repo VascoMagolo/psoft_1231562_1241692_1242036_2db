@@ -40,18 +40,20 @@ public class AircraftController {
     private final RegisterAircraftUseCase registerAircraft;
     private final SearchAircraftUseCase searchAircraft;
     private final UpdateAircraftStatusUseCase updateAircraftStatus;
-    private final DeleteAircraftUseCase deleteAircraft; // Adicionado do teu código
+    private final DeleteAircraftUseCase deleteAircraft;
+    private final UpdateAircraftUseCase updateAircraftUseCase;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
                               UpdateAircraftStatusUseCase updateAircraftStatus,
-                              DeleteAircraftUseCase deleteAircraft) {
+                              DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
         this.searchAircraft = searchAircraft;
         this.updateAircraftStatus = updateAircraftStatus;
         this.deleteAircraft = deleteAircraft;
+        this.updateAircraftUseCase = updateAircraftUseCase;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
@@ -162,6 +164,35 @@ public class AircraftController {
 
         ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);
         return ResponseEntity.ok(toHateoasModel(updatedAircraft, registration));
+    }
+
+    @Operation(summary = "Delete an aircraft", description = "Permanently removes an aircraft by registration number. Requires ATCC or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Aircraft deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found")
+    })
+    @DeleteMapping("/{registrationStr}")
+    public ResponseEntity<Void> deleteAircraft(
+            @Parameter(description = "Unique registration number of the aircraft (e.g. CS-TKA)")
+            @PathVariable String registrationStr) {
+
+        RegistrationNumber registration = new RegistrationNumber(registrationStr);
+        deleteAircraft.execute(registration);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{registrationStr}")
+    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftDetails(
+            @PathVariable String registrationStr,
+            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+            @RequestBody UpdateAircraftRequest request) {
+
+        Long version = parseEtagToVersion(ifMatchHeader);
+        RegistrationNumber registration = new RegistrationNumber(registrationStr);
+        ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registration, request, version);
+        return ResponseEntity.ok(toHateoasModel(response, registration));
     }
 
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {
