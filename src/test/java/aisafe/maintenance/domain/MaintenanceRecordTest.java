@@ -11,29 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MaintenanceRecordTest {
 
-    private AircraftModel buildModel() {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-    }
-
     private MaintenancePart buildPart() {
         return new MaintenancePart("P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
     }
 
     private MaintenanceTemplate buildTemplate() {
         return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION,
-                List.of(buildModel()), List.of("Check engine"), 500, 365);
-    }
-
-    private Aircraft buildAircraft() {
-        return new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1),
-                buildModel(), new RegistrationNumber("CS-TPA"), 150, List.of());
+                List.of("A320"), List.of("Check engine"), 500, 365);
     }
 
     @Test
     void ensureValidRecordIsCreated() {
         MaintenanceRecord record = new MaintenanceRecord(
                 "Engine inspection", LocalDateTime.now(), 4,
-                buildPart(), "Some notes", buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft());
+                buildPart(), "Some notes", buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA");
         assertEquals(MaintenanceStatus.PLANNED, record.getStatus());
         assertEquals("Engine inspection", record.getDescription());
         assertEquals(4, record.getExpectedDuration());
@@ -43,35 +34,35 @@ class MaintenanceRecordTest {
     void ensureBlankDescriptionThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("  ", LocalDateTime.now(), 4,
-                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullStartDateThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", null, 4,
-                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullExpectedDurationThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), null,
-                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureZeroExpectedDurationThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), 0,
-                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullPartThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), 4,
-                        null, null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        null, null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
@@ -85,20 +76,20 @@ class MaintenanceRecordTest {
     void ensureNullTemplateThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), 4,
-                        buildPart(), null, null, MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, null, MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullStatusThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), 4,
-                        buildPart(), null, buildTemplate(), null, buildAircraft()));
+                        buildPart(), null, buildTemplate(), null, "CS-TPA"));
     }
 
     @Test
     void ensureNotesAreOptional() {
         assertDoesNotThrow(() ->
                 new MaintenanceRecord("Engine check", LocalDateTime.now(), 4,
-                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                        buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 }

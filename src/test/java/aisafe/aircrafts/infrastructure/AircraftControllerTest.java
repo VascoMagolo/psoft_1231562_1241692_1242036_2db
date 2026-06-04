@@ -55,6 +55,9 @@ class AircraftControllerTest {
     private DeleteAircraftUseCase deleteAircraft;
 
     @MockitoBean
+    private UpdateAircraftUseCase updateAircraftUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -72,7 +75,7 @@ class AircraftControllerTest {
     @Test
     void ensureRegisterAircraftReturns201() throws Exception {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", 1L, LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
 
         when(registerAircraft.execute(any())).thenReturn(sampleResponse);
 

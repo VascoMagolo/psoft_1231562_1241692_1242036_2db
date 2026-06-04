@@ -27,6 +27,10 @@ public class UpdateAircraftStatusUseCase {
         Aircraft aircraft = repository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registration.getNumber()));
 
+        if (!aircraft.getVersion().equals(clientVersion)) {
+            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getRegistrationNumber().getNumber());
+        }
+
         if (!AircraftStatus.isValid(status)) {
             throw new AircraftInvalidFieldException("Invalid status value: " + status);
         }

@@ -1,8 +1,6 @@
 package aisafe.aircrafts.infrastructure;
 
-import aisafe.aircrafts.application.DeleteAircraftModelUseCase;
-import aisafe.aircrafts.application.ListAircraftModelsUseCase;
-import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
+import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.Manufacturer;
@@ -14,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,6 +41,12 @@ class AircraftModelControllerTest {
 
     @MockitoBean
     private DeleteAircraftModelUseCase deleteAircraftModel;
+
+    @MockitoBean
+    private UpdateAircraftModelUseCase updateAircraftModel;
+
+    @MockitoBean
+    private ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
 
     @MockitoBean
     private JwtService jwtService;

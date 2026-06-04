@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,13 +33,7 @@ class UpdateMaintenanceRecordUseCaseTest {
     }
 
     private MaintenanceTemplate buildTemplate() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(model), List.of("Check engine"), 500, 365);
-    }
-
-    private Aircraft buildAircraft() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        return new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, List.of());
+        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
     }
 
     @Test
@@ -48,7 +41,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
         MaintenanceRecord record = spy(new MaintenanceRecord(
-                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
         doReturn(0L).when(record).getVersion();
 
         when(recordRepository.findById(1L)).thenReturn(Optional.of(record));
@@ -85,7 +78,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
         MaintenanceRecord record = spy(new MaintenanceRecord(
-                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, buildAircraft()));
+                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
         doReturn(1L).when(record).getVersion();
 
         when(recordRepository.findById(1L)).thenReturn(Optional.of(record));
