@@ -48,9 +48,9 @@ public class Aircraft {
     public List<String> getFeatures() { return Collections.unmodifiableList(features); }
     public Long getVersion() { return version; }
 
-    public void setManufacturingDate(LocalDate manufacturingDate) {this.manufacturingDate = manufacturingDate; }
-    public void setSeatCapacity(Integer seatCapacity) { this.seatCapacity = seatCapacity; }
-    public void setModel(AircraftModel model) { this.model = model; }
-    public void setFeatures(List<String> features) { this.features = features; }
+    public void setManufacturingDate(LocalDate manufacturingDate) { Assert.notNull(manufacturingDate, "Manufacturing date must not be null."); this.manufacturingDate = manufacturingDate; }
+    public void setSeatCapacity(Integer seatCapacity) { Assert.notNull(seatCapacity, "Seat capacity must not be null."); Assert.isTrue(seatCapacity > 0, "Seat capacity must be greater than zero."); this.seatCapacity = seatCapacity; }
+    public void setModel(AircraftModel model) { Assert.notNull(model, "Model must not be null."); this.model = model; }
+    public void setFeatures(List<String> features) { this.features = features != null ? new ArrayList<>(features) : new ArrayList<>(); }
     public void setVersion(Long version) { this.version = version; }
 }

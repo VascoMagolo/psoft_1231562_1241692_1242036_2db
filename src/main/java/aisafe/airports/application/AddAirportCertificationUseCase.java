@@ -32,23 +32,21 @@ public class AddAirportCertificationUseCase {
 
     public AircraftCertificationResponse execute(String iataCodeStr, AddCertificationRequest request) {
 
-        // 1. Usamos o Value Object IataCode e um nome de método puro
+        if (!request.airportCode().equalsIgnoreCase(iataCodeStr)) {
+            throw new IllegalArgumentException("airportCode in request body must match the IATA code in the path.");
+        }
         IataCode iataCode = new IataCode(iataCodeStr);
-        Airport airport = airportRepository.findByIataCodeCode(String.valueOf(iataCode))
+        Airport airport = airportRepository.findByIataCodeCode(iataCode.getCode())
                 .orElseThrow(() -> new AirportNotFoundException(iataCodeStr));
 
-        // 2. Proteção de Bounded Contexts: Verificamos apenas se existe,
-        // sem instanciar a Entidade AircraftModel no módulo de Aeroportos!
         if (!aircraftModelRepository.existsByModelName(request.aircraftModelName())) {
             throw new AircraftModelNotFoundException("Aircraft model with name '" + request.aircraftModelName() + "' not found.");
         }
 
-        // 3. Validação de Duplicados
         if (certificationRepository.existsByAirportAndAircraftModelName(airport, request.aircraftModelName())) {
             throw new DuplicateResourceException("Aircraft model '" + request.aircraftModelName() + "' is already certified for airport " + iataCodeStr + ".");
         }
 
-        // 4. Criação e Persistência
         AircraftCertification certification = new AircraftCertification(airport, request.aircraftModelName());
         AircraftCertification saved = certificationRepository.save(certification);
 

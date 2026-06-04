@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface SpringDataAircraftRepository extends JpaRepository<AircraftJpaEntity, String> {
+public interface SpringDataAircraftRepository extends JpaRepository<AircraftJpaEntity, Long> {
 
     @Query("SELECT a FROM AircraftJpaEntity a WHERE " +
             "(:modelName IS NULL OR a.model.modelName = :modelName) AND " +

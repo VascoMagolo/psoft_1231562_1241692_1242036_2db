@@ -4,6 +4,7 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.shared.application.dtos.PaginatedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -80,13 +81,16 @@ public class AircraftController {
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<ListAircraftsUseCaseResponse> assembler) {
 
-        List<ListAircraftsUseCaseResponse> aircraftList = listAircraft.execute(
+        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraft.execute(
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
 
-        Page<ListAircraftsUseCaseResponse> aircraftPage = new PageImpl<>(aircraftList, pageable, aircraftList.size());
-
+        Page<ListAircraftsUseCaseResponse> aircraftPage = new PageImpl<>(
+                result.data(),
+                pageable,
+                result.totalElements()
+        );
         PagedModel<EntityModel<ListAircraftsUseCaseResponse>> pagedModel =
                 assembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft)
                         .add(linkTo(methodOn(AircraftController.class)
@@ -121,18 +125,23 @@ public class AircraftController {
     })
     @GetMapping("/search")
     public ResponseEntity<PagedModel<EntityModel<SearchAircraftUseCaseResponse>>> searchAircrafts(
-            @Parameter(description = "Filter by technical model name") @RequestParam(required = false) String modelName, // Corrigido de Long modelId
+            @Parameter(description = "Filter by technical model name") @RequestParam(required = false) String modelName,
             @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
             @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) {
 
         String statusStr = status != null ? status.name() : null;
-        List<SearchAircraftUseCaseResponse> resultsList = searchAircraft.execute(
+
+        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraft.execute(
                 modelName, statusStr, year, pageable.getPageNumber(), pageable.getPageSize()
         );
 
-        Page<SearchAircraftUseCaseResponse> resultsPage = new PageImpl<>(resultsList, pageable, resultsList.size());
+        Page<SearchAircraftUseCaseResponse> resultsPage = new PageImpl<>(
+                result.data(),
+                pageable,
+                result.totalElements()
+        );
 
         PagedModel<EntityModel<SearchAircraftUseCaseResponse>> pagedModel =
                 assembler.toModel(resultsPage, aircraft -> EntityModel.of(aircraft)

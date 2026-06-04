@@ -4,8 +4,7 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import aisafe.shared.application.dtos.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -32,14 +31,13 @@ public class ListAircraftUseCase {
      * @param pageSize the number of items per page
      * @return a pure Java List of aircraft DTOs
      */
-    public List<ListAircraftsUseCaseResponse> execute(int pageNumber, int pageSize) {
+    public PaginatedResult<ListAircraftsUseCaseResponse> execute(int pageNumber, int pageSize) {
+        PaginatedResult<Aircraft> domainResult = repository.findAll(pageNumber, pageSize);
 
-        List<Aircraft> aircraftList = repository.findAll(pageNumber, pageSize);
+        List<ListAircraftsUseCaseResponse> dtoList = domainResult.data().stream()
+                .map(ListAircraftsUseCaseResponse::from)
+                .collect(Collectors.toList());
 
-        return aircraftList.stream().map(aircraft -> new ListAircraftsUseCaseResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getStatus().name()
-        )).collect(Collectors.toList());
+        return new PaginatedResult<>(dtoList, domainResult.totalElements());
     }
 }

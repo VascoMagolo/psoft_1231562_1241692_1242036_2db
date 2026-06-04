@@ -1,6 +1,7 @@
 package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.application.dtos.PaginatedResult;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -23,33 +24,28 @@ public class AircraftRepositoryImpl implements AircraftRepository {
     }
 
     @Override
-    public List<Aircraft> searchAircrafts(String modelName, AircraftStatus status, Integer year, int pageNumber, int pageSize) {
+    public PaginatedResult<Aircraft> searchAircrafts(String modelName, AircraftStatus status, Integer year, int pageNumber, int pageSize) {
         String statusStr = status != null ? status.name() : null;
-
         var springPageable = PageRequest.of(pageNumber, pageSize);
-
         var jpaPage = springRepo.searchAircrafts(modelName, statusStr, year, springPageable);
 
-        return jpaPage.stream()
-                .map(jpaEntity -> {
-                    var pureModel = AircraftModelMapper.toDomain(jpaEntity.getModel());
-                    return AircraftMapper.toDomain(jpaEntity, pureModel);
-                })
+        List<Aircraft> list = jpaPage.stream()
+                .map(jpaEntity -> AircraftMapper.toDomain(jpaEntity, AircraftModelMapper.toDomain(jpaEntity.getModel())))
                 .collect(Collectors.toList());
+
+        return new PaginatedResult<>(list, jpaPage.getTotalElements());
     }
 
     @Override
-    public List<Aircraft> findAll(int pageNumber, int pageSize) {
+    public PaginatedResult<Aircraft> findAll(int pageNumber, int pageSize) {
         var springPageable = PageRequest.of(pageNumber, pageSize);
-
         var jpaPage = springRepo.findAll(springPageable);
 
-        return jpaPage.stream()
-                .map(jpaEntity -> AircraftMapper.toDomain(
-                        jpaEntity,
-                        AircraftModelMapper.toDomain(jpaEntity.getModel())
-                ))
+        List<Aircraft> list = jpaPage.stream()
+                .map(jpaEntity -> AircraftMapper.toDomain(jpaEntity, AircraftModelMapper.toDomain(jpaEntity.getModel())))
                 .collect(Collectors.toList());
+
+        return new PaginatedResult<>(list, jpaPage.getTotalElements());
     }
 
     @Override
@@ -68,7 +64,7 @@ public class AircraftRepositoryImpl implements AircraftRepository {
                 .orElse(null);
 
         AircraftModelJpaEntity managedModel = modelSpringRepo.findByModelName(aircraft.getModel().getModelName())
-                .orElseThrow(() -> new IllegalStateException("Model not found in DB: " + aircraft.getModel().getModelName()));
+                .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model not found in DB: " + aircraft.getModel().getModelName()));
 
         AircraftJpaEntity newJpaData = AircraftMapper.toJpa(aircraft, managedModel);
 
@@ -81,12 +77,13 @@ public class AircraftRepositoryImpl implements AircraftRepository {
             }
         }
 
-        springRepo.save(newJpaData);
+        AircraftJpaEntity saved = springRepo.save(newJpaData);
+        aircraft.setVersion(saved.getVersion());
     }
     @Override
     public void delete(Aircraft aircraft){
         AircraftJpaEntity jpaEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Aircraft not found: " + aircraft.getRegistrationNumber().getNumber()));
+                .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraft.getRegistrationNumber().getNumber()));
         springRepo.delete(jpaEntity);
     }
 }

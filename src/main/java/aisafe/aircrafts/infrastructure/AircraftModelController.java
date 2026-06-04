@@ -1,9 +1,6 @@
 package aisafe.aircrafts.infrastructure;
 
-import aisafe.aircrafts.application.DeleteAircraftModelUseCase;
-import aisafe.aircrafts.application.ListAircraftModelsUseCase;
-import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
-import aisafe.aircrafts.application.UpdateAircraftModelUseCase;
+import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
@@ -39,14 +36,16 @@ public class AircraftModelController {
     private final ListAircraftModelsUseCase listAircraftModels;
     private final DeleteAircraftModelUseCase deleteAircraftModel;
     private final UpdateAircraftModelUseCase updateAircraftModel;
+    private final ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
                                    ListAircraftModelsUseCase listAircraftModels,
-                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel) {
+                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel, ViewAircraftModelDetailsUseCase viewAircraftModelDetails) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
         this.deleteAircraftModel = deleteAircraftModel;
         this.updateAircraftModel = updateAircraftModel;
+        this.viewAircraftModelDetails = viewAircraftModelDetails;
     }
 
     @Operation(summary = "Register a new aircraft model")
@@ -100,11 +99,25 @@ public class AircraftModelController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get aircraft model details by name")
+    @Operation(summary = "Get aircraft model details by name", description = "Returns complete technical details for a specific aircraft model.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aircraft model details found and returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft model not found")
+    })
     @GetMapping("/{modelName}")
     public ResponseEntity<EntityModel<AircraftModelResponse>> getAircraftModelByName(
+            @Parameter(description = "Unique Name of the aircraft model (e.g. Boeing 737 MAX)")
             @PathVariable String modelName) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+
+        AircraftModelResponse response = viewAircraftModelDetails.execute(modelName);
+
+        EntityModel<AircraftModelResponse> entityModel = EntityModel.of(response);
+        entityModel.add(linkTo(methodOn(AircraftModelController.class).getAircraftModelByName(modelName)).withSelfRel());
+        entityModel.add(linkTo(methodOn(AircraftModelController.class).getAllAircraftModels(Pageable.unpaged(), null)).withRel("all-models"));
+
+        return ResponseEntity.ok(entityModel);
     }
 
     @Operation(summary = "Update aircraft model details", description = "Updates specific details of an existing aircraft model. Only provided fields will be updated.")

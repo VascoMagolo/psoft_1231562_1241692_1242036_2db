@@ -22,7 +22,7 @@ public class AircraftJpaEntity {
     @Column(name = "registration_number", unique = true, nullable = false)
     private String registrationNumber;
 
-    @Column(updatable = false)
+    @Column(nullable = false)
     private LocalDate manufacturingDate;
 
     @Column(nullable = false)

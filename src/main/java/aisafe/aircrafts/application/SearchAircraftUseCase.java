@@ -1,10 +1,12 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.domain.AircraftInvalidFieldException;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.SearchAircraftUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
+import aisafe.shared.application.dtos.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -29,17 +31,22 @@ public class SearchAircraftUseCase {
      * Search for aircrafts based on pure domain criteria.
      * ZERO Spring Data Pageable imports!
      */
-    public List<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
+    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
 
-        AircraftStatus status = statusStr != null ? AircraftStatus.valueOf(statusStr.toUpperCase()) : null;
+        AircraftStatus status = null;
+        if (statusStr != null && !statusStr.isBlank()) {
+            try {
+                status = AircraftStatus.valueOf(statusStr.toUpperCase());
+            } catch (AircraftInvalidFieldException e) {
+                throw new AircraftInvalidFieldException("Aircraft status is invalid: " + statusStr);
+            }
+        }
+        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
 
-        List<Aircraft> results = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
+        List<SearchAircraftUseCaseResponse> dtoList = domainResult.data().stream()
+                .map(SearchAircraftUseCaseResponse::from)
+                .collect(Collectors.toList());
 
-        return results.stream().map(aircraft -> new SearchAircraftUseCaseResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getStatus().name(),
-                aircraft.getManufacturingDate().getYear()
-        )).collect(Collectors.toList());
+        return new PaginatedResult<>(dtoList, domainResult.totalElements());
     }
 }
