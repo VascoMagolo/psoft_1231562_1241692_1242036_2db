@@ -1,0 +1,17 @@
+@startuml ssd_us109
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+activate BO
+BO -> Sys : deleteAircraftModel(modelName)
+activate Sys
+Sys --> BO : 204 No Content
+deactivate Sys
+deactivate BO
+
+@enduml

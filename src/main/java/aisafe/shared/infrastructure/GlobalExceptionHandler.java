@@ -5,8 +5,10 @@ import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.InvalidContactException;
 import aisafe.airports.domain.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
+import aisafe.shared.domain.ConcurrencyException;
 import aisafe.shared.domain.DomainException;
 import aisafe.shared.domain.DuplicateResourceException;
+import aisafe.shared.domain.ResourceInUseException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,10 +58,10 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-    /** 409 Conflict - duplicated information */
-    @ExceptionHandler({DataIntegrityViolationException.class, DuplicateResourceException.class})
+    /** 409 Conflict - duplicated information or resource in use */
+    @ExceptionHandler({DataIntegrityViolationException.class, DuplicateResourceException.class, ResourceInUseException.class})
     public ResponseEntity<ErrorResponse> handleConflict(RuntimeException ex) {
-        String msg = ex instanceof DuplicateResourceException
+        String msg = (ex instanceof DuplicateResourceException || ex instanceof ResourceInUseException)
                 ? ex.getMessage()
                 : "A resource with the given unique identifier already exists.";
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(msg));
@@ -77,6 +79,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("The resource was modified by another request. Please retry."));
+    }
+
+    /** 412 Precondition Failed - optimistic locking collision (If-Match mismatch) */
+    @ExceptionHandler(ConcurrencyException.class)
+    public ResponseEntity<ErrorResponse> handlePreconditionFailed(ConcurrencyException ex) {
+        return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     /** 400 Bad Request - bean validation failure (@Valid on request bodies) */

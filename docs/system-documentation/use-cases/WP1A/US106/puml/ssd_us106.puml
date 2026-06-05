@@ -1,0 +1,17 @@
+@startuml ssd_us106
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+activate BO
+BO -> Sys : updateAircraft(registration, modelName?, manufacturingDate?, seatCapacity?, features?, version)
+activate Sys
+Sys --> BO : 200 OK (ViewAircraftDetailsResponse)
+deactivate Sys
+deactivate BO
+
+@enduml

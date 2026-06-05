@@ -20,4 +20,5 @@ public interface SpringDataAircraftRepository extends JpaRepository<AircraftJpaE
                                             Pageable pageable);
     Optional<AircraftJpaEntity> findByRegistrationNumber(String registrationNumber);
     boolean existsByRegistrationNumber(String registrationNumber);
+    boolean existsByModelModelName(String modelName);
 }

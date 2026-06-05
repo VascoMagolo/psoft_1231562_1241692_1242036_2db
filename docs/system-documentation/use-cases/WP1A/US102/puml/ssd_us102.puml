@@ -2,7 +2,7 @@
 autonumber
 actor "ATCC" as Actor
 participant "System" as Sys
-Actor -> Sys : registerAircraft(registrationNumber, modelId, manufacturingDate, seatCapacity, status, features)
+Actor -> Sys : registerAircraft(registrationNumber, modelName, manufacturingDate, seatCapacity, status, features)
 activate Sys
 Sys --> Actor : returns created aircraft details
 deactivate Sys
