@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.ResourceInUseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,9 @@ class DeleteAircraftModelUseCaseTest {
     @Mock
     private AircraftModelRepository aircraftModelRepository;
 
+    @Mock
+    private AircraftRepository aircraftRepository;
+
     @InjectMocks
     private DeleteAircraftModelUseCase deleteAircraftModelUseCase;
 
@@ -32,6 +36,7 @@ class DeleteAircraftModelUseCaseTest {
     @Test
     void ensureModelIsDeletedSuccessfully() {
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(aircraftModel));
+        when(aircraftRepository.anyAircraftExistsForModel("A320")).thenReturn(false);
 
         assertDoesNotThrow(() -> deleteAircraftModelUseCase.execute("A320"));
         verify(aircraftModelRepository, times(1)).delete(aircraftModel);
@@ -42,6 +47,15 @@ class DeleteAircraftModelUseCaseTest {
         when(aircraftModelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 
         assertThrows(AircraftModelNotFoundException.class, () -> deleteAircraftModelUseCase.execute("NON-EXISTENT"));
+        verify(aircraftModelRepository, never()).delete(any());
+    }
+
+    @Test
+    void ensureExceptionWhenModelIsInUse() {
+        when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(aircraftModel));
+        when(aircraftRepository.anyAircraftExistsForModel("A320")).thenReturn(true);
+
+        assertThrows(ResourceInUseException.class, () -> deleteAircraftModelUseCase.execute("A320"));
         verify(aircraftModelRepository, never()).delete(any());
     }
 }

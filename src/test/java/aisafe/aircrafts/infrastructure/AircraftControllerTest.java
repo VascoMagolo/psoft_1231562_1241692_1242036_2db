@@ -156,7 +156,7 @@ class AircraftControllerTest {
         when(searchAircraft.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(new aisafe.shared.application.dtos.PaginatedResult<>(List.of(), 0L));
 
         mockMvc.perform(get("/api/aircrafts/search")
-                        .param("model", "A320"))
+                        .param("modelName", "A320"))
                 .andExpect(status().isOk());
     }
 }

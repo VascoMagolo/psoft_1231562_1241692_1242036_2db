@@ -2,6 +2,7 @@ package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.ConcurrencyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -59,6 +60,11 @@ public class AircraftRepositoryImpl implements AircraftRepository {
         return springRepo.existsByRegistrationNumber(number.getNumber());
     }
     @Override
+    public boolean anyAircraftExistsForModel(String modelName) {
+        return springRepo.existsByModelModelName(modelName);
+    }
+
+    @Override
     public void save(Aircraft aircraft, Long clientVersion) {
         AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
                 .orElse(null);
@@ -73,7 +79,7 @@ public class AircraftRepositoryImpl implements AircraftRepository {
             newJpaData.setVersion(existingEntity.getVersion());
 
             if (clientVersion != null && !clientVersion.equals(existingEntity.getVersion())) {
-                throw new IllegalStateException("Version conflict detected for aircraft with registration number: " + aircraft.getRegistrationNumber().getNumber());
+                throw new ConcurrencyException("Version conflict detected for aircraft with registration number: " + aircraft.getRegistrationNumber().getNumber());
             }
         }
 
