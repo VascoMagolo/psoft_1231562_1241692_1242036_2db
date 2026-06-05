@@ -1,6 +1,7 @@
 package aisafe.airports.infrastructure.persistence;
 
 import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
@@ -72,7 +73,7 @@ public class AirportJpaRepository implements AirportRepository {
     @Override
     public void delete(Airport airport) {
         AirportJpaEntity jpaEntity = springRepo.findByIataCode(airport.getIataCode().getCode())
-                .orElseThrow(() -> new aisafe.airports.domain.AirportNotFoundException(airport.getIataCode().getCode()));
+                .orElseThrow(() -> new AirportNotFoundException(airport.getIataCode().getCode()));
         springRepo.delete(jpaEntity);
     }
 }
