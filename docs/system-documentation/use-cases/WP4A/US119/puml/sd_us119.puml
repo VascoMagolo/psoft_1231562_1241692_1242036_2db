@@ -52,9 +52,8 @@ else update allowed
   activate Repo
   Repo -> DB : UPDATE maintenance_record\nSET status = ?, notes = ?\nWHERE id = ? AND version = ?
   activate DB
-  DB --> Repo : updated record (version incremented)
+  DB --> Repo
   deactivate DB
-  Repo --> UC : MaintenanceRecord
   deactivate Repo
 
   UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
