@@ -44,8 +44,7 @@ class CreateMaintenanceRecordUseCaseTest {
     }
 
     private MaintenanceTemplate buildTemplate() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(model), List.of("Check engine"), 500, 365);
+        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
     }
 
     private Aircraft buildAircraft() {

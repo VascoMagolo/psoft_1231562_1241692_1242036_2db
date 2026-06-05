@@ -10,7 +10,8 @@ import java.util.List;
  */
 @Repository
 public interface AircraftCertificationRepository extends JpaRepository<AircraftCertification, Long> {
+
     List<AircraftCertification> findByAirport(Airport airport);
 
-    boolean existsByAirportAndAircraftModelId(Airport airport, Long aircraftModelId);
+    boolean existsByAirportAndAircraftModelName(Airport airport, String aircraftModelName);
 }

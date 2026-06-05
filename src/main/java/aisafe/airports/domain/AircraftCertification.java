@@ -20,14 +20,13 @@ public class AircraftCertification {
     @JoinColumn(name = "airport_id", nullable = false)
     private Airport airport;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "aircraft_model_id", nullable = false)
-    private AircraftModel aircraftModel;
+    @Column(name = "aircraft_model_name", nullable = false)
+    private String aircraftModelName;
 
     protected AircraftCertification() {}
 
-    public AircraftCertification(Airport airport, AircraftModel aircraftModel) {
+    public AircraftCertification(Airport airport, String aircraftModelName) {
         this.airport = airport;
-        this.aircraftModel = aircraftModel;
+        this.aircraftModelName = aircraftModelName;
     }
 }

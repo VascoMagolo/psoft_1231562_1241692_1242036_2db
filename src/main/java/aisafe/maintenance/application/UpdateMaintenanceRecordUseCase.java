@@ -49,7 +49,7 @@ public class UpdateMaintenanceRecordUseCase {
                 updatedRecord.getId(), updatedRecord.getDescription(), updatedRecord.getStartDate(),
                 updatedRecord.getExpectedDuration(), updatedRecord.getNotes(),
                 updatedRecord.getPart().getPartNumber(), updatedRecord.getTemplate().getName(),
-                updatedRecord.getStatus().name(), updatedRecord.getAircraft().getRegistrationNumber().getNumber(),
+                updatedRecord.getStatus().name(), updatedRecord.getAircraftRegistration(),
                 updatedRecord.getVersion()
         );
     }

@@ -6,13 +6,11 @@ import aisafe.airports.domain.AircraftCertification;
  * DTO representing the response for an aircraft certification.
  * @param id the unique identifier of the aircraft certification
  * @param airportIataCode the IATA code of the airport where the certification is valid
- * @param aircraftModelId the unique identifier of the certified aircraft model
  * @param aircraftModelName the name of the certified aircraft model
  */
 public record AircraftCertificationResponse(
         Long id,
         String airportIataCode,
-        Long aircraftModelId,
         String aircraftModelName
 ) {
     /**
@@ -24,8 +22,8 @@ public record AircraftCertificationResponse(
         return new AircraftCertificationResponse(
                 certification.getId(),
                 certification.getAirport().getIataCode().getCode(),
-                certification.getAircraftModel().getId(),
-                certification.getAircraftModel().getModelName()
+                certification.getAircraftModelName()
+
         );
     }
 }

@@ -1,8 +1,6 @@
 package aisafe.aircrafts.infrastructure;
 
-import aisafe.aircrafts.application.DeleteAircraftModelUseCase;
-import aisafe.aircrafts.application.ListAircraftModelsUseCase;
-import aisafe.aircrafts.application.RegisterAircraftModelUseCase;
+import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.Manufacturer;
@@ -14,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,6 +43,12 @@ class AircraftModelControllerTest {
     private DeleteAircraftModelUseCase deleteAircraftModel;
 
     @MockitoBean
+    private UpdateAircraftModelUseCase updateAircraftModel;
+
+    @MockitoBean
+    private ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -57,7 +60,7 @@ class AircraftModelControllerTest {
                 "A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, "a320.jpg");
 
         AircraftModelResponse response = new AircraftModelResponse(
-                1L, "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+                 "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
 
         when(registerAircraftModel.execute(any())).thenReturn(response);
 
@@ -82,7 +85,7 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureGetAllModelsReturns200() throws Exception {
-        when(listAircraftModels.execute(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/aircraftModels"))
                 .andExpect(status().isOk());

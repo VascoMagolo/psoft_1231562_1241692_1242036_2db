@@ -6,16 +6,16 @@
 
 ## Acceptance Criteria
 
-- The request must provide `registrationNumber`, `modelId`, `manufacturingDate`, `seatCapacity`, `status`, and optional `features`.
+- The request must provide `registrationNumber`, `modelName`, `manufacturingDate`, `seatCapacity`, `status`, and optional `features`.
 - The registration number must follow the `XX-XXX` pattern and be unique.
-- The aircraft model is resolved by `modelId`.
+- The aircraft model is resolved by `modelName`.
 - The requested seat capacity cannot exceed the selected model's maximum seating capacity.
 - On success the system returns HTTP 201 with `ViewAircraftDetailsResponse` and HATEOAS links.
 
 ## Pre-conditions
 
 - The actor is authenticated as an ATCC user.
-- The aircraft model referenced by `modelId` exists.
+- The aircraft model referenced by `modelName` exists.
 
 ## Post-conditions
 

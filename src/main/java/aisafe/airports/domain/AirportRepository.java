@@ -39,4 +39,5 @@ public interface AirportRepository extends JpaRepository<Airport, Long> {
     List<Airport> findAllByCountry(String country);
 
     List<Airport> findAllByRegion(String region);
+
 }

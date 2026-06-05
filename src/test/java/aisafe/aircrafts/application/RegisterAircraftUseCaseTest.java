@@ -35,51 +35,50 @@ class RegisterAircraftUseCaseTest {
     @Test
     void ensureAircraftIsRegisteredSuccessfully() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", 1L, LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of("WiFi"));
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of("WiFi"));
 
         AircraftModel model = buildModel(180);
-        when(modelRepository.findById(1L)).thenReturn(Optional.of(model));
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
-        when(aircraftRepository.save(any(Aircraft.class))).thenAnswer(i -> i.getArguments()[0]);
 
         assertDoesNotThrow(() -> registerAircraft.execute(request));
-        verify(aircraftRepository, times(1)).save(any(Aircraft.class));
+        verify(aircraftRepository, times(1)).save(any(Aircraft.class), any());
     }
 
     @Test
     void ensureExceptionWhenModelNotFound() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", 99L, LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "NON-EXISTENT", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
 
-        when(modelRepository.findById(99L)).thenReturn(Optional.empty());
+        when(modelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any());
+        assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
+        verify(aircraftRepository, never()).save(any(), any());
     }
 
     @Test
     void ensureExceptionWhenRegistrationAlreadyExists() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", 1L, LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
 
         AircraftModel model = buildModel(180);
-        when(modelRepository.findById(1L)).thenReturn(Optional.of(model));
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
 
         assertThrows(AircraftAlreadyExistsException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any());
+        verify(aircraftRepository, never()).save(any(), any());
     }
 
     @Test
     void ensureExceptionWhenSeatCapacityExceedsModelMax() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", 1L, LocalDate.of(2020, 1, 1), 200, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 200, "AVAILABLE", List.of());
 
         AircraftModel model = buildModel(150);
-        when(modelRepository.findById(1L)).thenReturn(Optional.of(model));
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any());
+        verify(aircraftRepository, never()).save(any(), any());
     }
 }

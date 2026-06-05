@@ -36,10 +36,9 @@ class UpdateAircraftStatusUseCaseTest {
         Aircraft aircraft = spy(buildAircraft());
         doReturn(0L).when(aircraft).getVersion();
         when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
-        when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         assertDoesNotThrow(() -> updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "INACTIVE", 0L));
-        verify(repository).save(aircraft);
+        verify(repository).save(eq(aircraft), eq(0L));
     }
 
     @Test
@@ -48,7 +47,7 @@ class UpdateAircraftStatusUseCaseTest {
 
         assertThrows(AircraftNotFoundException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-XXX"), "INACTIVE", 0L));
-        verify(repository, never()).save(any());
+        verify(repository, never()).save(any(), any());
     }
 
     @Test
@@ -59,7 +58,7 @@ class UpdateAircraftStatusUseCaseTest {
 
         assertThrows(ObjectOptimisticLockingFailureException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "INACTIVE", 0L));
-        verify(repository, never()).save(any());
+        verify(repository, never()).save(any(), any());
     }
 
     @Test
@@ -70,6 +69,6 @@ class UpdateAircraftStatusUseCaseTest {
 
         assertThrows(AircraftInvalidFieldException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "FLYING", 0L));
-        verify(repository, never()).save(any());
+        verify(repository, never()).save(any(), any());
     }
 }

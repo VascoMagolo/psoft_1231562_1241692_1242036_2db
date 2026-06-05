@@ -31,8 +31,8 @@ public class RegisterAircraftUseCase {
      * @return a DTO containing the details of the newly registered aircraft
      */
     public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
-        AircraftModel model = modelRepository.findById(request.modelId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Model ID"));
+        AircraftModel model = modelRepository.findByModelName(request.modelName())
+                .orElseThrow(() -> new AircraftInvalidFieldException("Invalid Model Name: " + request.modelName()));
 
         RegistrationNumber regNum = new RegistrationNumber(request.registrationNumber());
 
@@ -53,17 +53,17 @@ public class RegisterAircraftUseCase {
                 request.seatCapacity(),
                 request.features()
         );
-        Aircraft savedAircraft = aircraftRepository.save(aircraft);
+        aircraftRepository.save(aircraft, null);
 
         return new ViewAircraftDetailsResponse(
-                savedAircraft.getRegistrationNumber().getNumber(),
-                savedAircraft.getModel().getModelName(),
-                savedAircraft.getModel().getManufacturer(),
-                savedAircraft.getManufacturingDate(),
-                savedAircraft.getStatus(),
-                savedAircraft.getSeatCapacity(),
-                savedAircraft.getFeatures(),
-                savedAircraft.getVersion()
+                aircraft.getRegistrationNumber().getNumber(),
+                aircraft.getModel().getModelName(),
+                aircraft.getModel().getManufacturer(),
+                aircraft.getManufacturingDate(),
+                aircraft.getStatus(),
+                aircraft.getSeatCapacity(),
+                aircraft.getFeatures(),
+                aircraft.getVersion()
         );
     }
 }

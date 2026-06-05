@@ -35,7 +35,7 @@ public class ViewAllMaintenanceRecordsUseCase {
         aircraftRepository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber.getNumber() + " not found."));
 
-        Page<MaintenanceRecord> recordsPage = repository.findByAircraftRegistrationNumber(registrationNumber, pageable);
+        Page<MaintenanceRecord> recordsPage = repository.findByAircraftRegistration(registrationNumber.getNumber(), pageable);
 
         return recordsPage.map(this::toResponse);
     }
@@ -53,7 +53,7 @@ public class ViewAllMaintenanceRecordsUseCase {
                 record.getExpectedDuration(),
                 record.getStatus(),
                 record.getNotes(),
-                record.getAircraft().getRegistrationNumber().getNumber()
+                record.getAircraftRegistration()
         );
     }
 }

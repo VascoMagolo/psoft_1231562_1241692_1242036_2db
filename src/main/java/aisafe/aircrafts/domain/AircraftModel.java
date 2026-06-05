@@ -1,55 +1,55 @@
 package aisafe.aircrafts.domain;
 
-import jakarta.persistence.*;
-import lombok.Getter;
 import org.springframework.util.Assert;
 
 /**
- * Represents an aircraft model template. It stores the manufacturer data and capacity limits used when registering individual aircraft.
+ * Represents an aircraft model template. (Pure Domain Model)
+ * It stores the manufacturer data and capacity limits used when registering individual aircraft.
  */
-@Entity
-@Getter
 public class AircraftModel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String modelName;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Manufacturer manufacturer;
+    private final String modelName;
+    private final Manufacturer manufacturer;
     private Double fuelCapacity;
     private Double maxRange;
     private Double cruisingSpeed;
-    @Column(nullable = false)
     private Integer maximumSeatingCapacity;
     private String imagePath;
 
-    public AircraftModel() {
-
-    }
-
     public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, String imagePath, Integer maximumSeatingCapacity) {
-        Assert.hasText(modelName,"modelName must not be blank");
-        Assert.notNull(manufacturer,"manufacturer must not be blank");
-        Assert.notNull(fuelCapacity,"fuelCapacity must not be null");
-        Assert.notNull(maxRange,"maxRange must not be null");
-        Assert.notNull(cruisingSpeed,"cruisingSpeed must not be null");
-        Assert.notNull(maximumSeatingCapacity,"maximumSeatingCapacity must not be null");
-        // maybe image path can be null, idk if it is really required
-        Assert.hasText(imagePath,"imagePath must not be blank");
+        Assert.hasText(modelName, "modelName must not be blank");
+        Assert.notNull(manufacturer, "manufacturer must not be null");
+        Assert.notNull(fuelCapacity, "fuelCapacity must not be null");
+        Assert.notNull(maxRange, "maxRange must not be null");
+        Assert.notNull(cruisingSpeed, "cruisingSpeed must not be null");
+        Assert.notNull(maximumSeatingCapacity, "maximumSeatingCapacity must not be null");
+        Assert.hasText(imagePath, "imagePath must not be blank");
+
         Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");
         Assert.isTrue(fuelCapacity > 0, "fuelCapacity must be greater than zero");
         Assert.isTrue(cruisingSpeed > 0, "cruisingSpeed must be greater than zero");
         Assert.isTrue(maximumSeatingCapacity > 0, "maximumSeatingCapacity must be greater than zero");
-        this.manufacturer = manufacturer;
+
         this.modelName = modelName;
+        this.manufacturer = manufacturer;
         this.fuelCapacity = fuelCapacity;
         this.maxRange = maxRange;
         this.cruisingSpeed = cruisingSpeed;
         this.imagePath = imagePath;
         this.maximumSeatingCapacity = maximumSeatingCapacity;
     }
+
+    public String getModelName() { return modelName; }
+    public Manufacturer getManufacturer() { return manufacturer; }
+    public Double getFuelCapacity() { return fuelCapacity; }
+    public Double getMaxRange() { return maxRange; }
+    public Double getCruisingSpeed() { return cruisingSpeed; }
+    public Integer getMaximumSeatingCapacity() { return maximumSeatingCapacity; }
+    public String getImagePath() { return imagePath; }
+
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+    public void setFuelCapacity(Double fuelCapacity) { this.fuelCapacity = fuelCapacity; }
+    public void setMaxRange(Double maxRange) { this.maxRange = maxRange; }
+    public void setCruisingSpeed(Double cruisingSpeed) { this.cruisingSpeed = cruisingSpeed; }
+    public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) { this.maximumSeatingCapacity = maximumSeatingCapacity; }
 }

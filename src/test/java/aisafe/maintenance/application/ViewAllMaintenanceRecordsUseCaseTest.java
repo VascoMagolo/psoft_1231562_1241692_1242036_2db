@@ -35,7 +35,7 @@ class ViewAllMaintenanceRecordsUseCaseTest {
     void ensureRecordsAreReturnedSuccessfully() {
         RegistrationNumber reg = new RegistrationNumber("CS-TPA");
         when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.of(mock(aisafe.aircrafts.domain.Aircraft.class)));
-        when(repository.findByAircraftRegistrationNumber(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        when(repository.findByAircraftRegistration(eq("CS-TPA"), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
         assertDoesNotThrow(() -> viewAllMaintenanceRecords.execute(reg, Pageable.unpaged()));
     }
@@ -47,6 +47,6 @@ class ViewAllMaintenanceRecordsUseCaseTest {
 
         assertThrows(AircraftNotFoundException.class, () ->
                 viewAllMaintenanceRecords.execute(reg, Pageable.unpaged()));
-        verify(repository, never()).findByAircraftRegistrationNumber(any(), any());
+        verify(repository, never()).findByAircraftRegistration(any(), any());
     }
 }

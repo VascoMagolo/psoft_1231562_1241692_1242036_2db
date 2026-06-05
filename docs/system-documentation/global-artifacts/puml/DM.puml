@@ -44,6 +44,7 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - seatCapacity : Integer
     - features : List<String>
     - model : AircraftModel
+    - version : Long
   }
 
   class AircraftModel <<Entity>> <<Root>> {
@@ -205,7 +206,7 @@ package "Maintenance Aggregate" <<Aggregate>> {
   class MaintenanceTemplate <<Entity>> <<Root>> {
     - name : String
     - templateType : MaintenanceType
-    - applicableModels : List<AircraftModel>
+    - applicableModelNames : List<String>
     - checklist : List<String>
     - intervalFlightHours : Integer
     - intervalDays : Integer
@@ -218,6 +219,7 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - expectedDuration : Integer
     - notes : String
     - status : MaintenanceStatus
+    - aircraftRegistration : String
     - parts : List<MaintenancePart>
   }
 
@@ -246,9 +248,9 @@ Route "1" --> "1" Airport : destination
 ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses
 
-MaintenanceTemplate "*" --> "*" AircraftModel : applicable to
+MaintenanceTemplate "*" --> "*" AircraftModel : applicable to (by Name)
 MaintenanceRecord "1" --> "*" MaintenancePart : needs
 MaintenanceRecord "1" --> "1" MaintenanceTemplate : based on
-MaintenanceRecord "*" --> "1" Aircraft : performed on
+MaintenanceRecord "*" --> "1" Aircraft : performed on (by Registration)
 
 @enduml

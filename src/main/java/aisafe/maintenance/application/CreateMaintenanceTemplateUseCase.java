@@ -42,7 +42,7 @@ public class CreateMaintenanceTemplateUseCase {
         MaintenanceTemplate template = new MaintenanceTemplate(
                 request.name(),
                 request.templateType(),
-                models,
+                request.applicableModels(),
                 request.checklist(),
                 request.intervalFlightHours(),
                 request.intervalDays()

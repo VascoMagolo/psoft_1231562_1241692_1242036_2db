@@ -1,13 +1,16 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.domain.AircraftInvalidFieldException;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.SearchAircraftUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import aisafe.shared.application.dtos.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Searches for aircrafts based on various criteria such as model, status, and manufacturing year.
@@ -25,22 +28,25 @@ public class SearchAircraftUseCase {
     }
 
     /**
-     * Search for aircrafts based on the provided criteria.
-     * @param modelId the ID of the aircraft model to filter by (optional)
-     * @param status the status of the aircraft to filter by (optional)
-     * @param year the manufacturing year to filter by (optional)
-     * @param pageable pagination and sorting information
-     * @return a page of aircraft DTOs matching the search criteria
+     * Search for aircrafts based on pure domain criteria.
+     * ZERO Spring Data Pageable imports!
      */
-    public Page<SearchAircraftUseCaseResponse> execute(Long modelId, AircraftStatus status, Integer year, Pageable pageable) {
+    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
 
-        Page<Aircraft> resultPage = repository.searchAircrafts(modelId, status, year, pageable);
+        AircraftStatus status = null;
+        if (statusStr != null && !statusStr.isBlank()) {
+            try {
+                status = AircraftStatus.valueOf(statusStr.toUpperCase());
+            } catch (AircraftInvalidFieldException e) {
+                throw new AircraftInvalidFieldException("Aircraft status is invalid: " + statusStr);
+            }
+        }
+        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
 
-        return resultPage.map(aircraft -> new SearchAircraftUseCaseResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getStatus().name(),
-                aircraft.getManufacturingDate().getYear()
-        ));
+        List<SearchAircraftUseCaseResponse> dtoList = domainResult.data().stream()
+                .map(SearchAircraftUseCaseResponse::from)
+                .collect(Collectors.toList());
+
+        return new PaginatedResult<>(dtoList, domainResult.totalElements());
     }
 }
