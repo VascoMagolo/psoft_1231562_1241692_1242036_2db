@@ -1,4 +1,4 @@
-# US106 — Register an Airport
+# US106 -- Register an Airport
 
 ## User Story
 
@@ -46,7 +46,7 @@
 ## Design Justification
 
 - `IataCode` is modelled as an embedded **Value Object** to encapsulate format validation (`^[A-Z0-9]{3}$`) in one place and make it reusable.
-- `Runway`, `Coordinates`, `Service`, `Terminal`, and `Gate` are also Value Objects — they have no independent identity and exist only within the `Airport` aggregate.
+- `Runway`, `Coordinates`, `Service`, `Terminal`, and `Gate` are also Value Objects -- they have no independent identity and exist only within the `Airport` aggregate.
 - `Airport` is the **Aggregate Root**; all access to its parts goes through it.
 - Optional facilities are accepted at registration time (via `updateDetails`) to avoid a mandatory second request for basic airports that already know their facilities.
 - Optimistic locking (`@Version`) is applied to `Airport` to handle concurrent status/detail updates safely (relevant for US109/US208).

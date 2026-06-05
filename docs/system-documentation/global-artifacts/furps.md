@@ -1,4 +1,4 @@
-# FURPS+ — Non-Functional Requirements
+# FURPS+ -- Non-Functional Requirements
 
 > Sources: `ProjectAssignment.pdf` and `docs/client-questions/`.
 

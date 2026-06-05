@@ -34,7 +34,7 @@ alt record not found
   Ctrl --> MT : 404 Not Found\n{ message: "Maintenance record not found." }
 else version mismatch
   UC --> Ctrl : throws ObjectOptimisticLockingFailureException
-  Ctrl --> MT : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
+  Ctrl --> MT : 409 Conflict\n{ message: "Concurrent update conflict -- please retry" }
 else update allowed
   UC -> Entity : setStatus(request.status())
   activate Entity

@@ -121,7 +121,7 @@ package "Airport Aggregate" <<Aggregate>> {
   }
 
   class AircraftCertification <<Entity>> {
-    - id : Long
+    - aircraftModelName : String
   }
 
   Airport --> AirportStatus : current status

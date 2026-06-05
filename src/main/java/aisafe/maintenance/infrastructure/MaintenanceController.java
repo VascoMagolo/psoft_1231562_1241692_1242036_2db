@@ -136,7 +136,7 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Maintenance record not found"),
-            @ApiResponse(responseCode = "409", description = "Conflict detected — The resource version has changed or matches a concurrency collision state")
+            @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
     })
     @PatchMapping("/records/{id}")
     public ResponseEntity<EntityModel<MaintenanceRecordResponse>> updateRecordStatusAndNotes(
