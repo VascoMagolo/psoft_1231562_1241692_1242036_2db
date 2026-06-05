@@ -25,7 +25,7 @@
 ## Main Success Scenario
 
 1. The actor sends `POST /api/aircrafts` with the aircraft payload.
-2. The system validates the request and resolves the aircraft model by ID.
+2. The system validates the request and resolves the aircraft model by name.
 3. The system checks that the registration number is new and the seat capacity does not exceed the model limit.
 4. The system persists the aircraft and returns HTTP 201 with the detailed DTO and links.
 

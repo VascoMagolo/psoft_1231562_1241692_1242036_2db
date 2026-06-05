@@ -7,13 +7,13 @@ participant "AircraftModelRepository" as ModelRepo
 participant "AircraftRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : POST /api/aircrafts\n{ registrationNumber, modelId,\n  manufacturingDate, seatCapacity,\n  status, features? }
+BO -> Ctrl : POST /api/aircrafts\n{ registrationNumber, modelName,\n  manufacturingDate, seatCapacity,\n  status, features? }
 activate Ctrl
 
 note right of Ctrl
   @Valid on RegisterAircraftRequest:
   - registrationNumber: pattern ^[A-Z]{2}-[A-Z]{3}$
-  - modelId: not null
+  - modelName: not null
   - manufacturingDate: not null
   - seatCapacity: >= 1
   - status: not blank
@@ -22,9 +22,9 @@ end note
 Ctrl -> UC : execute(request: RegisterAircraftRequest)
 activate UC
 
-UC -> ModelRepo : findById(request.modelId())
+UC -> ModelRepo : findByModelName(request.modelName())
 activate ModelRepo
-ModelRepo -> DB : SELECT FROM aircraft_model WHERE id = ?
+ModelRepo -> DB : SELECT FROM aircraft_model WHERE model_name = ?
 activate DB
 DB --> ModelRepo : model record
 deactivate DB

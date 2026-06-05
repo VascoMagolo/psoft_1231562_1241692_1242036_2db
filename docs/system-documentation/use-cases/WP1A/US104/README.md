@@ -6,7 +6,7 @@
 
 ## Acceptance Criteria
 
-- The search accepts optional `modelId`, `status`, and `year` query parameters.
+- The search accepts optional `modelName`, `status`, and `year` query parameters.
 - Results are paginated.
 - The response is a page of `SearchAircraftUseCaseResponse` DTOs.
 - An empty result set still returns HTTP 200.

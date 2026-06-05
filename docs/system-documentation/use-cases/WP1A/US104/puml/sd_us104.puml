@@ -6,36 +6,36 @@ participant "SearchAircraftUseCase" as UC
 participant "AircraftRepository" as Repo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/aircrafts/search\n?modelId=X&status=Y&year=Z&page=0&size=20
+ATCC -> Ctrl : GET /api/aircrafts/search\n?modelName=X&status=Y&year=Z&page=0&size=20
 activate Ctrl
 
 note right of Ctrl
   Query params (all optional):
-  - modelId: Long
+  - modelName: String
   - status: AircraftStatus enum
   - year: Integer (manufacturing year)
-  - page, size, sort (Pageable)
+  - page, size (Pageable)
   Default page size: 20
 end note
 
-Ctrl -> UC : execute(modelId: Long, status: String,\n  year: Integer, pageable: Pageable)
+Ctrl -> UC : execute(modelName: String, status: String,\n  year: Integer, pageNumber, pageSize)
 activate UC
 
-UC -> Repo : searchAircrafts(modelId, status, year, pageable)
+UC -> Repo : searchAircrafts(modelName, status, year, pageNumber, pageSize)
 activate Repo
-Repo -> DB : SELECT FROM aircraft\nWHERE model_id = ? AND status = ? AND year = ?\n(dynamic query, LIMIT ? OFFSET ?)
+Repo -> DB : SELECT FROM aircraft\nWHERE model_name = ? AND status = ? AND year = ?\n(dynamic query, LIMIT ? OFFSET ?)
 activate DB
-DB --> Repo : page of records + total count
+DB --> Repo : PaginatedResult<Aircraft>
 deactivate DB
-Repo --> UC : Page<Aircraft>
+Repo --> UC : PaginatedResult<Aircraft>
 deactivate Repo
 
-UC --> Ctrl : page.map(SearchAircraftUseCaseResponse::from)\n→ Page<SearchAircraftUseCaseResponse>
+UC --> Ctrl : PaginatedResult<SearchAircraftUseCaseResponse>\n{ registrationNumber, model, status, seatCapacity }
 deactivate UC
 
 note right of Ctrl
   PagedResourcesAssembler wraps
-  Page<SearchAircraftUseCaseResponse> into
+  PaginatedResult into
   PagedModel<EntityModel<SearchAircraftUseCaseResponse>>
   adding _links and page metadata
 end note

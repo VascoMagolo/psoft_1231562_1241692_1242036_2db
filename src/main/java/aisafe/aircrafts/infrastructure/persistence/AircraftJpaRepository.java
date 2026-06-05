@@ -1,6 +1,7 @@
 package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.ConcurrencyException;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +65,11 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
+    public boolean anyAircraftExistsForModel(String modelName) {
+        return springRepo.existsByModelModelName(modelName);
+    }
+
+    @Override
     public void save(Aircraft aircraft, Long clientVersion) {
         AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
                 .orElse(null);
@@ -78,7 +84,7 @@ public class AircraftJpaRepository implements AircraftRepository {
             newJpaData.setVersion(existingEntity.getVersion());
 
             if (clientVersion != null && !clientVersion.equals(existingEntity.getVersion())) {
-                throw new IllegalStateException("Version conflict detected for aircraft with registration number: " + aircraft.getRegistrationNumber().getNumber());
+                throw new ConcurrencyException("Version conflict detected for aircraft with registration number: " + aircraft.getRegistrationNumber().getNumber());
             }
         }
 

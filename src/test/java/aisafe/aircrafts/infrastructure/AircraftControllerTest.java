@@ -2,6 +2,7 @@ package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
+import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
 import aisafe.aircrafts.application.dtos.UpdateStatusRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.AircraftStatus;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -119,5 +121,42 @@ class AircraftControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"));
+    }
+
+    @Test
+    void ensureUpdateAircraftReturns200() throws Exception {
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, null);
+
+        when(updateAircraftUseCase.execute(any(), any(), any())).thenReturn(sampleResponse);
+
+        mockMvc.perform(patch("/api/aircrafts/CS-TPA")
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"));
+    }
+
+    @Test
+    void ensureDeleteAircraftReturns204() throws Exception {
+        mockMvc.perform(delete("/api/aircrafts/CS-TPA"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureListAircraftReturns200() throws Exception {
+        when(listAircraft.execute(anyInt(), anyInt())).thenReturn(new aisafe.shared.application.dtos.PaginatedResult<>(List.of(), 0L));
+
+        mockMvc.perform(get("/api/aircrafts"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchAircraftReturns200() throws Exception {
+        when(searchAircraft.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(new aisafe.shared.application.dtos.PaginatedResult<>(List.of(), 0L));
+
+        mockMvc.perform(get("/api/aircrafts/search")
+                        .param("modelName", "A320"))
+                .andExpect(status().isOk());
     }
 }
