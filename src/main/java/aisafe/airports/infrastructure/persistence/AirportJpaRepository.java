@@ -17,7 +17,7 @@ public class AirportJpaRepository implements AirportRepository {
 
     private final SpringDataAirportRepository springRepo;
 
-    public AirportRepositoryImpl(SpringDataAirportRepository springRepo) {
+    public AirportJpaRepository(SpringDataAirportRepository springRepo) {
         this.springRepo = springRepo;
     }
 

@@ -16,7 +16,7 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
     private final SpringDataAircraftCertificationRepository springRepo;
     private final SpringDataAirportRepository airportSpringRepo;
 
-    public AircraftCertificationRepositoryImpl(SpringDataAircraftCertificationRepository springRepo,
+    public AircraftCertificationJpaRepository(SpringDataAircraftCertificationRepository springRepo,
                                                SpringDataAirportRepository airportSpringRepo) {
         this.springRepo = springRepo;
         this.airportSpringRepo = airportSpringRepo;
