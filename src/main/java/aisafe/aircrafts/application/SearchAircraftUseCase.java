@@ -6,7 +6,7 @@ import aisafe.aircrafts.application.dtos.SearchAircraftUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
-import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

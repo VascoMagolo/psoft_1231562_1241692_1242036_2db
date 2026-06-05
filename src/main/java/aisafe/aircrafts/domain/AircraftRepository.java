@@ -1,6 +1,6 @@
 package aisafe.aircrafts.domain;
 
-import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.PaginatedResult;
 
 import java.util.Optional;
 
