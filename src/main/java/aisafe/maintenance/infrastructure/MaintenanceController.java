@@ -3,14 +3,15 @@ package aisafe.maintenance.infrastructure;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
 import aisafe.maintenance.application.dtos.*;
+import aisafe.shared.domain.PaginatedResult;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -171,12 +172,11 @@ public class MaintenanceController {
 
         RegistrationNumber regNum = new RegistrationNumber(registrationNumber);
 
-        Page<ViewAllMaintenanceRecordsResponse> recordsPage = viewAllMaintenanceRecordsUseCase.execute(regNum, pageable);
+        PaginatedResult<ViewAllMaintenanceRecordsResponse> result = viewAllMaintenanceRecordsUseCase.execute(
+                regNum, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ViewAllMaintenanceRecordsResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
 
-        PagedModel<EntityModel<ViewAllMaintenanceRecordsResponse>> pagedModel =
-                assembler.toModel(recordsPage, EntityModel::of);
-
-        return ResponseEntity.ok(pagedModel);
+        return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
     }
 
     /**

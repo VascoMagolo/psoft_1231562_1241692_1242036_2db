@@ -4,19 +4,18 @@ import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,9 +34,9 @@ class ViewAllMaintenanceRecordsUseCaseTest {
     void ensureRecordsAreReturnedSuccessfully() {
         RegistrationNumber reg = new RegistrationNumber("CS-TPA");
         when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.of(mock(aisafe.aircrafts.domain.Aircraft.class)));
-        when(repository.findByAircraftRegistration(eq("CS-TPA"), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+        when(repository.findByAircraftRegistration(eq("CS-TPA"), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0));
 
-        assertDoesNotThrow(() -> viewAllMaintenanceRecords.execute(reg, Pageable.unpaged()));
+        assertDoesNotThrow(() -> viewAllMaintenanceRecords.execute(reg, 0, 20));
     }
 
     @Test
@@ -46,7 +45,7 @@ class ViewAllMaintenanceRecordsUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.empty());
 
         assertThrows(AircraftNotFoundException.class, () ->
-                viewAllMaintenanceRecords.execute(reg, Pageable.unpaged()));
-        verify(repository, never()).findByAircraftRegistration(any(), any());
+                viewAllMaintenanceRecords.execute(reg, 0, 20));
+        verify(repository, never()).findByAircraftRegistration(any(), anyInt(), anyInt());
     }
 }

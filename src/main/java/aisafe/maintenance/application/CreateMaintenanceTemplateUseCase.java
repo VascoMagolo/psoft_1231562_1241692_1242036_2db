@@ -52,12 +52,12 @@ public class CreateMaintenanceTemplateUseCase {
             throw new MaintenanceTemplateAlreadyExistsException("A template with the name " + template.getName() + " already exists.");
         }
 
-        MaintenanceTemplate savedTemplate = maintenanceTemplateRepository.save(template);
+        maintenanceTemplateRepository.save(template);
 
         return new MaintenanceTemplateResponse(
-                savedTemplate.getId(),
-                savedTemplate.getName(),
-                savedTemplate.getTemplateType().name()
+                template.getId(),
+                template.getName(),
+                template.getTemplateType().name()
         );
     }
 }

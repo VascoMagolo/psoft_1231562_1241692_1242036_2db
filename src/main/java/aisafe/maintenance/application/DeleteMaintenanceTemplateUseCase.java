@@ -4,8 +4,10 @@ import aisafe.shared.application.UseCase;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @UseCase
+@Transactional
 public class DeleteMaintenanceTemplateUseCase {
     private final MaintenanceTemplateRepository maintenanceTemplateRepository;
 
