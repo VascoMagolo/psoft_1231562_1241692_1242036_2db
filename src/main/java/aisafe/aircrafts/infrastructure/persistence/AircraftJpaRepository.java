@@ -1,20 +1,24 @@
 package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.*;
-import aisafe.shared.application.dtos.PaginatedResult;
 import aisafe.shared.domain.ConcurrencyException;
+import aisafe.shared.domain.PaginatedResult;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-public class AircraftRepositoryImpl implements AircraftRepository {
+@Profile("jpa")
+public class AircraftJpaRepository implements AircraftRepository {
 
     private final SpringDataAircraftRepository springRepo;
     private final SpringDataAircraftModelRepository modelSpringRepo;
-    public AircraftRepositoryImpl(SpringDataAircraftRepository springRepo, SpringDataAircraftModelRepository modelSpringRepo) {
+
+    public AircraftJpaRepository(SpringDataAircraftRepository springRepo, SpringDataAircraftModelRepository modelSpringRepo) {
         this.springRepo = springRepo;
         this.modelSpringRepo = modelSpringRepo;
     }
@@ -59,6 +63,7 @@ public class AircraftRepositoryImpl implements AircraftRepository {
     public boolean existsByRegistrationNumber(RegistrationNumber number) {
         return springRepo.existsByRegistrationNumber(number.getNumber());
     }
+
     @Override
     public boolean anyAircraftExistsForModel(String modelName) {
         return springRepo.existsByModelModelName(modelName);
@@ -86,8 +91,9 @@ public class AircraftRepositoryImpl implements AircraftRepository {
         AircraftJpaEntity saved = springRepo.save(newJpaData);
         aircraft.setVersion(saved.getVersion());
     }
+
     @Override
-    public void delete(Aircraft aircraft){
+    public void delete(Aircraft aircraft) {
         AircraftJpaEntity jpaEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraft.getRegistrationNumber().getNumber()));
         springRepo.delete(jpaEntity);

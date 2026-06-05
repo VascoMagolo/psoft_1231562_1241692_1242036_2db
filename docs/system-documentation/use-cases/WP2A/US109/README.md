@@ -1,4 +1,4 @@
-# US109 — Update Airport Operational Status
+# US109 -- Update Airport Operational Status
 
 ## User Story
 
@@ -42,7 +42,7 @@
 
 - `PATCH` is used instead of `PUT` because only a single field is being updated; the full resource representation is not required in the request.
 - `AirportStatus` is an enum validated at the DTO level by Jackson deserialization; invalid values fail before reaching the use case.
-- Optimistic locking (`@Version` on `Airport`) ensures that two concurrent operators cannot silently overwrite each other's status change — the second writer receives a 409 and must retry.
+- Optimistic locking (`@Version` on `Airport`) ensures that two concurrent operators cannot silently overwrite each other's status change -- the second writer receives a 409 and must retry.
 
 ## Sequence Diagrams
 

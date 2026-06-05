@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
@@ -11,6 +12,7 @@ import aisafe.airports.domain.AirportStatus;
  * Use case for updating the details of an existing airport
  */
 @UseCase
+@Transactional
 public class UpdateAirportStatusUseCase {
     private final AirportRepository airportRepository;
 
@@ -28,6 +30,7 @@ public class UpdateAirportStatusUseCase {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
         airport.setStatus(status);
-        return AirportResponse.from(airportRepository.save(airport));
+        airportRepository.save(airport);
+        return AirportResponse.from(airport);
     }
 }

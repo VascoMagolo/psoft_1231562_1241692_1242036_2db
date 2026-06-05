@@ -1,4 +1,4 @@
-# US106a — Add Aircraft Certification to Airport
+# US106a -- Add Aircraft Certification to Airport
 
 ## User Story
 
@@ -28,7 +28,7 @@
 1. The actor sends `POST /api/airports/{iataCode}/certifications` with `{ "aircraftModelId": <id> }`.
 2. The system looks up the airport by IATA code.
 3. The system looks up the aircraft model by ID.
-4. The system checks no certification already exists for this airport–model pair.
+4. The system checks no certification already exists for this airport-model pair.
 5. The system persists the certification and returns HTTP 201.
 
 ## Alternative / Exception Flows

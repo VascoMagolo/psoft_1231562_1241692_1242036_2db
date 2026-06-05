@@ -4,7 +4,7 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.PaginatedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -159,7 +159,7 @@ public class AircraftController {
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Aircraft profile not found"),
-            @ApiResponse(responseCode = "409", description = "Conflict detected — The resource version has changed or matches a concurrency collision state")
+            @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
     })
     @PatchMapping("/{registrationStr}/status")
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftStatus(

@@ -1,10 +1,8 @@
 package aisafe.airports.application;
 
 import aisafe.shared.domain.DuplicateResourceException;
-import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
-import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.airports.application.dtos.AddCertificationRequest;
 import aisafe.airports.domain.*;
 import org.junit.jupiter.api.Test;
@@ -40,17 +38,12 @@ class AddAirportCertificationUseCaseTest {
                 38.77, -9.13, List.of(new Runway("03/21", 3000, "030/210")));
     }
 
-    private AircraftModel buildModel() {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-    }
-
     @Test
     void ensureCertificationIsAddedSuccessfully() {
         Airport airport = buildAirport();
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(false);
-        when(certificationRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
         verify(certificationRepository).save(any(AircraftCertification.class));

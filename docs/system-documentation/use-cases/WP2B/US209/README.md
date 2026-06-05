@@ -1,4 +1,4 @@
-# US209 — View Routes to/from an Airport
+# US209 -- View Routes to/from an Airport
 
 ## User Story
 
@@ -37,7 +37,7 @@
 ## Design Justification
 
 - Airport existence is verified before querying routes (`existsByIataCodeCode`) to fail fast with a meaningful 404 rather than silently returning an empty list for a nonexistent airport.
-- The route query crosses bounded context boundaries (Airports → Routes). Rather than coupling the Airport aggregate to Route entities, the `ViewAirportRoutesUseCase` depends on both `AirportRepository` and `RouteRepository` directly — a deliberate application-layer cross-context coordination.
+- The route query crosses bounded context boundaries (Airports → Routes). Rather than coupling the Airport aggregate to Route entities, the `ViewAirportRoutesUseCase` depends on both `AirportRepository` and `RouteRepository` directly -- a deliberate application-layer cross-context coordination.
 - `Route` entities are returned directly (not wrapped in a DTO) at this stage; this can be refined if the Route representation needs to be projected differently for this endpoint.
 
 ## Sequence Diagrams

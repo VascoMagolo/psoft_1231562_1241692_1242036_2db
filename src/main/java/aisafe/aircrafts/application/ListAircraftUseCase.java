@@ -4,7 +4,7 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
-import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

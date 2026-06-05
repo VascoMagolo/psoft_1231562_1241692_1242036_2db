@@ -5,7 +5,7 @@ import aisafe.shared.domain.DomainException;
 /**
  * Thrown when a login attempt fails due to an unrecognized username or incorrect password.
  *
- * <p>The message is intentionally generic — callers must not reveal which of the two
+ * <p>The message is intentionally generic -- callers must not reveal which of the two
  * fields was wrong, to avoid username enumeration attacks.</p>
  */
 

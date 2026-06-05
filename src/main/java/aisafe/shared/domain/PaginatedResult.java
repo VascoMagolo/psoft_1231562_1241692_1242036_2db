@@ -1,4 +1,4 @@
-package aisafe.shared.application.dtos;
+package aisafe.shared.domain;
 
 import java.util.List;
 

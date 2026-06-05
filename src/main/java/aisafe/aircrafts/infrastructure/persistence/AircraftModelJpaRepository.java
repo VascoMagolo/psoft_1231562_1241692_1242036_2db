@@ -2,6 +2,7 @@ package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
@@ -10,17 +11,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-public class AircraftModelRepositoryImpl implements AircraftModelRepository {
+@Profile("jpa")
+public class AircraftModelJpaRepository implements AircraftModelRepository {
 
     private final SpringDataAircraftModelRepository springRepo;
+
+    public AircraftModelJpaRepository(SpringDataAircraftModelRepository springRepo) {
+        this.springRepo = springRepo;
+    }
 
     @Override
     public long count() {
         return springRepo.count();
-    }
-
-    public AircraftModelRepositoryImpl(SpringDataAircraftModelRepository springRepo) {
-        this.springRepo = springRepo;
     }
 
     @Override

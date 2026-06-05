@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    /** 401 Unauthorized — authentication failed. */
+    /** 401 Unauthorized -- authentication failed. */
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
     /** Error response body. */
     record ErrorResponse(String message) {}
 
-    /** Error response body for validation failures — includes per-field details. */
+    /** Error response body for validation failures -- includes per-field details. */
     record ValidationErrorResponse(String message, Map<String, String> errors) {}
 
 }

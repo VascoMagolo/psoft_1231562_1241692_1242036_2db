@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  * Use case for retrieving statistics about airports
  */
 @UseCase
+@Transactional(readOnly = true)
 public class AirportStatisticsUseCase {
     private final AirportRepository airportRepository;
     private final RouteRepository routeRepository;
@@ -34,14 +36,17 @@ public class AirportStatisticsUseCase {
         List<Route> routes = routeRepository.findAll();
 
         // Precompute the route count for each airport to avoid repeated filtering
-        Map<Long, Long> routeCountById = airports.stream()
-                .collect(Collectors.toMap(Airport::getId, airport -> {
-                    String code = airport.getIataCode().getCode();
-                    return routes.stream().filter(r ->
-                            code.equals(r.getOrigin().getCode()) ||
-                            code.equals(r.getDestination().getCode())
-                    ).count();
-                }));
+        Map<String, Long> routeCountByCode = airports.stream()
+                .collect(Collectors.toMap(
+                        a -> a.getIataCode().getCode(),
+                        a -> {
+                            String code = a.getIataCode().getCode();
+                            return routes.stream().filter(r ->
+                                    code.equals(r.getOrigin().getCode()) ||
+                                    code.equals(r.getDestination().getCode())
+                            ).count();
+                        }
+                ));
         // Map each airport to its statistics response and sort by route count in descending order
         return airports.stream()
                 .map(a -> new AirportStatisticsResponse(
@@ -49,7 +54,7 @@ public class AirportStatisticsUseCase {
                         a.getName(),
                         a.getCity(),
                         a.getCountry(),
-                        routeCountById.getOrDefault(a.getId(), 0L)
+                        routeCountByCode.getOrDefault(a.getIataCode().getCode(), 0L)
                 ))
                 .sorted(Comparator.comparingLong(AirportStatisticsResponse::routeCount).reversed())
                 .toList();

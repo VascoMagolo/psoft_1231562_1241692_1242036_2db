@@ -1,32 +1,19 @@
 package aisafe.airports.domain;
 
-import aisafe.aircrafts.domain.AircraftModel;
-import jakarta.persistence.*;
-import lombok.Getter;
-
 /**
  * Represents the certification of an aircraft model at a specific airport.
  * Each certification indicates that a particular aircraft model is approved for operation at the associated airport.
  */
-@Entity
-@Getter
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"airport_id", "aircraft_model_id"}))
 public class AircraftCertification {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "airport_id", nullable = false)
-    private Airport airport;
-
-    @Column(name = "aircraft_model_name", nullable = false)
-    private String aircraftModelName;
-
-    protected AircraftCertification() {}
+    private final Airport airport;
+    private final String aircraftModelName;
 
     public AircraftCertification(Airport airport, String aircraftModelName) {
         this.airport = airport;
         this.aircraftModelName = aircraftModelName;
     }
+
+    public Airport getAirport() { return airport; }
+    public String getAircraftModelName() { return aircraftModelName; }
 }

@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
@@ -9,6 +10,7 @@ import aisafe.airports.domain.AirportRepository;
  * Use case for viewing the details of a specific airport.
  */
 @UseCase
+@Transactional(readOnly = true)
 public class ViewAirportDetailsUseCase {
     private final AirportRepository airportRepository;
 

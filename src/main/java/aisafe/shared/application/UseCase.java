@@ -16,9 +16,9 @@ import java.lang.annotation.Target;
  *
  * <p>This is a composed annotation that combines:</p>
  * <ul>
- *   <li>{@link Service} — registers the class as a Spring-managed bean</li>
- *   <li>{@link Validated} — enables Bean Validation on method parameters</li>
- *   <li>{@link Transactional} — wraps every use case method in a single database transaction,
+ *   <li>{@link Service} -- registers the class as a Spring-managed bean</li>
+ *   <li>{@link Validated} -- enables Bean Validation on method parameters</li>
+ *   <li>{@link Transactional} -- wraps every use case method in a single database transaction,
  *       so that domain event listeners registered with
  *       {@code @TransactionalEventListener(phase = BEFORE_COMMIT)} run inside that same
  *       transaction and any failure rolls back the entire operation atomically</li>
@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  *
  * <p>Any class annotated with {@code @UseCase} is also intercepted by
  * {@link UseCaseLoggingAdvice}, which logs the method name, parameters, and execution time
- * for every public method invocation — without any log statements in the use case code itself.</p>
+ * for every public method invocation -- without any log statements in the use case code itself.</p>
  */
 @Documented
 @Target(ElementType.TYPE)

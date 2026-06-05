@@ -1,4 +1,4 @@
-# US107 — View Airport Details
+# US107 -- View Airport Details
 
 ## User Story
 

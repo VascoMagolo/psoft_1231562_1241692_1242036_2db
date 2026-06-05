@@ -1,74 +1,28 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Entity representing an airport in the system.
  */
-@Entity
-@Getter
 public class Airport {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Embedded
-    private IataCode iataCode;
-
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private String city;
-
-    @Column(nullable = false)
-    private String country;
-
-    private String region;
-
-    @Column(nullable = false)
-    private String timezone;
-
+    private final IataCode iataCode;
+    private final String name;
+    private final String city;
+    private final String country;
+    private final String region;
+    private final String timezone;
+    private final Coordinates coordinates;
+    private final List<Runway> runways;
+    private AirportStatus status;
     private String imagePath;
     private String operationalHours;
-
-    @Setter
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AirportStatus status;
-
-    @Embedded
-    private Coordinates coordinates;
-
-    @ElementCollection
-    @CollectionTable(name = "airport_runways", joinColumns = @JoinColumn(name = "airport_id"))
-    private List<Runway> runways = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "airport_contacts", joinColumns = @JoinColumn(name = "airport_id"))
-    private List<Contact> contacts = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "airport_services", joinColumns = @JoinColumn(name = "airport_id"))
-    private List<Service> services = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "airport_terminals", joinColumns = @JoinColumn(name = "airport_id"))
-    private List<Terminal> terminals = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "airport_gates", joinColumns = @JoinColumn(name = "airport_id"))
-    private List<Gate> gates = new ArrayList<>();
-
-    @Version
-    private Long version;
-
-    protected Airport() {}
+    private List<Contact> contacts;
+    private List<Service> services;
+    private List<Terminal> terminals;
+    private List<Gate> gates;
 
     public Airport(String iataCode, String name, String city, String country, String region,
                    String timezone, Double latitude, Double longitude, List<Runway> runways) {
@@ -102,4 +56,22 @@ public class Airport {
         if (terminals != null) this.terminals = new ArrayList<>(terminals);
         if (gates != null) this.gates = new ArrayList<>(gates);
     }
+
+    public void setStatus(AirportStatus status) { this.status = status; }
+
+    public IataCode getIataCode() { return iataCode; }
+    public String getName() { return name; }
+    public String getCity() { return city; }
+    public String getCountry() { return country; }
+    public String getRegion() { return region; }
+    public String getTimezone() { return timezone; }
+    public Coordinates getCoordinates() { return coordinates; }
+    public List<Runway> getRunways() { return runways; }
+    public AirportStatus getStatus() { return status; }
+    public String getImagePath() { return imagePath; }
+    public String getOperationalHours() { return operationalHours; }
+    public List<Contact> getContacts() { return contacts; }
+    public List<Service> getServices() { return services; }
+    public List<Terminal> getTerminals() { return terminals; }
+    public List<Gate> getGates() { return gates; }
 }

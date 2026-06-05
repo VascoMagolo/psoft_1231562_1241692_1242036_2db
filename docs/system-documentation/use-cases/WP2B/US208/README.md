@@ -1,4 +1,4 @@
-# US208 — Update Airport Details
+# US208 -- Update Airport Details
 
 ## User Story
 
@@ -40,7 +40,7 @@
 
 ## Design Justification
 
-- `PATCH` is used because this is a partial update — the caller does not need to resend the full airport representation.
+- `PATCH` is used because this is a partial update -- the caller does not need to resend the full airport representation.
 - `updateDetails` on the `Airport` aggregate uses null-check guards, so only explicitly provided fields are mutated. This is intentional: a `PATCH` request with `{ "operationalHours": "24/7" }` should not clear existing contacts.
 - `Contact` is modelled as an embedded Value Object with a `ContactType` enum to enforce valid contact kinds at the domain level, preventing arbitrary string types.
 - Optimistic locking (`@Version`) protects against lost updates when two operators edit different fields concurrently.

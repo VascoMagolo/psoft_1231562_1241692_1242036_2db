@@ -1,23 +1,16 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
-
 /**
  * Represents a service offered at an airport.
  */
-@Embeddable
-@Getter
 public class Service {
-    @Column(nullable = false)
-    private String description;
-
-    protected Service() {}
+    private final String description;
 
     public Service(String description) {
         if (description == null || description.trim().isEmpty())
             throw new IllegalArgumentException("Service description cannot be empty");
         this.description = description;
     }
+
+    public String getDescription() { return description; }
 }

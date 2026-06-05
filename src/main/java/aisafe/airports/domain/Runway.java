@@ -1,23 +1,12 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
-
 /**
  * Represents a runway at an airport
  */
-@Embeddable
-@Getter
 public class Runway {
-    @Column(nullable = false)
-    private String name;
-    @Column(nullable = false)
-    private Integer length;
-    @Column(nullable = false)
-    private String orientation;
-
-    protected Runway() {}
+    private final String name;
+    private final Integer length;
+    private final String orientation;
 
     public Runway(String name, Integer length, String orientation) {
         if (name == null || orientation == null || name.trim().isEmpty() || orientation.trim().isEmpty() || length == null) {
@@ -27,4 +16,8 @@ public class Runway {
         this.name = name;
         this.orientation = orientation;
     }
+
+    public String getName() { return name; }
+    public Integer getLength() { return length; }
+    public String getOrientation() { return orientation; }
 }
