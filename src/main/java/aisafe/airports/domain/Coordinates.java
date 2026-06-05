@@ -1,21 +1,11 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
-
 /**
  * Embeddable class representing geographical coordinates
  */
-@Embeddable
-@Getter
 public class Coordinates {
-    @Column(nullable = false)
-    private Double latitude;
-    @Column(nullable = false)
-    private Double longitude;
-
-    protected Coordinates() {}
+    private final Double latitude;
+    private final Double longitude;
 
     public Coordinates(Double latitude, Double longitude) {
         if (latitude == null || longitude == null) {
@@ -30,4 +20,7 @@ public class Coordinates {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    public Double getLatitude() { return latitude; }
+    public Double getLongitude() { return longitude; }
 }

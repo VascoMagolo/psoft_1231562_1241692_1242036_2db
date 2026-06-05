@@ -46,13 +46,11 @@ class AirportStatisticsUseCaseTest {
         IataCode lisCode = new IataCode("LIS");
         IataCode opoCode = new IataCode("OPO");
 
-        when(lis.getId()).thenReturn(1L);
         when(lis.getIataCode()).thenReturn(lisCode);
         when(lis.getName()).thenReturn("Lisbon Airport");
         when(lis.getCity()).thenReturn("Lisbon");
         when(lis.getCountry()).thenReturn("Portugal");
 
-        when(opo.getId()).thenReturn(2L);
         when(opo.getIataCode()).thenReturn(opoCode);
         when(opo.getName()).thenReturn("Porto Airport");
         when(opo.getCity()).thenReturn("Porto");

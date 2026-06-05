@@ -1,23 +1,16 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
-
 /**
  * Value object representing a terminal within an airport.
  */
-@Embeddable
-@Getter
 public class Terminal {
-    @Column(nullable = false)
-    private String name;
-
-    protected Terminal() {}
+    private final String name;
 
     public Terminal(String name) {
         if (name == null || name.trim().isEmpty())
             throw new IllegalArgumentException("Terminal name cannot be empty");
         this.name = name;
     }
+
+    public String getName() { return name; }
 }

@@ -2,6 +2,7 @@ package aisafe.airports.application;
 
 import aisafe.shared.domain.DuplicateResourceException;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.airports.application.dtos.AddCertificationRequest;
@@ -17,6 +18,7 @@ import aisafe.airports.domain.AirportRepository;
  * Use case for adding a new aircraft certification to an airport.
  */
 @UseCase
+@Transactional
 public class AddAirportCertificationUseCase {
     private final AirportRepository airportRepository;
     private final AircraftCertificationRepository certificationRepository;
@@ -48,8 +50,8 @@ public class AddAirportCertificationUseCase {
         }
 
         AircraftCertification certification = new AircraftCertification(airport, request.aircraftModelName());
-        AircraftCertification saved = certificationRepository.save(certification);
+        certificationRepository.save(certification);
 
-        return AircraftCertificationResponse.from(saved);
+        return AircraftCertificationResponse.from(certification);
     }
 }

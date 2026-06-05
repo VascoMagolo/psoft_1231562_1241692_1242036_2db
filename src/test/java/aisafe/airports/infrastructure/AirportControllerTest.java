@@ -74,7 +74,7 @@ class AirportControllerTest {
     @BeforeEach
     void setUp() {
         sampleAirportResponse = new AirportResponse(
-                1L, "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe",
+                "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe",
                 "Europe/Lisbon", null, null, "OPERATIONAL",
                 new AirportResponse.CoordinatesRecord(38.77, -9.13),
                 List.of(new AirportResponse.RunwayRecord("03/21", 3000, "030/210")),
