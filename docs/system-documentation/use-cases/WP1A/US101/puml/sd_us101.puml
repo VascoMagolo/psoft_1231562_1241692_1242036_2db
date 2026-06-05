@@ -43,7 +43,7 @@ else model name is unique
   Repo --> UC : AircraftModel
   deactivate Repo
 
-  UC --> Ctrl : AircraftModelResponse\n{ id, modelName, manufacturer,\n  fuelCapacity, maxRange, cruisingSpeed,\n  imagePath, maximumSeatingCapacity }
+  UC --> Ctrl : AircraftModelResponse\n{ modelName, manufacturer,\n  fuelCapacity, maxRange, cruisingSpeed,\n  imagePath, maximumSeatingCapacity }
   deactivate UC
   Ctrl --> BO : 201 Created\nEntityModel<AircraftModelResponse> with _links
 end

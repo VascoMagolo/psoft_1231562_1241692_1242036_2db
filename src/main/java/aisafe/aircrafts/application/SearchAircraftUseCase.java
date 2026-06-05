@@ -37,8 +37,8 @@ public class SearchAircraftUseCase {
         if (statusStr != null && !statusStr.isBlank()) {
             try {
                 status = AircraftStatus.valueOf(statusStr.toUpperCase());
-            } catch (AircraftInvalidFieldException e) {
-                throw new AircraftInvalidFieldException("Aircraft status is invalid: " + statusStr);
+            } catch (IllegalArgumentException e) {
+                throw new AircraftInvalidFieldException("Invalid aircraft status: " + statusStr);
             }
         }
         PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);

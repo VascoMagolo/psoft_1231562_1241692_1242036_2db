@@ -37,7 +37,7 @@ Key domain constraints derived from client clarifications:
 
 - **Input validation** must be enforced at all API endpoints. Specific rules include: IATA airport codes must follow the 3-letter format; aircraft registration numbers must follow the standard format; date ranges and numeric values (capacity, range, etc.) must be within valid bounds. (sections 5, 8)
 - **Concurrent access** must be handled correctly. Critical scenarios include: updating aircraft status, modifying route information, and creating maintenance records. (sections 4.6, 8)
-- **Optimistic locking** must be used where applicable (e.g., aircraft status updates) to prevent lost updates under concurrent requests. (section 5)
+- **Optimistic locking** must be used where applicable (e.g., aircraft status updates) to prevent lost updates under concurrent requests. Validation must be enforced at the application layer using resource versioning. (section 5)
 - **Role-based access control** must be enforced for all endpoints. Roles: Admin, Backoffice Operator, ATCC, Maintenance Technician, Maintenance Supervisor. (section 8)
 - All authenticated requests must use **JWT**. (sections 3.6, 4.6)
 

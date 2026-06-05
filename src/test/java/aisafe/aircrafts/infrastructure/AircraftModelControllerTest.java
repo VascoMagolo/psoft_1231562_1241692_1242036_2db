@@ -90,4 +90,36 @@ class AircraftModelControllerTest {
         mockMvc.perform(get("/api/aircraftModels"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void ensureGetModelDetailsReturns200() throws Exception {
+        AircraftModelResponse response = new AircraftModelResponse(
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+
+        when(viewAircraftModelDetails.execute("A320")).thenReturn(response);
+
+        mockMvc.perform(get("/api/aircraftModels/A320"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.modelName").value("A320"));
+    }
+
+    @Test
+    void ensureUpdateModelReturns200() throws Exception {
+        AircraftModelResponse response = new AircraftModelResponse(
+                "A320", Manufacturer.AIRBUS, 28000.0, 7000.0, 850.0, "a320_new.jpg", 200);
+
+        when(updateAircraftModel.execute(any(), any())).thenReturn(response);
+
+        mockMvc.perform(patch("/api/aircraftModels/A320")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"maxRange\": 28000.0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.modelName").value("A320"));
+    }
+
+    @Test
+    void ensureDeleteModelReturns204() throws Exception {
+        mockMvc.perform(delete("/api/aircraftModels/A320"))
+                .andExpect(status().isNoContent());
+    }
 }
