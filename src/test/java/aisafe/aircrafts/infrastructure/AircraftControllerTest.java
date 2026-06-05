@@ -9,6 +9,7 @@ import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -145,7 +146,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureListAircraftReturns200() throws Exception {
-        when(listAircraft.execute(anyInt(), anyInt())).thenReturn(new aisafe.shared.application.dtos.PaginatedResult<>(List.of(), 0L));
+        when(listAircraft.execute(anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
         mockMvc.perform(get("/api/aircrafts"))
                 .andExpect(status().isOk());
@@ -153,7 +154,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureSearchAircraftReturns200() throws Exception {
-        when(searchAircraft.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(new aisafe.shared.application.dtos.PaginatedResult<>(List.of(), 0L));
+        when(searchAircraft.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
