@@ -19,6 +19,11 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
     }
 
     @Override
+    public long count() {
+        return springRepo.count();
+    }
+
+    @Override
     public boolean existsByPartNumber(String partNumber) {
         return springRepo.existsByPartNumber(partNumber);
     }

@@ -19,6 +19,11 @@ public class MaintenanceTemplateJpaRepository implements MaintenanceTemplateRepo
     }
 
     @Override
+    public long count() {
+        return springRepo.count();
+    }
+
+    @Override
     public boolean existsByName(String name) {
         return springRepo.existsByName(name);
     }

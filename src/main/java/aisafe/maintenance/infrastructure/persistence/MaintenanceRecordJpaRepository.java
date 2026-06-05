@@ -29,6 +29,11 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public long count() {
+        return springRepo.count();
+    }
+
+    @Override
     public boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template) {
         MaintenancePartJpaEntity partJpa = partSpringRepo.findByPartNumber(part.getPartNumber()).orElse(null);
         if (partJpa == null) return false;

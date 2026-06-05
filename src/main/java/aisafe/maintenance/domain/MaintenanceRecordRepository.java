@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MaintenanceRecordRepository {
+    long count();
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     List<MaintenanceRecord> findAll();
