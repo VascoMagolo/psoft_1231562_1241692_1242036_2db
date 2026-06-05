@@ -8,12 +8,15 @@ participant "AircraftModelRepository" as ModelRepo
 participant "AircraftCertificationRepository" as CertRepo
 database "Database" as DB
 
-Actor -> Ctrl : POST /api/airports/{iataCode}/certifications (JSON)
+Actor -> Ctrl : POST /api/airports/{iataCode}/certifications\n{ aircraftModelId: Long }
 activate Ctrl
 
-note right of Ctrl : @Valid validates\naircraftModelId is not null
+note right of Ctrl
+  @Valid on AddCertificationRequest:
+  - aircraftModelId: not null
+end note
 
-Ctrl -> UC : execute(iataCode, request)
+Ctrl -> UC : execute(iataCode: String,\n  request: AddCertificationRequest)
 activate UC
 
 UC -> AirportRepo : findByIataCodeCode(iataCode)
@@ -25,7 +28,7 @@ deactivate DB
 AirportRepo --> UC : Airport
 deactivate AirportRepo
 
-UC -> ModelRepo : findById(aircraftModelId)
+UC -> ModelRepo : findById(request.aircraftModelId())
 activate ModelRepo
 ModelRepo -> DB : SELECT FROM aircraft_model WHERE id = ?
 activate DB
@@ -49,12 +52,12 @@ CertRepo -> DB : INSERT INTO airport_certification
 activate DB
 DB --> CertRepo : saved record (with ID)
 deactivate DB
-CertRepo --> UC : savedCertification
+CertRepo --> UC : AircraftCertification
 deactivate CertRepo
 
-UC --> Ctrl : AircraftCertificationResponse
+UC --> Ctrl : AircraftCertificationResponse\n{ id, airportIataCode, aircraftModelId,\n  aircraftModelName }
 deactivate UC
 
-Ctrl --> Actor : 201 Created (JSON with _links)
+Ctrl --> Actor : 201 Created\nEntityModel<AircraftCertificationResponse> with _links
 deactivate Ctrl
 @enduml

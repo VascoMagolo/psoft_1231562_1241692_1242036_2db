@@ -8,62 +8,74 @@ participant "AirportRepository" as AirportRepo
 participant "RouteRepository" as RouteRepo
 database "Database" as DB
 
-== View details by ID ==
+== View route details by ID ==
 Actor -> Ctrl : GET /api/routes/{id}
 activate Ctrl
 
-Ctrl -> DetailsUC : execute(id)
+Ctrl -> DetailsUC : execute(id: Long)
 activate DetailsUC
 
 DetailsUC -> RouteRepo : findById(id)
 activate RouteRepo
 RouteRepo -> DB : SELECT FROM route WHERE id = ?
 activate DB
-DB --> RouteRepo : route record / empty
+DB --> RouteRepo : route record
 deactivate DB
 RouteRepo --> DetailsUC : Optional<Route>
 deactivate RouteRepo
 
-alt Route found
-  DetailsUC --> Ctrl : Route
-  Ctrl --> Actor : 200 OK
-else Route not found
+alt route found
+  DetailsUC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active }
+  deactivate DetailsUC
+  Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
+else route not found
   DetailsUC --> Ctrl : throws RouteNotFoundException
-  Ctrl --> Actor : 404 Not Found
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
 end
-deactivate DetailsUC
+
 deactivate Ctrl
 
 == View all routes from a specific airport ==
-Actor -> Ctrl : GET /api/routes/airport/{iataCode}
+Actor -> Ctrl : GET /api/routes/airport/{iataCode}?page=0&size=20
 activate Ctrl
-Ctrl -> ListUC : execute(iataCode, pageable)
+
+Ctrl -> ListUC : execute(iataCode: String, pageable: Pageable)
 activate ListUC
 
 ListUC -> AirportRepo : existsByIataCodeCode(iataCode)
 activate AirportRepo
 AirportRepo -> DB : SELECT EXISTS(FROM airport WHERE code = ?)
 activate DB
-DB --> AirportRepo : true/false
+DB --> AirportRepo : boolean
 deactivate DB
 AirportRepo --> ListUC : boolean
 deactivate AirportRepo
 
-alt Airport found
-    ListUC -> RouteRepo : findByOrigin(iataCode)
-    activate RouteRepo
-    RouteRepo -> DB : SELECT FROM route WHERE origin_iata_code = ?
-    activate DB
-    DB --> RouteRepo : route records
-    deactivate DB
-    RouteRepo --> ListUC : Page<Route>
-    deactivate RouteRepo
-    ListUC --> Ctrl : Page<Route>
-    Ctrl --> Actor : 200 OK (HAL+JSON with _embedded, _links, page)
-else Airport not found
-    ListUC --> Ctrl : throws AirportNotFoundException
-    Ctrl --> Actor : 404 Not Found
+alt airport not found
+  ListUC --> Ctrl : throws AirportNotFoundException
+  Ctrl --> Actor : 404 Not Found\n{ message: "Airport with IATA code '...' not found." }
+else airport found
+  ListUC -> RouteRepo : findByOrigin(iataCode, pageable)
+  activate RouteRepo
+  RouteRepo -> DB : SELECT FROM route WHERE origin_iata_code = ?\n(LIMIT ? OFFSET ?)
+  activate DB
+  DB --> RouteRepo : route records + total count
+  deactivate DB
+  RouteRepo --> ListUC : Page<Route>
+  deactivate RouteRepo
+
+  ListUC --> Ctrl : page.map(RouteResponse::from)\n→ Page<RouteResponse>
+  deactivate ListUC
+
+  note right of Ctrl
+    PagedResourcesAssembler wraps
+    Page<RouteResponse> into
+    PagedModel<EntityModel<RouteResponse>>
+    adding _links and page metadata
+  end note
+
+  Ctrl --> Actor : 200 OK (HAL+JSON)\n{\n  "_embedded": { "routeResponseList": [...] },\n  "_links": { "self", "next", "prev" },\n  "page": { number, size,\n    totalElements, totalPages }\n}
 end
-deactivate ListUC
+
 deactivate Ctrl
 @enduml

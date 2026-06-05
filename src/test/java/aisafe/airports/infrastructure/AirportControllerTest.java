@@ -61,6 +61,9 @@ class AirportControllerTest {
     private ListAirportsByRegionUseCase listAirportsByRegion;
 
     @MockitoBean
+    private DeleteAirportUseCase deleteAirport;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

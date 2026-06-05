@@ -7,12 +7,15 @@ participant "Airport" as Entity
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : PATCH /api/airports/{iataCode}/status (JSON)
+BO -> Ctrl : PATCH /api/airports/{iataCode}/status\n{ status: "OPERATIONAL" | "CLOSED" | "UNDER_MAINTENANCE" }
 activate Ctrl
 
-note right of Ctrl : @Valid validates\nstatus is not null
+note right of Ctrl
+  @Valid on UpdateAirportStatusRequest:
+  - status: not null, must be valid enum value
+end note
 
-Ctrl -> UC : execute(iataCode, status)
+Ctrl -> UC : execute(iataCode: String,\n  request.status(): AirportStatus)
 activate UC
 
 UC -> Repo : findByIataCodeCode(iataCode)
@@ -37,16 +40,16 @@ activate DB
 alt No concurrent modification (version matches)
   DB --> Repo : updated record (version incremented)
   deactivate DB
-  Repo --> UC : updatedAirport
+  Repo --> UC : Airport
   deactivate Repo
-  UC --> Ctrl : AirportResponse
+  UC --> Ctrl : AirportResponse.from(airport)\n{ id, iataCode, name, status, ... }
   deactivate UC
-  Ctrl --> BO : 200 OK (JSON with _links)
-else Concurrent modification detected (version mismatch)
+  Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links
+else Concurrent modification (version mismatch)
   DB --> Repo : 0 rows affected
   Repo --> UC : throws ObjectOptimisticLockingFailureException
   UC --> Ctrl : exception propagates
-  Ctrl --> BO : 409 Conflict
+  Ctrl --> BO : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
 end
 
 deactivate Ctrl

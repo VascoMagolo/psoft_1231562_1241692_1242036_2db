@@ -9,7 +9,12 @@ database "Database" as DB
 ATCC -> Ctrl : GET /api/airports/grouped?by=region
 activate Ctrl
 
-Ctrl -> UC : execute(by)
+note right of Ctrl
+  Query param:
+  - by: "region" (default) | "country"
+end note
+
+Ctrl -> UC : execute(by: String)
 activate UC
 
 UC -> Repo : findAll()
@@ -21,11 +26,16 @@ deactivate DB
 Repo --> UC : List<Airport>
 deactivate Repo
 
-note right of UC : Groups airports by region\n(or country if by=country),\nthen sorts groups alphabetically
+note right of UC
+  Groups airports by region or country
+  (depending on 'by' param),
+  then sorts groups alphabetically.
+  Each group maps to AirportGroupResponse.
+end note
 
-UC --> Ctrl : List<AirportGroupResponse>
+UC --> Ctrl : List<AirportGroupResponse>\n[{ groupName: String,\n  airports: [AirportResponse] }]
 deactivate UC
 
-Ctrl --> ATCC : 200 OK (JSON Array)
+Ctrl --> ATCC : 200 OK\nCollectionModel<AirportGroupResponse>\nwith _links (self)
 deactivate Ctrl
 @enduml

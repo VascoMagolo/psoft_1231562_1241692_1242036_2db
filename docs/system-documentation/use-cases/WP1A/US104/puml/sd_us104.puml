@@ -1,26 +1,45 @@
-﻿@startuml
+@startuml
 autonumber
 actor "ATCC" as ATCC
 participant "AircraftController" as Ctrl
 participant "SearchAircraftUseCase" as UC
 participant "AircraftRepository" as Repo
 database "Database" as DB
-ATCC -> Ctrl : GET /api/aircrafts/search?modelId=X&status=Y&year=Z
+
+ATCC -> Ctrl : GET /api/aircrafts/search\n?modelId=X&status=Y&year=Z&page=0&size=20
 activate Ctrl
-Ctrl -> UC : execute(modelId, status, year, pageable)
+
+note right of Ctrl
+  Query params (all optional):
+  - modelId: Long
+  - status: AircraftStatus enum
+  - year: Integer (manufacturing year)
+  - page, size, sort (Pageable)
+  Default page size: 20
+end note
+
+Ctrl -> UC : execute(modelId: Long, status: String,\n  year: Integer, pageable: Pageable)
 activate UC
+
 UC -> Repo : searchAircrafts(modelId, status, year, pageable)
 activate Repo
-Repo -> DB : SELECT * FROM aircraft WHERE ... (dynamic query)
+Repo -> DB : SELECT FROM aircraft\nWHERE model_id = ? AND status = ? AND year = ?\n(dynamic query, LIMIT ? OFFSET ?)
 activate DB
-DB --> Repo : page of records
+DB --> Repo : page of records + total count
 deactivate DB
 Repo --> UC : Page<Aircraft>
 deactivate Repo
-UC --> Ctrl : Page<SearchAircraftUseCaseResponse>
+
+UC --> Ctrl : page.map(SearchAircraftUseCaseResponse::from)\n→ Page<SearchAircraftUseCaseResponse>
 deactivate UC
-Ctrl --> ATCC : 200 OK (paged HATEOAS model)
+
+note right of Ctrl
+  PagedResourcesAssembler wraps
+  Page<SearchAircraftUseCaseResponse> into
+  PagedModel<EntityModel<SearchAircraftUseCaseResponse>>
+  adding _links and page metadata
+end note
+
+ATCC <-- Ctrl : 200 OK (HAL+JSON)\n{\n  "_embedded": { "searchAircraftUseCaseResponseList": [...] },\n  "_links": { "self", "next", "prev" },\n  "page": { number, size,\n    totalElements, totalPages }\n}
 deactivate Ctrl
 @enduml
-
-

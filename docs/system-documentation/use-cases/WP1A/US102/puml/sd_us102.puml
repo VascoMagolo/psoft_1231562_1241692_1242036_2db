@@ -1,56 +1,67 @@
-﻿@startuml
+@startuml
 autonumber
-actor "ATCC" as ATCC
+actor "Backoffice Operator" as BO
 participant "AircraftController" as Ctrl
 participant "RegisterAircraftUseCase" as UC
 participant "AircraftModelRepository" as ModelRepo
 participant "AircraftRepository" as Repo
-participant "AircraftModel" as Model
 database "Database" as DB
-ATCC -> Ctrl : POST /api/aircrafts (JSON)
+
+BO -> Ctrl : POST /api/aircrafts\n{ registrationNumber, modelId,\n  manufacturingDate, seatCapacity,\n  status, features? }
 activate Ctrl
-Ctrl -> UC : execute(request)
+
+note right of Ctrl
+  @Valid on RegisterAircraftRequest:
+  - registrationNumber: pattern ^[A-Z]{2}-[A-Z]{3}$
+  - modelId: not null
+  - manufacturingDate: not null
+  - seatCapacity: >= 1
+  - status: not blank
+end note
+
+Ctrl -> UC : execute(request: RegisterAircraftRequest)
 activate UC
-UC -> ModelRepo : findById(request.modelId)
+
+UC -> ModelRepo : findById(request.modelId())
 activate ModelRepo
-ModelRepo -> DB : SELECT * FROM aircraft_model WHERE id = ?
+ModelRepo -> DB : SELECT FROM aircraft_model WHERE id = ?
 activate DB
 DB --> ModelRepo : model record
 deactivate DB
 ModelRepo --> UC : Optional<AircraftModel>
 deactivate ModelRepo
+
 alt model not found
-    UC -> UC : throw IllegalArgumentException("Invalid Model ID")
+  UC --> Ctrl : throws AircraftModelNotFoundException
+  Ctrl --> BO : 404 Not Found\n{ message: "Aircraft model not found." }
 else model found
-    UC -> Repo : existsByRegistrationNumber(regNum)
+  UC -> Repo : existsByRegistrationNumber(request.registrationNumber())
+  activate Repo
+  Repo -> DB : SELECT COUNT(*) FROM aircraft WHERE registration_number = ?
+  activate DB
+  DB --> Repo : count
+  deactivate DB
+  Repo --> UC : boolean
+  deactivate Repo
+
+  alt registration already exists
+    UC --> Ctrl : throws AircraftAlreadyExistsException
+    Ctrl --> BO : 409 Conflict\n{ message: "Aircraft '...' already exists." }
+  else registration is unique
+    UC -> Repo : save(new Aircraft(model, registrationNumber,\n  manufacturingDate, seatCapacity, status, features))
     activate Repo
-    Repo -> DB : SELECT COUNT(*) FROM aircraft WHERE registration_number = ?
+    Repo -> DB : INSERT INTO aircraft
     activate DB
-    DB --> Repo : count
+    DB --> Repo : saved record (with generated ID)
     deactivate DB
-    Repo --> UC : true/false
+    Repo --> UC : Aircraft
     deactivate Repo
-    alt registration already exists
-        UC -> UC : throw AircraftAlreadyExistsException
-    else registration is unique
-        UC -> Model : validate seat capacity and status
-        activate Model
-        Model --> UC
-        deactivate Model
-        UC -> Repo : save(aircraft)
-        activate Repo
-        Repo -> DB : INSERT INTO aircraft
-        activate DB
-        DB --> Repo : saved record (with ID)
-        deactivate DB
-        Repo --> UC : savedAircraft
-        deactivate Repo
-    end
+
+    UC --> Ctrl : ViewAircraftDetailsResponse\n{ registrationNumber, model, manufacturer,\n  manufacturingDate, status, seatCapacity,\n  features, version }
+    deactivate UC
+    Ctrl --> BO : 201 Created\nEntityModel<ViewAircraftDetailsResponse> with _links
+  end
 end
-UC --> Ctrl : ViewAircraftDetailsResponse
-deactivate UC
-Ctrl --> ATCC : 201 Created (JSON with _links)
+
 deactivate Ctrl
 @enduml
-
-

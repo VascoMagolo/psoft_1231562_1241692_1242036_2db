@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 autonumber
 actor "Maintenance Technician" as MT
 participant "MaintenanceController" as Ctrl
@@ -8,62 +8,82 @@ participant "MaintenanceTemplateRepository" as TemplateRepo
 participant "AircraftRepository" as AircraftRepo
 participant "MaintenanceRecordRepository" as Repo
 database "Database" as DB
-MT -> Ctrl : POST /api/maintenance/records (JSON)
+
+MT -> Ctrl : POST /api/maintenance/records\n{ description, startDate, expectedDuration,\n  part (partNumber), notes?, template (name),\n  status, registrationNumber }
 activate Ctrl
-Ctrl -> UC : execute(request)
+
+note right of Ctrl
+  @Valid on CreateMaintenanceRecordRequest:
+  - description: not blank
+  - startDate: not null
+  - expectedDuration: >= 1
+  - part: not blank (part number)
+  - template: not blank (template name)
+  - status: not null (MaintenanceStatus enum)
+  - registrationNumber: not blank
+end note
+
+Ctrl -> UC : execute(request: CreateMaintenanceRecordRequest)
 activate UC
-UC -> PartRepo : findByPartNumber(request.part)
+
+UC -> PartRepo : findByPartNumber(request.part())
 activate PartRepo
-PartRepo -> DB : SELECT * FROM maintenance_part WHERE part_number = ?
+PartRepo -> DB : SELECT FROM maintenance_part WHERE part_number = ?
 activate DB
 DB --> PartRepo : part record
 deactivate DB
 PartRepo --> UC : Optional<MaintenancePart>
 deactivate PartRepo
-UC -> TemplateRepo : findByName(request.template)
+
+UC -> TemplateRepo : findByName(request.template())
 activate TemplateRepo
-TemplateRepo -> DB : SELECT * FROM maintenance_template WHERE name = ?
+TemplateRepo -> DB : SELECT FROM maintenance_template WHERE name = ?
 activate DB
 DB --> TemplateRepo : template record
 deactivate DB
 TemplateRepo --> UC : Optional<MaintenanceTemplate>
 deactivate TemplateRepo
-UC -> AircraftRepo : findByRegistrationNumber(request.registrationNumber)
+
+UC -> AircraftRepo : findByRegistrationNumber(request.registrationNumber())
 activate AircraftRepo
-AircraftRepo -> DB : SELECT * FROM aircraft WHERE registration_number = ?
+AircraftRepo -> DB : SELECT FROM aircraft WHERE registration_number = ?
 activate DB
 DB --> AircraftRepo : aircraft record
 deactivate DB
 AircraftRepo --> UC : Optional<Aircraft>
 deactivate AircraftRepo
-alt part/template/aircraft not found
-    UC -> UC : throw not-found exception
-else all references exist
-    UC -> Repo : existsByStartDateAndPartAndTemplate(...)
+
+alt part, template, or aircraft not found
+  UC --> Ctrl : throws MaintenancePartNotFoundException\n/ MaintenanceTemplateNotFoundException\n/ AircraftNotFoundException
+  Ctrl --> MT : 404 Not Found\n{ message: "... not found." }
+else all references found
+  UC -> Repo : existsByStartDateAndPartAndTemplate(startDate, part, template)
+  activate Repo
+  Repo -> DB : SELECT COUNT(*) FROM maintenance_record WHERE ...
+  activate DB
+  DB --> Repo : count
+  deactivate DB
+  Repo --> UC : boolean
+  deactivate Repo
+
+  alt duplicate record exists
+    UC --> Ctrl : throws MaintenanceRecordAlreadyExistsException
+    Ctrl --> MT : 409 Conflict\n{ message: "Maintenance record already exists." }
+  else record is unique
+    UC -> Repo : save(new MaintenanceRecord(description, startDate,\n  expectedDuration, part, notes, template, status, aircraft))
     activate Repo
-    Repo -> DB : SELECT COUNT(*) FROM maintenance_record WHERE ...
+    Repo -> DB : INSERT INTO maintenance_record
     activate DB
-    DB --> Repo : count
-deactivate DB
-    Repo --> UC : true/false
+    DB --> Repo : saved record (with generated ID)
+    deactivate DB
+    Repo --> UC : MaintenanceRecord
     deactivate Repo
-    alt duplicate record exists
-        UC -> UC : throw MaintenanceRecordAlreadyExistsException
-    else record is unique
-        UC -> Repo : save(record)
-        activate Repo
-        Repo -> DB : INSERT INTO maintenance_record
-        activate DB
-        DB --> Repo : saved record (with ID)
-        deactivate DB
-        Repo --> UC : savedRecord
-        deactivate Repo
-    end
+
+    UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+    deactivate UC
+    Ctrl --> MT : 201 Created\nEntityModel<MaintenanceRecordResponse> with _links
+  end
 end
-UC --> Ctrl : MaintenanceRecordResponse
-deactivate UC
-Ctrl --> MT : 201 Created (JSON with _links)
+
 deactivate Ctrl
 @enduml
-
-

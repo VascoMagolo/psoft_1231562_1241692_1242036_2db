@@ -1,38 +1,52 @@
-﻿@startuml
+@startuml
 autonumber
 actor "Maintenance Supervisor" as MS
 participant "MaintenanceController" as Ctrl
 participant "CreateMaintenancePartUseCase" as UC
 participant "MaintenancePartRepository" as Repo
 database "Database" as DB
-MS -> Ctrl : POST /api/maintenance/parts (JSON)
+
+MS -> Ctrl : POST /api/maintenance/parts\n{ partNumber, name, description?,\n  stockQuantity, minimumThreshold,\n  component: MaintenanceComponent }
 activate Ctrl
-Ctrl -> UC : execute(request)
+
+note right of Ctrl
+  @Valid on CreateMaintenancePartRequest:
+  - partNumber: not blank
+  - name: not blank
+  - stockQuantity: >= 0
+  - minimumThreshold: >= 0
+  - component: not null (MaintenanceComponent enum)
+end note
+
+Ctrl -> UC : execute(request: CreateMaintenancePartRequest)
 activate UC
-UC -> Repo : existsByPartNumber(request.partNumber)
+
+UC -> Repo : existsByPartNumber(request.partNumber())
 activate Repo
 Repo -> DB : SELECT COUNT(*) FROM maintenance_part WHERE part_number = ?
 activate DB
 DB --> Repo : count
 deactivate DB
-Repo --> UC : true/false
+Repo --> UC : boolean
 deactivate Repo
+
 alt part number already exists
-    UC -> UC : throw MaintenancePartAlreadyExistsException
+  UC --> Ctrl : throws MaintenancePartAlreadyExistsException
+  Ctrl --> MS : 409 Conflict\n{ message: "Maintenance part '...' already exists." }
 else part number is unique
-    UC -> Repo : save(part)
-    activate Repo
-    Repo -> DB : INSERT INTO maintenance_part
-    activate DB
-    DB --> Repo : saved record (with ID)
-    deactivate DB
-    Repo --> UC : savedPart
-    deactivate Repo
+  UC -> Repo : save(new MaintenancePart(partNumber, name,\n  description, stockQuantity,\n  minimumThreshold, component))
+  activate Repo
+  Repo -> DB : INSERT INTO maintenance_part
+  activate DB
+  DB --> Repo : saved record (with generated ID)
+  deactivate DB
+  Repo --> UC : MaintenancePart
+  deactivate Repo
+
+  UC --> Ctrl : MaintenancePartResponse\n{ id, partNumber, description }
+  deactivate UC
+  Ctrl --> MS : 201 Created\nEntityModel<MaintenancePartResponse> with _links
 end
-UC --> Ctrl : MaintenancePart
-deactivate UC
-Ctrl --> MS : 201 Created (JSON)
+
 deactivate Ctrl
 @enduml
-
-

@@ -49,9 +49,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/search").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/aircrafts/*/status").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/aircrafts/*").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/aircraftModels/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         // WP #2 – Airports
                         .requestMatchers(HttpMethod.POST, "/api/airports").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
@@ -63,11 +65,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/status").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
+                        // WP #3A – Routes
+                        .requestMatchers(HttpMethod.DELETE, "/api/routes/*").hasAnyRole("ADMIN")
                         // WP #4 - Maintenance
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/maintenance/templates/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/maintenance/parts/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/aircraft/*").hasAnyRole("ATCC", "ADMIN")
 

@@ -3,6 +3,7 @@ package aisafe.maintenance.infrastructure;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
 import aisafe.maintenance.application.dtos.*;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,19 +37,28 @@ public class MaintenanceController {
     private final UpdateMaintenanceRecordUseCase updateMaintenanceRecordUseCase;
     private final ViewAllMaintenanceRecordsUseCase viewAllMaintenanceRecordsUseCase;
     private final ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase;
+    private final DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase;
+    private final DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase;
+    private final DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
                                  CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
                                  CreateMaintenancePartUseCase createMaintenancePartUseCase,
                                  UpdateMaintenanceRecordUseCase updateMaintenanceRecordUseCase,
                                  ViewAllMaintenanceRecordsUseCase viewAllMaintenanceRecordsUseCase,
-                                 ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase) {
+                                 ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase,
+                                 DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase,
+                                 DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase,
+                                 DeleteMaintenancePartUseCase deleteMaintenancePartUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
         this.updateMaintenanceRecordUseCase = updateMaintenanceRecordUseCase;
         this.viewAllMaintenanceRecordsUseCase = viewAllMaintenanceRecordsUseCase;
         this.viewTotalMaintenanceHoursInFleetUseCase = viewTotalMaintenanceHoursInFleetUseCase;
+        this.deleteMaintenanceRecordUseCase = deleteMaintenanceRecordUseCase;
+        this.deleteMaintenanceTemplateUseCase = deleteMaintenanceTemplateUseCase;
+        this.deleteMaintenancePartUseCase = deleteMaintenancePartUseCase;
     }
 
     /**
@@ -185,6 +195,48 @@ public class MaintenanceController {
         EntityModel<ViewTotalMaintenanceHoursInFleetResponse> model = EntityModel.of(response,
                 linkTo(methodOn(MaintenanceController.class).getTotalMaintenanceHoursInFleet()).withSelfRel());
         return ResponseEntity.ok(model);
+    }
+
+    @Operation(summary = "Delete a maintenance record", description = "Permanently removes a maintenance record by ID. Requires Maintenance Technician or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Maintenance record deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Maintenance record not found")
+    })
+    @DeleteMapping("/records/{id}")
+    public ResponseEntity<Void> deleteMaintenanceRecord(
+            @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id) {
+        deleteMaintenanceRecordUseCase.execute(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Delete a maintenance template", description = "Permanently removes a maintenance template by ID. Requires Maintenance Technician or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Maintenance template deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Maintenance template not found")
+    })
+    @DeleteMapping("/templates/{id}")
+    public ResponseEntity<Void> deleteMaintenanceTemplate(
+            @Parameter(description = "Unique ID of the maintenance template") @PathVariable Long id) {
+        deleteMaintenanceTemplateUseCase.execute(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Delete a maintenance part", description = "Permanently removes a maintenance part by ID. Requires Maintenance Technician or Admin role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Maintenance part deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Maintenance part not found")
+    })
+    @DeleteMapping("/parts/{id}")
+    public ResponseEntity<Void> deleteMaintenancePart(
+            @Parameter(description = "Unique ID of the maintenance part") @PathVariable Long id) {
+        deleteMaintenancePartUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
