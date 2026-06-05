@@ -1,5 +1,6 @@
 package aisafe.maintenance.application;
 
+import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
@@ -33,7 +34,7 @@ class ViewAllMaintenanceRecordsUseCaseTest {
     @Test
     void ensureRecordsAreReturnedSuccessfully() {
         RegistrationNumber reg = new RegistrationNumber("CS-TPA");
-        when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.of(mock(aisafe.aircrafts.domain.Aircraft.class)));
+        when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.of(mock(Aircraft.class)));
         when(repository.findByAircraftRegistration(eq("CS-TPA"), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0));
 
         assertDoesNotThrow(() -> viewAllMaintenanceRecords.execute(reg, 0, 20));

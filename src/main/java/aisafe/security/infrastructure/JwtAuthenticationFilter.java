@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import aisafe.security.application.JwtService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Convert roles to Spring Security authorities
                 var authorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .map(a -> (org.springframework.security.core.GrantedAuthority) a)
+                        .map(a -> (GrantedAuthority) a)
                         .toList();
 
                 var authentication = new UsernamePasswordAuthenticationToken(
