@@ -1,0 +1,50 @@
+package aisafe.maintenance.application;
+
+import aisafe.maintenance.domain.MaintenanceTemplate;
+import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
+import aisafe.maintenance.domain.MaintenanceTemplateRepository;
+import aisafe.maintenance.domain.MaintenanceType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class DeleteMaintenanceTemplateUseCaseTest {
+
+    @Mock
+    private MaintenanceTemplateRepository maintenanceTemplateRepository;
+
+    @InjectMocks
+    private DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplate;
+
+    private MaintenanceTemplate buildTemplate() {
+        return new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
+                List.of("ModelA"), List.of("Check oil"), 500, 90);
+    }
+
+    @Test
+    void ensureMaintenanceTemplateIsDeletedSuccessfully() {
+        MaintenanceTemplate template = buildTemplate();
+        when(maintenanceTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
+
+        assertDoesNotThrow(() -> deleteMaintenanceTemplate.execute(1L));
+        verify(maintenanceTemplateRepository).delete(any(MaintenanceTemplate.class));
+    }
+
+    @Test
+    void ensureExceptionWhenMaintenanceTemplateNotFound() {
+        when(maintenanceTemplateRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(MaintenanceTemplateNotFoundException.class, () -> deleteMaintenanceTemplate.execute(99L));
+        verify(maintenanceTemplateRepository, never()).delete(any());
+    }
+}
