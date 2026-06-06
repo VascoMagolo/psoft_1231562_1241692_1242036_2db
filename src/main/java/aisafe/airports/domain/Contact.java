@@ -1,30 +1,17 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.Getter;
-
 import java.util.regex.Pattern;
 
 /**
  * Embeddable class representing a contact method for an airport
  */
-@Embeddable
-@Getter
 public class Contact {
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ContactType type;
-    @Column(name = "contact_value", nullable = false)
-    private String value;
-    private String description;
+    private final ContactType type;
+    private final String value;
+    private final String description;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9]{9,15}$");
-
-    protected Contact() {}
 
     public Contact(ContactType type, String value, String description) {
         if (type == null) {
@@ -55,4 +42,8 @@ public class Contact {
         this.description = (description != null) ? description.trim() : null;
         this.value = value;
     }
+
+    public ContactType getType() { return type; }
+    public String getValue() { return value; }
+    public String getDescription() { return description; }
 }

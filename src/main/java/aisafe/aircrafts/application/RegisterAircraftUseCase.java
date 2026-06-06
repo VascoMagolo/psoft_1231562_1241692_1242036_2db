@@ -4,7 +4,6 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for registering a new aircraft in the system.
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Returns a DTO with the details of the newly registered aircraft.
  */
 @UseCase
-@Transactional
 public class RegisterAircraftUseCase {
 
     private final AircraftRepository aircraftRepository;
@@ -31,8 +29,8 @@ public class RegisterAircraftUseCase {
      * @return a DTO containing the details of the newly registered aircraft
      */
     public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
-        AircraftModel model = modelRepository.findById(request.modelId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Model ID"));
+        AircraftModel model = modelRepository.findByModelName(request.modelName())
+                .orElseThrow(() -> new AircraftInvalidFieldException("Invalid Model Name: " + request.modelName()));
 
         RegistrationNumber regNum = new RegistrationNumber(request.registrationNumber());
 
@@ -53,17 +51,17 @@ public class RegisterAircraftUseCase {
                 request.seatCapacity(),
                 request.features()
         );
-        Aircraft savedAircraft = aircraftRepository.save(aircraft);
+        aircraftRepository.save(aircraft, null);
 
         return new ViewAircraftDetailsResponse(
-                savedAircraft.getRegistrationNumber().getNumber(),
-                savedAircraft.getModel().getModelName(),
-                savedAircraft.getModel().getManufacturer(),
-                savedAircraft.getManufacturingDate(),
-                savedAircraft.getStatus(),
-                savedAircraft.getSeatCapacity(),
-                savedAircraft.getFeatures(),
-                savedAircraft.getVersion()
+                aircraft.getRegistrationNumber().getNumber(),
+                aircraft.getModel().getModelName(),
+                aircraft.getModel().getManufacturer(),
+                aircraft.getManufacturingDate(),
+                aircraft.getStatus(),
+                aircraft.getSeatCapacity(),
+                aircraft.getFeatures(),
+                aircraft.getVersion()
         );
     }
 }

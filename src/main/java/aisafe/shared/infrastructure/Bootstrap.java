@@ -82,12 +82,12 @@ public class Bootstrap implements ApplicationRunner {
             AircraftModel e195e2 = aircraftModelRepository.findByModelName("Embraer E195-E2").orElseThrow();
 
             aircraftRepository.save(new Aircraft(AircraftStatus.AVAILABLE, LocalDate.parse("2019-05-25"), a320neo,
-                    new RegistrationNumber("CS-TKA"), 180, List.of("WiFi", "In-flight entertainment")));
+                    new RegistrationNumber("CS-TKA"), 180, List.of("WiFi", "In-flight entertainment")),null);
             aircraftRepository.save(new Aircraft(AircraftStatus.UNDER_MAINTENANCE, LocalDate.parse("2020-08-15"),
                     b737max, new RegistrationNumber("CS-TKB"), 200,
-                    List.of("WiFi", "In-flight entertainment", "Extra legroom")));
+                    List.of("WiFi", "In-flight entertainment", "Extra legroom")),null);
             aircraftRepository.save(new Aircraft(AircraftStatus.IN_FLIGHT, LocalDate.parse("2018-03-10"), e195e2,
-                    new RegistrationNumber("CS-TKC"), 120, List.of("WiFi")));
+                    new RegistrationNumber("CS-TKC"), 120, List.of("WiFi")),null);
         }
 
         // bootstrap for airport package
@@ -135,7 +135,7 @@ public class Bootstrap implements ApplicationRunner {
             AircraftModel e195e2 = aircraftModelRepository.findByModelName("Embraer E195-E2").orElseThrow();
             List<AircraftModel> models = List.of(a320neo, b737max, e195e2);
             maintenanceTemplateRepository.save(new MaintenanceTemplate("Inspection to the starter motor",
-                    MaintenanceType.INSPECTION, models, List.of("starterMotor inspection"), 300, 365));
+                    MaintenanceType.INSPECTION, List.of("Airbus A320neo", "Boeing 737 MAX"), List.of("starterMotor inspection"), 300, 365));
         }
 
         if (maintenancePartRepository.count() == 0) {
@@ -153,11 +153,11 @@ public class Bootstrap implements ApplicationRunner {
                     .orElseThrow();
             maintenanceRecordRepository.save(new MaintenanceRecord("Simple inspection to the starter motor",
                     LocalDateTime.parse("2024-06-01T10:00:00"), 120, part, "No issues found during the inspection.",
-                    template, MaintenanceStatus.PLANNED, aircraft1));
+                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber().getNumber()));
             maintenanceRecordRepository.save(new MaintenanceRecord("Detailed inspection to the starter motor",
                     LocalDateTime.parse("2024-06-10T14:00:00"), 240, part,
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
-                    MaintenanceStatus.PLANNED, aircraft2));
+                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber().getNumber()));
         }
     }
 }

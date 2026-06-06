@@ -1,33 +1,23 @@
 package aisafe.airports.domain;
 
-import aisafe.aircrafts.domain.AircraftModel;
-import jakarta.persistence.*;
-import lombok.Getter;
+import org.springframework.util.Assert;
 
 /**
  * Represents the certification of an aircraft model at a specific airport.
  * Each certification indicates that a particular aircraft model is approved for operation at the associated airport.
  */
-@Entity
-@Getter
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"airport_id", "aircraft_model_id"}))
 public class AircraftCertification {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "airport_id", nullable = false)
-    private Airport airport;
+    private final Airport airport;
+    private final String aircraftModelName;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "aircraft_model_id", nullable = false)
-    private AircraftModel aircraftModel;
-
-    protected AircraftCertification() {}
-
-    public AircraftCertification(Airport airport, AircraftModel aircraftModel) {
+    public AircraftCertification(Airport airport, String aircraftModelName) {
+        Assert.notNull(airport, "Airport cannot be null");
+        Assert.hasText(aircraftModelName, "Aircraft model name cannot be blank");
         this.airport = airport;
-        this.aircraftModel = aircraftModel;
+        this.aircraftModelName = aircraftModelName;
     }
+
+    public Airport getAirport() { return airport; }
+    public String getAircraftModelName() { return aircraftModelName; }
 }

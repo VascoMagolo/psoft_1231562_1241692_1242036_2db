@@ -5,13 +5,11 @@ import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
 import aisafe.maintenance.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Updates an existing maintenance record with respective status and notes for it
  */
 @UseCase
-@Transactional
 public class UpdateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
 
@@ -43,14 +41,14 @@ public class UpdateMaintenanceRecordUseCase {
             record.setNotes(request.notes());
         }
 
-        MaintenanceRecord updatedRecord = recordRepository.save(record);
+        recordRepository.save(record);
 
         return new MaintenanceRecordResponse(
-                updatedRecord.getId(), updatedRecord.getDescription(), updatedRecord.getStartDate(),
-                updatedRecord.getExpectedDuration(), updatedRecord.getNotes(),
-                updatedRecord.getPart().getPartNumber(), updatedRecord.getTemplate().getName(),
-                updatedRecord.getStatus().name(), updatedRecord.getAircraft().getRegistrationNumber().getNumber(),
-                updatedRecord.getVersion()
+                record.getId(), record.getDescription(), record.getStartDate(),
+                record.getExpectedDuration(), record.getNotes(),
+                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getStatus().name(), record.getAircraftRegistration(),
+                record.getVersion()
         );
     }
 }

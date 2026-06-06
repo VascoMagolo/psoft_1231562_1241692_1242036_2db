@@ -10,7 +10,7 @@ database "Database" as DB
 MT -> Ctrl : GET /api/maintenance/records/aircraft/{registrationNumber}\n?page=0&size=20
 activate Ctrl
 
-Ctrl -> UC : execute(registrationNumber: String,\n  pageable: Pageable)
+Ctrl -> UC : execute(registrationNumber: RegistrationNumber,\n  pageNumber: int, pageSize: int)
 activate UC
 
 UC -> AircraftRepo : findByRegistrationNumber(registrationNumber)
@@ -26,21 +26,21 @@ alt aircraft not found
   UC --> Ctrl : throws AircraftNotFoundException
   Ctrl --> MT : 404 Not Found\n{ message: "Aircraft '...' not found." }
 else aircraft found
-  UC -> Repo : findByAircraftRegistrationNumber(registrationNumber, pageable)
+  UC -> Repo : findByAircraftRegistration(registrationNumber, pageNumber, pageSize)
   activate Repo
   Repo -> DB : SELECT FROM maintenance_record\nWHERE registration_number = ?\n(LIMIT ? OFFSET ?)
   activate DB
   DB --> Repo : page of records + total count
   deactivate DB
-  Repo --> UC : Page<MaintenanceRecord>
+  Repo --> UC : PaginatedResult<MaintenanceRecord>
   deactivate Repo
 
-  UC --> Ctrl : page.map(ViewAllMaintenanceRecordsResponse::from)\n→ Page<ViewAllMaintenanceRecordsResponse>
+  UC --> Ctrl : PaginatedResult<ViewAllMaintenanceRecordsResponse>
   deactivate UC
 
   note right of Ctrl
-    PagedResourcesAssembler wraps
-    Page<ViewAllMaintenanceRecordsResponse> into
+    Controller wraps PaginatedResult into PageImpl,
+    then PagedResourcesAssembler converts it to
     PagedModel<EntityModel<ViewAllMaintenanceRecordsResponse>>
     adding _links and page metadata
   end note

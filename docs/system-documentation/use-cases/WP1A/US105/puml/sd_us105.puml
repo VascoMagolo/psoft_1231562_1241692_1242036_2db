@@ -57,7 +57,7 @@ else update allowed
     DB --> Repo : 0 rows affected
     Repo --> UC : throws ObjectOptimisticLockingFailureException
     UC --> Ctrl : exception propagates
-    Ctrl --> BO : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
+    Ctrl --> BO : 409 Conflict\n{ message: "Concurrent update conflict -- please retry" }
   end
 end
 

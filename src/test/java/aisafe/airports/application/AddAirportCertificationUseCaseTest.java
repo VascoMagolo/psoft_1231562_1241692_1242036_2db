@@ -1,10 +1,8 @@
 package aisafe.airports.application;
 
 import aisafe.shared.domain.DuplicateResourceException;
-import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
-import aisafe.aircrafts.domain.AircraftNotFoundException;
-import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.airports.application.dtos.AddCertificationRequest;
 import aisafe.airports.domain.*;
 import org.junit.jupiter.api.Test;
@@ -40,20 +38,14 @@ class AddAirportCertificationUseCaseTest {
                 38.77, -9.13, List.of(new Runway("03/21", 3000, "030/210")));
     }
 
-    private AircraftModel buildModel() {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-    }
-
     @Test
     void ensureCertificationIsAddedSuccessfully() {
         Airport airport = buildAirport();
-        AircraftModel model = buildModel();
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
-        when(aircraftModelRepository.findById(1L)).thenReturn(Optional.of(model));
-        when(certificationRepository.existsByAirportAndAircraftModelId(airport, 1L)).thenReturn(false);
-        when(certificationRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
+        when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(false);
 
-        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest(1L)));
+        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
         verify(certificationRepository).save(any(AircraftCertification.class));
     }
 
@@ -61,7 +53,7 @@ class AddAirportCertificationUseCaseTest {
     void ensureExceptionWhenAirportNotFound() {
         when(airportRepository.findByIataCodeCode("XYZ")).thenReturn(Optional.empty());
 
-        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest(1L)));
+        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("XYZ", "A320")));
         verify(certificationRepository, never()).save(any());
     }
 
@@ -69,21 +61,20 @@ class AddAirportCertificationUseCaseTest {
     void ensureExceptionWhenModelNotFound() {
         Airport airport = buildAirport();
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
-        when(aircraftModelRepository.findById(99L)).thenReturn(Optional.empty());
+        when(aircraftModelRepository.existsByModelName("NON-EXISTENT")).thenReturn(false);
 
-        assertThrows(AircraftNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest(99L)));
+        assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "NON-EXISTENT")));
         verify(certificationRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenCertificationAlreadyExists() {
         Airport airport = buildAirport();
-        AircraftModel model = buildModel();
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
-        when(aircraftModelRepository.findById(1L)).thenReturn(Optional.of(model));
-        when(certificationRepository.existsByAirportAndAircraftModelId(airport, 1L)).thenReturn(true);
+        when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
+        when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest(1L)));
+        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
         verify(certificationRepository, never()).save(any());
     }
 }

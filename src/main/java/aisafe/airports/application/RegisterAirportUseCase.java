@@ -59,6 +59,7 @@ public class RegisterAirportUseCase {
 
         airport.updateDetails(request.operationalHours(), null, request.imagePath(), services, terminals, gates);
 
-        return AirportResponse.from(airportRepository.save(airport));
+        airportRepository.save(airport);
+        return AirportResponse.from(airport);
     }
 }

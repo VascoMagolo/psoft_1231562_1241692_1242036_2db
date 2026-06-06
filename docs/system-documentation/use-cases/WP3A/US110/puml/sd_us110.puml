@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as Actor
+actor "ATCC" as Actor
 participant "RouteController" as Ctrl
 participant "CreateRouteUseCase" as UC
 participant "AirportRepository" as AirRepo
@@ -45,18 +45,32 @@ alt origin or destination airport not found
   UC --> Ctrl : throws AirportNotFoundException
   Ctrl --> Actor : 404 Not Found\n{ message: "Airport with IATA code '...' not found." }
 else both airports exist
-  UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity))
+  UC -> RouteRepo : existsByOriginAndDestination(originIataCode, destinationIataCode)
   activate RouteRepo
-  RouteRepo -> DB : INSERT INTO route
+  RouteRepo -> DB : SELECT EXISTS(FROM route WHERE origin = ? AND destination = ?)
   activate DB
-  DB --> RouteRepo : saved record (with generated ID)
+  DB --> RouteRepo : boolean
   deactivate DB
-  RouteRepo --> UC : Route
+  RouteRepo --> UC : boolean
   deactivate RouteRepo
 
-  UC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active: true }
-  deactivate UC
-  Ctrl --> Actor : 201 Created\nEntityModel<RouteResponse> with _links
+  alt route already exists
+    UC --> Ctrl : throws IllegalArgumentException
+    Ctrl --> Actor : 409 Conflict\n{ message: "A route between these airports already exists." }
+  else route does not exist
+    UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity))
+    activate RouteRepo
+    RouteRepo -> DB : INSERT INTO route
+    activate DB
+    DB --> RouteRepo : saved record (with generated ID)
+    deactivate DB
+    RouteRepo --> UC : Route
+    deactivate RouteRepo
+
+    UC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active: true }
+    deactivate UC
+    Ctrl --> Actor : 201 Created\nEntityModel<RouteResponse> with _links
+  end
 end
 
 deactivate Ctrl

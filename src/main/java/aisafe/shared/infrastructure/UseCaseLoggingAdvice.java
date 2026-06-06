@@ -28,7 +28,7 @@ import java.util.Arrays;
  *
  * <p>
  * This is a cross-cutting concern: no use case class needs a single log
- * statement — the
+ * statement -- the
  * logging is woven in at runtime by Spring AOP. {@code @Order(1)} ensures this
  * advice runs
  * before any other advice applied to the same pointcut.

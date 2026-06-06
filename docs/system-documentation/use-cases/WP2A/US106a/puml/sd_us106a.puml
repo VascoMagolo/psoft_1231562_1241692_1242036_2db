@@ -8,12 +8,13 @@ participant "AircraftModelRepository" as ModelRepo
 participant "AircraftCertificationRepository" as CertRepo
 database "Database" as DB
 
-Actor -> Ctrl : POST /api/airports/{iataCode}/certifications\n{ aircraftModelId: Long }
+Actor -> Ctrl : POST /api/airports/{iataCode}/certifications\n{ airportCode: String, aircraftModelName: String }
 activate Ctrl
 
 note right of Ctrl
   @Valid on AddCertificationRequest:
-  - aircraftModelId: not null
+  - airportCode: must match path iataCode
+  - aircraftModelName: not blank
 end note
 
 Ctrl -> UC : execute(iataCode: String,\n  request: AddCertificationRequest)
@@ -28,34 +29,33 @@ deactivate DB
 AirportRepo --> UC : Airport
 deactivate AirportRepo
 
-UC -> ModelRepo : findById(request.aircraftModelId())
+UC -> ModelRepo : existsByModelName(request.aircraftModelName())
 activate ModelRepo
-ModelRepo -> DB : SELECT FROM aircraft_model WHERE id = ?
+ModelRepo -> DB : SELECT FROM aircraft_model WHERE model_name = ?
 activate DB
-DB --> ModelRepo : model record
+DB --> ModelRepo : exists
 deactivate DB
-ModelRepo --> UC : AircraftModel
+ModelRepo --> UC : true
 deactivate ModelRepo
 
-UC -> CertRepo : existsByAirportAndAircraftModelId(airport, modelId)
+UC -> CertRepo : existsByAirportAndAircraftModelName(airport, modelName)
 activate CertRepo
-CertRepo -> DB : SELECT COUNT(*) FROM airport_certification WHERE ...
+CertRepo -> DB : SELECT COUNT(*) FROM aircraft_certification WHERE ...
 activate DB
 DB --> CertRepo : 0
 deactivate DB
 CertRepo --> UC : false
 deactivate CertRepo
 
-UC -> CertRepo : save(new AircraftCertification(airport, model))
+UC -> CertRepo : save(new AircraftCertification(airport, modelName))
 activate CertRepo
-CertRepo -> DB : INSERT INTO airport_certification
+CertRepo -> DB : INSERT INTO aircraft_certification
 activate DB
-DB --> CertRepo : saved record (with ID)
+DB --> CertRepo
 deactivate DB
-CertRepo --> UC : AircraftCertification
 deactivate CertRepo
 
-UC --> Ctrl : AircraftCertificationResponse\n{ id, airportIataCode, aircraftModelId,\n  aircraftModelName }
+UC --> Ctrl : AircraftCertificationResponse\n{ airportIataCode, aircraftModelName }
 deactivate UC
 
 Ctrl --> Actor : 201 Created\nEntityModel<AircraftCertificationResponse> with _links

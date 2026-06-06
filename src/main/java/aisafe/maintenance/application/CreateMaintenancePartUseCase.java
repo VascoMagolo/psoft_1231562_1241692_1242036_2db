@@ -6,13 +6,11 @@ import aisafe.maintenance.application.dtos.MaintenancePartResponse;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new maintenance part in the system.
  */
 @UseCase
-@Transactional
 public class CreateMaintenancePartUseCase {
     private final MaintenancePartRepository maintenancePartRepository;
 
@@ -39,12 +37,12 @@ public class CreateMaintenancePartUseCase {
             throw new MaintenancePartAlreadyExistsException("Part with the same part number already exists: " + part.getPartNumber());
         }
 
-        MaintenancePart savedPart = maintenancePartRepository.save(part);
+        maintenancePartRepository.save(part);
 
         return new MaintenancePartResponse(
-                savedPart.getId(),
-                savedPart.getPartNumber(),
-                savedPart.getDescription()
+                part.getId(),
+                part.getPartNumber(),
+                part.getDescription()
         );
     }
 }

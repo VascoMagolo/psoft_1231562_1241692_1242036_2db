@@ -36,7 +36,6 @@ class UpdateAirportStatusUseCaseTest {
     void ensureStatusIsUpdatedSuccessfully() {
         Airport airport = buildAirport();
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
-        when(airportRepository.save(any(Airport.class))).thenAnswer(i -> i.getArguments()[0]);
 
         assertDoesNotThrow(() -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED));
         verify(airportRepository).save(airport);

@@ -4,14 +4,12 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for registering a new aircraft model. Validates that the model name is unique and then creates and saves the new model.
  * Returns a DTO with the details of the newly created model.
  */
 @UseCase
-@Transactional
 public class RegisterAircraftModelUseCase {
 
     private final AircraftModelRepository repository;
@@ -40,17 +38,16 @@ public class RegisterAircraftModelUseCase {
                 request.maximumSeatingCapacity()
         );
 
-        AircraftModel savedModel = repository.save(newModel);
+        repository.save(newModel);
 
         return new AircraftModelResponse(
-                savedModel.getId(),
-                savedModel.getModelName(),
-                savedModel.getManufacturer(),
-                savedModel.getFuelCapacity(),
-                savedModel.getMaxRange(),
-                savedModel.getCruisingSpeed(),
-                savedModel.getImagePath(),
-                savedModel.getMaximumSeatingCapacity()
+                newModel.getModelName(),
+                newModel.getManufacturer(),
+                newModel.getFuelCapacity(),
+                newModel.getMaxRange(),
+                newModel.getCruisingSpeed(),
+                newModel.getImagePath(),
+                newModel.getMaximumSeatingCapacity()
         );
     }
 }

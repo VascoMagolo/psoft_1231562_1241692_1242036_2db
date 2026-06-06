@@ -1,10 +1,10 @@
-# Use Case Diagram — WP4A
+# Use Case Diagram -- WP4A
 
 Este ficheiro contém o diagrama de casos de uso para o sub-bloco WP4A (manutenção).
 
 Ficheiros:
 
-- `usecase_wp4a.puml` – diagrama PlantUML com atores e principais use cases:
+- `usecase_wp4a.puml` - diagrama PlantUML com atores e principais use cases:
   - Create Maintenance Template (criar templates aplicáveis a modelos de aeronave)
   - Register Maintenance Part (registar peças de manutenção)
   - Create Maintenance Record (criar registos de manutenção)
@@ -14,9 +14,9 @@ Ficheiros:
 
 Actores identificados no diagrama:
 
-- Maintenance Manager — gere templates e peças; consulta relatórios
-- Technician — cria e atualiza registos de manutenção
-- Scheduler / System — representa triggers automáticos (e.g., agendamento por horas de voo)
+- Maintenance Manager -- gere templates e peças; consulta relatórios
+- Technician -- cria e atualiza registos de manutenção
+- Scheduler / System -- representa triggers automáticos (e.g., agendamento por horas de voo)
 
 Observações técnicas:
 

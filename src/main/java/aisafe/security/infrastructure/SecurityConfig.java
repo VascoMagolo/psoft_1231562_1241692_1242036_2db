@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/docs.html", "/docs/**").permitAll()
-                        // WP #1A – Aircraft Management
+                        // WP #1A - Aircraft Management
                         .requestMatchers(HttpMethod.POST, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/search").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/aircrafts/*/status").hasAnyRole("ATCC", "ADMIN")
@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/aircraftModels/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
-                        // WP #2 – Airports
+                        // WP #2 - Airports
                         .requestMatchers(HttpMethod.POST, "/api/airports").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/airports/*/certifications").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/airports/search").hasAnyRole("ATCC", "BACKOFFICE_OPERATOR", "ADMIN")
@@ -66,7 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/status").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
-                        // WP #3A – Routes
+                        // WP #3A - Routes
                         .requestMatchers(HttpMethod.DELETE, "/api/routes/*").hasAnyRole("ADMIN")
                         // WP #4 - Maintenance
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")

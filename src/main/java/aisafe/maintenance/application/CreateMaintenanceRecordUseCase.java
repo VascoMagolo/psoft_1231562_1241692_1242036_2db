@@ -5,13 +5,11 @@ import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new maintenance record in the system.
  */
 @UseCase
-@Transactional
 public class CreateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
     private final MaintenancePartRepository partRepository;
@@ -40,21 +38,21 @@ public class CreateMaintenanceRecordUseCase {
 
         MaintenanceRecord record = new MaintenanceRecord(
                 request.description(), request.startDate(), request.expectedDuration(),
-                part, request.notes(), template, request.status(), aircraft
+                part, request.notes(), template, request.status(), aircraft.getRegistrationNumber().getNumber()
         );
 
         if (recordRepository.existsByStartDateAndPartAndTemplate(record.getStartDate(), record.getPart(), record.getTemplate())) {
             throw new MaintenanceRecordAlreadyExistsException("Record with the same start date, part, and template already exists.");
         }
 
-        MaintenanceRecord savedRecord = recordRepository.save(record);
+        recordRepository.save(record);
 
         return new MaintenanceRecordResponse(
-                savedRecord.getId(), savedRecord.getDescription(), savedRecord.getStartDate(),
-                savedRecord.getExpectedDuration(), savedRecord.getNotes(),
-                savedRecord.getPart().getPartNumber(), savedRecord.getTemplate().getName(),
-                savedRecord.getStatus().name(), savedRecord.getAircraft().getRegistrationNumber().getNumber(),
-                savedRecord.getVersion()
+                record.getId(), record.getDescription(), record.getStartDate(),
+                record.getExpectedDuration(), record.getNotes(),
+                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getStatus().name(), request.registrationNumber(),
+                record.getVersion()
         );
     }
 }

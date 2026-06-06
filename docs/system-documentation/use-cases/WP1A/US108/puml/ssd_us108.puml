@@ -1,0 +1,17 @@
+@startuml ssd_us108
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+activate BO
+BO -> Sys : updateAircraftModel(modelName, cruisingSpeed?, fuelCapacity?, maxRange?, maximumSeatingCapacity?, imagePath?)
+activate Sys
+Sys --> BO : 200 OK (AircraftModelResponse)
+deactivate Sys
+deactivate BO
+
+@enduml

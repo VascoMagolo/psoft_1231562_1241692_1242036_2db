@@ -1,4 +1,4 @@
-# US210 — Statistics on Busiest Airports
+# US210 -- Statistics on Busiest Airports
 
 ## User Story
 
@@ -36,7 +36,7 @@
 
 - The count is computed in-memory using Java Streams (`Collectors.toMap` + `filter/count`) rather than a database aggregation query. This is acceptable for the expected data volume (hundreds of airports) and avoids a cross-context SQL join; it can be replaced with a JPQL aggregation query if performance becomes a concern.
 - `AirportStatisticsResponse` is a dedicated read DTO that contains only the fields relevant to this view, following the principle of separate read models for reporting queries.
-- Airports with zero routes are included intentionally — the statistic is meaningful for operators monitoring network coverage.
+- Airports with zero routes are included intentionally -- the statistic is meaningful for operators monitoring network coverage.
 
 ## Sequence Diagrams
 

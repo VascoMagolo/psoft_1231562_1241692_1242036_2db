@@ -51,13 +51,12 @@ else all models resolved
     UC --> Ctrl : throws MaintenanceTemplateAlreadyExistsException
     Ctrl --> MS : 409 Conflict\n{ message: "Maintenance template '...' already exists." }
   else name is unique
-    UC -> Repo : save(new MaintenanceTemplate(name, templateType,\n  models, checklist, intervalFlightHours, intervalDays))
+    UC -> Repo : save(template)
     activate Repo
     Repo -> DB : INSERT INTO maintenance_template
     activate DB
-    DB --> Repo : saved record (with generated ID)
+    DB --> Repo
     deactivate DB
-    Repo --> UC : MaintenanceTemplate
     deactivate Repo
 
     UC --> Ctrl : MaintenanceTemplateResponse\n{ id, name, description }

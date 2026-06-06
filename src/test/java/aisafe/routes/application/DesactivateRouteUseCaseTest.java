@@ -1,6 +1,7 @@
 package aisafe.routes.application;
 
 import aisafe.routes.domain.*;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,19 +49,28 @@ class DesactivateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
         when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
-        when(routeHistoryRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Route result = desactivateRoute.execute(1L);
+        Route result = desactivateRoute.execute(1L, null);
 
         assertFalse(result.isActive());
         verify(routeHistoryRepository).save(any(RouteHistory.class));
     }
 
     @Test
+    void ensureVersionMismatchThrowsOptimisticLockException() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+
+        assertThrows(ConcurrencyException.class, () ->
+                desactivateRoute.execute(1L, 1L));
+        verify(routeRepository, never()).save(any());
+    }
+
+    @Test
     void ensureExceptionWhenRouteNotFound() {
         when(routeRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, () -> desactivateRoute.execute(99L));
+        assertThrows(RouteNotFoundException.class, () -> desactivateRoute.execute(99L, null));
         verify(routeRepository, never()).save(any());
     }
 }

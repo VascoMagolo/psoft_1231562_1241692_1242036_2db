@@ -5,6 +5,7 @@ import aisafe.maintenance.application.dtos.*;
 import aisafe.maintenance.domain.*;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -155,8 +155,8 @@ class MaintenanceControllerTest {
 
     @Test
     void ensureGetRecordsByAircraftReturns200() throws Exception {
-        when(viewAllMaintenanceRecordsUseCase.execute(any(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
+        when(viewAllMaintenanceRecordsUseCase.execute(any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
 
         mockMvc.perform(get("/api/maintenance/records/aircraft/CS-TPA"))
                 .andExpect(status().isOk());

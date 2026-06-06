@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
@@ -13,6 +14,7 @@ import java.util.List;
  * Use case for viewing all routes associated with a specific airport
  */
 @UseCase
+@Transactional(readOnly = true)
 public class ViewAirportRoutesUseCase {
     private final AirportRepository airportRepository;
     private final RouteRepository routeRepository;

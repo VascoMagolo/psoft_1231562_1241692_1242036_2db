@@ -33,7 +33,7 @@ deactivate Entity
 
 UC -> Entity : updateDetails(operationalHours, null,\n  imagePath, services, terminals, gates)
 activate Entity
-note right of Entity : Optional fields — only\nnon-null values are applied
+note right of Entity : Optional fields -- only\nnon-null values are applied
 Entity --> UC
 deactivate Entity
 
@@ -41,12 +41,11 @@ UC -> Repo : save(airport)
 activate Repo
 Repo -> DB : INSERT INTO airport\n+ collection tables (runways, services...)
 activate DB
-DB --> Repo : saved record (with generated ID)
+DB --> Repo
 deactivate DB
-Repo --> UC : Airport
 deactivate Repo
 
-UC --> Ctrl : AirportResponse.from(airport)\n{ id, iataCode, name, city, country,\n  status, coordinates, runways, _links }
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, city, country,\n  status, coordinates, runways,\n  services, terminals, gates }
 deactivate UC
 
 Ctrl --> BO : 201 Created\nEntityModel<AirportResponse> with _links

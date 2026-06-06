@@ -50,6 +50,7 @@ public class UpdateAirportDetailsUseCase {
 
         airport.updateDetails(request.operationalHours(), contacts, request.imagePath(), services, terminals, gates);
 
-        return AirportResponse.from(airportRepository.save(airport));
+        airportRepository.save(airport);
+        return AirportResponse.from(airport);
     }
 }

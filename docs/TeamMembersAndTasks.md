@@ -26,7 +26,7 @@ Please note that in every phase there are:
 While responsibilities may be distributed among team members, **effective collaboration and mutual support are essential**.
 Additionally, all members should maintain a comprehensive understanding of the entire project, beyond their assigned tasks.
 
-Finally, keep in mind that each User Story is not isolated — it must be integrated with the others. Once again,
+Finally, keep in mind that each User Story is not isolated -- it must be integrated with the others. Once again,
 **integration is a shared team responsibility**.
 
 **The following table must always be kept up to date.**

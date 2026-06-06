@@ -38,12 +38,11 @@ UC -> Repo : save(airport)
 activate Repo
 Repo -> DB : UPDATE airport\n+ replace collection tables
 activate DB
-DB --> Repo : updated record
+DB --> Repo
 deactivate DB
-Repo --> UC : Airport
 deactivate Repo
 
-UC --> Ctrl : AirportResponse.from(airport)\n{ id, iataCode, name, status,\n  operationalHours, contacts,\n  services, terminals, gates, ... }
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, status,\n  operationalHours, contacts,\n  services, terminals, gates, ... }
 deactivate UC
 
 Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links

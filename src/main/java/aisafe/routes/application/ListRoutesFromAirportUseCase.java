@@ -6,9 +6,8 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.shared.domain.PaginatedResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 /**
  * Use case responsible for listing all routes originating from a specific airport.
@@ -21,20 +20,20 @@ public class ListRoutesFromAirportUseCase {
     private final AirportRepository airportRepository;
 
     /**
-     * Retrieves a page of routes associated with the provided airport IATA code.
+     * Retrieves a paginated result of routes associated with the provided airport IATA code.
      *
-     * @param iataCode the IATA code of the origin airport
-     * @param pageable the pagination information
-     * @return a page of routes originating from the specified airport
+     * @param iataCode   the IATA code of the origin airport
+     * @param pageNumber the zero-based page number
+     * @param pageSize   the number of results per page
+     * @return a paginated result of routes originating from the specified airport
      */
-    public Page<Route> execute(String iataCode, Pageable pageable) {
-        IataCode origin = new IataCode(iataCode);
+    public PaginatedResult<Route> execute(String iataCode, int pageNumber, int pageSize) {
         String originCode = iataCode.trim().toUpperCase();
 
         if (!airportRepository.existsByIataCodeCode(originCode)) {
             throw new AirportNotFoundException(originCode);
         }
 
-        return routeRepository.findByOrigin(origin, pageable);
+        return routeRepository.findByOrigin(new IataCode(originCode), pageNumber, pageSize);
     }
 }

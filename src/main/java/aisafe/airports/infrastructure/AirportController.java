@@ -4,6 +4,7 @@ import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.infrastructure.RouteController;
+import aisafe.shared.domain.PaginatedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -181,7 +183,8 @@ public class AirportController {
             @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<AirportResponse> assembler) {
-        Page<AirportResponse> page = searchAirport.execute(name, city, country, pageable);
+        PaginatedResult<AirportResponse> result = searchAirport.execute(name, city, country, pageable.getPageNumber(), pageable.getPageSize());
+        Page<AirportResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(page, this::toModel));
     }
 
@@ -203,7 +206,7 @@ public class AirportController {
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict — please retry")
+            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
     })
     @PatchMapping("/{iataCode}/status")
     public ResponseEntity<EntityModel<AirportResponse>> updateStatus(
@@ -228,7 +231,7 @@ public class AirportController {
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict — please retry")
+            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
     })
     @PatchMapping("/{iataCode}/details")
     public ResponseEntity<EntityModel<AirportResponse>> updateDetails(

@@ -29,7 +29,6 @@ class RegisterAircraftModelUseCaseTest {
     @Test
     void ensureModelIsRegisteredSuccessfully() {
         when(repository.existsByModelName("A320")).thenReturn(false);
-        when(repository.save(any(AircraftModel.class))).thenAnswer(i -> i.getArguments()[0]);
 
         AircraftModelResponse response = registerAircraftModel.execute(buildRequest());
 

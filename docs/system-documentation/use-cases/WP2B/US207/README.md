@@ -1,4 +1,4 @@
-# US207 — Register Airport with Detailed Facilities
+# US207 -- Register Airport with Detailed Facilities
 
 ## User Story
 

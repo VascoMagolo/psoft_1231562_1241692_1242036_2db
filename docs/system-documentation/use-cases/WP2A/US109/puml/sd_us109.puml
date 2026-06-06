@@ -34,23 +34,15 @@ deactivate Entity
 
 UC -> Repo : save(airport)
 activate Repo
-Repo -> DB : UPDATE airport SET status = ? WHERE id = ? AND version = ?
+Repo -> DB : UPDATE airport SET status = ? WHERE code = ?
 activate DB
+DB --> Repo
+deactivate DB
+deactivate Repo
 
-alt No concurrent modification (version matches)
-  DB --> Repo : updated record (version incremented)
-  deactivate DB
-  Repo --> UC : Airport
-  deactivate Repo
-  UC --> Ctrl : AirportResponse.from(airport)\n{ id, iataCode, name, status, ... }
-  deactivate UC
-  Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links
-else Concurrent modification (version mismatch)
-  DB --> Repo : 0 rows affected
-  Repo --> UC : throws ObjectOptimisticLockingFailureException
-  UC --> Ctrl : exception propagates
-  Ctrl --> BO : 409 Conflict\n{ message: "Concurrent update conflict — please retry" }
-end
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, status, ... }
+deactivate UC
 
+Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links
 deactivate Ctrl
 @enduml

@@ -1,30 +1,25 @@
 package aisafe.airports.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
+import org.springframework.util.Assert;
 
 /**
  * Represents a runway at an airport
  */
-@Embeddable
-@Getter
 public class Runway {
-    @Column(nullable = false)
-    private String name;
-    @Column(nullable = false)
-    private Integer length;
-    @Column(nullable = false)
-    private String orientation;
-
-    protected Runway() {}
+    private final String name;
+    private final Integer length;
+    private final String orientation;
 
     public Runway(String name, Integer length, String orientation) {
-        if (name == null || orientation == null || name.trim().isEmpty() || orientation.trim().isEmpty() || length == null) {
-            throw new IllegalArgumentException("Name, length or orientation cannot be null");
-        }
+        Assert.hasText(name, "Runway name cannot be empty");
+        Assert.notNull(length, "Runway length cannot be null");
+        Assert.hasText(orientation, "Runway orientation cannot be empty");
         this.length = length;
         this.name = name;
         this.orientation = orientation;
     }
+
+    public String getName() { return name; }
+    public Integer getLength() { return length; }
+    public String getOrientation() { return orientation; }
 }

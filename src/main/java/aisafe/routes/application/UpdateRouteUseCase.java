@@ -8,8 +8,10 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import lombok.RequiredArgsConstructor;
+import aisafe.shared.domain.ConcurrencyException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * Use case responsible for updating the details of an existing route.
@@ -28,10 +30,13 @@ public class UpdateRouteUseCase {
      * @param request the data to update
      * @return the updated route
      */
-    @Transactional
-    public Route execute(Long id, UpdateRouteRequest request) {
+    public Route execute(Long id, UpdateRouteRequest request, Long clientVersion) {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
+
+        if (!Objects.equals(route.getVersion(), clientVersion)) {
+            throw new ConcurrencyException("Route version mismatch. Please fetch the latest version and retry.");
+        }
 
         route.updateRoute(
                 request.estimatedFlightTime(),
@@ -45,7 +50,7 @@ public class UpdateRouteUseCase {
 
         String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         Route updatedRoute = routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(updatedRoute, "Route details updated", changedBy));
+        routeHistoryRepository.save(new RouteHistory(updatedRoute.getId(), "Route details updated", changedBy));
         return updatedRoute;
     }
 }

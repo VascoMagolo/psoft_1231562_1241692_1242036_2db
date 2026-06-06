@@ -27,7 +27,7 @@ class ViewRouteHistoryUseCaseTest {
     @Test
     void ensureHistoryIsReturnedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        RouteHistory entry = new RouteHistory(route, "Route created", "system");
+        RouteHistory entry = new RouteHistory(route.getId(), "Route created", "system");
         when(routeRepository.existsById(1L)).thenReturn(true);
         when(historyRepository.findAllByRouteId(1L)).thenReturn(List.of(entry));
 

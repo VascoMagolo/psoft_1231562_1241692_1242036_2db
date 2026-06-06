@@ -6,13 +6,11 @@ import aisafe.security.application.dtos.RegisterRequest;
 import aisafe.security.domain.User;
 import aisafe.security.domain.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for registering a new user in the system.
  */
 @UseCase
-@Transactional
 public class RegisterUserUseCase {
 
     private final UserRepository repository;

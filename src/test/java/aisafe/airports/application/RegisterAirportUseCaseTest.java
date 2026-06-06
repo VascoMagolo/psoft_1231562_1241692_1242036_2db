@@ -36,7 +36,6 @@ class RegisterAirportUseCaseTest {
     @Test
     void ensureAirportIsRegisteredSuccessfully() {
         when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(false);
-        when(airportRepository.save(any(Airport.class))).thenAnswer(i -> i.getArguments()[0]);
 
         assertDoesNotThrow(() -> registerAirport.execute(buildRequest("LIS")));
         verify(airportRepository).save(any(Airport.class));

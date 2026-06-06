@@ -44,8 +44,7 @@ class CreateMaintenanceRecordUseCaseTest {
     }
 
     private MaintenanceTemplate buildTemplate() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(model), List.of("Check engine"), 500, 365);
+        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
     }
 
     private Aircraft buildAircraft() {
@@ -68,7 +67,7 @@ class CreateMaintenanceRecordUseCaseTest {
         when(templateRepository.findByName("Annual Check")).thenReturn(Optional.of(template));
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
         when(recordRepository.existsByStartDateAndPartAndTemplate(any(), any(), any())).thenReturn(false);
-        when(recordRepository.save(any(MaintenanceRecord.class))).thenAnswer(i -> i.getArguments()[0]);
+        doNothing().when(recordRepository).save(any(MaintenanceRecord.class));
 
         MaintenanceRecordResponse response = createMaintenanceRecord.execute(buildRequest());
 

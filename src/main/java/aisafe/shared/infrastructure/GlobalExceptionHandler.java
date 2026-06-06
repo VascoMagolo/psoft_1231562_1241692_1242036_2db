@@ -1,12 +1,19 @@
 package aisafe.shared.infrastructure;
 
+import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.maintenance.domain.MaintenancePartNotFoundException;
+import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
+import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
+import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.airports.domain.InvalidContactException;
 import aisafe.airports.domain.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
+import aisafe.shared.domain.ConcurrencyException;
 import aisafe.shared.domain.DomainException;
 import aisafe.shared.domain.DuplicateResourceException;
+import aisafe.shared.domain.ResourceInUseException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    /** 401 Unauthorized — authentication failed. */
+    /** 401 Unauthorized -- authentication failed. */
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -37,13 +44,21 @@ public class GlobalExceptionHandler {
     }
 
     /** 404 Not Found */
-    @ExceptionHandler({AircraftNotFoundException.class, AirportNotFoundException.class})
+    @ExceptionHandler({
+            AircraftNotFoundException.class,
+            AircraftModelNotFoundException.class,
+            AirportNotFoundException.class,
+            RouteNotFoundException.class,
+            MaintenanceRecordNotFoundException.class,
+            MaintenancePartNotFoundException.class,
+            MaintenanceTemplateNotFoundException.class
+    })
     public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-    /** 401 Bad Request - Invalid args.*/
+    /** 400 Bad Request - Invalid args.*/
     // can be added more later
     @ExceptionHandler({
             DomainException.class,
@@ -56,10 +71,10 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-    /** 409 Conflict - duplicated information */
-    @ExceptionHandler({DataIntegrityViolationException.class, DuplicateResourceException.class})
+    /** 409 Conflict - duplicated information or resource in use */
+    @ExceptionHandler({DataIntegrityViolationException.class, DuplicateResourceException.class, ResourceInUseException.class})
     public ResponseEntity<ErrorResponse> handleConflict(RuntimeException ex) {
-        String msg = ex instanceof DuplicateResourceException
+        String msg = (ex instanceof DuplicateResourceException || ex instanceof ResourceInUseException)
                 ? ex.getMessage()
                 : "A resource with the given unique identifier already exists.";
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(msg));
@@ -77,6 +92,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("The resource was modified by another request. Please retry."));
+    }
+
+    /** 412 Precondition Failed - optimistic locking collision (If-Match mismatch) */
+    @ExceptionHandler(ConcurrencyException.class)
+    public ResponseEntity<ErrorResponse> handlePreconditionFailed(ConcurrencyException ex) {
+        return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     /** 400 Bad Request - bean validation failure (@Valid on request bodies) */
@@ -98,7 +120,7 @@ public class GlobalExceptionHandler {
     /** Error response body. */
     record ErrorResponse(String message) {}
 
-    /** Error response body for validation failures — includes per-field details. */
+    /** Error response body for validation failures -- includes per-field details. */
     record ValidationErrorResponse(String message, Map<String, String> errors) {}
 
 }

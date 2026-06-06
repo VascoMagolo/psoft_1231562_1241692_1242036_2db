@@ -8,7 +8,7 @@
 
 - The request body only needs the new status value.
 - The request must include the current resource version in the `If-Match` header.
-- If the version does not match, the system returns HTTP 409.
+- If the version does not match, the system returns HTTP 412.
 - If the status is invalid, the system returns HTTP 400.
 - On success the system returns HTTP 200 with `ViewAircraftDetailsResponse` and HATEOAS links.
 
@@ -35,7 +35,7 @@
 | ---- | --------------------------------------- | --------------- |
 | 2    | `If-Match` header is missing or invalid | HTTP 400        |
 | 3    | Aircraft not found                      | HTTP 404        |
-| 3    | Version mismatch                        | HTTP 409        |
+| 3    | Version mismatch                        | HTTP 412        |
 | 4    | Invalid status value                    | HTTP 400        |
 
 ## Design Justification

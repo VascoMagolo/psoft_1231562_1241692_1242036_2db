@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * log. {@link UseCase} still applies, giving this class consistent transaction management,
  * Bean Validation, and timing logs.</p>
  *
- * <p>The message on failure is intentionally generic — do not distinguish between "username
+ * <p>The message on failure is intentionally generic -- do not distinguish between "username
  * not found" and "wrong password" to prevent username enumeration attacks.</p>
  */
 @UseCase

@@ -1,4 +1,4 @@
-# US108 — Search for Airports
+# US108 -- Search for Airports
 
 ## User Story
 

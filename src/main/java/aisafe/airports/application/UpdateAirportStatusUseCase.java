@@ -28,6 +28,7 @@ public class UpdateAirportStatusUseCase {
         Airport airport = airportRepository.findByIataCodeCode(iataCode)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
         airport.setStatus(status);
-        return AirportResponse.from(airportRepository.save(airport));
+        airportRepository.save(airport);
+        return AirportResponse.from(airport);
     }
 }
