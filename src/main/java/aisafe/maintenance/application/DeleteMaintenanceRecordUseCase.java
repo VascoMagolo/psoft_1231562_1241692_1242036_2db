@@ -4,10 +4,8 @@ import aisafe.shared.application.UseCase;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 @UseCase
-@Transactional
 public class DeleteMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository maintenanceRecordRepository;
 

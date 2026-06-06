@@ -1,7 +1,6 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
@@ -18,7 +17,6 @@ import java.util.List;
  * Use case for updating the details of an existing airport
  */
 @UseCase
-@Transactional
 public class UpdateAirportDetailsUseCase {
     private final AirportRepository airportRepository;
 

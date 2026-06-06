@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -101,7 +101,7 @@ class RouteControllerTest {
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
         deactivated.deactivate();
-        when(desactivateRoute.execute(anyLong())).thenReturn(deactivated);
+        when(desactivateRoute.execute(anyLong(), any())).thenReturn(deactivated);
 
         mockMvc.perform(patch("/api/routes/1/deactivate")
                         .header("If-Match", "0"))
@@ -111,8 +111,8 @@ class RouteControllerTest {
 
     @Test
     void ensureGetRoutesFromAirportReturns200() throws Exception {
-        when(listRoutesFromAirport.execute(anyString(), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(sampleRoute)));
+        when(listRoutesFromAirport.execute(anyString(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(sampleRoute), 1L));
 
         mockMvc.perform(get("/api/routes/airport/OPO"))
                 .andExpect(status().isOk())

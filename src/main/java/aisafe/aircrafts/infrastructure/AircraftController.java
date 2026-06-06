@@ -5,6 +5,7 @@ import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.ETagUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -168,7 +169,7 @@ public class AircraftController {
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateStatusRequest request) {
 
-        Long version = parseEtagToVersion(ifMatchHeader);
+        Long version = ETagUtils.parseVersion(ifMatchHeader);
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
 
         ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);
@@ -198,7 +199,7 @@ public class AircraftController {
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @RequestBody UpdateAircraftRequest request) {
 
-        Long version = parseEtagToVersion(ifMatchHeader);
+        Long version = ETagUtils.parseVersion(ifMatchHeader);
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
         ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registration, request, version);
         return ResponseEntity.ok(toHateoasModel(response, registration));
@@ -212,15 +213,4 @@ public class AircraftController {
         return model;
     }
 
-    private Long parseEtagToVersion(String etag) {
-        if (etag == null || etag.isBlank()) {
-            throw new IllegalArgumentException("If-Match header is missing or empty. Please provide the current resource version.");
-        }
-        String cleanEtag = etag.replace("W/", "").replace("\"", "").trim();
-        try {
-            return Long.parseLong(cleanEtag);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid If-Match ETag format. Expected a numeric entity version.");
-        }
-    }
 }

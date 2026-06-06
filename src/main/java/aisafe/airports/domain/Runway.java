@@ -1,5 +1,7 @@
 package aisafe.airports.domain;
 
+import org.springframework.util.Assert;
+
 /**
  * Represents a runway at an airport
  */
@@ -9,9 +11,9 @@ public class Runway {
     private final String orientation;
 
     public Runway(String name, Integer length, String orientation) {
-        if (name == null || orientation == null || name.trim().isEmpty() || orientation.trim().isEmpty() || length == null) {
-            throw new IllegalArgumentException("Name, length or orientation cannot be null");
-        }
+        Assert.hasText(name, "Runway name cannot be empty");
+        Assert.notNull(length, "Runway length cannot be null");
+        Assert.hasText(orientation, "Runway orientation cannot be empty");
         this.length = length;
         this.name = name;
         this.orientation = orientation;

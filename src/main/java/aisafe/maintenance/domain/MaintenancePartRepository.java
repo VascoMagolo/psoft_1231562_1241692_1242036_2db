@@ -6,7 +6,7 @@ public interface MaintenancePartRepository {
     long count();
     boolean existsByPartNumber(String partNumber);
     Optional<MaintenancePart> findByPartNumber(String partNumber);
-    Optional<MaintenancePart> findById(Long id);
+
     void save(MaintenancePart part);
     void delete(MaintenancePart part);
 }

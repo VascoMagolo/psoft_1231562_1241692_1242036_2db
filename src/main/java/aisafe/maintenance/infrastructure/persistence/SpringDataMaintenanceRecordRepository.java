@@ -7,5 +7,7 @@ import java.time.LocalDateTime;
 
 public interface SpringDataMaintenanceRecordRepository extends JpaRepository<MaintenanceRecordJpaEntity, Long> {
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePartJpaEntity part, MaintenanceTemplateJpaEntity template);
+    boolean existsByPart(MaintenancePartJpaEntity part);
+    boolean existsByTemplate(MaintenanceTemplateJpaEntity template);
     Page<MaintenanceRecordJpaEntity> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);
 }

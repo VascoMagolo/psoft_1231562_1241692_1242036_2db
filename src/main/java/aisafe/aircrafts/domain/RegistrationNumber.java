@@ -2,9 +2,6 @@ package aisafe.aircrafts.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import lombok.Getter;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -12,16 +9,10 @@ import java.util.regex.Pattern;
 /**
  * Value object for aircraft registration numbers. It normalizes the value to uppercase and enforces the expected `XX-XXX` format.
  */
-@Getter
-@Embeddable
 public class RegistrationNumber {
     private static final Pattern PATTERN = Pattern.compile("^[A-Z]{2}-[A-Z]{3}$");
 
-    @Column(name = "registration_number", unique = true, nullable = false, updatable = false)
     private String number;
-
-    protected RegistrationNumber() {
-    }
 
     @JsonCreator
     public RegistrationNumber(String number) {

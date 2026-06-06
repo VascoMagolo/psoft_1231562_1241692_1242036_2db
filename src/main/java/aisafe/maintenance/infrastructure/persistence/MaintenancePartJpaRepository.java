@@ -34,11 +34,6 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
     }
 
     @Override
-    public Optional<MaintenancePart> findById(Long id) {
-        return springRepo.findById(id).map(MaintenancePartMapper::toDomain);
-    }
-
-    @Override
     public void save(MaintenancePart part) {
         MaintenancePartJpaEntity existing = springRepo.findByPartNumber(part.getPartNumber()).orElse(null);
         MaintenancePartJpaEntity jpaEntity = MaintenancePartMapper.toJpa(part);

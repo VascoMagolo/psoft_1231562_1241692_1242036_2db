@@ -5,13 +5,11 @@ import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
 import aisafe.maintenance.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Updates an existing maintenance record with respective status and notes for it
  */
 @UseCase
-@Transactional
 public class UpdateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
 

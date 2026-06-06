@@ -4,13 +4,11 @@ import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for updating the details of an existing aircraft in the system.
  */
 @UseCase
-@Transactional
 public class UpdateAircraftUseCase {
 
     private final AircraftRepository aircraftRepository;

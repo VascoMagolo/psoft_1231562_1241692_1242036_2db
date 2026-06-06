@@ -5,13 +5,11 @@ import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new maintenance record in the system.
  */
 @UseCase
-@Transactional
 public class CreateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
     private final MaintenancePartRepository partRepository;

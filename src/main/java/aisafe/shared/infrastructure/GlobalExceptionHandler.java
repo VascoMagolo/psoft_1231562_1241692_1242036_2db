@@ -1,7 +1,12 @@
 package aisafe.shared.infrastructure;
 
+import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.maintenance.domain.MaintenancePartNotFoundException;
+import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
+import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
+import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.airports.domain.InvalidContactException;
 import aisafe.airports.domain.InvalidIataCodeException;
 import aisafe.security.domain.InvalidCredentialsException;
@@ -39,13 +44,21 @@ public class GlobalExceptionHandler {
     }
 
     /** 404 Not Found */
-    @ExceptionHandler({AircraftNotFoundException.class, AirportNotFoundException.class})
+    @ExceptionHandler({
+            AircraftNotFoundException.class,
+            AircraftModelNotFoundException.class,
+            AirportNotFoundException.class,
+            RouteNotFoundException.class,
+            MaintenanceRecordNotFoundException.class,
+            MaintenancePartNotFoundException.class,
+            MaintenanceTemplateNotFoundException.class
+    })
     public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
-    /** 401 Bad Request - Invalid args.*/
+    /** 400 Bad Request - Invalid args.*/
     // can be added more later
     @ExceptionHandler({
             DomainException.class,

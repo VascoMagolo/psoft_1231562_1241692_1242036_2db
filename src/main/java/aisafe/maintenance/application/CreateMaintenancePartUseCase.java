@@ -6,13 +6,11 @@ import aisafe.maintenance.application.dtos.MaintenancePartResponse;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for creating a new maintenance part in the system.
  */
 @UseCase
-@Transactional
 public class CreateMaintenancePartUseCase {
     private final MaintenancePartRepository maintenancePartRepository;
 

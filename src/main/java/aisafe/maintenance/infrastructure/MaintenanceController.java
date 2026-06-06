@@ -4,6 +4,7 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
 import aisafe.maintenance.application.dtos.*;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.ETagUtils;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,14 +44,14 @@ public class MaintenanceController {
     private final DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
-                                 CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
-                                 CreateMaintenancePartUseCase createMaintenancePartUseCase,
-                                 UpdateMaintenanceRecordUseCase updateMaintenanceRecordUseCase,
-                                 ViewAllMaintenanceRecordsUseCase viewAllMaintenanceRecordsUseCase,
-                                 ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase,
-                                 DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase,
-                                 DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase,
-                                 DeleteMaintenancePartUseCase deleteMaintenancePartUseCase) {
+            CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
+            CreateMaintenancePartUseCase createMaintenancePartUseCase,
+            UpdateMaintenanceRecordUseCase updateMaintenanceRecordUseCase,
+            ViewAllMaintenanceRecordsUseCase viewAllMaintenanceRecordsUseCase,
+            ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase,
+            DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase,
+            DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase,
+            DeleteMaintenancePartUseCase deleteMaintenancePartUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -64,7 +65,9 @@ public class MaintenanceController {
 
     /**
      * Endpoint to create a new maintenance template configuration in the system.
-     * @param request the request body containing the details of the maintenance template to be created
+     * 
+     * @param request the request body containing the details of the maintenance
+     *                template to be created
      * @return a ResponseEntity containing the created MaintenanceTemplateResponse
      */
     @Operation(summary = "Create maintenance template", description = "Registers a new maintenance template configuration in the system. (US115b)")
@@ -75,7 +78,8 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/templates")
-    public ResponseEntity<EntityModel<MaintenanceTemplateResponse>> createMaintenanceTemplate(@Valid @RequestBody CreateMaintenanceTemplateRequest request) {
+    public ResponseEntity<EntityModel<MaintenanceTemplateResponse>> createMaintenanceTemplate(
+            @Valid @RequestBody CreateMaintenanceTemplateRequest request) {
         MaintenanceTemplateResponse response = createMaintenanceTemplateUseCase.execute(request);
         EntityModel<MaintenanceTemplateResponse> model = EntityModel.of(response,
                 linkTo(methodOn(MaintenanceController.class).createMaintenanceRecord(null)).withRel("create-record"));
@@ -84,7 +88,9 @@ public class MaintenanceController {
 
     /**
      * Endpoint to register a new maintenance part in the system.
-     * @param request the request body containing the details of the maintenance part to be registered
+     * 
+     * @param request the request body containing the details of the maintenance
+     *                part to be registered
      * @return a ResponseEntity containing the created MaintenancePartResponse
      */
     @Operation(summary = "Register a maintenance part", description = "Adds a new hardware component or part to the maintenance catalog. (US226)")
@@ -95,7 +101,8 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PostMapping("/parts")
-    public ResponseEntity<EntityModel<MaintenancePartResponse>> createMaintenancePart(@Valid @RequestBody CreateMaintenancePartRequest request) {
+    public ResponseEntity<EntityModel<MaintenancePartResponse>> createMaintenancePart(
+            @Valid @RequestBody CreateMaintenancePartRequest request) {
         MaintenancePartResponse response = createMaintenancePartUseCase.execute(request);
         EntityModel<MaintenancePartResponse> model = EntityModel.of(response,
                 linkTo(methodOn(MaintenanceController.class).createMaintenanceRecord(null)).withRel("create-record"));
@@ -104,8 +111,11 @@ public class MaintenanceController {
 
     /**
      * Endpoint to create a new maintenance record for a specific aircraft
-     * @param request the request body containing the details of the maintenance record to be created
-     * @return a ResponseEntity containing the created MaintenanceRecordResponse with HATEOAS links for further actions
+     * 
+     * @param request the request body containing the details of the maintenance
+     *                record to be created
+     * @return a ResponseEntity containing the created MaintenanceRecordResponse
+     *         with HATEOAS links for further actions
      */
     @Operation(summary = "Create a maintenance record", description = "Schedules or logs a new maintenance record for a specific aircraft. (US115a)")
     @ApiResponses({
@@ -124,11 +134,17 @@ public class MaintenanceController {
     }
 
     /**
-     * Endpoint to update the operational status and notes of an existing maintenance record.
-     * @param id the unique ID of the maintenance record to be updated
-     * @param ifMatchHeader the value of the 'If-Match' header containing the current version of the resource for Optimistic Concurrency Locking check
-     * @param request the request body containing the new status and notes for the maintenance record
-     * @return a ResponseEntity containing the updated MaintenanceRecordResponse with HATEOAS links for further actions
+     * Endpoint to update the operational status and notes of an existing
+     * maintenance record.
+     * 
+     * @param id            the unique ID of the maintenance record to be updated
+     * @param ifMatchHeader the value of the 'If-Match' header containing the
+     *                      current version of the resource for Optimistic
+     *                      Concurrency Locking check
+     * @param request       the request body containing the new status and notes for
+     *                      the maintenance record
+     * @return a ResponseEntity containing the updated MaintenanceRecordResponse
+     *         with HATEOAS links for further actions
      */
     @Operation(summary = "Update maintenance record", description = "Updates the operational status and notes of an existing maintenance record. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check. (US119)")
     @ApiResponses({
@@ -142,20 +158,24 @@ public class MaintenanceController {
     @PatchMapping("/records/{id}")
     public ResponseEntity<EntityModel<MaintenanceRecordResponse>> updateRecordStatusAndNotes(
             @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id,
-            @Parameter(description = "Current version entity state identifier for locking assessment")
-            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+            @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateMaintenanceRecordsRequest request) {
-        Long version = parseEtagToVersion(ifMatchHeader);
+        Long version = ETagUtils.parseVersion(ifMatchHeader);
         MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(id, request, version);
         return ResponseEntity.ok(toHateoasModel(updatedRecord));
     }
 
     /**
-     * Endpoint to retrieve all maintenance records associated with a specific aircraft registration number
+     * Endpoint to retrieve all maintenance records associated with a specific
+     * aircraft registration number
+     * 
      * @param registrationNumber the unique registration number code of the aircraft
-     * @param pageable the pagination information for the request
-     * @param assembler the PagedResourcesAssembler used to convert the Page of responses into a HATEOAS-compliant paged model
-     * @return a ResponseEntity containing a paginated list of maintenance records for the specified aircraft
+     * @param pageable           the pagination information for the request
+     * @param assembler          the PagedResourcesAssembler used to convert the
+     *                           Page of responses into a HATEOAS-compliant paged
+     *                           model
+     * @return a ResponseEntity containing a paginated list of maintenance records
+     *         for the specified aircraft
      */
     @Operation(summary = "Get maintenance records by aircraft", description = "Returns a paginated list of all maintenance records associated with a specific aircraft registration number. (US116)")
     @ApiResponses({
@@ -180,7 +200,9 @@ public class MaintenanceController {
     }
 
     /**
-     * Endpoint to calculate and retrieve the total amount of maintenance hours performed across the entire fleet.
+     * Endpoint to calculate and retrieve the total amount of maintenance hours
+     * performed across the entire fleet.
+     * 
      * @return a ResponseEntity containing the total maintenance hours in the fleet
      */
     @Operation(summary = "Get total maintenance hours", description = "Calculates and returns the total amount of maintenance hours performed across the entire fleet. (US117)")
@@ -211,59 +233,49 @@ public class MaintenanceController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete a maintenance template", description = "Permanently removes a maintenance template by ID. Requires Maintenance Technician or Admin role.")
+    @Operation(summary = "Delete a maintenance template", description = "Permanently removes a maintenance template by name. Requires Maintenance Technician or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Maintenance template deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Maintenance template not found")
+            @ApiResponse(responseCode = "404", description = "Maintenance template not found"),
+            @ApiResponse(responseCode = "409", description = "Maintenance template is in use by existing records")
     })
-    @DeleteMapping("/templates/{id}")
+    @DeleteMapping("/templates/{name}")
     public ResponseEntity<Void> deleteMaintenanceTemplate(
-            @Parameter(description = "Unique ID of the maintenance template") @PathVariable Long id) {
-        deleteMaintenanceTemplateUseCase.execute(id);
+            @Parameter(description = "Name of the maintenance template") @PathVariable String name) {
+        deleteMaintenanceTemplateUseCase.execute(name);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete a maintenance part", description = "Permanently removes a maintenance part by ID. Requires Maintenance Technician or Admin role.")
+    @Operation(summary = "Delete a maintenance part", description = "Permanently removes a maintenance part by part number. Requires Maintenance Technician or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Maintenance part deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Maintenance part not found")
+            @ApiResponse(responseCode = "404", description = "Maintenance part not found"),
+            @ApiResponse(responseCode = "409", description = "Maintenance part is in use by existing records")
     })
-    @DeleteMapping("/parts/{id}")
+    @DeleteMapping("/parts/{partNumber}")
     public ResponseEntity<Void> deleteMaintenancePart(
-            @Parameter(description = "Unique ID of the maintenance part") @PathVariable Long id) {
-        deleteMaintenancePartUseCase.execute(id);
+            @Parameter(description = "Part number of the maintenance part") @PathVariable String partNumber) {
+        deleteMaintenancePartUseCase.execute(partNumber);
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Helper method to convert a MaintenanceRecordResponse into an EntityModel with HATEOAS links for further actions related to the maintenance record.
-     * @param response the MaintenanceRecordResponse to be converted into an EntityModel
-     * @return an EntityModel containing the MaintenanceRecordResponse and HATEOAS links for related actions
+     * Helper method to convert a MaintenanceRecordResponse into an EntityModel with
+     * HATEOAS links for further actions related to the maintenance record.
+     * 
+     * @param response the MaintenanceRecordResponse to be converted into an
+     *                 EntityModel
+     * @return an EntityModel containing the MaintenanceRecordResponse and HATEOAS
+     *         links for related actions
      */
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {
         EntityModel<MaintenanceRecordResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(MaintenanceController.class)
                 .updateRecordStatusAndNotes(response.id(), null, null)).withRel("update-record"));
         return model;
-    }
-    /**
-     * Helper method to parse HTTP ETags securely.
-     * Extracts the numeric version from standard ETag formats like "5" or W/"5".
-     */
-    private Long parseEtagToVersion(String etag) {
-        if (etag == null || etag.isBlank()) {
-            throw new IllegalArgumentException("If-Match header cannot be empty.");
-        }
-        String cleanEtag = etag.replace("W/", "");
-        cleanEtag = cleanEtag.replace("\"", "").trim();
-        try {
-            return Long.parseLong(cleanEtag);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid If-Match ETag format. Expected a numeric entity version.");
-        }
     }
 }

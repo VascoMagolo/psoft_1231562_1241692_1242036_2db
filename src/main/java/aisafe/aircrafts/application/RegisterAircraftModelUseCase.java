@@ -4,14 +4,12 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for registering a new aircraft model. Validates that the model name is unique and then creates and saves the new model.
  * Returns a DTO with the details of the newly created model.
  */
 @UseCase
-@Transactional
 public class RegisterAircraftModelUseCase {
 
     private final AircraftModelRepository repository;

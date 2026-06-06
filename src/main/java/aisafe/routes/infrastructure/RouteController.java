@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -25,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import aisafe.shared.infrastructure.ETagUtils;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -122,7 +126,7 @@ public class RouteController {
         List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(id).stream()
                 .map(h -> {
                     RouteHistoryResponse response = new RouteHistoryResponse(
-                            h.getId(), h.getRoute().getId(), h.getChangeDescription(),
+                            h.getId(), h.getRouteId(), h.getChangeDescription(),
                             h.getChangedAt(), h.getChangedBy());
                     return EntityModel.of(response,
                             linkTo(methodOn(RouteController.class).getRouteDetails(response.routeId()))
@@ -156,7 +160,8 @@ public class RouteController {
             @Parameter(description = "Unique ID of the route to be updated") @PathVariable Long id,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
             @Valid @RequestBody UpdateRouteRequest request) {
-        return ResponseEntity.ok(mapToModel(updateRoute.execute(id, request)));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(mapToModel(updateRoute.execute(id, request, version)));
     }
 
     /**
@@ -178,8 +183,10 @@ public class RouteController {
     public ResponseEntity<EntityModel<RouteResponse>> deactivateRoute(
             @Parameter(description = "Unique ID of the route to deactivate") @PathVariable Long id,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch) {
-        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(id)));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(id, version)));
     }
+
 
     /**
      * Retrieves all active routes departing from a specific airport.
@@ -222,7 +229,8 @@ public class RouteController {
             @Parameter(description = "IATA code of the origin airport (e.g., LIS, OPO)") @PathVariable String iataCode,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<Route> assembler) {
-        Page<Route> routePage = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable);
+        PaginatedResult<Route> result = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 
@@ -249,7 +257,8 @@ public class RouteController {
             @Parameter(description = "Destination location or IATA code") @RequestParam(required = false) String destination,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<Route> assembler) {
-        Page<Route> routePage = this.searchRoutes.execute(origin, destination, pageable);
+        PaginatedResult<Route> result = this.searchRoutes.execute(origin, destination, pageable.getPageNumber(), pageable.getPageSize());
+        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 

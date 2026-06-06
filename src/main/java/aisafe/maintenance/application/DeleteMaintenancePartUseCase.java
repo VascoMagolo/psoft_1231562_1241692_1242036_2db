@@ -4,20 +4,26 @@ import aisafe.shared.application.UseCase;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
-import org.springframework.transaction.annotation.Transactional;
+import aisafe.maintenance.domain.MaintenanceRecordRepository;
+import aisafe.shared.domain.ResourceInUseException;
 
 @UseCase
-@Transactional
 public class DeleteMaintenancePartUseCase {
     private final MaintenancePartRepository maintenancePartRepository;
+    private final MaintenanceRecordRepository maintenanceRecordRepository;
 
-    public DeleteMaintenancePartUseCase(MaintenancePartRepository maintenancePartRepository) {
+    public DeleteMaintenancePartUseCase(MaintenancePartRepository maintenancePartRepository,
+                                        MaintenanceRecordRepository maintenanceRecordRepository) {
         this.maintenancePartRepository = maintenancePartRepository;
+        this.maintenanceRecordRepository = maintenanceRecordRepository;
     }
 
-    public void execute(Long id) {
-        MaintenancePart part = maintenancePartRepository.findById(id)
-                .orElseThrow(() -> new MaintenancePartNotFoundException("Maintenance part not found with id: " + id));
+    public void execute(String partNumber) {
+        MaintenancePart part = maintenancePartRepository.findByPartNumber(partNumber)
+                .orElseThrow(() -> new MaintenancePartNotFoundException("Maintenance part not found with part number: " + partNumber));
+        if (maintenanceRecordRepository.existsByPart(part)) {
+            throw new ResourceInUseException("Maintenance part is referenced by existing maintenance records and cannot be deleted.");
+        }
         maintenancePartRepository.delete(part);
     }
 }
