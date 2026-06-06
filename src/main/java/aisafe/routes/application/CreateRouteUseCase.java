@@ -1,8 +1,9 @@
 package aisafe.routes.application;
 
 import aisafe.shared.application.UseCase;
-import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
@@ -34,7 +35,7 @@ public class CreateRouteUseCase {
         if (!airportRepository.existsByIataCodeCode(destinationCode)) {
             throw new AirportNotFoundException(destinationCode);
         }
-        if (routeRepository.existsByOriginAndDestination(originCode, destinationCode)) {
+        if (routeRepository.existsByOriginAndDestination(new IataCode(originCode), new IataCode(destinationCode))) {
             throw new IllegalArgumentException("Route already exists between origin and destination.");
         }
 
