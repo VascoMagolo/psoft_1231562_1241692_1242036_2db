@@ -34,11 +34,6 @@ public class MaintenanceTemplateJpaRepository implements MaintenanceTemplateRepo
     }
 
     @Override
-    public Optional<MaintenanceTemplate> findById(Long id) {
-        return springRepo.findById(id).map(MaintenanceTemplateMapper::toDomain);
-    }
-
-    @Override
     public void save(MaintenanceTemplate template) {
         MaintenanceTemplateJpaEntity existing = springRepo.findByName(template.getName()).orElse(null);
         MaintenanceTemplateJpaEntity jpaEntity = MaintenanceTemplateMapper.toJpa(template);

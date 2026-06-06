@@ -43,6 +43,20 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public boolean existsByPart(MaintenancePart part) {
+        MaintenancePartJpaEntity partJpa = partSpringRepo.findByPartNumber(part.getPartNumber()).orElse(null);
+        if (partJpa == null) return false;
+        return springRepo.existsByPart(partJpa);
+    }
+
+    @Override
+    public boolean existsByTemplate(MaintenanceTemplate template) {
+        MaintenanceTemplateJpaEntity templateJpa = templateSpringRepo.findByName(template.getName()).orElse(null);
+        if (templateJpa == null) return false;
+        return springRepo.existsByTemplate(templateJpa);
+    }
+
+    @Override
     public PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize) {
         Page<MaintenanceRecordJpaEntity> page = springRepo.findByAircraftRegistration(
                 aircraftRegistration, PageRequest.of(pageNumber, pageSize));
