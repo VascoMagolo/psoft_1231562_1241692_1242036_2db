@@ -7,6 +7,7 @@ import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.shared.domain.DuplicateResourceException;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -36,7 +37,7 @@ public class CreateRouteUseCase {
             throw new AirportNotFoundException(destinationCode);
         }
         if (routeRepository.existsByOriginAndDestination(new IataCode(originCode), new IataCode(destinationCode))) {
-            throw new IllegalArgumentException("Route already exists between origin and destination.");
+            throw new DuplicateResourceException("Route already exists between origin and destination.");
         }
 
         Route route = new Route(

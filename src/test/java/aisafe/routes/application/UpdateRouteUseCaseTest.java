@@ -2,7 +2,7 @@ package aisafe.routes.application;
 
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.*;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ class UpdateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
 
-        assertThrows(ObjectOptimisticLockingFailureException.class, () ->
+        assertThrows(ConcurrencyException.class, () ->
                 updateRoute.execute(1L, new UpdateRouteRequest(60, 400.0, 180, null), 1L));
         verify(routeRepository, never()).save(any());
     }

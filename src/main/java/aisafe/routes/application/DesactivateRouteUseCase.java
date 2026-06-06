@@ -7,7 +7,7 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import aisafe.shared.domain.ConcurrencyException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class DesactivateRouteUseCase {
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
 
         if (!Objects.equals(route.getVersion(), clientVersion)) {
-            throw new ObjectOptimisticLockingFailureException(Route.class, route.getId());
+            throw new ConcurrencyException("Route version mismatch. Please fetch the latest version and retry.");
         }
 
         String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();

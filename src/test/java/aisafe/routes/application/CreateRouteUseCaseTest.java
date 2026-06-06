@@ -6,6 +6,7 @@ import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.shared.domain.DuplicateResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -74,7 +75,7 @@ class CreateRouteUseCaseTest {
         when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(true);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> createRoute.execute(request));
+        DuplicateResourceException ex = assertThrows(DuplicateResourceException.class, () -> createRoute.execute(request));
         assertEquals("Route already exists between origin and destination.", ex.getMessage());
         verify(routeRepository, never()).save(any());
     }

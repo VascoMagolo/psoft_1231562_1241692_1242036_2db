@@ -1,7 +1,7 @@
 package aisafe.routes.application;
 
 import aisafe.routes.domain.*;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ class DesactivateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
 
-        assertThrows(ObjectOptimisticLockingFailureException.class, () ->
+        assertThrows(ConcurrencyException.class, () ->
                 desactivateRoute.execute(1L, 1L));
         verify(routeRepository, never()).save(any());
     }
