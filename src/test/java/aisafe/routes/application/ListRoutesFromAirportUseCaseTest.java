@@ -5,19 +5,17 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,21 +33,21 @@ class ListRoutesFromAirportUseCaseTest {
     @Test
     void ensureRoutesReturnedForExistingAirport() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        Page<Route> routePage = new PageImpl<>(List.of(route));
         when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(routeRepository.findByOrigin(any(IataCode.class), any(Pageable.class))).thenReturn(routePage);
+        when(routeRepository.findByOrigin(any(IataCode.class), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(route), 1L));
 
-        Page<Route> result = listRoutesFromAirport.execute("OPO", Pageable.unpaged());
+        PaginatedResult<Route> result = listRoutesFromAirport.execute("OPO", 0, 20);
 
-        assertEquals(1, result.getTotalElements());
-        verify(routeRepository).findByOrigin(any(IataCode.class), any(Pageable.class));
+        assertEquals(1L, result.totalElements());
+        verify(routeRepository).findByOrigin(any(IataCode.class), anyInt(), anyInt());
     }
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
         when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
 
-        assertThrows(AirportNotFoundException.class, () -> listRoutesFromAirport.execute("XXX", Pageable.unpaged()));
-        verify(routeRepository, never()).findByOrigin(any(), any());
+        assertThrows(AirportNotFoundException.class, () -> listRoutesFromAirport.execute("XXX", 0, 20));
+        verify(routeRepository, never()).findByOrigin(any(), anyInt(), anyInt());
     }
 }

@@ -3,9 +3,10 @@ package aisafe.routes.infrastructure.persistence;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -63,24 +64,28 @@ public class RouteJpaRepository implements RouteRepository {
     }
 
     @Override
-    public Page<Route> findAll(Pageable pageable) {
-        return springRepo.findAll(pageable).map(RouteMapper::toDomain);
+    public PaginatedResult<Route> findAll(int pageNumber, int pageSize) {
+        Page<RouteJpaEntity> page = springRepo.findAll(PageRequest.of(pageNumber, pageSize));
+        return new PaginatedResult<>(page.map(RouteMapper::toDomain).toList(), page.getTotalElements());
     }
 
     @Override
-    public Page<Route> findByOrigin(IataCode origin, Pageable pageable) {
-        return springRepo.findByOriginCode(origin.getCode(), pageable).map(RouteMapper::toDomain);
+    public PaginatedResult<Route> findByOrigin(IataCode origin, int pageNumber, int pageSize) {
+        Page<RouteJpaEntity> page = springRepo.findByOriginCode(origin.getCode(), PageRequest.of(pageNumber, pageSize));
+        return new PaginatedResult<>(page.map(RouteMapper::toDomain).toList(), page.getTotalElements());
     }
 
     @Override
-    public Page<Route> findByDestination(IataCode destination, Pageable pageable) {
-        return springRepo.findByDestinationCode(destination.getCode(), pageable).map(RouteMapper::toDomain);
+    public PaginatedResult<Route> findByDestination(IataCode destination, int pageNumber, int pageSize) {
+        Page<RouteJpaEntity> page = springRepo.findByDestinationCode(destination.getCode(), PageRequest.of(pageNumber, pageSize));
+        return new PaginatedResult<>(page.map(RouteMapper::toDomain).toList(), page.getTotalElements());
     }
 
     @Override
-    public Page<Route> findByOriginAndDestination(IataCode origin, IataCode destination, Pageable pageable) {
-        return springRepo.findByOriginCodeAndDestinationCode(origin.getCode(), destination.getCode(), pageable)
-                .map(RouteMapper::toDomain);
+    public PaginatedResult<Route> findByOriginAndDestination(IataCode origin, IataCode destination, int pageNumber, int pageSize) {
+        Page<RouteJpaEntity> page = springRepo.findByOriginCodeAndDestinationCode(
+                origin.getCode(), destination.getCode(), PageRequest.of(pageNumber, pageSize));
+        return new PaginatedResult<>(page.map(RouteMapper::toDomain).toList(), page.getTotalElements());
     }
 
     @Override

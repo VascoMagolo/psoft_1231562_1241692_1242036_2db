@@ -1,8 +1,7 @@
 package aisafe.routes.domain;
 
 import aisafe.airports.domain.IataCode;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import aisafe.shared.domain.PaginatedResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +13,10 @@ public interface RouteRepository {
     boolean existsById(Long id);
     void delete(Route route);
     List<Route> findAll();
-    Page<Route> findAll(Pageable pageable);
-    Page<Route> findByOrigin(IataCode origin, Pageable pageable);
-    Page<Route> findByDestination(IataCode destination, Pageable pageable);
-    Page<Route> findByOriginAndDestination(IataCode origin, IataCode destination, Pageable pageable);
+    PaginatedResult<Route> findAll(int pageNumber, int pageSize);
+    PaginatedResult<Route> findByOrigin(IataCode origin, int pageNumber, int pageSize);
+    PaginatedResult<Route> findByDestination(IataCode destination, int pageNumber, int pageSize);
+    PaginatedResult<Route> findByOriginAndDestination(IataCode origin, IataCode destination, int pageNumber, int pageSize);
     boolean existsByOriginAndDestination(IataCode origin, IataCode destination);
     List<Route> findByOriginOrDestination(IataCode origin, IataCode destination);
 }

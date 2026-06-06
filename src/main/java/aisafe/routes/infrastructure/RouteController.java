@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -227,7 +229,8 @@ public class RouteController {
             @Parameter(description = "IATA code of the origin airport (e.g., LIS, OPO)") @PathVariable String iataCode,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<Route> assembler) {
-        Page<Route> routePage = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable);
+        PaginatedResult<Route> result = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 
@@ -254,7 +257,8 @@ public class RouteController {
             @Parameter(description = "Destination location or IATA code") @RequestParam(required = false) String destination,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<Route> assembler) {
-        Page<Route> routePage = this.searchRoutes.execute(origin, destination, pageable);
+        PaginatedResult<Route> result = this.searchRoutes.execute(origin, destination, pageable.getPageNumber(), pageable.getPageSize());
+        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
     }
 
