@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Objects;
+
 /**
  * Use case responsible for updating the details of an existing route.
  */
@@ -32,7 +34,7 @@ public class UpdateRouteUseCase {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
 
-        if (!route.getVersion().equals(clientVersion)) {
+        if (!Objects.equals(route.getVersion(), clientVersion)) {
             throw new ObjectOptimisticLockingFailureException(Route.class, route.getId());
         }
 
@@ -48,7 +50,7 @@ public class UpdateRouteUseCase {
 
         String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         Route updatedRoute = routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(updatedRoute, "Route details updated", changedBy));
+        routeHistoryRepository.save(new RouteHistory(updatedRoute.getId(), "Route details updated", changedBy));
         return updatedRoute;
     }
 }

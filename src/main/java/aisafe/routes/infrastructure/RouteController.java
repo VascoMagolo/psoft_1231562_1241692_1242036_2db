@@ -124,7 +124,7 @@ public class RouteController {
         List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(id).stream()
                 .map(h -> {
                     RouteHistoryResponse response = new RouteHistoryResponse(
-                            h.getId(), h.getRoute().getId(), h.getChangeDescription(),
+                            h.getId(), h.getRouteId(), h.getChangeDescription(),
                             h.getChangedAt(), h.getChangedBy());
                     return EntityModel.of(response,
                             linkTo(methodOn(RouteController.class).getRouteDetails(response.routeId()))

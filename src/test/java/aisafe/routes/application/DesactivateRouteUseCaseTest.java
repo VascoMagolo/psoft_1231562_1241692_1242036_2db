@@ -49,7 +49,6 @@ class DesactivateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
         when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
-        when(routeHistoryRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         Route result = desactivateRoute.execute(1L, null);
 

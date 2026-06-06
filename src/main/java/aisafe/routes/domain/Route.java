@@ -1,48 +1,19 @@
 package aisafe.routes.domain;
 
 import aisafe.airports.domain.IataCode;
-import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.util.Assert;
 
-/**
- * Entity representing a flight route between two airports.
- * Stores operational requirements such as flight time,
- * minimum range and passenger capacity.
- */
-
-@Entity
 @Getter
 public class Route {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "code", column = @Column(name = "origin_iata_code", length = 3, nullable = false))
-    })
     private IataCode origin;
-
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "code", column = @Column(name = "destination_iata_code", length = 3, nullable = false))
-    })
     private IataCode destination;
-
-    @Column(nullable = false)
     private Integer estimatedFlightTime;
-
-    @Column(nullable = false)
     private Double minimumRange;
-
-    @Column(nullable = false)
     private Integer minimumCapacity;
-
-    @Column(nullable = false)
     private boolean active;
-
-    @Version
     private Long version;
 
     protected Route() {}
@@ -62,12 +33,14 @@ public class Route {
 
         this.origin = new IataCode(originCode);
         this.destination = new IataCode(destinationCode);
-
         this.estimatedFlightTime = estimatedFlightTime;
         this.minimumRange = minimumRange;
         this.minimumCapacity = minimumCapacity;
         this.active = true;
     }
+
+    public void setId(Long id) { this.id = id; }
+    public void setVersion(Long version) { this.version = version; }
 
     public void updateRoute(Integer flightTime, Double range, Integer capacity) {
         if (flightTime != null) {

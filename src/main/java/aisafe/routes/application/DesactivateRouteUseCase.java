@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Objects;
+
 /**
  * Use case responsible for deactivating an existing route.
  */
@@ -30,14 +32,14 @@ public class DesactivateRouteUseCase {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
 
-        if (!route.getVersion().equals(clientVersion)) {
+        if (!Objects.equals(route.getVersion(), clientVersion)) {
             throw new ObjectOptimisticLockingFailureException(Route.class, route.getId());
         }
 
         String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         route.deactivate();
         Route deactivatedRoute = routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(deactivatedRoute, "Route deactivated", changedBy));
+        routeHistoryRepository.save(new RouteHistory(deactivatedRoute.getId(), "Route deactivated", changedBy));
         return deactivatedRoute;
     }
 }

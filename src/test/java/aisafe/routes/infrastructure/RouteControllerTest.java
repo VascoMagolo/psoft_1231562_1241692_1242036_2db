@@ -101,7 +101,7 @@ class RouteControllerTest {
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
         deactivated.deactivate();
-        when(desactivateRoute.execute(anyLong())).thenReturn(deactivated);
+        when(desactivateRoute.execute(anyLong(), any())).thenReturn(deactivated);
 
         mockMvc.perform(patch("/api/routes/1/deactivate")
                         .header("If-Match", "0"))
