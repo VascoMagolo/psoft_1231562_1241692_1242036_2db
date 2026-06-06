@@ -1,49 +1,23 @@
 package aisafe.maintenance.domain;
 
-import aisafe.aircrafts.domain.Aircraft;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.util.Assert;
-
 import java.time.LocalDateTime;
 
-/**
- * Represents a maintenance record for an aircraft
- */
-@Getter
-@Entity
 public class MaintenanceRecord {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Version
     private Long version;
-    @Column(nullable = false)
     private String description;
-    @Column(nullable = false)
     private LocalDateTime startDate;
-    @Column(nullable = false)
     private Integer expectedDuration;
-    @Setter
     private String notes;
-    @ManyToOne
-    @JoinColumn(name = "part_id")
     private MaintenancePart part;
-    @ManyToOne
-    @JoinColumn(name = "template_maintenance_id")
     private MaintenanceTemplate template;
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    @Setter
     private MaintenanceStatus status;
-    @Column(name = "aircraft_registration", nullable = false)
     private String aircraftRegistration;
 
-    protected MaintenanceRecord() {}
-
-    public MaintenanceRecord(String description, LocalDateTime startDate, Integer expectedDuration, MaintenancePart part, String notes, MaintenanceTemplate template, MaintenanceStatus status,String aircraftRegistration) {
+    public MaintenanceRecord(String description, LocalDateTime startDate, Integer expectedDuration,
+                             MaintenancePart part, String notes, MaintenanceTemplate template,
+                             MaintenanceStatus status, String aircraftRegistration) {
         Assert.hasText(description, "Description must not be blank.");
         Assert.notNull(startDate, "Start date must not be null.");
         Assert.notNull(expectedDuration, "Expected duration must not be null.");
@@ -62,10 +36,19 @@ public class MaintenanceRecord {
         this.aircraftRegistration = aircraftRegistration;
     }
 
-    public String getAircraftRegistration() {
-        return this.aircraftRegistration;
-    }
+    public Long getId() { return id; }
+    public Long getVersion() { return version; }
+    public String getDescription() { return description; }
+    public LocalDateTime getStartDate() { return startDate; }
+    public Integer getExpectedDuration() { return expectedDuration; }
+    public String getNotes() { return notes; }
+    public MaintenancePart getPart() { return part; }
+    public MaintenanceTemplate getTemplate() { return template; }
+    public MaintenanceStatus getStatus() { return status; }
+    public String getAircraftRegistration() { return aircraftRegistration; }
+
+    public void setId(Long id) { this.id = id; }
+    public void setVersion(Long version) { this.version = version; }
+    public void setNotes(String notes) { this.notes = notes; }
+    public void setStatus(MaintenanceStatus status) { this.status = status; }
 }
-
-
-

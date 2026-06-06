@@ -34,13 +34,12 @@ alt part number already exists
   UC --> Ctrl : throws MaintenancePartAlreadyExistsException
   Ctrl --> MS : 409 Conflict\n{ message: "Maintenance part '...' already exists." }
 else part number is unique
-  UC -> Repo : save(new MaintenancePart(partNumber, name,\n  description, stockQuantity,\n  minimumThreshold, component))
+  UC -> Repo : save(part)
   activate Repo
   Repo -> DB : INSERT INTO maintenance_part
   activate DB
-  DB --> Repo : saved record (with generated ID)
+  DB --> Repo
   deactivate DB
-  Repo --> UC : MaintenancePart
   deactivate Repo
 
   UC --> Ctrl : MaintenancePartResponse\n{ id, partNumber, description }

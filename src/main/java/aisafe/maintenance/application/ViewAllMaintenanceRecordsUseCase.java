@@ -7,9 +7,11 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.dtos.ViewAllMaintenanceRecordsResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Views all maintenance records from a specific aircraft using its registration number
@@ -25,26 +27,20 @@ public class ViewAllMaintenanceRecordsUseCase {
         this.aircraftRepository = aircraftRepository;
     }
 
-    /**
-     * Retrieves a paginated list of maintenance records for the specified aircraft registration number.
-     * @param registrationNumber the registration number of the aircraft for which to retrieve maintenance records
-     * @param pageable the pagination information for the query
-     * @return a paginated list of maintenance records for the specified aircraft
-     */
-    public Page<ViewAllMaintenanceRecordsResponse> execute(RegistrationNumber registrationNumber, Pageable pageable) {
+    public PaginatedResult<ViewAllMaintenanceRecordsResponse> execute(RegistrationNumber registrationNumber, int pageNumber, int pageSize) {
         aircraftRepository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber.getNumber() + " not found."));
 
-        Page<MaintenanceRecord> recordsPage = repository.findByAircraftRegistration(registrationNumber.getNumber(), pageable);
+        PaginatedResult<MaintenanceRecord> recordsPage = repository.findByAircraftRegistration(
+                registrationNumber.getNumber(), pageNumber, pageSize);
 
-        return recordsPage.map(this::toResponse);
+        List<ViewAllMaintenanceRecordsResponse> data = recordsPage.data().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return new PaginatedResult<>(data, recordsPage.totalElements());
     }
 
-    /**
-     * Converts a MaintenanceRecord entity to a ViewAllMaintenanceRecordsResponse DTO.
-     * @param record the MaintenanceRecord entity to be converted
-     * @return a ViewAllMaintenanceRecordsResponse DTO containing the details of the maintenance record
-     */
     private ViewAllMaintenanceRecordsResponse toResponse(MaintenanceRecord record) {
         return new ViewAllMaintenanceRecordsResponse(
                 record.getPart().getPartNumber(),

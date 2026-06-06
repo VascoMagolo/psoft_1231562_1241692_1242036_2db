@@ -28,7 +28,7 @@ class CreateMaintenancePartUseCaseTest {
     @Test
     void ensurePartIsCreatedSuccessfully() {
         when(maintenancePartRepository.existsByPartNumber("P001")).thenReturn(false);
-        when(maintenancePartRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        doNothing().when(maintenancePartRepository).save(any());
 
         assertDoesNotThrow(() -> createMaintenancePart.execute(buildRequest()));
         verify(maintenancePartRepository).save(any(MaintenancePart.class));

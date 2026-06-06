@@ -45,7 +45,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         doReturn(0L).when(record).getVersion();
 
         when(recordRepository.findById(1L)).thenReturn(Optional.of(record));
-        when(recordRepository.save(any())).thenReturn(record);
+        doNothing().when(recordRepository).save(any());
 
         MaintenanceRecordResponse response = updateMaintenanceRecord.execute(1L, request, 0L);
 

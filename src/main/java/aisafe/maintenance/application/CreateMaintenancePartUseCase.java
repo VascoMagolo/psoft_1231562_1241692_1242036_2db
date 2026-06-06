@@ -39,12 +39,12 @@ public class CreateMaintenancePartUseCase {
             throw new MaintenancePartAlreadyExistsException("Part with the same part number already exists: " + part.getPartNumber());
         }
 
-        MaintenancePart savedPart = maintenancePartRepository.save(part);
+        maintenancePartRepository.save(part);
 
         return new MaintenancePartResponse(
-                savedPart.getId(),
-                savedPart.getPartNumber(),
-                savedPart.getDescription()
+                part.getId(),
+                part.getPartNumber(),
+                part.getDescription()
         );
     }
 }

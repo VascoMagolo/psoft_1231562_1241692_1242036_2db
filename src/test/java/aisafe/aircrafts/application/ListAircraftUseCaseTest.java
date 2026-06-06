@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.*;
-import aisafe.shared.application.dtos.PaginatedResult;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

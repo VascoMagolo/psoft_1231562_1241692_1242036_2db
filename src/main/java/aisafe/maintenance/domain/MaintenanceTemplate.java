@@ -1,46 +1,26 @@
 package aisafe.maintenance.domain;
 
-import aisafe.aircrafts.domain.AircraftModel;
-import jakarta.persistence.*;
-import lombok.Getter;
 import org.springframework.util.Assert;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Getter
 public class MaintenanceTemplate {
-    @Id
-    @Column(name = "maintenance_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column ( nullable = false )
     private String name;
-    @Enumerated(EnumType.STRING)
-    @Column ( nullable = false )
     private MaintenanceType templateType;
-    @ElementCollection
-    @CollectionTable(name = "maintenance_template_models", joinColumns = @JoinColumn(name = "template_id"))
-    @Column(name = "model_name")
     private List<String> applicableModelNames;
-    @ElementCollection
-    @Column ( nullable = false )
     private List<String> checklist;
-    @Column ( nullable = false )
     private Integer intervalFlightHours;
-    @Column ( nullable = false )
     private Integer intervalDays;
 
-    public MaintenanceTemplate() {}
-    public MaintenanceTemplate(String name, MaintenanceType templateType, List<String> applicableModelNames, List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
-        Assert.notNull(name,"Name cannot be null");
+    public MaintenanceTemplate(String name, MaintenanceType templateType, List<String> applicableModelNames,
+                               List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
+        Assert.notNull(name, "Name cannot be null");
         Assert.notNull(templateType, "Template cannot be null");
-        Assert.notNull(applicableModelNames,"Template must have applicable models");
-        Assert.notNull(checklist,"Template must have a checklist");
-        Assert.notNull(intervalFlightHours,"Template must have an interval in flight hours");
-        Assert.notNull(intervalDays,"Template must have an interval in days");
-        Assert.hasText(name,"Name cannot be empty");
+        Assert.notNull(applicableModelNames, "Template must have applicable models");
+        Assert.notNull(checklist, "Template must have a checklist");
+        Assert.notNull(intervalFlightHours, "Template must have an interval in flight hours");
+        Assert.notNull(intervalDays, "Template must have an interval in days");
+        Assert.hasText(name, "Name cannot be empty");
         this.name = name;
         this.templateType = templateType;
         this.applicableModelNames = applicableModelNames;
@@ -49,4 +29,13 @@ public class MaintenanceTemplate {
         this.intervalDays = intervalDays;
     }
 
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public MaintenanceType getTemplateType() { return templateType; }
+    public List<String> getApplicableModelNames() { return applicableModelNames; }
+    public List<String> getChecklist() { return checklist; }
+    public Integer getIntervalFlightHours() { return intervalFlightHours; }
+    public Integer getIntervalDays() { return intervalDays; }
+
+    public void setId(Long id) { this.id = id; }
 }

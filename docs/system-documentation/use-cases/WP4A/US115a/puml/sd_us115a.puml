@@ -70,13 +70,12 @@ else all references found
     UC --> Ctrl : throws MaintenanceRecordAlreadyExistsException
     Ctrl --> MT : 409 Conflict\n{ message: "Maintenance record already exists." }
   else record is unique
-    UC -> Repo : save(new MaintenanceRecord(description, startDate,\n  expectedDuration, part, notes, template, status, aircraft))
+    UC -> Repo : save(record)
     activate Repo
     Repo -> DB : INSERT INTO maintenance_record
     activate DB
-    DB --> Repo : saved record (with generated ID)
+    DB --> Repo
     deactivate DB
-    Repo --> UC : MaintenanceRecord
     deactivate Repo
 
     UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }

@@ -43,14 +43,14 @@ public class UpdateMaintenanceRecordUseCase {
             record.setNotes(request.notes());
         }
 
-        MaintenanceRecord updatedRecord = recordRepository.save(record);
+        recordRepository.save(record);
 
         return new MaintenanceRecordResponse(
-                updatedRecord.getId(), updatedRecord.getDescription(), updatedRecord.getStartDate(),
-                updatedRecord.getExpectedDuration(), updatedRecord.getNotes(),
-                updatedRecord.getPart().getPartNumber(), updatedRecord.getTemplate().getName(),
-                updatedRecord.getStatus().name(), updatedRecord.getAircraftRegistration(),
-                updatedRecord.getVersion()
+                record.getId(), record.getDescription(), record.getStartDate(),
+                record.getExpectedDuration(), record.getNotes(),
+                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getStatus().name(), record.getAircraftRegistration(),
+                record.getVersion()
         );
     }
 }

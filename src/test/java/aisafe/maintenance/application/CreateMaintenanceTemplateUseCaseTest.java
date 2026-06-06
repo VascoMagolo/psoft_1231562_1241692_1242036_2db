@@ -45,7 +45,7 @@ class CreateMaintenanceTemplateUseCaseTest {
     void ensureTemplateIsCreatedSuccessfully() {
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(buildModel()));
         when(maintenanceTemplateRepository.existsByName("Annual Check")).thenReturn(false);
-        when(maintenanceTemplateRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        doNothing().when(maintenanceTemplateRepository).save(any());
 
         assertDoesNotThrow(() -> createMaintenanceTemplate.execute(buildRequest()));
         verify(maintenanceTemplateRepository).save(any(MaintenanceTemplate.class));

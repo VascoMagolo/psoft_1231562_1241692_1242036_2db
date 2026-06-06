@@ -67,7 +67,7 @@ class CreateMaintenanceRecordUseCaseTest {
         when(templateRepository.findByName("Annual Check")).thenReturn(Optional.of(template));
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
         when(recordRepository.existsByStartDateAndPartAndTemplate(any(), any(), any())).thenReturn(false);
-        when(recordRepository.save(any(MaintenanceRecord.class))).thenAnswer(i -> i.getArguments()[0]);
+        doNothing().when(recordRepository).save(any(MaintenanceRecord.class));
 
         MaintenanceRecordResponse response = createMaintenanceRecord.execute(buildRequest());
 

@@ -3,6 +3,7 @@ package aisafe.aircrafts.application;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -28,7 +29,7 @@ public class UpdateAircraftStatusUseCase {
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registration.getNumber()));
 
         if (!aircraft.getVersion().equals(clientVersion)) {
-            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getRegistrationNumber().getNumber());
+            throw new ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getRegistrationNumber().getNumber());
         }
 
         if (!AircraftStatus.isValid(status)) {

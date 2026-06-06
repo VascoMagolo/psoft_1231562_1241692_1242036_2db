@@ -3,6 +3,7 @@ package aisafe.airports.infrastructure.persistence;
 import aisafe.airports.domain.AircraftCertification;
 import aisafe.airports.domain.AircraftCertificationRepository;
 import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.AirportNotFoundException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -25,7 +26,7 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
     @Override
     public List<AircraftCertification> findByAirport(Airport airport) {
         AirportJpaEntity jpaAirport = airportSpringRepo.findByIataCode(airport.getIataCode().getCode())
-                .orElseThrow(() -> new aisafe.airports.domain.AirportNotFoundException(airport.getIataCode().getCode()));
+                .orElseThrow(() -> new AirportNotFoundException(airport.getIataCode().getCode()));
 
         return springRepo.findByAirport(jpaAirport).stream()
                 .map(AircraftCertificationMapper::toDomain)
@@ -44,7 +45,7 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
     public void save(AircraftCertification certification) {
         AirportJpaEntity jpaAirport = airportSpringRepo.findByIataCode(
                         certification.getAirport().getIataCode().getCode())
-                .orElseThrow(() -> new aisafe.airports.domain.AirportNotFoundException(
+                .orElseThrow(() -> new AirportNotFoundException(
                         certification.getAirport().getIataCode().getCode()));
 
         springRepo.save(new AircraftCertificationJpaEntity(jpaAirport, certification.getAircraftModelName()));

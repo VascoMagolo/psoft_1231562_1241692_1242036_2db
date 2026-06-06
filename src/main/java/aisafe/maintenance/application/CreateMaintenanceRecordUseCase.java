@@ -47,14 +47,14 @@ public class CreateMaintenanceRecordUseCase {
             throw new MaintenanceRecordAlreadyExistsException("Record with the same start date, part, and template already exists.");
         }
 
-        MaintenanceRecord savedRecord = recordRepository.save(record);
+        recordRepository.save(record);
 
         return new MaintenanceRecordResponse(
-                savedRecord.getId(), savedRecord.getDescription(), savedRecord.getStartDate(),
-                savedRecord.getExpectedDuration(), savedRecord.getNotes(),
-                savedRecord.getPart().getPartNumber(), savedRecord.getTemplate().getName(),
-                savedRecord.getStatus().name(), request.registrationNumber(),
-                savedRecord.getVersion()
+                record.getId(), record.getDescription(), record.getStartDate(),
+                record.getExpectedDuration(), record.getNotes(),
+                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getStatus().name(), request.registrationNumber(),
+                record.getVersion()
         );
     }
 }
