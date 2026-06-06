@@ -1,9 +1,11 @@
 package aisafe.maintenance.application;
 
+import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
 import aisafe.maintenance.domain.MaintenanceType;
+import aisafe.shared.domain.ResourceInUseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +25,9 @@ class DeleteMaintenanceTemplateUseCaseTest {
     @Mock
     private MaintenanceTemplateRepository maintenanceTemplateRepository;
 
+    @Mock
+    private MaintenanceRecordRepository maintenanceRecordRepository;
+
     @InjectMocks
     private DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplate;
 
@@ -35,6 +40,7 @@ class DeleteMaintenanceTemplateUseCaseTest {
     void ensureMaintenanceTemplateIsDeletedSuccessfully() {
         MaintenanceTemplate template = buildTemplate();
         when(maintenanceTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
+        when(maintenanceRecordRepository.existsByTemplate(template)).thenReturn(false);
 
         assertDoesNotThrow(() -> deleteMaintenanceTemplate.execute(1L));
         verify(maintenanceTemplateRepository).delete(any(MaintenanceTemplate.class));
@@ -45,6 +51,16 @@ class DeleteMaintenanceTemplateUseCaseTest {
         when(maintenanceTemplateRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(MaintenanceTemplateNotFoundException.class, () -> deleteMaintenanceTemplate.execute(99L));
+        verify(maintenanceTemplateRepository, never()).delete(any());
+    }
+
+    @Test
+    void ensureExceptionWhenMaintenanceTemplateIsInUse() {
+        MaintenanceTemplate template = buildTemplate();
+        when(maintenanceTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
+        when(maintenanceRecordRepository.existsByTemplate(template)).thenReturn(true);
+
+        assertThrows(ResourceInUseException.class, () -> deleteMaintenanceTemplate.execute(1L));
         verify(maintenanceTemplateRepository, never()).delete(any());
     }
 }

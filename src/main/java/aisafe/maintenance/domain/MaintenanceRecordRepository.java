@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface MaintenanceRecordRepository {
     long count();
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
+    boolean existsByPart(MaintenancePart part);
+    boolean existsByTemplate(MaintenanceTemplate template);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     List<MaintenanceRecord> findAll();
     Optional<MaintenanceRecord> findById(Long id);
