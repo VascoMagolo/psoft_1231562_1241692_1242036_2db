@@ -1,6 +1,9 @@
 package aisafe.airports.domain;
 
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,11 +29,11 @@ public class Airport {
 
     public Airport(String iataCode, String name, String city, String country, String region,
                    String timezone, Double latitude, Double longitude, List<Runway> runways) {
-        if (name == null || name.isBlank()) throw new IllegalArgumentException("Airport name cannot be blank");
-        if (city == null || city.isBlank()) throw new IllegalArgumentException("City cannot be blank");
-        if (country == null || country.isBlank()) throw new IllegalArgumentException("Country cannot be blank");
-        if (timezone == null || timezone.isBlank()) throw new IllegalArgumentException("Timezone cannot be blank");
-        if (runways == null || runways.isEmpty()) throw new IllegalArgumentException("Airport must have at least one runway");
+        Assert.hasText(name, "Airport name cannot be blank");
+        Assert.hasText(city, "City cannot be blank");
+        Assert.hasText(country, "Country cannot be blank");
+        Assert.hasText(timezone, "Timezone cannot be blank");
+        Assert.notEmpty(runways, "Airport must have at least one runway");
 
         this.iataCode = new IataCode(iataCode);
         this.name = name.trim();
@@ -66,12 +69,12 @@ public class Airport {
     public String getRegion() { return region; }
     public String getTimezone() { return timezone; }
     public Coordinates getCoordinates() { return coordinates; }
-    public List<Runway> getRunways() { return runways; }
+    public List<Runway> getRunways() { return Collections.unmodifiableList(runways); }
     public AirportStatus getStatus() { return status; }
     public String getImagePath() { return imagePath; }
     public String getOperationalHours() { return operationalHours; }
-    public List<Contact> getContacts() { return contacts; }
-    public List<Service> getServices() { return services; }
-    public List<Terminal> getTerminals() { return terminals; }
-    public List<Gate> getGates() { return gates; }
+    public List<Contact> getContacts() { return Collections.unmodifiableList(contacts); }
+    public List<Service> getServices() { return Collections.unmodifiableList(services); }
+    public List<Terminal> getTerminals() { return Collections.unmodifiableList(terminals); }
+    public List<Gate> getGates() { return Collections.unmodifiableList(gates); }
 }

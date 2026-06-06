@@ -2,7 +2,6 @@ package aisafe.airports.application;
 
 import aisafe.shared.domain.DuplicateResourceException;
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
@@ -18,7 +17,6 @@ import java.util.List;
  * Use case for registering a new airport in the system.
  */
 @UseCase
-@Transactional
 public class RegisterAirportUseCase {
     private final AirportRepository airportRepository;
 

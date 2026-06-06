@@ -4,10 +4,8 @@ import aisafe.shared.application.UseCase;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 @UseCase
-@Transactional
 public class DeleteMaintenancePartUseCase {
     private final MaintenancePartRepository maintenancePartRepository;
 

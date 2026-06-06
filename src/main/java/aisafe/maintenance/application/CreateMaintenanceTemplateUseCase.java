@@ -9,7 +9,6 @@ import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
  * Use case for creating a new maintenance template in the system.
  */
 @UseCase
-@Transactional
 public class CreateMaintenanceTemplateUseCase {
     private final MaintenanceTemplateRepository maintenanceTemplateRepository;
     private final AircraftModelRepository modelRepository;

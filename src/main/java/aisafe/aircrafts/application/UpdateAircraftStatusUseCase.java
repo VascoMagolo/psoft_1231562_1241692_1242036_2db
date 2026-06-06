@@ -4,7 +4,6 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for updating the status of an aircraft.
@@ -22,7 +21,6 @@ public class UpdateAircraftStatusUseCase {
      * Updates the status of an aircraft.
      * Delegates optimistic locking validation to the infrastructure layer.
      */
-    @Transactional
     public ViewAircraftDetailsResponse execute(RegistrationNumber registration, String status, Long clientVersion) {
 
         Aircraft aircraft = repository.findByRegistrationNumber(registration)

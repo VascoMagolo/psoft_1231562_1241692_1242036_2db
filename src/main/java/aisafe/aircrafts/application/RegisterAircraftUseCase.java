@@ -4,7 +4,6 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for registering a new aircraft in the system.
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Returns a DTO with the details of the newly registered aircraft.
  */
 @UseCase
-@Transactional
 public class RegisterAircraftUseCase {
 
     private final AircraftRepository aircraftRepository;

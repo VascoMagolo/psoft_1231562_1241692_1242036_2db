@@ -47,9 +47,32 @@ public class AircraftModel {
     public Integer getMaximumSeatingCapacity() { return maximumSeatingCapacity; }
     public String getImagePath() { return imagePath; }
 
-    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
-    public void setFuelCapacity(Double fuelCapacity) { this.fuelCapacity = fuelCapacity; }
-    public void setMaxRange(Double maxRange) { this.maxRange = maxRange; }
-    public void setCruisingSpeed(Double cruisingSpeed) { this.cruisingSpeed = cruisingSpeed; }
-    public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) { this.maximumSeatingCapacity = maximumSeatingCapacity; }
+    public void setImagePath(String imagePath) {
+        Assert.hasText(imagePath, "imagePath must not be blank");
+        this.imagePath = imagePath;
+    }
+
+    public void setFuelCapacity(Double fuelCapacity) {
+        Assert.notNull(fuelCapacity, "fuelCapacity must not be null");
+        Assert.isTrue(fuelCapacity > 0, "fuelCapacity must be greater than zero");
+        this.fuelCapacity = fuelCapacity;
+    }
+
+    public void setMaxRange(Double maxRange) {
+        Assert.notNull(maxRange, "maxRange must not be null");
+        Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");
+        this.maxRange = maxRange;
+    }
+
+    public void setCruisingSpeed(Double cruisingSpeed) {
+        Assert.notNull(cruisingSpeed, "cruisingSpeed must not be null");
+        Assert.isTrue(cruisingSpeed > 0, "cruisingSpeed must be greater than zero");
+        this.cruisingSpeed = cruisingSpeed;
+    }
+
+    public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) {
+        Assert.notNull(maximumSeatingCapacity, "maximumSeatingCapacity must not be null");
+        Assert.isTrue(maximumSeatingCapacity > 0, "maximumSeatingCapacity must be greater than zero");
+        this.maximumSeatingCapacity = maximumSeatingCapacity;
+    }
 }

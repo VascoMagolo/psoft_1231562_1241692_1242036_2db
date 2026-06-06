@@ -1,5 +1,7 @@
 package aisafe.airports.domain;
 
+import org.springframework.util.Assert;
+
 /**
  * Value object representing a terminal within an airport.
  */
@@ -7,8 +9,7 @@ public class Terminal {
     private final String name;
 
     public Terminal(String name) {
-        if (name == null || name.trim().isEmpty())
-            throw new IllegalArgumentException("Terminal name cannot be empty");
+        Assert.hasText(name, "Terminal name cannot be empty");
         this.name = name;
     }
 
