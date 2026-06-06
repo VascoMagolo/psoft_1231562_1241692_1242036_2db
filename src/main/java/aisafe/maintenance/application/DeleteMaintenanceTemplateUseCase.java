@@ -18,9 +18,9 @@ public class DeleteMaintenanceTemplateUseCase {
         this.maintenanceRecordRepository = maintenanceRecordRepository;
     }
 
-    public void execute(Long id) {
-        MaintenanceTemplate template = maintenanceTemplateRepository.findById(id)
-                .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Maintenance template not found with id: " + id));
+    public void execute(String name) {
+        MaintenanceTemplate template = maintenanceTemplateRepository.findByName(name)
+                .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Maintenance template not found with name: " + name));
         if (maintenanceRecordRepository.existsByTemplate(template)) {
             throw new ResourceInUseException("Maintenance template is referenced by existing maintenance records and cannot be deleted.");
         }

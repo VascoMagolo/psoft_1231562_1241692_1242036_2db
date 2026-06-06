@@ -39,28 +39,28 @@ class DeleteMaintenanceTemplateUseCaseTest {
     @Test
     void ensureMaintenanceTemplateIsDeletedSuccessfully() {
         MaintenanceTemplate template = buildTemplate();
-        when(maintenanceTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
+        when(maintenanceTemplateRepository.findByName("Engine Check")).thenReturn(Optional.of(template));
         when(maintenanceRecordRepository.existsByTemplate(template)).thenReturn(false);
 
-        assertDoesNotThrow(() -> deleteMaintenanceTemplate.execute(1L));
+        assertDoesNotThrow(() -> deleteMaintenanceTemplate.execute("Engine Check"));
         verify(maintenanceTemplateRepository).delete(any(MaintenanceTemplate.class));
     }
 
     @Test
     void ensureExceptionWhenMaintenanceTemplateNotFound() {
-        when(maintenanceTemplateRepository.findById(99L)).thenReturn(Optional.empty());
+        when(maintenanceTemplateRepository.findByName("Unknown")).thenReturn(Optional.empty());
 
-        assertThrows(MaintenanceTemplateNotFoundException.class, () -> deleteMaintenanceTemplate.execute(99L));
+        assertThrows(MaintenanceTemplateNotFoundException.class, () -> deleteMaintenanceTemplate.execute("Unknown"));
         verify(maintenanceTemplateRepository, never()).delete(any());
     }
 
     @Test
     void ensureExceptionWhenMaintenanceTemplateIsInUse() {
         MaintenanceTemplate template = buildTemplate();
-        when(maintenanceTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
+        when(maintenanceTemplateRepository.findByName("Engine Check")).thenReturn(Optional.of(template));
         when(maintenanceRecordRepository.existsByTemplate(template)).thenReturn(true);
 
-        assertThrows(ResourceInUseException.class, () -> deleteMaintenanceTemplate.execute(1L));
+        assertThrows(ResourceInUseException.class, () -> deleteMaintenanceTemplate.execute("Engine Check"));
         verify(maintenanceTemplateRepository, never()).delete(any());
     }
 }

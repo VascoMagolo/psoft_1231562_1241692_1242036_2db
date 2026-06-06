@@ -233,31 +233,33 @@ public class MaintenanceController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete a maintenance template", description = "Permanently removes a maintenance template by ID. Requires Maintenance Technician or Admin role.")
+    @Operation(summary = "Delete a maintenance template", description = "Permanently removes a maintenance template by name. Requires Maintenance Technician or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Maintenance template deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Maintenance template not found")
+            @ApiResponse(responseCode = "404", description = "Maintenance template not found"),
+            @ApiResponse(responseCode = "409", description = "Maintenance template is in use by existing records")
     })
-    @DeleteMapping("/templates/{id}")
+    @DeleteMapping("/templates/{name}")
     public ResponseEntity<Void> deleteMaintenanceTemplate(
-            @Parameter(description = "Unique ID of the maintenance template") @PathVariable Long id) {
-        deleteMaintenanceTemplateUseCase.execute(id);
+            @Parameter(description = "Name of the maintenance template") @PathVariable String name) {
+        deleteMaintenanceTemplateUseCase.execute(name);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete a maintenance part", description = "Permanently removes a maintenance part by ID. Requires Maintenance Technician or Admin role.")
+    @Operation(summary = "Delete a maintenance part", description = "Permanently removes a maintenance part by part number. Requires Maintenance Technician or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Maintenance part deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Maintenance part not found")
+            @ApiResponse(responseCode = "404", description = "Maintenance part not found"),
+            @ApiResponse(responseCode = "409", description = "Maintenance part is in use by existing records")
     })
-    @DeleteMapping("/parts/{id}")
+    @DeleteMapping("/parts/{partNumber}")
     public ResponseEntity<Void> deleteMaintenancePart(
-            @Parameter(description = "Unique ID of the maintenance part") @PathVariable Long id) {
-        deleteMaintenancePartUseCase.execute(id);
+            @Parameter(description = "Part number of the maintenance part") @PathVariable String partNumber) {
+        deleteMaintenancePartUseCase.execute(partNumber);
         return ResponseEntity.noContent().build();
     }
 

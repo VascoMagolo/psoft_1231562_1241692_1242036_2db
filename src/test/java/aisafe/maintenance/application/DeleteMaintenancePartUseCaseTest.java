@@ -37,28 +37,28 @@ class DeleteMaintenancePartUseCaseTest {
     @Test
     void ensureMaintenancePartIsDeletedSuccessfully() {
         MaintenancePart part = buildPart();
-        when(maintenancePartRepository.findById(1L)).thenReturn(Optional.of(part));
+        when(maintenancePartRepository.findByPartNumber("PN-001")).thenReturn(Optional.of(part));
         when(maintenanceRecordRepository.existsByPart(part)).thenReturn(false);
 
-        assertDoesNotThrow(() -> deleteMaintenancePart.execute(1L));
+        assertDoesNotThrow(() -> deleteMaintenancePart.execute("PN-001"));
         verify(maintenancePartRepository).delete(any(MaintenancePart.class));
     }
 
     @Test
     void ensureExceptionWhenMaintenancePartNotFound() {
-        when(maintenancePartRepository.findById(99L)).thenReturn(Optional.empty());
+        when(maintenancePartRepository.findByPartNumber("UNKNOWN")).thenReturn(Optional.empty());
 
-        assertThrows(MaintenancePartNotFoundException.class, () -> deleteMaintenancePart.execute(99L));
+        assertThrows(MaintenancePartNotFoundException.class, () -> deleteMaintenancePart.execute("UNKNOWN"));
         verify(maintenancePartRepository, never()).delete(any());
     }
 
     @Test
     void ensureExceptionWhenMaintenancePartIsInUse() {
         MaintenancePart part = buildPart();
-        when(maintenancePartRepository.findById(1L)).thenReturn(Optional.of(part));
+        when(maintenancePartRepository.findByPartNumber("PN-001")).thenReturn(Optional.of(part));
         when(maintenanceRecordRepository.existsByPart(part)).thenReturn(true);
 
-        assertThrows(ResourceInUseException.class, () -> deleteMaintenancePart.execute(1L));
+        assertThrows(ResourceInUseException.class, () -> deleteMaintenancePart.execute("PN-001"));
         verify(maintenancePartRepository, never()).delete(any());
     }
 }
