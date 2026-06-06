@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import aisafe.shared.infrastructure.ETagUtils;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
@@ -156,7 +158,8 @@ public class RouteController {
             @Parameter(description = "Unique ID of the route to be updated") @PathVariable Long id,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
             @Valid @RequestBody UpdateRouteRequest request) {
-        return ResponseEntity.ok(mapToModel(updateRoute.execute(id, request)));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(mapToModel(updateRoute.execute(id, request, version)));
     }
 
     /**
@@ -178,8 +181,10 @@ public class RouteController {
     public ResponseEntity<EntityModel<RouteResponse>> deactivateRoute(
             @Parameter(description = "Unique ID of the route to deactivate") @PathVariable Long id,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch) {
-        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(id)));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(id, version)));
     }
+
 
     /**
      * Retrieves all active routes departing from a specific airport.

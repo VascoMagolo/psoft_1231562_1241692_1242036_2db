@@ -8,8 +8,8 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case responsible for updating the details of an existing route.
@@ -28,10 +28,13 @@ public class UpdateRouteUseCase {
      * @param request the data to update
      * @return the updated route
      */
-    @Transactional
-    public Route execute(Long id, UpdateRouteRequest request) {
+    public Route execute(Long id, UpdateRouteRequest request, Long clientVersion) {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
+
+        if (!route.getVersion().equals(clientVersion)) {
+            throw new ObjectOptimisticLockingFailureException(Route.class, route.getId());
+        }
 
         route.updateRoute(
                 request.estimatedFlightTime(),

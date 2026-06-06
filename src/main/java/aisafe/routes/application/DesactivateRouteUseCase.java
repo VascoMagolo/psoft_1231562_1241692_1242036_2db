@@ -7,8 +7,8 @@ import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case responsible for deactivating an existing route.
@@ -26,10 +26,13 @@ public class DesactivateRouteUseCase {
      * @param id the unique identifier of the route to be deactivated
      * @return the deactivated route
      */
-    @Transactional
-    public Route execute(Long id) {
+    public Route execute(Long id, Long clientVersion) {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new RouteNotFoundException(id.toString()));
+
+        if (!route.getVersion().equals(clientVersion)) {
+            throw new ObjectOptimisticLockingFailureException(Route.class, route.getId());
+        }
 
         String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         route.deactivate();
