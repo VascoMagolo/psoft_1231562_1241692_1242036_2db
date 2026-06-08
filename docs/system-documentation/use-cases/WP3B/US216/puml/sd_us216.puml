@@ -1,0 +1,50 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "UpdateAirportDetailsUseCase" as UC
+participant "Airport" as Entity
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : PATCH /api/airports/{iataCode}/details\n{ operationalHours?, imagePath?,\n  contacts?: [{ type, value, description }],\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+activate Ctrl
+
+note right of Ctrl
+  UpdateAirportDetailsRequest:
+  - all fields optional
+  - only non-null fields are applied
+end note
+
+Ctrl -> UC : execute(iataCode: String,\n  request: UpdateAirportDetailsRequest)
+activate UC
+
+UC -> Repo : findByIataCodeCode(iataCode)
+activate Repo
+Repo -> DB : SELECT FROM airport WHERE code = ?
+activate DB
+DB --> Repo : airport record
+deactivate DB
+Repo --> UC : Airport
+deactivate Repo
+
+UC -> Entity : updateDetails(operationalHours, contacts,\n  imagePath, services, terminals, gates)
+activate Entity
+note right of Entity : Only non-null fields\nare updated on the entity
+Entity --> UC
+deactivate Entity
+
+UC -> Repo : save(airport)
+activate Repo
+Repo -> DB : UPDATE airport\n+ replace collection tables
+activate DB
+DB --> Repo
+deactivate DB
+deactivate Repo
+
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, status,\n  operationalHours, contacts,\n  services, terminals, gates, ... }
+deactivate UC
+
+Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links
+deactivate Ctrl
+@enduml

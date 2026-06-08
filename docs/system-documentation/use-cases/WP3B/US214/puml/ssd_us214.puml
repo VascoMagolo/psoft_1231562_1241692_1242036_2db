@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+BO -> Sys : getBusiestAirports()
+activate Sys
+Sys --> BO : returns list of AirportStatistics sorted by route count (descending)
+deactivate Sys
+@enduml

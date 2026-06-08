@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "System" as Sys
+
+ATCC -> Sys : listAirportsGrouped(by)
+activate Sys
+Sys --> ATCC : returns list of AirportGroups (grouped by region or country)
+deactivate Sys
+@enduml

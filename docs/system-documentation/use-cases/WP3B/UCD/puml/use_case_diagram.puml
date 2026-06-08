@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Backoffice Operator" as BO
+actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
+
+rectangle "Enhanced Airport Features (WP #2B)" {
+  usecase "US207 - Register airport with facilities and photo" as UC207
+  usecase "US208 - Update airport details (hours/contact)" as UC208
+  usecase "US209 - View routes to/from specific airport" as UC209
+  usecase "US210 - Stats on busiest airports" as UC210
+  usecase "US211 - View airports grouped by region" as UC211
+}
+
+BO --> UC207
+BO --> UC208
+BO --> UC210
+
+ATCC --> UC209
+ATCC --> UC211
+
+@enduml

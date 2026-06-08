@@ -1,0 +1,41 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AirportController" as Ctrl
+participant "ListAirportsByRegionUseCase" as UC
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/airports/grouped?by=region
+activate Ctrl
+
+note right of Ctrl
+  Query param:
+  - by: "region" (default) | "country"
+end note
+
+Ctrl -> UC : execute(by: String)
+activate UC
+
+UC -> Repo : findAll()
+activate Repo
+Repo -> DB : SELECT FROM airport
+activate DB
+DB --> Repo : all airports
+deactivate DB
+Repo --> UC : List<Airport>
+deactivate Repo
+
+note right of UC
+  Groups airports by region or country
+  (depending on 'by' param),
+  then sorts groups alphabetically.
+  Each group maps to AirportGroupResponse.
+end note
+
+UC --> Ctrl : List<AirportGroupResponse>\n[{ groupName: String,\n  airports: [AirportResponse] }]
+deactivate UC
+
+Ctrl --> ATCC : 200 OK\nCollectionModel<AirportGroupResponse>\nwith _links (self)
+deactivate Ctrl
+@enduml

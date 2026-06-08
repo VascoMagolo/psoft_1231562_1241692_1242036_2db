@@ -1,0 +1,46 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "AirportStatisticsUseCase" as UC
+participant "AirportRepository" as AirportRepo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/airports/statistics/busiest
+activate Ctrl
+
+Ctrl -> UC : execute()
+activate UC
+
+UC -> AirportRepo : findAll()
+activate AirportRepo
+AirportRepo -> DB : SELECT FROM airport
+activate DB
+DB --> AirportRepo : all airports
+deactivate DB
+AirportRepo --> UC : List<Airport>
+deactivate AirportRepo
+
+UC -> RouteRepo : findAll()
+activate RouteRepo
+RouteRepo -> DB : SELECT FROM route
+activate DB
+DB --> RouteRepo : all routes
+deactivate DB
+RouteRepo --> UC : List<Route>
+deactivate RouteRepo
+
+note right of UC
+  For each Airport:
+  counts routes where origin OR
+  destination matches iataCode,
+  then sorts descending by routeCount
+end note
+
+UC --> Ctrl : List<AirportStatisticsResponse>\n[{ iataCode, name, city,\n  country, routeCount }]
+deactivate UC
+
+Ctrl --> BO : 200 OK\nCollectionModel<EntityModel<AirportStatisticsResponse>>\nwith _links (airport ref per item)
+deactivate Ctrl
+@enduml

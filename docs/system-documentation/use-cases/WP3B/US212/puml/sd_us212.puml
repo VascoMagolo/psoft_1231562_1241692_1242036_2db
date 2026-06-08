@@ -1,0 +1,54 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AirportController" as Ctrl
+participant "RegisterAirportUseCase" as UC
+participant "Airport" as Entity
+participant "AirportRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : POST /api/airports\n{ iataCode, name, city, country, region,\n  timezone, latitude, longitude,\n  runways: [{ name, length, orientation }],\n  imagePath?, operationalHours?,\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+activate Ctrl
+
+note right of Ctrl
+  @Valid on RegisterAirportRequest:
+  - iataCode: 3 alphanumeric chars
+  - name, city, country, timezone: not blank
+  - latitude: [-90, 90], longitude: [-180, 180]
+  - runways: at least one entry required
+  - services, terminals, gates: optional
+end note
+
+Ctrl -> UC : execute(request: RegisterAirportRequest)
+activate UC
+
+UC -> Repo : existsByIataCodeCode(request.iataCode())
+activate Repo
+Repo --> UC : false
+deactivate Repo
+
+UC -> Entity : new Airport(iataCode, name, city, country,\n  region, timezone, lat, lon, runways)
+activate Entity
+Entity --> UC : airport
+deactivate Entity
+
+UC -> Entity : updateDetails(operationalHours, null,\n  imagePath, services, terminals, gates)
+activate Entity
+note right of Entity : Optional fields -- only\nnon-null values are applied
+Entity --> UC
+deactivate Entity
+
+UC -> Repo : save(airport)
+activate Repo
+Repo -> DB : INSERT INTO airport\n+ collection tables\n(runways, services, terminals, gates)
+activate DB
+DB --> Repo
+deactivate DB
+deactivate Repo
+
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, city, country,\n  status, coordinates, runways,\n  services, terminals, gates }
+deactivate UC
+
+Ctrl --> BO : 201 Created\nEntityModel<AirportResponse> with _links
+deactivate Ctrl
+@enduml
