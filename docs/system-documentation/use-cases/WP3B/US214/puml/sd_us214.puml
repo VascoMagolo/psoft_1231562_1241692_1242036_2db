@@ -1,46 +1,29 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as BO
-participant "AirportController" as Ctrl
-participant "AirportStatisticsUseCase" as UC
-participant "AirportRepository" as AirportRepo
-participant "RouteRepository" as RouteRepo
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "ListActiveRoutesUseCase" as UC
+participant "RouteRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : GET /api/airports/statistics/busiest
+BO -> Ctrl : GET /api/routes?status=active&sortBy={sortBy}
 activate Ctrl
 
-Ctrl -> UC : execute()
+Ctrl -> UC : execute(status="active", sortBy)
 activate UC
 
-UC -> AirportRepo : findAll()
-activate AirportRepo
-AirportRepo -> DB : SELECT FROM airport
+UC -> Repo : findActiveAndSort(sortBy)
+activate Repo
+Repo -> DB : SELECT * FROM route WHERE active = true ORDER BY sortBy
 activate DB
-DB --> AirportRepo : all airports
+DB --> Repo : returns sorted route records
 deactivate DB
-AirportRepo --> UC : List<Airport>
-deactivate AirportRepo
+Repo --> UC : returns list of sorted routes
+deactivate Repo
 
-UC -> RouteRepo : findAll()
-activate RouteRepo
-RouteRepo -> DB : SELECT FROM route
-activate DB
-DB --> RouteRepo : all routes
-deactivate DB
-RouteRepo --> UC : List<Route>
-deactivate RouteRepo
-
-note right of UC
-  For each Airport:
-  counts routes where origin OR
-  destination matches iataCode,
-  then sorts descending by routeCount
-end note
-
-UC --> Ctrl : List<AirportStatisticsResponse>\n[{ iataCode, name, city,\n  country, routeCount }]
+UC --> Ctrl : returns List<RouteResponse>
 deactivate UC
 
-Ctrl --> BO : 200 OK\nCollectionModel<EntityModel<AirportStatisticsResponse>>\nwith _links (airport ref per item)
+Ctrl --> BO : returns list of active Route details sorted by criteria
 deactivate Ctrl
 @enduml

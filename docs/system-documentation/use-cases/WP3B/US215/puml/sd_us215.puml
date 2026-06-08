@@ -1,45 +1,40 @@
 @startuml
 autonumber
-actor "ATCC" as ATCC
-participant "AirportController" as Ctrl
-participant "ViewAirportRoutesUseCase" as UC
-participant "AirportRepository" as AirportRepo
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "ListActiveRoutesUseCase" as UC
 participant "RouteRepository" as RouteRepo
+participant "AirportRepository" as AirportRepo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/airports/{iataCode}/routes
+BO -> Ctrl : GET /api/routes?status=active&sortBy={sortBy}
 activate Ctrl
 
-Ctrl -> UC : execute(iataCode: String)
+Ctrl -> UC : execute(status="active", sortBy)
 activate UC
 
-UC -> AirportRepo : existsByIataCodeCode(iataCode)
-activate AirportRepo
-AirportRepo -> DB : SELECT EXISTS FROM airport WHERE code = ?
+UC -> RouteRepo : findActiveRoutes()
+activate RouteRepo
+RouteRepo -> DB : SELECT * FROM route WHERE active = true
 activate DB
-DB --> AirportRepo : true / false
+DB --> RouteRepo : returns active route records
 deactivate DB
-AirportRepo --> UC : boolean
-deactivate AirportRepo
+RouteRepo --> UC : returns list of active routes
+deactivate RouteRepo
 
-alt Airport exists
-  UC -> RouteRepo : findByOriginOrDestination(iataCode)
-  activate RouteRepo
-  RouteRepo -> DB : SELECT FROM route\nWHERE origin_iata_code = ?\nOR destination_iata_code = ?
-  activate DB
-  DB --> RouteRepo : route records
-  deactivate DB
-  RouteRepo --> UC : List<RouteResponse>
-  deactivate RouteRepo
+alt sortBy == "distance"
+    loop for each route
+        UC -> AirportRepo : findCoordinates(route.originIata, route.destinationIata)
+        activate AirportRepo
+        AirportRepo --> UC : returns origin and destination Airports
+        deactivate AirportRepo
+    end
 
-  UC --> Ctrl : List<RouteResponse>\n[{ id, originIataCode,\n  destinationIataCode,\n  estimatedFlightTime,\n  minimumRange, minimumCapacity,\n  active }]
-  deactivate UC
-
-  Ctrl --> ATCC : 200 OK\nCollectionModel<EntityModel<RouteResponse>>\nwith _links (self, airport)
-else Airport not found
-  UC --> Ctrl : throws AirportNotFoundException
-  Ctrl --> ATCC : 404 Not Found\n{ message: "Airport with IATA code '...' not found." }
 end
 
+UC --> Ctrl : returns List<RouteResponse>
+deactivate UC
+
+Ctrl --> BO : returns list of active Route details sorted by criteria
 deactivate Ctrl
 @enduml

@@ -61,6 +61,12 @@ class RouteControllerTest {
     private DeleteRouteUseCase deleteRoute;
 
     @MockitoBean
+    private ListActiveRoutesUseCase listActiveRoutes;
+
+    @MockitoBean
+    private SearchAlternativeRoutesUseCase searchAlternativeRoutes;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

@@ -1,18 +1,18 @@
-# WP2B - Airport Management (Extended)
+# WP3 - Flight & Network Management
 
-This package documents the extended airport use cases currently implemented in `src/main/java/aisafe/airports`.
+This package documents the flight scheduling and network calculation use cases currently implemented in `src/main/java/aisafe/flights` and `src/main/java/aisafe/routes`.
 
 ## Covered use cases
 
-- `US207` - Register airport with detailed facilities (`POST /api/airports`)
-- `US208` - Update airport details (`PATCH /api/airports/{iataCode}/details`)
-- `US209` - View routes to/from a specific airport (`GET /api/airports/{iataCode}/routes`)
-- `US210` - Stats on busiest airports (`GET /api/airports/statistics/busiest`)
-- `US211` - View airports grouped by region or country (`GET /api/airports/grouped`)
+- `US212` - Assign aircraft to a route to create a scheduled flight (`POST /api/flights`)
+- `US213` - View scheduled flights by aircraft (`GET /api/flights?aircraftId={id}`)
+- `US214` - List active routes sorted by popularity or distance (`GET /api/routes?status=active&sortBy={param}`)
+- `US215` - Calculate the total distance covered by all routes in my network (`GET /api/network/total-distance`)
+- `US216` - Search for alternative routes between two airports (`GET /api/routes/alternatives?origin={iataA}&destination={iataB}`)
 
 ## Notes
 
-- `US209` returns `List<RouteResponse>` DTOs sourced from the routes bounded context.
-- `US210` ranks airports by total number of associated routes descending.
-- `US211` supports grouping by `region` (default) or `country` via query parameter.
-- All diagrams are stored as PlantUML source in each `US` folder under `puml/`.
+- `US212` introduces `Flight` as a new aggregate root to independently manage schedule overlaps and validate aircraft range capacities against route distances.
+- `US214` and `US215` calculate segment distances dynamically based on the geographic coordinates (latitude/longitude) of the associated `Airport` entities, ensuring the network state is always accurate.
+- `US216` finds indirect flights (routes with layovers) between two airports, instead of just the direct connection.
+- All diagrams (SSD, SD, and UCD) are stored as PlantUML source in each `US` folder under `puml/`.

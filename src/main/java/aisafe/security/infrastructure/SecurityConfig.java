@@ -67,6 +67,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         // WP #3A - Routes
+                        .requestMatchers(HttpMethod.POST, "/api/flights").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/flights").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/network/total-distance").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/routes/alternatives").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/routes").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/routes/*").hasAnyRole("ADMIN")
                         // WP #4 - Maintenance
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/templates").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")

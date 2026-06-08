@@ -1,41 +1,29 @@
 @startuml
 autonumber
-actor "ATCC" as ATCC
-participant "AirportController" as Ctrl
-participant "ListAirportsByRegionUseCase" as UC
-participant "AirportRepository" as Repo
+actor "ATCC" as BO
+participant "FlightController" as Ctrl
+participant "GetFlightsByAircraftUseCase" as UC
+participant "FlightRepository" as Repo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/airports/grouped?by=region
+BO -> Ctrl : GET /api/flights?aircraftId={aircraftId}
 activate Ctrl
 
-note right of Ctrl
-  Query param:
-  - by: "region" (default) | "country"
-end note
-
-Ctrl -> UC : execute(by: String)
+Ctrl -> UC : execute(aircraftId)
 activate UC
 
-UC -> Repo : findAll()
+UC -> Repo : findByAircraftId(aircraftId)
 activate Repo
-Repo -> DB : SELECT FROM airport
+Repo -> DB : SELECT * FROM flight WHERE aircraft_id = aircraftId
 activate DB
-DB --> Repo : all airports
+DB --> Repo : returns flight records
 deactivate DB
-Repo --> UC : List<Airport>
+Repo --> UC : returns list of flights
 deactivate Repo
 
-note right of UC
-  Groups airports by region or country
-  (depending on 'by' param),
-  then sorts groups alphabetically.
-  Each group maps to AirportGroupResponse.
-end note
-
-UC --> Ctrl : List<AirportGroupResponse>\n[{ groupName: String,\n  airports: [AirportResponse] }]
+UC --> Ctrl : returns List<FlightResponse>
 deactivate UC
 
-Ctrl --> ATCC : 200 OK\nCollectionModel<AirportGroupResponse>\nwith _links (self)
+Ctrl --> BO : returns list of Scheduled Flight details
 deactivate Ctrl
 @enduml

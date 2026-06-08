@@ -13,6 +13,7 @@ public interface RouteRepository {
     boolean existsById(Long id);
     void delete(Route route);
     List<Route> findAll();
+    List<Route> findAllActive();
     PaginatedResult<Route> findAll(int pageNumber, int pageSize);
     PaginatedResult<Route> findByOrigin(IataCode origin, int pageNumber, int pageSize);
     PaginatedResult<Route> findByDestination(IataCode destination, int pageNumber, int pageSize);

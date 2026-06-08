@@ -1,10 +1,10 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as BO
+actor "ATCC" as BO
 participant "System" as Sys
 
-BO -> Sys : updateAirportDetails(iataCode, operationalHours, contacts, imagePath, services, terminals, gates)
+BO -> Sys : searchAlternativeRoutes(originIata, destinationIata)
 activate Sys
-Sys --> BO : returns updated Airport details
+Sys --> BO : returns list of alternative Route paths
 deactivate Sys
 @enduml

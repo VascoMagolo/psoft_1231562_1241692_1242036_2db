@@ -1,10 +1,10 @@
 @startuml
 autonumber
-actor "ATCC" as ATCC
+actor "ATCC" as BO
 participant "System" as Sys
 
-ATCC -> Sys : viewAirportRoutes(iataCode)
+BO -> Sys : getActiveRoutes(status, sortBy)
 activate Sys
-Sys --> ATCC : returns list of Routes departing from or arriving at airport
+Sys --> BO : returns list of active Route details sorted by criteria
 deactivate Sys
 @enduml

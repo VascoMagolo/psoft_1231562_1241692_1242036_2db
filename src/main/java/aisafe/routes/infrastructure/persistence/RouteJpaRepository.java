@@ -64,6 +64,13 @@ public class RouteJpaRepository implements RouteRepository {
     }
 
     @Override
+    public List<Route> findAllActive() {
+        return springRepo.findByActiveTrue().stream()
+                .map(RouteMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public PaginatedResult<Route> findAll(int pageNumber, int pageSize) {
         Page<RouteJpaEntity> page = springRepo.findAll(PageRequest.of(pageNumber, pageSize));
         return new PaginatedResult<>(page.map(RouteMapper::toDomain).toList(), page.getTotalElements());

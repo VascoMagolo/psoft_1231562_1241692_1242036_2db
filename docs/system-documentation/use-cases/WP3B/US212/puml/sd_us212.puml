@@ -1,54 +1,52 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as BO
-participant "AirportController" as Ctrl
-participant "RegisterAirportUseCase" as UC
-participant "Airport" as Entity
-participant "AirportRepository" as Repo
+actor "ATCC" as BO
+participant "FlightController" as Ctrl
+participant "ScheduleFlightUseCase" as UC
+participant "RouteRepository" as RouteRepo
+participant "AircraftRepository" as AcRepo
+participant "FlightRepository" as FlightRepo
+participant "Flight" as Entity
 database "Database" as DB
 
-BO -> Ctrl : POST /api/airports\n{ iataCode, name, city, country, region,\n  timezone, latitude, longitude,\n  runways: [{ name, length, orientation }],\n  imagePath?, operationalHours?,\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+BO -> Ctrl : POST /api/flights\n(aircraftId, routeId, departureDateTime, arrivalDateTime)
 activate Ctrl
 
-note right of Ctrl
-  @Valid on RegisterAirportRequest:
-  - iataCode: 3 alphanumeric chars
-  - name, city, country, timezone: not blank
-  - latitude: [-90, 90], longitude: [-180, 180]
-  - runways: at least one entry required
-  - services, terminals, gates: optional
-end note
-
-Ctrl -> UC : execute(request: RegisterAirportRequest)
+Ctrl -> UC : execute(aircraftId, routeId, departureDateTime, arrivalDateTime)
 activate UC
 
-UC -> Repo : existsByIataCodeCode(request.iataCode())
-activate Repo
-Repo --> UC : false
-deactivate Repo
+UC -> RouteRepo : findById(routeId)
+activate RouteRepo
+RouteRepo --> UC : returns route details
+deactivate RouteRepo
 
-UC -> Entity : new Airport(iataCode, name, city, country,\n  region, timezone, lat, lon, runways)
+UC -> AcRepo : findById(aircraftId)
+activate AcRepo
+AcRepo --> UC : returns aircraft details
+deactivate AcRepo
+
+UC -> FlightRepo : hasOverlappingFlights(aircraftId, departureDateTime, arrivalDateTime)
+activate FlightRepo
+FlightRepo --> UC : returns false
+deactivate FlightRepo
+
+UC -> Entity : new Flight(route, aircraft, departureDateTime, arrivalDateTime)
 activate Entity
-Entity --> UC : airport
+Entity --> UC : returns flight entity
 deactivate Entity
 
-UC -> Entity : updateDetails(operationalHours, null,\n  imagePath, services, terminals, gates)
-activate Entity
-note right of Entity : Optional fields -- only\nnon-null values are applied
-Entity --> UC
-deactivate Entity
-
-UC -> Repo : save(airport)
-activate Repo
-Repo -> DB : INSERT INTO airport\n+ collection tables\n(runways, services, terminals, gates)
+UC -> FlightRepo : save(flight)
+activate FlightRepo
+FlightRepo -> DB : INSERT INTO flight (route_id, aircraft_id, departure, arrival)
 activate DB
-DB --> Repo
+DB --> FlightRepo : returns success
 deactivate DB
-deactivate Repo
+FlightRepo --> UC : returns saved flight
+deactivate FlightRepo
 
-UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, city, country,\n  status, coordinates, runways,\n  services, terminals, gates }
+UC --> Ctrl : FlightResponse.from(flight)
 deactivate UC
 
-Ctrl --> BO : 201 Created\nEntityModel<AirportResponse> with _links
+Ctrl --> BO : returns created scheduled Flight details
 deactivate Ctrl
 @enduml

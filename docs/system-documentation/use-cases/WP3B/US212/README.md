@@ -1,47 +1,47 @@
-# US207 -- Register Airport with Detailed Facilities
+# US212 -- Assign Aircraft to Route (Scheduled Flight)
 
 ## User Story
 
-> As a **Backoffice Operator**, I want to register an airport with optional photos and detailed facilities information (terminals, gates, services).
+> As an **ATCC**, I want to assign an aircraft to a route for a specific date and time to create a scheduled flight. These should comply with range requirements, airplane and airport availability.
 
 ## Acceptance Criteria
 
-- All requirements from US106 apply.
-- Additionally, the registration request may include: image path, services (list of strings), terminals (list of names), gates (list of identifiers).
-- All facility fields are optional; the airport can be registered without them and updated later via US208.
-- On success the system returns HTTP 201 with the full airport representation including facilities.
+- The request must include the aircraft ID, route ID, departure datetime, and arrival datetime.
+- The system must validate that the route's distance does not exceed the aircraft's maximum range.
+- The system must validate that the aircraft is available (no overlapping flights in the given timeframe).
+- On success, the system returns HTTP 201 with the created flight representation.
 
 ## Pre-conditions
 
-- The actor is authenticated as a Backoffice Operator.
-- No airport with the given IATA code exists in the system.
+- The actor is authenticated as an ATCC (Backoffice Operator).
+- Both the specified Aircraft and Route must exist in the system.
 
 ## Post-conditions
 
-- A new `Airport` entity is persisted with status `OPERATIONAL`.
-- All provided facilities (services, terminals, gates, image) are stored.
+- A new `Flight` entity is persisted in the database, linking the aircraft and the route for the specified timeframe.
 
 ## Main Success Scenario
 
-1. The actor sends `POST /api/airports` with the required fields and optional facility fields.
-2. The system validates all mandatory fields (same as US106).
-3. The system creates the `Airport` aggregate and immediately applies the provided facilities via `updateDetails`.
-4. The system persists the airport and returns HTTP 201.
+1. The actor sends `POST /api/flights` with the required assignment details.
+2. The system retrieves the specified Route and Aircraft.
+3. The system executes domain validations (range capacity and schedule overlap).
+4. The system creates the `Flight` aggregate and persists it.
+5. The system returns HTTP 201 Created with the scheduled flight details.
 
 ## Alternative / Exception Flows
 
 | Step | Condition                         | System Response |
 | ---- | --------------------------------- | --------------- |
-| 2    | Required field missing or invalid | HTTP 400        |
-| 3    | IATA code already registered      | HTTP 409        |
+| 2    | Route or Aircraft not found       | HTTP 404 Not Found |
+| 3    | Route distance > Aircraft range   | HTTP 400 Bad Request (Business Rule Violation) |
+| 3    | Aircraft schedule overlaps        | HTTP 409 Conflict (Aircraft Unavailable) |
 
 ## Design Justification
 
-- US207 extends US106: the same `POST /api/airports` endpoint and `RegisterAirportRequest` DTO are used. The request already supports the optional facility fields, so no separate endpoint is needed.
-- Facilities are stored as `@ElementCollection` mapped to separate join tables (`airport_services`, `airport_terminals`, `airport_gates`). This avoids a separate entity lifecycle for simple list-of-string collections while still allowing efficient replacement via `updateDetails`.
-- `updateDetails` applies a null-check pattern: only non-null fields are overwritten, allowing partial facility registration without clearing existing data.
+- A dedicated `FlightController` and `FlightRepository` were introduced because a Scheduled Flight is a core aggregate in this domain. Coupling it to the Route or Aircraft controllers would violate the Single Responsibility Principle.
+- Validations like `hasOverlappingFlights` are executed directly at the Repository/Database level to ensure data integrity and performance, rather than loading all aircraft flights into memory.
 
 ## Sequence Diagrams
 
-- [System Sequence Diagram](svg/ssd_us207.svg)
-- [Sequence Diagram](svg/sd_us207.svg)
+- [System Sequence Diagram](svg/ssd_us212.svg)
+- [Sequence Diagram](svg/sd_us212.svg)

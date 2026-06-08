@@ -1,10 +1,10 @@
 @startuml
 autonumber
-actor "ATCC" as ATCC
+actor "ATCC" as BO
 participant "System" as Sys
 
-ATCC -> Sys : listAirportsGrouped(by)
+BO -> Sys : getScheduledFlights(aircraftId)
 activate Sys
-Sys --> ATCC : returns list of AirportGroups (grouped by region or country)
+Sys --> BO : returns list of Scheduled Flight details for the aircraft
 deactivate Sys
 @enduml

@@ -1,46 +1,43 @@
-# US209 -- View Routes to/from an Airport
+# US215 -- Calculate Total Network Distance
 
 ## User Story
 
-> As an **ATCC**, I want to view all routes that depart from or arrive at a specific airport.
+> As an **ATCC**, I want to calculate the total distance covered by all routes in my network.
 
 ## Acceptance Criteria
 
-- The system returns all routes where the airport is either the origin or the destination.
-- The airport must exist; otherwise HTTP 404 is returned.
-- An empty list is returned if the airport has no associated routes.
-- The system returns HTTP 200.
+- The system must evaluate all active connections (routes) in the network.
+- The total distance must be calculated dynamically based on airport coordinates.
+- On success, the system returns HTTP 200 with the aggregated total and the measurement unit.
 
 ## Pre-conditions
 
 - The actor is authenticated as an ATCC.
-- The target airport exists.
 
 ## Post-conditions
 
-- No state change. Read-only operation.
+- None (Read-only operation).
 
 ## Main Success Scenario
 
-1. The actor sends `GET /api/airports/{iataCode}/routes`.
-2. The system verifies the airport exists.
-3. The system queries routes where `originAirport.iataCode = iataCode OR destinationAirport.iataCode = iataCode`.
-4. The system returns HTTP 200 with the list of routes.
+1. The actor sends `GET /api/network/total-distance`.
+2. The system retrieves all routes representing the network.
+3. The system iterates through the routes, fetches the respective origin and destination airports, and calculates the geographic distance for each segment.
+4. The system sums the distances.
+5. The system returns HTTP 200 OK with the aggregated total value.
 
 ## Alternative / Exception Flows
 
-| Step | Condition                        | System Response          |
-| ---- | -------------------------------- | ------------------------ |
-| 2    | Airport not found                | HTTP 404                 |
-| 4    | Airport exists but has no routes | HTTP 200 with empty list |
+| Step | Condition                         | System Response |
+| ---- | --------------------------------- | --------------- |
+| 2    | No routes exist in the network    | HTTP 200 OK (Total = 0) |
 
 ## Design Justification
 
-- Airport existence is verified before querying routes (`existsByIataCodeCode`) to fail fast with a meaningful 404 rather than silently returning an empty list for a nonexistent airport.
-- The route query crosses bounded context boundaries (Airports → Routes). Rather than coupling the Airport aggregate to Route entities, the `ViewAirportRoutesUseCase` depends on both `AirportRepository` and `RouteRepository` directly -- a deliberate application-layer cross-context coordination.
-- `Route` entities are returned directly (not wrapped in a DTO) at this stage; this can be refined if the Route representation needs to be projected differently for this endpoint.
+- The term "network" conceptually encompasses the relationships (routes) between nodes (airports). Therefore, calculating the network distance requires retrieving route configurations and computing the Haversine distance on-the-fly using the `AirportRepository`.
+- Returning a dedicated DTO (`TotalDistanceResponse`) allows the inclusion of metadata, such as the unit of measurement (e.g., kilometers or nautical miles), making the API self-documenting.
 
 ## Sequence Diagrams
 
-- [System Sequence Diagram](svg/ssd_us209.svg)
-- [Sequence Diagram](svg/sd_us209.svg)
+- [System Sequence Diagram](svg/ssd_us215.svg)
+- [Sequence Diagram](svg/sd_us215.svg)

@@ -1,6 +1,8 @@
 package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
+import aisafe.routes.application.dtos.ActiveRouteResponse;
+import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
@@ -45,6 +47,8 @@ public class RouteController {
     private final ListRoutesFromAirportUseCase listRoutesFromAirport;
     private final SearchRoutesUseCase searchRoutes;
     private final DeleteRouteUseCase deleteRoute;
+    private final ListActiveRoutesUseCase listActiveRoutes;
+    private final SearchAlternativeRoutesUseCase searchAlternativeRoutes;
 
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
@@ -53,7 +57,9 @@ public class RouteController {
                            ViewRouteDetailsUseCase viewRouteDetails,
                            ListRoutesFromAirportUseCase listRoutesFromAirport,
                            SearchRoutesUseCase searchRoutes,
-                           DeleteRouteUseCase deleteRoute) {
+                           DeleteRouteUseCase deleteRoute,
+                           ListActiveRoutesUseCase listActiveRoutes,
+                           SearchAlternativeRoutesUseCase searchAlternativeRoutes) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -62,6 +68,8 @@ public class RouteController {
         this.listRoutesFromAirport = listRoutesFromAirport;
         this.searchRoutes = searchRoutes;
         this.deleteRoute = deleteRoute;
+        this.listActiveRoutes = listActiveRoutes;
+        this.searchAlternativeRoutes = searchAlternativeRoutes;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
@@ -104,6 +112,35 @@ public class RouteController {
     public ResponseEntity<EntityModel<RouteResponse>> createRoute(
             @Valid @RequestBody CreateRouteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToModel(createRoute.execute(request)));
+    }
+
+    @Operation(summary = "List active routes", description = "Lists active routes sorted by distance or popularity. (US214)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active routes retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid status or sortBy parameter")
+    })
+    @GetMapping
+    public ResponseEntity<CollectionModel<ActiveRouteResponse>> getActiveRoutes(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy) {
+        List<ActiveRouteResponse> routes = listActiveRoutes.execute(status, sortBy);
+        return ResponseEntity.ok(CollectionModel.of(routes,
+                linkTo(methodOn(RouteController.class).getActiveRoutes(status, sortBy)).withSelfRel()));
+    }
+
+    @Operation(summary = "Search alternative routes", description = "Finds indirect active route paths between two airports. (US216)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Alternative routes retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid origin or destination"),
+            @ApiResponse(responseCode = "404", description = "Airport not found")
+    })
+    @GetMapping("/alternatives")
+    public ResponseEntity<CollectionModel<AlternativeRouteResponse>> getAlternativeRoutes(
+            @RequestParam String origin,
+            @RequestParam String destination) {
+        List<AlternativeRouteResponse> alternatives = searchAlternativeRoutes.execute(origin, destination);
+        return ResponseEntity.ok(CollectionModel.of(alternatives,
+                linkTo(methodOn(RouteController.class).getAlternativeRoutes(origin, destination)).withSelfRel()));
     }
 
     /**

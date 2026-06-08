@@ -12,4 +12,5 @@ public interface SpringDataRouteRepository extends JpaRepository<RouteJpaEntity,
     Page<RouteJpaEntity> findByOriginCodeAndDestinationCode(String originCode, String destinationCode, Pageable pageable);
     boolean existsByOriginCodeAndDestinationCode(String originCode, String destinationCode);
     List<RouteJpaEntity> findByOriginCodeOrDestinationCode(String originCode, String destinationCode);
+    List<RouteJpaEntity> findByActiveTrue();
 }

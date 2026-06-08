@@ -1,50 +1,37 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as BO
-participant "AirportController" as Ctrl
-participant "UpdateAirportDetailsUseCase" as UC
-participant "Airport" as Entity
-participant "AirportRepository" as Repo
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "SearchAlternativeRoutesUseCase" as UC
+participant "NetworkGraphService" as GraphSvc
+participant "RouteRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : PATCH /api/airports/{iataCode}/details\n{ operationalHours?, imagePath?,\n  contacts?: [{ type, value, description }],\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+BO -> Ctrl : GET /api/routes/alternatives?origin={originIata}&destination={destinationIata}
 activate Ctrl
 
-note right of Ctrl
-  UpdateAirportDetailsRequest:
-  - all fields optional
-  - only non-null fields are applied
-end note
-
-Ctrl -> UC : execute(iataCode: String,\n  request: UpdateAirportDetailsRequest)
+Ctrl -> UC : execute(originIata, destinationIata)
 activate UC
 
-UC -> Repo : findByIataCodeCode(iataCode)
+UC -> GraphSvc : findAlternativePaths(originIata, destinationIata)
+activate GraphSvc
+
+GraphSvc -> Repo : findAllActiveRoutes()
 activate Repo
-Repo -> DB : SELECT FROM airport WHERE code = ?
+Repo -> DB : SELECT * FROM route WHERE active = true
 activate DB
-DB --> Repo : airport record
+DB --> Repo : returns all active routes
 deactivate DB
-Repo --> UC : Airport
+Repo --> GraphSvc : returns allRoutes
 deactivate Repo
 
-UC -> Entity : updateDetails(operationalHours, contacts,\n  imagePath, services, terminals, gates)
-activate Entity
-note right of Entity : Only non-null fields\nare updated on the entity
-Entity --> UC
-deactivate Entity
 
-UC -> Repo : save(airport)
-activate Repo
-Repo -> DB : UPDATE airport\n+ replace collection tables
-activate DB
-DB --> Repo
-deactivate DB
-deactivate Repo
+GraphSvc --> UC : returns List<Path> alternativePaths
+deactivate GraphSvc
 
-UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, status,\n  operationalHours, contacts,\n  services, terminals, gates, ... }
+UC --> Ctrl : returns AlternativeRoutesResponse(alternativePaths)
 deactivate UC
 
-Ctrl --> BO : 200 OK\nEntityModel<AirportResponse> with _links
+Ctrl --> BO : returns list of alternative Route paths
 deactivate Ctrl
 @enduml
