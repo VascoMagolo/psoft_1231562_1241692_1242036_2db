@@ -35,7 +35,7 @@ class RegisterAircraftUseCaseTest {
     @Test
     void ensureAircraftIsRegisteredSuccessfully() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of("WiFi"));
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of("WiFi"));
 
         AircraftModel model = buildModel(180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
@@ -48,7 +48,7 @@ class RegisterAircraftUseCaseTest {
     @Test
     void ensureExceptionWhenModelNotFound() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "NON-EXISTENT", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "NON-EXISTENT", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
 
         when(modelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 
@@ -59,7 +59,7 @@ class RegisterAircraftUseCaseTest {
     @Test
     void ensureExceptionWhenRegistrationAlreadyExists() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
 
         AircraftModel model = buildModel(180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
@@ -72,7 +72,7 @@ class RegisterAircraftUseCaseTest {
     @Test
     void ensureExceptionWhenSeatCapacityExceedsModelMax() {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 200, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 200, 5000.0, "AVAILABLE", List.of());
 
         AircraftModel model = buildModel(150);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));

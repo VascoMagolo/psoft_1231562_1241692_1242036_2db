@@ -19,8 +19,8 @@ public class AircraftJpaEntity {
     @Version
     private Long version;
 
-    @Column(name = "registration_number", unique = true, nullable = false)
-    private String registrationNumber;
+    @Embedded
+    private RegistrationNumberJpaEmbeddable registrationNumber;
 
     @Column(nullable = false)
     private LocalDate manufacturingDate;
@@ -30,6 +30,9 @@ public class AircraftJpaEntity {
 
     @Column(nullable = false)
     private Integer seatCapacity;
+
+    @Column(name = "operational_range", nullable = false)
+    private Double range;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id")

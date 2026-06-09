@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
+Actor -> Sys : getTopUtilizedModels(criteria)
+activate Sys
+Sys --> Actor : returns top 5 models
+deactivate Sys
+@enduml

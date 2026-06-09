@@ -1,0 +1,12 @@
+# BONUS - Bonus Use Cases
+
+This package documents the bonus use cases implemented in the system.
+
+## Covered use cases
+
+- `US223` - View aircraft utilization rates over time with graphical representations (`GET /api/aircrafts/{registration}/utilization`)
+- `US224` - Search aircraft by specific features (e.g., WiFi-enabled) (`GET /api/aircrafts/search/feature`)
+
+## Notes
+
+- All diagrams are stored as PlantUML source in each `US` folder under `puml/`.

@@ -61,6 +61,18 @@ class AircraftControllerTest {
     private UpdateAircraftUseCase updateAircraftUseCase;
 
     @MockitoBean
+    private ViewCompatibleRoutesUseCase viewCompatibleRoutes;
+
+    @MockitoBean
+    private CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours;
+
+    @MockitoBean
+    private GetAircraftUtilizationUseCase getAircraftUtilization;
+
+    @MockitoBean
+    private SearchAircraftByFeatureUseCase searchAircraftByFeature;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -72,13 +84,37 @@ class AircraftControllerTest {
     void setUp() {
         sampleResponse = new ViewAircraftDetailsResponse(
                 "CS-TPA", "A320", Manufacturer.AIRBUS, LocalDate.of(2020, 1, 1),
-                AircraftStatus.AVAILABLE, 150, List.of("WiFi"), 0L);
+                AircraftStatus.AVAILABLE, 150, 5000.0, List.of("WiFi"), 0L);
+    }
+
+    @Test
+    void ensureGetAircraftUtilizationReturns200() throws Exception {
+        when(getAircraftUtilization.execute(any(), any(), any())).thenReturn(List.of(
+                new aisafe.aircrafts.application.dtos.UtilizationDataPointResponse(LocalDate.of(2023, 1, 1), 2.5, 10.4)
+        ));
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA/utilization")
+                        .param("startDate", "2023-01-01")
+                        .param("endDate", "2023-01-31"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].date").value("2023-01-01"));
+    }
+
+    @Test
+    void ensureGetOperationalHoursReturns200() throws Exception {
+        when(calculateAircraftOperationalHours.execute(any())).thenReturn(
+                new aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse("CS-TPA", 15.5));
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA/operational-hours"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"))
+                .andExpect(jsonPath("$.totalOperationalHours").value(15.5));
     }
 
     @Test
     void ensureRegisterAircraftReturns201() throws Exception {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
 
         when(registerAircraft.execute(any())).thenReturn(sampleResponse);
 
@@ -126,7 +162,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureUpdateAircraftReturns200() throws Exception {
-        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, null);
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, 5000.0, null);
 
         when(updateAircraftUseCase.execute(any(), any(), any())).thenReturn(sampleResponse);
 
@@ -158,6 +194,15 @@ class AircraftControllerTest {
 
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchAircraftByFeatureReturns200() throws Exception {
+        when(searchAircraftByFeature.execute(any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
+
+        mockMvc.perform(get("/api/aircrafts/search-by-feature")
+                        .param("feature", "WiFi"))
                 .andExpect(status().isOk());
     }
 }

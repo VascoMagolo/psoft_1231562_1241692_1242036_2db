@@ -14,8 +14,9 @@ public class AircraftMapper {
                 AircraftStatus.valueOf(entity.getStatus()),
                 entity.getManufacturingDate(),
                 pureModel,
-                new RegistrationNumber(entity.getRegistrationNumber()),
+                new RegistrationNumber(entity.getRegistrationNumber().getNumber()),
                 entity.getSeatCapacity(),
+                entity.getRange(),
                 entity.getFeatures()
         );
         aircraft.setVersion(entity.getVersion());
@@ -26,10 +27,11 @@ public class AircraftMapper {
         if (domain == null) return null;
 
         AircraftJpaEntity entity = new AircraftJpaEntity();
-        entity.setRegistrationNumber(domain.getRegistrationNumber().getNumber());
+        entity.setRegistrationNumber(new RegistrationNumberJpaEmbeddable(domain.getRegistrationNumber().getNumber()));
         entity.setManufacturingDate(domain.getManufacturingDate());
         entity.setStatus(domain.getStatus().name());
         entity.setSeatCapacity(domain.getSeatCapacity());
+        entity.setRange(domain.getRange());
         entity.setModel(jpaModel);
         entity.setFeatures(domain.getFeatures());
 

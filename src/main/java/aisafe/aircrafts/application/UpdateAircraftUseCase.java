@@ -35,10 +35,14 @@ public class UpdateAircraftUseCase {
         }
 
         if (request.seatCapacity() != null) {
-            aircraft.setSeatCapacity(request.seatCapacity());
-            if (request.seatCapacity() > aircraft.getSeatCapacity()) {
-                throw new AircraftInvalidFieldException("Seat capacity cannot be increased beyond the model's maximum seating capacity.");
+            if (request.seatCapacity() > aircraft.getModel().getMaximumSeatingCapacity()) {
+                throw new AircraftInvalidFieldException("Seat capacity cannot exceed the model's maximum seating capacity (" + aircraft.getModel().getMaximumSeatingCapacity() + ").");
             }
+            aircraft.setSeatCapacity(request.seatCapacity());
+        }
+
+        if (request.range() != null) {
+            aircraft.setRange(request.range());
         }
 
         if (request.features() != null) {

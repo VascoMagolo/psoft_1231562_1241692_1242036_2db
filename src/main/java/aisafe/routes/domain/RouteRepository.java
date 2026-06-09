@@ -19,4 +19,5 @@ public interface RouteRepository {
     PaginatedResult<Route> findByOriginAndDestination(IataCode origin, IataCode destination, int pageNumber, int pageSize);
     boolean existsByOriginAndDestination(IataCode origin, IataCode destination);
     List<Route> findByOriginOrDestination(IataCode origin, IataCode destination);
+    List<Route> findCompatibleRoutes(Double range, Integer capacity);
 }

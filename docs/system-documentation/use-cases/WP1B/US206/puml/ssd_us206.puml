@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
+Actor -> Sys : getOperationalHours(registrationNumber)
+activate Sys
+Sys --> Actor : returns operational hours
+deactivate Sys
+@enduml

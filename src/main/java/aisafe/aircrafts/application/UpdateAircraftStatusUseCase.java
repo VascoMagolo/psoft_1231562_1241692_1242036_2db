@@ -42,15 +42,6 @@ public class UpdateAircraftStatusUseCase {
     }
 
     private ViewAircraftDetailsResponse toDto(Aircraft aircraft) {
-        return new ViewAircraftDetailsResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getModel().getManufacturer(),
-                aircraft.getManufacturingDate(),
-                aircraft.getStatus(),
-                aircraft.getSeatCapacity(),
-                aircraft.getFeatures(),
-                aircraft.getVersion()
-        );
+        return ViewAircraftDetailsResponse.from(aircraft);
     }
 }

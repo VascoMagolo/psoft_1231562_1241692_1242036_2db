@@ -57,8 +57,11 @@ class AircraftModelTest {
     }
 
     @Test
-    void ensureBlankImagePathThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "  ", 180));
+    void ensureModelCanBeCreatedWithoutImage() {
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
+        assertNull(model.getImagePath());
+
+        AircraftModel model2 = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, " ", 180);
+        assertEquals(" ", model2.getImagePath());
     }
 }

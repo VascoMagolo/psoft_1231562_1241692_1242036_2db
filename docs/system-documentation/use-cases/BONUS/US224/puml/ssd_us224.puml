@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : searchAircraftByFeature(feature, pageable)
+activate Sys
+Sys --> Actor : returns a paginated list of matching aircraft
+deactivate Sys
+@enduml

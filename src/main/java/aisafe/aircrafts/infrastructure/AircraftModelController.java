@@ -37,15 +37,17 @@ public class AircraftModelController {
     private final DeleteAircraftModelUseCase deleteAircraftModel;
     private final UpdateAircraftModelUseCase updateAircraftModel;
     private final ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
+    private final GetTopUtilizedModelsUseCase getTopUtilizedModels;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
                                    ListAircraftModelsUseCase listAircraftModels,
-                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel, ViewAircraftModelDetailsUseCase viewAircraftModelDetails) {
+                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel, ViewAircraftModelDetailsUseCase viewAircraftModelDetails, GetTopUtilizedModelsUseCase getTopUtilizedModels) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
         this.deleteAircraftModel = deleteAircraftModel;
         this.updateAircraftModel = updateAircraftModel;
         this.viewAircraftModelDetails = viewAircraftModelDetails;
+        this.getTopUtilizedModels = getTopUtilizedModels;
     }
 
     @Operation(summary = "Register a new aircraft model")
@@ -141,5 +143,21 @@ public class AircraftModelController {
         entityModel.add(linkTo(methodOn(AircraftModelController.class).getAllAircraftModels(Pageable.unpaged(), null)).withRel("all-models"));
 
         return ResponseEntity.ok(entityModel);
+    }
+
+    @Operation(summary = "Get top 5 most utilized aircraft models", description = "Returns the top 5 most utilized aircraft models based on total flight hours or number of assignments. (US204)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Top utilized models returned successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid criteria supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/top-utilized")
+    public ResponseEntity<List<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> getTopUtilizedModels(
+            @Parameter(description = "Criteria for utilization ranking: 'HOURS' or 'ASSIGNMENTS'")
+            @RequestParam(required = true) String criteria) {
+
+        List<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse> response = getTopUtilizedModels.execute(criteria);
+        return ResponseEntity.ok(response);
     }
 }

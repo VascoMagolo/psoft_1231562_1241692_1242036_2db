@@ -42,6 +42,17 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
+    public PaginatedResult<Aircraft> searchAircraftByFeature(String feature, int pageNumber, int pageSize) {
+        var springPageable = PageRequest.of(pageNumber, pageSize);
+        var jpaPage = springRepo.searchAircraftsByFeature(feature, springPageable);
+
+        List<Aircraft> list = jpaPage.stream()
+                .map(jpaEntity -> AircraftMapper.toDomain(jpaEntity, AircraftModelMapper.toDomain(jpaEntity.getModel())))
+                .collect(Collectors.toList());
+
+        return new PaginatedResult<>(list, jpaPage.getTotalElements());
+    }
+    @Override
     public PaginatedResult<Aircraft> findAll(int pageNumber, int pageSize) {
         var springPageable = PageRequest.of(pageNumber, pageSize);
         var jpaPage = springRepo.findAll(springPageable);
@@ -55,13 +66,13 @@ public class AircraftJpaRepository implements AircraftRepository {
 
     @Override
     public Optional<Aircraft> findByRegistrationNumber(RegistrationNumber number) {
-        return springRepo.findByRegistrationNumber(number.getNumber())
+        return springRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(number.getNumber()))
                 .map(jpa -> AircraftMapper.toDomain(jpa, AircraftModelMapper.toDomain(jpa.getModel())));
     }
 
     @Override
     public boolean existsByRegistrationNumber(RegistrationNumber number) {
-        return springRepo.existsByRegistrationNumber(number.getNumber());
+        return springRepo.existsByRegistrationNumber(new RegistrationNumberJpaEmbeddable(number.getNumber()));
     }
 
     @Override
@@ -71,7 +82,7 @@ public class AircraftJpaRepository implements AircraftRepository {
 
     @Override
     public void save(Aircraft aircraft, Long clientVersion) {
-        AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
+        AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(aircraft.getRegistrationNumber().getNumber()))
                 .orElse(null);
 
         AircraftModelJpaEntity managedModel = modelSpringRepo.findByModelName(aircraft.getModel().getModelName())
@@ -94,7 +105,7 @@ public class AircraftJpaRepository implements AircraftRepository {
 
     @Override
     public void delete(Aircraft aircraft) {
-        AircraftJpaEntity jpaEntity = springRepo.findByRegistrationNumber(aircraft.getRegistrationNumber().getNumber())
+        AircraftJpaEntity jpaEntity = springRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(aircraft.getRegistrationNumber().getNumber()))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraft.getRegistrationNumber().getNumber()));
         springRepo.delete(jpaEntity);
     }

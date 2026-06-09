@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "SearchAircraftByFeatureUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/aircrafts/search/feature?feature=X&page=0&size=20
+activate Ctrl
+
+Ctrl -> UC : execute(feature: String, pageNumber, pageSize)
+activate UC
+
+UC -> Repo : searchAircraftByFeature(feature, pageNumber, pageSize)
+activate Repo
+Repo -> DB : SELECT * FROM aircrafts a\nJOIN aircraft_features f ON a.id = f.aircraft_id\nWHERE f.feature = ?\nLIMIT ? OFFSET ?
+activate DB
+DB --> Repo : PaginatedResult<Aircraft>
+deactivate DB
+Repo --> UC : PaginatedResult<Aircraft>
+deactivate Repo
+
+UC --> Ctrl : PaginatedResult<SearchAircraftUseCaseResponse>\n{ registrationNumber, model, status, seatCapacity }
+deactivate UC
+
+ATCC <-- Ctrl : 200 OK (HAL+JSON) with paged results
+deactivate Ctrl
+@enduml

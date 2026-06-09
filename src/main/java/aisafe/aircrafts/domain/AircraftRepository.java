@@ -13,6 +13,7 @@ public interface AircraftRepository {
     boolean existsByRegistrationNumber(RegistrationNumber registrationNumber);
     PaginatedResult<Aircraft> findAll(int pageNumber, int pageSize);
     PaginatedResult<Aircraft> searchAircrafts(String modelName, AircraftStatus status, Integer year, int pageNumber, int pageSize);
+    PaginatedResult<Aircraft> searchAircraftByFeature(String feature, int pageNumber, int pageSize);
     boolean anyAircraftExistsForModel(String modelName);
     void save(Aircraft aircraft, Long clientVersion);
     void delete(Aircraft aircraft);

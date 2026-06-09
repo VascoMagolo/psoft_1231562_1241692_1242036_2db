@@ -28,7 +28,7 @@ class UpdateAircraftStatusUseCaseTest {
     private Aircraft buildAircraft() {
         AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
         return new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model,
-                new RegistrationNumber("CS-TPA"), 150, List.of());
+                new RegistrationNumber("CS-TPA"), 150, 5000.0, List.of());
     }
 
     @Test

@@ -18,7 +18,11 @@ public interface SpringDataAircraftRepository extends JpaRepository<AircraftJpaE
                                             @Param("status") String status,
                                             @Param("year") Integer year,
                                             Pageable pageable);
-    Optional<AircraftJpaEntity> findByRegistrationNumber(String registrationNumber);
-    boolean existsByRegistrationNumber(String registrationNumber);
+
+    @Query ("SELECT a FROM AircraftJpaEntity a WHERE " +
+            "(:feature IN elements(a.features))")
+    Page<AircraftJpaEntity> searchAircraftsByFeature(@Param("feature") String feature, Pageable pageable);
+    Optional<AircraftJpaEntity> findByRegistrationNumber(RegistrationNumberJpaEmbeddable registrationNumber);
+    boolean existsByRegistrationNumber(RegistrationNumberJpaEmbeddable registrationNumber);
     boolean existsByModelModelName(String modelName);
 }

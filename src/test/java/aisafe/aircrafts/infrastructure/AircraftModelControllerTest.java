@@ -49,10 +49,33 @@ class AircraftModelControllerTest {
     private ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
 
     @MockitoBean
+    private GetTopUtilizedModelsUseCase getTopUtilizedModels;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @Test
+    void ensureGetTopUtilizedModelsReturns200() throws Exception {
+        when(getTopUtilizedModels.execute("HOURS")).thenReturn(List.of(new aisafe.aircrafts.application.dtos.TopUtilizedModelResponse("A320", 5000L)));
+
+        mockMvc.perform(get("/api/aircraftModels/top-utilized")
+                        .param("criteria", "HOURS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].modelName").value("A320"))
+                .andExpect(jsonPath("$[0].utilizationValue").value(5000));
+    }
+
+    @Test
+    void ensureGetTopUtilizedModelsWithInvalidCriteriaReturns400() throws Exception {
+        when(getTopUtilizedModels.execute("INVALID")).thenThrow(new IllegalArgumentException("Invalid criteria"));
+
+        mockMvc.perform(get("/api/aircraftModels/top-utilized")
+                        .param("criteria", "INVALID"))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     void ensureRegisterModelReturns201() throws Exception {
