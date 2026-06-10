@@ -2,11 +2,11 @@
 
 ## User Story
 
-> As an ATCC user, I want to search aircraft by model, status, and manufacturing year so I can quickly filter the fleet.
+> As an ATCC user, I want to search aircraft by model, status, manufacturing year, and specific features so I can quickly filter the fleet. (Note: Incorporates requirements of bonus US224).
 
 ## Acceptance Criteria
 
-- The search accepts optional `modelName`, `status`, and `year` query parameters.
+- The search accepts optional `modelName`, `status`, `year`, and `feature` query parameters.
 - Results are paginated.
 - The response is a page of `SearchAircraftUseCaseResponse` DTOs.
 - An empty result set still returns HTTP 200.
@@ -36,6 +36,7 @@
 
 - The controller keeps the paging contract by using `Pageable` and `PagedResourcesAssembler`.
 - The search output is a lightweight DTO so the API only exposes the fields needed for the listing screen.
+- Merged with US224 to provide a single, unified search endpoint for aircraft.
 
 ## Sequence Diagrams
 

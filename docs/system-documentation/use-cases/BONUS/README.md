@@ -5,7 +5,7 @@ This package documents the bonus use cases implemented in the system.
 ## Covered use cases
 
 - `US223` - View aircraft utilization rates over time with graphical representations (`GET /api/aircrafts/{registration}/utilization`)
-- `US224` - Search aircraft by specific features (e.g., WiFi-enabled) (`GET /api/aircrafts/search/feature`)
+- `US224` - Search aircraft by specific features (Merged with `US104` search endpoint)
 
 ## Notes
 

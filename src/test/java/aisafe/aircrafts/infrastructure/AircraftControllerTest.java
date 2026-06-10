@@ -70,9 +70,6 @@ class AircraftControllerTest {
     private GetAircraftUtilizationUseCase getAircraftUtilization;
 
     @MockitoBean
-    private SearchAircraftByFeatureUseCase searchAircraftByFeature;
-
-    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -190,7 +187,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureSearchAircraftReturns200() throws Exception {
-        when(searchAircraft.execute(any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
+        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
@@ -199,9 +196,9 @@ class AircraftControllerTest {
 
     @Test
     void ensureSearchAircraftByFeatureReturns200() throws Exception {
-        when(searchAircraftByFeature.execute(any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
+        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
-        mockMvc.perform(get("/api/aircrafts/search-by-feature")
+        mockMvc.perform(get("/api/aircrafts/search")
                         .param("feature", "WiFi"))
                 .andExpect(status().isOk());
     }

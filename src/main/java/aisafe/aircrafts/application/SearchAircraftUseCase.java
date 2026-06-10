@@ -31,7 +31,7 @@ public class SearchAircraftUseCase {
      * Search for aircrafts based on pure domain criteria.
      * ZERO Spring Data Pageable imports!
      */
-    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
+    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, String feature, int pageNumber, int pageSize) {
 
         AircraftStatus status = null;
         if (statusStr != null && !statusStr.isBlank()) {
@@ -41,7 +41,7 @@ public class SearchAircraftUseCase {
                 throw new AircraftInvalidFieldException("Invalid aircraft status: " + statusStr);
             }
         }
-        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
+        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, feature, pageNumber, pageSize);
 
         List<SearchAircraftUseCaseResponse> dtoList = domainResult.data().stream()
                 .map(SearchAircraftUseCaseResponse::from)

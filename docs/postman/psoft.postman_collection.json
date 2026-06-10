@@ -766,38 +766,6 @@
           "response": []
         },
         {
-          "name": "Search Aircraft by Feature [ATCC]",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{base_url}}/api/aircrafts/search-by-feature?feature=WiFi",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "aircrafts",
-                "search-by-feature"
-              ],
-              "query": [
-                {
-                  "key": "feature",
-                  "value": "WiFi"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "View Aircraft Utilization Rate [ATCC]",
           "protocolProfileBehavior": {
             "disableBodyPruning": true

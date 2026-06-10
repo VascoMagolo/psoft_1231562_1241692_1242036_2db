@@ -129,7 +129,7 @@ public class AircraftController {
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
-    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support. Supports ATCC real-time status viewing. (US104, US205)")
+    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model name, current status, year of manufacturing, or specific feature with pagination support. Supports ATCC real-time status viewing. (US104, US205)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -140,13 +140,14 @@ public class AircraftController {
             @Parameter(description = "Filter by technical model name") @RequestParam(required = false) String modelName,
             @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
             @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
+            @Parameter(description = "Filter by a specific feature (e.g., 'WiFi')") @RequestParam(required = false) String feature,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) {
 
         String statusStr = status != null ? status.name() : null;
 
         PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraft.execute(
-                modelName, statusStr, year, pageable.getPageNumber(), pageable.getPageSize()
+                modelName, statusStr, year, feature, pageable.getPageNumber(), pageable.getPageSize()
         );
 
         Page<SearchAircraftUseCaseResponse> resultsPage = new PageImpl<>(
@@ -155,35 +156,6 @@ public class AircraftController {
                 result.totalElements()
         );
 
-        PagedModel<EntityModel<SearchAircraftUseCaseResponse>> pagedModel =
-                assembler.toModel(resultsPage, aircraft -> EntityModel.of(aircraft)
-                        .add(linkTo(methodOn(AircraftController.class)
-                                .getAircraftByRegistrationNumber(aircraft.registrationNumber()))
-                                .withSelfRel()));
-
-        return ResponseEntity.ok(pagedModel);
-    }
-
-    @Operation(summary = "Search aircraft by feature", description = " Searches for aircraft that have a specific feature (e.g., WiFi-enabled, specific engine type). (US224)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid feature parameter supplied"),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
-    })
-    @GetMapping("/search-by-feature")
-    public ResponseEntity<PagedModel<EntityModel<SearchAircraftUseCaseResponse>>> searchAircraftByFeature(
-            @Parameter(description = "Feature to search for (e.g., 'WiFi-enabled', 'engine-type')") @RequestParam String feature,
-            @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) {
-        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraftByFeature.execute(
-                feature, pageable.getPageNumber(), pageable.getPageSize()
-        );
-        Page<SearchAircraftUseCaseResponse> resultsPage = new PageImpl<>(
-                result.data(),
-                pageable,
-                result.totalElements()
-        );
         PagedModel<EntityModel<SearchAircraftUseCaseResponse>> pagedModel =
                 assembler.toModel(resultsPage, aircraft -> EntityModel.of(aircraft)
                         .add(linkTo(methodOn(AircraftController.class)

@@ -29,10 +29,10 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
-    public PaginatedResult<Aircraft> searchAircrafts(String modelName, AircraftStatus status, Integer year, int pageNumber, int pageSize) {
+    public PaginatedResult<Aircraft> searchAircrafts(String modelName, AircraftStatus status, Integer year, String feature, int pageNumber, int pageSize) {
         String statusStr = status != null ? status.name() : null;
         var springPageable = PageRequest.of(pageNumber, pageSize);
-        var jpaPage = springRepo.searchAircrafts(modelName, statusStr, year, springPageable);
+        var jpaPage = springRepo.searchAircrafts(modelName, statusStr, year, feature, springPageable);
 
         List<Aircraft> list = jpaPage.stream()
                 .map(jpaEntity -> AircraftMapper.toDomain(jpaEntity, AircraftModelMapper.toDomain(jpaEntity.getModel())))
@@ -41,17 +41,6 @@ public class AircraftJpaRepository implements AircraftRepository {
         return new PaginatedResult<>(list, jpaPage.getTotalElements());
     }
 
-    @Override
-    public PaginatedResult<Aircraft> searchAircraftByFeature(String feature, int pageNumber, int pageSize) {
-        var springPageable = PageRequest.of(pageNumber, pageSize);
-        var jpaPage = springRepo.searchAircraftsByFeature(feature, springPageable);
-
-        List<Aircraft> list = jpaPage.stream()
-                .map(jpaEntity -> AircraftMapper.toDomain(jpaEntity, AircraftModelMapper.toDomain(jpaEntity.getModel())))
-                .collect(Collectors.toList());
-
-        return new PaginatedResult<>(list, jpaPage.getTotalElements());
-    }
     @Override
     public PaginatedResult<Aircraft> findAll(int pageNumber, int pageSize) {
         var springPageable = PageRequest.of(pageNumber, pageSize);
