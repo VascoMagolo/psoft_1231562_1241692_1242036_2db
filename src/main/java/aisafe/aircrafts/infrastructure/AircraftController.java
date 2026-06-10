@@ -47,7 +47,6 @@ public class AircraftController {
     private final ViewCompatibleRoutesUseCase viewCompatibleRoutes;
     private final CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours;
     private final GetAircraftUtilizationUseCase getAircraftUtilization;
-    private final SearchAircraftByFeatureUseCase searchAircraftByFeature;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
@@ -55,7 +54,7 @@ public class AircraftController {
                               DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase,
                               ViewCompatibleRoutesUseCase viewCompatibleRoutes,
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
-                              GetAircraftUtilizationUseCase getAircraftUtilization, SearchAircraftByFeatureUseCase searchAircraftByFeature) {
+                              GetAircraftUtilizationUseCase getAircraftUtilization) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -66,7 +65,6 @@ public class AircraftController {
         this.viewCompatibleRoutes = viewCompatibleRoutes;
         this.calculateAircraftOperationalHours = calculateAircraftOperationalHours;
         this.getAircraftUtilization = getAircraftUtilization;
-        this.searchAircraftByFeature = searchAircraftByFeature;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
