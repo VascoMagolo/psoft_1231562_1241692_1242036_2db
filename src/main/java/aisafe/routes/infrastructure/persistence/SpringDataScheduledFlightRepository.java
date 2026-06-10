@@ -41,4 +41,6 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "AND f.departureDateTime >= :startDate " +
            "AND f.departureDateTime <= :endDate")
     List<ScheduledFlightJpaEntity> findFlightsForUtilization(@Param("registration") String registration, @Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    boolean existsByAircraftRegistrationNumberNumber(String registration);
 }

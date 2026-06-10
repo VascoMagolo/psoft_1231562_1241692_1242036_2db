@@ -12,6 +12,32 @@ Expected layout:
         puml/   (at least one .puml)
         svg/    (at least one .svg)
       use-cases/
+        BONUS/   (bonus use case, optional)
+          README.md
+          UCD/   (optional)
+            puml/  (at least one .puml)
+            svg/   (at least one .svg)
+          USxxx/   (US prefix, e.g. US101, US106a)
+            README.md
+            puml/
+              sd_*.puml
+              ssd_*.puml
+            svg/
+              sd_*.svg
+              ssd_*.svg
+        EXTRAS/   (extra use case, optional)
+          README.md
+          UCD/   (optional)
+            puml/  (at least one .puml)
+            svg/   (at least one .svg)
+          use_case_name/   (e.g. deleteAircraft)
+            README.md
+            puml/
+              sd_*.puml
+              ssd_*.puml
+            svg/
+              sd_*.svg
+              ssd_*.svg
         WPXA/   (WP + digits + letters, e.g. WP1A, WP2B)
           README.md
           UCD/
@@ -77,31 +103,34 @@ def check_ucd(ucd: Path) -> list:
 
 def check_us(us: Path) -> list:
     errors = []
-    name = us.name.lower()
     _require_file(us, "README.md", errors)
+    
     puml = us / "puml"
     if not puml.is_dir():
         errors.append("missing directory: puml/")
     else:
-        for fname in (f"sd_{name}.puml", f"ssd_{name}.puml"):
-            if not (puml / fname).is_file():
-                errors.append(f"missing file: puml/{fname}")
+        if not list(puml.glob("sd_*.puml")):
+            errors.append("missing sd_*.puml in puml/")
+        if not list(puml.glob("ssd_*.puml")):
+            errors.append("missing ssd_*.puml in puml/")
+            
     svg = us / "svg"
     if not svg.is_dir():
         errors.append("missing directory: svg/")
     else:
-        for fname in (f"sd_{name}.svg", f"ssd_{name}.svg"):
-            if not (svg / fname).is_file():
-                errors.append(f"missing file: svg/{fname}")
+        if not list(svg.glob("sd_*.svg")):
+            errors.append("missing sd_*.svg in svg/")
+        if not list(svg.glob("ssd_*.svg")):
+            errors.append("missing ssd_*.svg in svg/")
     return errors
 
 
-def check_wp(wp: Path) -> dict:
+def check_wp(wp: Path, require_ucd: bool = True) -> dict:
     results = {}
 
     wp_errors = []
     _require_file(wp, "README.md", wp_errors)
-    if not (wp / "UCD").is_dir():
+    if require_ucd and not (wp / "UCD").is_dir():
         wp_errors.append("missing directory: UCD/")
     if wp_errors:
         results[wp.name] = wp_errors
@@ -111,9 +140,14 @@ def check_wp(wp: Path) -> dict:
         if errs:
             results[f"{wp.name}/UCD"] = errs
 
-    us_dirs = [d for d in sorted(wp.iterdir()) if d.is_dir() and US_PATTERN.match(d.name)]
-    if not us_dirs:
+    if wp.name == "EXTRAS":
+        us_dirs = [d for d in sorted(wp.iterdir()) if d.is_dir() and d.name != "UCD"]
+    else:
+        us_dirs = [d for d in sorted(wp.iterdir()) if d.is_dir() and US_PATTERN.match(d.name)]
+        
+    if not us_dirs and wp.name != "EXTRAS":
         results.setdefault(wp.name, []).append("no USxxx folders found")
+        
     for us in us_dirs:
         errs = check_us(us)
         if errs:
@@ -147,7 +181,7 @@ def main() -> int:
 
     for name in _unexpected_dirs(sys_doc, {"global-artifacts", "use-cases"}):
         failures.setdefault("docs/system-documentation/", []).append(
-            f"unexpected directory: {name}/ (only global-artifacts/ and use-cases/ expected)"
+            f"unexpected directory: {name}/"
         )
 
     if not GLOBAL_ARTIFACTS.is_dir():
@@ -160,17 +194,22 @@ def main() -> int:
     if not USE_CASES_ROOT.is_dir():
         failures["docs/system-documentation/use-cases/"] = ["directory does not exist"]
     else:
-        for name in _unexpected_dirs(USE_CASES_ROOT, set()):
-            if not WP_PATTERN.match(name):
-                failures.setdefault("docs/system-documentation/use-cases/", []).append(
-                    f"unexpected directory: {name}/ (only WP folders expected)"
-                )
-
+        allowed_uc_top = {"BONUS", "EXTRAS"}
+        
         for wp in sorted(USE_CASES_ROOT.iterdir()):
-            if not wp.is_dir() or not WP_PATTERN.match(wp.name):
+            if not wp.is_dir():
                 continue
-            for rel, errs in check_wp(wp).items():
-                failures[f"docs/system-documentation/use-cases/{rel}/"] = errs
+                
+            if wp.name in allowed_uc_top:
+                for rel, errs in check_wp(wp, require_ucd=False).items():
+                    failures[f"docs/system-documentation/use-cases/{rel}/"] = errs
+            elif WP_PATTERN.match(wp.name):
+                for rel, errs in check_wp(wp).items():
+                    failures[f"docs/system-documentation/use-cases/{rel}/"] = errs
+            else:
+                failures.setdefault("docs/system-documentation/use-cases/", []).append(
+                    f"unexpected directory: {wp.name}/"
+                )
 
     if failures:
         _report(failures)
@@ -181,7 +220,7 @@ def main() -> int:
 
 
 def _report(failures: dict) -> None:
-    print("docs structure check FAILED — issues found:")
+    print("docs structure check FAILED \u2014 issues found:")
     for path, errs in failures.items():
         print(f"\n  {path}")
         for e in errs:

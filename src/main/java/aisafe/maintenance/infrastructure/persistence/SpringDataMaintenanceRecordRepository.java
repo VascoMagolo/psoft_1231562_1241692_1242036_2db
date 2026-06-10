@@ -9,5 +9,6 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePartJpaEntity part, MaintenanceTemplateJpaEntity template);
     boolean existsByPart(MaintenancePartJpaEntity part);
     boolean existsByTemplate(MaintenanceTemplateJpaEntity template);
+    boolean existsByAircraftRegistration(String aircraftRegistration);
     Page<MaintenanceRecordJpaEntity> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);
 }

@@ -8,6 +8,8 @@ actor "Backoffice Operator" as BO
 participant "AircraftController" as Ctrl
 participant "DeleteAircraftUseCase" as UC
 participant "AircraftRepository" as Repo
+participant "ScheduledFlightRepository" as FlightRepo
+participant "MaintenanceRecordRepository" as RecordRepo
 database "Database" as DB
 
 BO -> Ctrl : DELETE /api/aircrafts/{registration}
@@ -29,16 +31,44 @@ alt aircraft not found
     UC --> Ctrl : throws AircraftNotFoundException
     Ctrl --> BO : 404 Not Found
 else aircraft found
-    UC -> Repo : delete(aircraft)
-    activate Repo
-    Repo -> DB : DELETE FROM aircraft WHERE registration_number = ?
+    UC -> FlightRepo : existsByAircraftRegistration(registration)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT COUNT(*) FROM scheduled_flight WHERE registration_number = ?
     activate DB
-    DB --> Repo : success
+    DB --> FlightRepo : count
     deactivate DB
-    deactivate Repo
-    UC --> Ctrl : void
-    deactivate UC
-    Ctrl --> BO : 204 No Content
+    FlightRepo --> UC : boolean
+    deactivate FlightRepo
+
+    alt aircraft assigned to flights
+        UC --> Ctrl : throws ResourceInUseException
+        Ctrl --> BO : 409 Conflict
+    else aircraft not assigned to flights
+        UC -> RecordRepo : existsByAircraftRegistration(registration)
+        activate RecordRepo
+        RecordRepo -> DB : SELECT COUNT(*) FROM maintenance_record WHERE aircraft_registration = ?
+        activate DB
+        DB --> RecordRepo : count
+        deactivate DB
+        RecordRepo --> UC : boolean
+        deactivate RecordRepo
+
+        alt aircraft has maintenance records
+            UC --> Ctrl : throws ResourceInUseException
+            Ctrl --> BO : 409 Conflict
+        else aircraft has no maintenance records
+            UC -> Repo : delete(aircraft)
+            activate Repo
+            Repo -> DB : DELETE FROM aircraft WHERE registration_number = ?
+            activate DB
+            DB --> Repo : success
+            deactivate DB
+            deactivate Repo
+            UC --> Ctrl : void
+            deactivate UC
+            Ctrl --> BO : 204 No Content
+        end
+    end
 end
 
 deactivate Ctrl

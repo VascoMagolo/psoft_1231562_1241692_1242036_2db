@@ -1,0 +1,16 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Backoffice Operator" as BO
+actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
+
+rectangle "Bonus Use Cases" {
+  usecase "US223 - View aircraft utilization rates" as UC223
+  usecase "US224 - Search aircraft by specific features" as UC224
+}
+
+ATCC --> UC223
+ATCC --> UC224
+
+@enduml

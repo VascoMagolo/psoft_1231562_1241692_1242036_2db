@@ -10,4 +10,5 @@ public interface ScheduledFlightRepository {
     List<ScheduledFlight> findAll();
     long count();
     List<ScheduledFlight> findFlightsForUtilization(String registration, OffsetDateTime start, OffsetDateTime end);
+    boolean existsByAircraftRegistration(String registration);
 }

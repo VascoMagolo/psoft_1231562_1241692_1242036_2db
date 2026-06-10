@@ -1,4 +1,4 @@
-﻿# WP1A - Aircraft Management
+# WP1A - Aircraft Management
 
 This package documents the aircraft-related use cases currently implemented in `src/main/java/aisafe/aircrafts`.
 

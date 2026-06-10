@@ -11,6 +11,7 @@ public interface MaintenanceRecordRepository {
     boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template);
     boolean existsByPart(MaintenancePart part);
     boolean existsByTemplate(MaintenanceTemplate template);
+    boolean existsByAircraftRegistration(String aircraftRegistration);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     List<MaintenanceRecord> findAll();
     Optional<MaintenanceRecord> findById(Long id);

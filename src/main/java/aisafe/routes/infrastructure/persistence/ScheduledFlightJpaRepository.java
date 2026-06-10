@@ -76,4 +76,9 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
                 .map(ScheduledFlightMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean existsByAircraftRegistration(String registration) {
+        return springRepo.existsByAircraftRegistrationNumberNumber(registration);
+    }
 }
