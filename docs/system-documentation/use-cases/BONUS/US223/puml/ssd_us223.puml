@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : getAircraftUtilization(registration, startDate, endDate)
+activate Sys
+Sys --> Actor : returns utilization data points
+deactivate Sys
+@enduml

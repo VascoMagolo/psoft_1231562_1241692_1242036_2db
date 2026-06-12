@@ -98,4 +98,11 @@ public class RouteJpaRepository implements RouteRepository {
         return springRepo.findByOriginCodeOrDestinationCode(origin.getCode(), destination.getCode())
                 .stream().map(RouteMapper::toDomain).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Route> findCompatibleRoutes(Double range, Integer capacity) {
+        return springRepo.findCompatibleRoutes(range, capacity).stream()
+                .map(RouteMapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }

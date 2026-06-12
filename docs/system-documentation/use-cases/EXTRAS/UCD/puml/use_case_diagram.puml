@@ -1,0 +1,18 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Backoffice Operator" as BO
+actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
+
+rectangle "Extra Use Cases" {
+  usecase "Update aircraft details" as UC_UpdateAircraft
+  usecase "Delete aircraft" as UC_DeleteAircraft
+  usecase "Delete aircraft model" as UC_DeleteAircraftModel
+}
+
+BO --> UC_UpdateAircraft
+BO --> UC_DeleteAircraft
+BO --> UC_DeleteAircraftModel
+
+@enduml

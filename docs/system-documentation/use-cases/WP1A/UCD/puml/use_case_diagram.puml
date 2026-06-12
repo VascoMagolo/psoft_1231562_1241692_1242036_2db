@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 left to right direction
 skinparam packageStyle rectangle
 
@@ -22,4 +22,3 @@ ATCC --> UC104
 ATCC --> UC105
 
 @enduml
-

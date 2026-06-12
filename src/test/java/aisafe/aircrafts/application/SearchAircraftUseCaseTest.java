@@ -30,15 +30,15 @@ class SearchAircraftUseCaseTest {
     @BeforeEach
     void setUp() {
         AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, List.of());
+        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, 5000.0, List.of());
     }
 
     @Test
     void ensureSearchReturnsResultsSuccessfully() {
         PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(aircraft), 1L);
-        when(aircraftRepository.searchAircrafts("A320", AircraftStatus.AVAILABLE, 2020, 0, 10)).thenReturn(domainResult);
+        when(aircraftRepository.searchAircrafts("A320", AircraftStatus.AVAILABLE, 2020, "WiFi", 0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraftUseCase.execute("A320", "AVAILABLE", 2020, 0, 10);
+        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraftUseCase.execute("A320", "AVAILABLE", 2020, "WiFi", 0, 10);
 
         assertNotNull(result);
         assertEquals(1, result.data().size());
@@ -47,6 +47,6 @@ class SearchAircraftUseCaseTest {
 
     @Test
     void ensureExceptionForInvalidStatus() {
-        assertThrows(AircraftInvalidFieldException.class, () -> searchAircraftUseCase.execute(null, "INVALID_STATUS", null, 0, 10));
+        assertThrows(AircraftInvalidFieldException.class, () -> searchAircraftUseCase.execute(null, "INVALID_STATUS", null, null, 0, 10));
     }
 }

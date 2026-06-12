@@ -23,7 +23,6 @@ public class AircraftModel {
         Assert.notNull(maxRange, "maxRange must not be null");
         Assert.notNull(cruisingSpeed, "cruisingSpeed must not be null");
         Assert.notNull(maximumSeatingCapacity, "maximumSeatingCapacity must not be null");
-        Assert.hasText(imagePath, "imagePath must not be blank");
 
         Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");
         Assert.isTrue(fuelCapacity > 0, "fuelCapacity must be greater than zero");
@@ -48,7 +47,6 @@ public class AircraftModel {
     public String getImagePath() { return imagePath; }
 
     public void setImagePath(String imagePath) {
-        Assert.hasText(imagePath, "imagePath must not be blank");
         this.imagePath = imagePath;
     }
 

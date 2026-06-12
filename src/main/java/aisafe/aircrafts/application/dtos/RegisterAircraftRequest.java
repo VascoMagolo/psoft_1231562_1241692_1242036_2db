@@ -19,6 +19,9 @@ public record RegisterAircraftRequest(
 	@NotNull(message = "Seat capacity is required")
 	@Min(value = 1, message = "Seat capacity must be greater than zero")
 	Integer seatCapacity,
+	@NotNull(message = "Range is required")
+	@DecimalMin(value = "1.0", message = "Range must be greater than zero")
+	Double range,
 	@NotBlank(message = "Status is required")
 	String status,
 	List<String> features) {

@@ -49,6 +49,7 @@ public class RegisterAircraftUseCase {
                 model,
                 regNum,
                 request.seatCapacity(),
+                request.range(),
                 request.features()
         );
         aircraftRepository.save(aircraft, null);
@@ -60,6 +61,7 @@ public class RegisterAircraftUseCase {
                 aircraft.getManufacturingDate(),
                 aircraft.getStatus(),
                 aircraft.getSeatCapacity(),
+                aircraft.getRange(),
                 aircraft.getFeatures(),
                 aircraft.getVersion()
         );

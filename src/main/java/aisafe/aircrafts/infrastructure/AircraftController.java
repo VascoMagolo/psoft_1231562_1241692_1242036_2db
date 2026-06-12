@@ -44,11 +44,19 @@ public class AircraftController {
     private final UpdateAircraftStatusUseCase updateAircraftStatus;
     private final DeleteAircraftUseCase deleteAircraft;
     private final UpdateAircraftUseCase updateAircraftUseCase;
+    private final ViewCompatibleRoutesUseCase viewCompatibleRoutes;
+    private final CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours;
+    private final GetAircraftUtilizationUseCase getAircraftUtilization;
+    private final CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
                               UpdateAircraftStatusUseCase updateAircraftStatus,
-                              DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase) {
+                              DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase,
+                              ViewCompatibleRoutesUseCase viewCompatibleRoutes,
+                              CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
+                              GetAircraftUtilizationUseCase getAircraftUtilization,
+                              CalculateFuelEfficiencyUseCase calculateFuelEfficiency) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -56,6 +64,10 @@ public class AircraftController {
         this.updateAircraftStatus = updateAircraftStatus;
         this.deleteAircraft = deleteAircraft;
         this.updateAircraftUseCase = updateAircraftUseCase;
+        this.viewCompatibleRoutes = viewCompatibleRoutes;
+        this.calculateAircraftOperationalHours = calculateAircraftOperationalHours;
+        this.getAircraftUtilization = getAircraftUtilization;
+        this.calculateFuelEfficiency = calculateFuelEfficiency;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
@@ -76,7 +88,7 @@ public class AircraftController {
                 .body(toHateoasModel(createdAircraft, new RegistrationNumber(request.registrationNumber())));
     }
 
-    @Operation(summary = "Get all aircrafts with pagination")
+    @Operation(summary = "Get all aircrafts with pagination", description = "Retrieves a paginated list of all aircrafts in the fleet along with their real-time availability status. (US205)")
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<ListAircraftsUseCaseResponse>>> getAllAircraft(
             @PageableDefault(size = 20) Pageable pageable,
@@ -118,7 +130,7 @@ public class AircraftController {
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
-    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model ID, current status, or year of manufacturing with pagination support. (US104)")
+    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model name, current status, year of manufacturing, or specific feature with pagination support. Supports ATCC real-time status viewing. (US104, US205)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -129,13 +141,14 @@ public class AircraftController {
             @Parameter(description = "Filter by technical model name") @RequestParam(required = false) String modelName,
             @Parameter(description = "Filter by aircraft current operational status") @RequestParam(required = false) AircraftStatus status,
             @Parameter(description = "Filter by the exact year the aircraft was manufactured") @RequestParam(required = false) Integer year,
+            @Parameter(description = "Filter by a specific feature (e.g., 'WiFi')") @RequestParam(required = false) String feature,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<SearchAircraftUseCaseResponse> assembler) {
 
         String statusStr = status != null ? status.name() : null;
 
         PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraft.execute(
-                modelName, statusStr, year, pageable.getPageNumber(), pageable.getPageSize()
+                modelName, statusStr, year, feature, pageable.getPageNumber(), pageable.getPageSize()
         );
 
         Page<SearchAircraftUseCaseResponse> resultsPage = new PageImpl<>(
@@ -193,6 +206,15 @@ public class AircraftController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update aircraft details", description = "Updates the technical details of an existing aircraft.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aircraft details updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number"),
+            @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
+    })
     @PatchMapping("/{registrationStr}")
     public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftDetails(
             @PathVariable String registrationStr,
@@ -203,6 +225,74 @@ public class AircraftController {
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
         ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registration, request, version);
         return ResponseEntity.ok(toHateoasModel(response, registration));
+    }
+
+    @Operation(summary = "Get compatible routes for an aircraft", description = "Returns a list of active routes compatible with the aircraft based on its range and capacity. (US203)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Compatible routes retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
+    @GetMapping("/{registrationStr}/compatible-routes")
+    public ResponseEntity<List<CompatibleRouteResponse>> getCompatibleRoutes(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
+            @PathVariable String registrationStr) {
+
+        RegistrationNumber registration = new RegistrationNumber(registrationStr);
+        List<CompatibleRouteResponse> routes = viewCompatibleRoutes.execute(registration);
+        return ResponseEntity.ok(routes);
+    }
+
+    @Operation(summary = "Calculate total operational hours", description = "Calculates the total operational hours for a specific aircraft based on completed flights. (US206)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Total operational hours calculated successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
+    @GetMapping("/{registrationStr}/operational-hours")
+    public ResponseEntity<AircraftOperationalHoursResponse> getOperationalHours(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
+            @PathVariable String registrationStr) {
+
+        RegistrationNumber registration = new RegistrationNumber(registrationStr);
+        AircraftOperationalHoursResponse response = calculateAircraftOperationalHours.execute(registration);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get aircraft utilization rates over time", description = "Returns daily flight hours and utilization percentage for an aircraft in a given date range. (US223)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Utilization rates returned successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
+    @GetMapping("/{registrationStr}/utilization")
+    public ResponseEntity<List<UtilizationDataPointResponse>> getAircraftUtilization(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
+            @Parameter(description = "Start date (YYYY-MM-DD)") @RequestParam java.time.LocalDate startDate,
+            @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam java.time.LocalDate endDate) {
+
+        List<UtilizationDataPointResponse> response = getAircraftUtilization.execute(registrationStr, startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Calculate fuel efficiency", description = "Calculates fuel efficiency metrics per aircraft and per route. (US227)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fuel efficiency calculated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid route ID supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
+    @GetMapping("/{registrationStr}/fuel-efficiency")
+    public ResponseEntity<FuelEfficiencyResponse> getFuelEfficiency(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
+            @Parameter(description = "Optional route ID to calculate specific fuel needs") @RequestParam(required = false) Long routeId) {
+
+        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, routeId);
+        return ResponseEntity.ok(response);
     }
 
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {

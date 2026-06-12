@@ -57,6 +57,11 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public boolean existsByAircraftRegistration(String aircraftRegistration) {
+        return springRepo.existsByAircraftRegistration(aircraftRegistration);
+    }
+
+    @Override
     public PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize) {
         Page<MaintenanceRecordJpaEntity> page = springRepo.findByAircraftRegistration(
                 aircraftRegistration, PageRequest.of(pageNumber, pageSize));

@@ -31,15 +31,6 @@ public class ViewAircraftDetailsUseCase {
         Aircraft aircraft = repository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registrationNumber.getNumber()));
 
-        return new ViewAircraftDetailsResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getModel().getManufacturer(),
-                aircraft.getManufacturingDate(),
-                aircraft.getStatus(),
-                aircraft.getSeatCapacity(),
-                aircraft.getFeatures(),
-                aircraft.getVersion()
-        );
+        return ViewAircraftDetailsResponse.from(aircraft);
     }
 }

@@ -1,0 +1,44 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "ViewCompatibleRoutesUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "RouteRepository" as RouteRepo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/aircrafts/{registration}/compatible-routes
+activate Ctrl
+
+Ctrl -> UC : execute(registration)
+activate UC
+
+UC -> Repo : findByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : aircraft record
+deactivate DB
+Repo --> UC : Optional<Aircraft>
+deactivate Repo
+
+alt aircraft not found
+    UC --> Ctrl : throws AircraftNotFoundException
+    Ctrl --> ATCC : 404 Not Found
+else aircraft found
+    UC -> RouteRepo : findCompatibleRoutes(aircraft.range(), aircraft.seatCapacity())
+    activate RouteRepo
+    RouteRepo -> DB : SELECT FROM route WHERE minimum_range <= ? AND minimum_capacity <= ?
+    activate DB
+    DB --> RouteRepo : list of routes
+    deactivate DB
+    RouteRepo --> UC : List<Route>
+    deactivate RouteRepo
+
+    UC --> Ctrl : List<RouteResponse>
+    deactivate UC
+    Ctrl --> ATCC : 200 OK\nCollectionModel<RouteResponse> with _links
+end
+
+deactivate Ctrl
+@enduml

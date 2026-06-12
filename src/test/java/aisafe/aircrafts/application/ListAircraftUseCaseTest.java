@@ -30,7 +30,7 @@ class ListAircraftUseCaseTest {
     @BeforeEach
     void setUp() {
         AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, List.of());
+        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, 5000.0, List.of());
     }
 
     @Test
@@ -42,6 +42,15 @@ class ListAircraftUseCaseTest {
 
         assertNotNull(result);
         assertEquals(1, result.data().size());
-        assertEquals("CS-TPA", result.data().get(0).registrationNumber());
+        
+        ListAircraftsUseCaseResponse response = result.data().get(0);
+        assertEquals("CS-TPA", response.registrationNumber());
+        assertEquals("A320", response.model());
+        assertEquals(Manufacturer.AIRBUS, response.manufacturer());
+        assertEquals(LocalDate.of(2020, 1, 1), response.manufacturingDate());
+        assertEquals(AircraftStatus.AVAILABLE, response.status());
+        assertEquals(150, response.seatCapacity());
+        assertEquals(5000.0, response.range());
+        assertTrue(response.features().isEmpty());
     }
 }

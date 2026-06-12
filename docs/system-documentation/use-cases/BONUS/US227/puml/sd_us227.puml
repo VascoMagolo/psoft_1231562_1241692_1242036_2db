@@ -1,0 +1,61 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "CalculateFuelEfficiencyUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "RouteRepository" as RouteRepo
+participant "Aircraft" as Aircraft
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/aircrafts/{registration}/fuel-efficiency?routeId=X
+activate Ctrl
+
+Ctrl -> UC : execute(registration, routeId)
+activate UC
+
+UC -> Repo : findByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : aircraft record
+deactivate DB
+Repo --> UC : Optional<Aircraft>
+deactivate Repo
+
+alt aircraft not found
+    UC --> Ctrl : throws AircraftNotFoundException
+    Ctrl --> ATCC : 404 Not Found
+else aircraft found
+    UC -> Aircraft : getFuelConsumptionPerDistanceUnit()
+    activate Aircraft
+    Aircraft --> UC : fuelConsumption
+    deactivate Aircraft
+
+    alt routeId provided
+        UC -> RouteRepo : findById(routeId)
+        activate RouteRepo
+        RouteRepo -> DB : SELECT FROM route WHERE id = ?
+        activate DB
+        DB --> RouteRepo : route record
+        deactivate DB
+        RouteRepo --> UC : Optional<Route>
+        deactivate RouteRepo
+
+        alt route not found
+            UC --> Ctrl : throws IllegalArgumentException
+            Ctrl --> ATCC : 400 Bad Request
+        else route found
+            note right of UC
+                fuelNeeded = fuelConsumption * route.getMinimumRange()
+            end note
+        end
+    end
+
+    UC --> Ctrl : FuelEfficiencyResponse
+    deactivate UC
+    Ctrl --> ATCC : 200 OK\nFuelEfficiencyResponse
+end
+
+deactivate Ctrl
+@enduml

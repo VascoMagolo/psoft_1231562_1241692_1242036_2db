@@ -37,12 +37,12 @@ class UpdateAircraftUseCaseTest {
     void setUp() {
         registrationNumber = new RegistrationNumber("CS-TPA");
         model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, List.of("WiFi"));
+        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, 5000.0, List.of("WiFi"));
     }
 
     @Test
     void ensureAircraftIsUpdatedSuccessfully() {
-        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", LocalDate.of(2021, 1, 1), 160, List.of("WiFi", "Bluetooth"));
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", LocalDate.of(2021, 1, 1), 160, 5000.0, List.of("WiFi", "Bluetooth"));
         AircraftModel newModel = new AircraftModel("A321", Manufacturer.AIRBUS, 27000.0, 6500.0, 840.0, "a321.jpg", 200);
 
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
@@ -60,7 +60,7 @@ class UpdateAircraftUseCaseTest {
 
     @Test
     void ensureExceptionWhenAircraftNotFound() {
-        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, null, null);
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, null, null, null);
 
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.empty());
 
@@ -70,7 +70,7 @@ class UpdateAircraftUseCaseTest {
 
     @Test
     void ensureExceptionWhenModelNotFound() {
-        UpdateAircraftRequest request = new UpdateAircraftRequest("NON-EXISTENT", null, null, null);
+        UpdateAircraftRequest request = new UpdateAircraftRequest("NON-EXISTENT", null, null, null, null);
 
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
         when(aircraftModelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
