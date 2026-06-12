@@ -40,8 +40,7 @@ public class MaintenanceTemplateJpaRepository implements MaintenanceTemplateRepo
         if (existing != null) {
             jpaEntity.setId(existing.getId());
         }
-        MaintenanceTemplateJpaEntity saved = springRepo.save(jpaEntity);
-        template.setId(saved.getId());
+        springRepo.save(jpaEntity);
     }
 
     @Override

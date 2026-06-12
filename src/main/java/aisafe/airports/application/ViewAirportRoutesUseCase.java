@@ -36,13 +36,12 @@ public class ViewAirportRoutesUseCase {
         IataCode code = new IataCode(iataCode);
         return routeRepository.findByOriginOrDestination(code, code).stream()
                 .map(r -> new RouteResponse(
-                        r.getId(),
                         r.getOrigin().getCode(),
                         r.getDestination().getCode(),
                         r.getEstimatedFlightTime(),
                         r.getMinimumRange(),
                         r.getMinimumCapacity(),
-                        r.isActive()
+                        r.getStatus()
                 ))
                 .toList();
     }

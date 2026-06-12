@@ -24,16 +24,16 @@ public class RouteHistoryJpaRepository implements RouteHistoryRepository {
 
     @Override
     public void save(RouteHistory history) {
-        RouteJpaEntity routeJpa = routeSpringRepo.findById(history.getRouteId())
-                .orElseThrow(() -> new RouteNotFoundException(history.getRouteId().toString()));
-        RouteHistoryJpaEntity jpaEntity = RouteHistoryMapper.toJpa(history, routeJpa);
-        RouteHistoryJpaEntity saved = springRepo.save(jpaEntity);
-        history.setId(saved.getId());
+        RouteJpaEntity routeJpa = routeSpringRepo.findByOriginCodeAndDestinationCode(
+                        history.getOriginCode(), history.getDestinationCode())
+                .orElseThrow(() -> new RouteNotFoundException(
+                        history.getOriginCode() + "-" + history.getDestinationCode()));
+        springRepo.save(RouteHistoryMapper.toJpa(history, routeJpa));
     }
 
     @Override
-    public List<RouteHistory> findAllByRouteId(Long routeId) {
-        return springRepo.findAllByRouteId(routeId).stream()
+    public List<RouteHistory> findAllByRoute(String originCode, String destinationCode) {
+        return springRepo.findAllByRoute(originCode, destinationCode).stream()
                 .map(RouteHistoryMapper::toDomain)
                 .collect(Collectors.toList());
     }

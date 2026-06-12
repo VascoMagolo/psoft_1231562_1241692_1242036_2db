@@ -38,7 +38,7 @@
 
 ### View Route Details
 
-1. The ATCC requests `GET /api/routes/{id}`.
+1. The ATCC requests `GET /api/routes/{origin}/{destination}`.
 2. The system validates the route existence.
 3. The system retrieves the route details.
 4. The system returns HTTP 200 with the route information.
@@ -59,6 +59,10 @@
 
 - Route retrieval operations are separated from modification operations following CQRS-inspired principles.
 - Query operations are optimized for filtering by airport and retrieving by route ID.
+
+## Implementation Note
+
+A route has no surrogate numeric ID in the domain model. Its natural key is the **origin + destination IATA code pair**, which is unique by domain rule. The "ID" referred to in the user story is fulfilled by this pair: route details are accessed via `GET /api/routes/{origin}/{destination}` (e.g., `GET /api/routes/OPO/LIS`).
 
 ---
 

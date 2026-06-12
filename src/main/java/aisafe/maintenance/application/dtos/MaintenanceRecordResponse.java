@@ -1,6 +1,7 @@
 package aisafe.maintenance.application.dtos;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Response DTO for returning maintenance record information.
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  * @param version
  */
 public record MaintenanceRecordResponse(
-        Long id,
+        UUID id,
         String description,
         LocalDateTime startDate,
         Integer expectedDuration,

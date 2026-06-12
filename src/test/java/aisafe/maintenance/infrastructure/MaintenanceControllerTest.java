@@ -19,10 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -69,12 +69,14 @@ class MaintenanceControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    private UUID sampleRecordId;
     private MaintenanceRecordResponse sampleRecordResponse;
 
     @BeforeEach
     void setUp() {
+        sampleRecordId = UUID.randomUUID();
         sampleRecordResponse = new MaintenanceRecordResponse(
-                1L, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
+                sampleRecordId, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
                 4, null, "P001", "Annual Check", "PLANNED", "CS-TPA", 0L);
     }
 
@@ -83,7 +85,7 @@ class MaintenanceControllerTest {
         CreateMaintenanceTemplateRequest request = new CreateMaintenanceTemplateRequest(
                 "Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
 
-        when(createMaintenanceTemplateUseCase.execute(any())).thenReturn(new MaintenanceTemplateResponse(1L, "Annual Check", null));
+        when(createMaintenanceTemplateUseCase.execute(any())).thenReturn(new MaintenanceTemplateResponse("Annual Check", null));
 
         mockMvc.perform(post("/api/maintenance/templates")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,7 +98,7 @@ class MaintenanceControllerTest {
         CreateMaintenancePartRequest request = new CreateMaintenancePartRequest(
                 "P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
 
-        when(createMaintenancePartUseCase.execute(any())).thenReturn(new MaintenancePartResponse(1L, "P001", null));
+        when(createMaintenancePartUseCase.execute(any())).thenReturn(new MaintenancePartResponse("P001", null));
 
         mockMvc.perform(post("/api/maintenance/parts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,9 +126,9 @@ class MaintenanceControllerTest {
     void ensureUpdateRecordWithIfMatchReturns200() throws Exception {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
-        when(updateMaintenanceRecordUseCase.execute(anyLong(), any(), any())).thenReturn(sampleRecordResponse);
+        when(updateMaintenanceRecordUseCase.execute(any(UUID.class), any(), any())).thenReturn(sampleRecordResponse);
 
-        mockMvc.perform(patch("/api/maintenance/records/1")
+        mockMvc.perform(patch("/api/maintenance/records/" + sampleRecordId)
                         .header("If-Match", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -138,7 +140,7 @@ class MaintenanceControllerTest {
     void ensureUpdateRecordWithoutIfMatchReturns400() throws Exception {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
-        mockMvc.perform(patch("/api/maintenance/records/1")
+        mockMvc.perform(patch("/api/maintenance/records/" + sampleRecordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

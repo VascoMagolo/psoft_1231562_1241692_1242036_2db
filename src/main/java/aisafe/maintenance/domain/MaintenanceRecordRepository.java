@@ -5,6 +5,7 @@ import aisafe.shared.domain.PaginatedResult;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface MaintenanceRecordRepository {
     long count();
@@ -14,7 +15,7 @@ public interface MaintenanceRecordRepository {
     boolean existsByAircraftRegistration(String aircraftRegistration);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     List<MaintenanceRecord> findAll();
-    Optional<MaintenanceRecord> findById(Long id);
+    Optional<MaintenanceRecord> findByRecordId(UUID recordId);
     void save(MaintenanceRecord record);
     void delete(MaintenanceRecord record);
 }

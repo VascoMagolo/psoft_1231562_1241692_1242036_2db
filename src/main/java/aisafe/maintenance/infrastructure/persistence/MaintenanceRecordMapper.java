@@ -9,7 +9,7 @@ public class MaintenanceRecordMapper {
                 MaintenancePartMapper.toDomain(entity.getPart()), entity.getNotes(),
                 MaintenanceTemplateMapper.toDomain(entity.getTemplate()),
                 entity.getStatus(), entity.getAircraftRegistration());
-        record.setId(entity.getId());
+        record.setRecordId(entity.getRecordId());
         record.setVersion(entity.getVersion());
         return record;
     }

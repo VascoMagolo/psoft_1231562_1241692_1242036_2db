@@ -9,8 +9,7 @@ import java.util.Optional;
 public interface RouteRepository {
     long count();
     Route save(Route route);
-    Optional<Route> findById(Long id);
-    boolean existsById(Long id);
+    Optional<Route> findByOriginAndDestination(IataCode origin, IataCode destination);
     void delete(Route route);
     List<Route> findAll();
     PaginatedResult<Route> findAll(int pageNumber, int pageSize);

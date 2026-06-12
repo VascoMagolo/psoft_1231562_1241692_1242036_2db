@@ -2,9 +2,10 @@ package aisafe.maintenance.domain;
 
 import org.springframework.util.Assert;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class MaintenanceRecord {
-    private Long id;
+    private UUID recordId;
     private Long version;
     private String description;
     private LocalDateTime startDate;
@@ -26,6 +27,7 @@ public class MaintenanceRecord {
         Assert.notNull(aircraftRegistration, "Record must have an aircraft registration number.");
         Assert.notNull(template, "Maintenance template must not be null.");
         Assert.notNull(status, "Maintenance status must not be null.");
+        this.recordId = UUID.randomUUID();
         this.description = description;
         this.startDate = startDate;
         this.expectedDuration = expectedDuration;
@@ -36,7 +38,7 @@ public class MaintenanceRecord {
         this.aircraftRegistration = aircraftRegistration;
     }
 
-    public Long getId() { return id; }
+    public UUID getRecordId() { return recordId; }
     public Long getVersion() { return version; }
     public String getDescription() { return description; }
     public LocalDateTime getStartDate() { return startDate; }
@@ -47,7 +49,7 @@ public class MaintenanceRecord {
     public MaintenanceStatus getStatus() { return status; }
     public String getAircraftRegistration() { return aircraftRegistration; }
 
-    public void setId(Long id) { this.id = id; }
+    public void setRecordId(UUID recordId) { this.recordId = recordId; }
     public void setVersion(Long version) { this.version = version; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(MaintenanceStatus status) { this.status = status; }

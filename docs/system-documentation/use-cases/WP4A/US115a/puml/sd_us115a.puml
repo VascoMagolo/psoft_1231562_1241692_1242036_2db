@@ -78,7 +78,7 @@ else all references found
     deactivate DB
     deactivate Repo
 
-    UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+    UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
     deactivate UC
     Ctrl --> MT : 201 Created\nEntityModel<MaintenanceRecordResponse> with _links
   end

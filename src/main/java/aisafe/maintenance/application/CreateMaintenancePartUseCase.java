@@ -40,7 +40,6 @@ public class CreateMaintenancePartUseCase {
         maintenancePartRepository.save(part);
 
         return new MaintenancePartResponse(
-                part.getId(),
                 part.getPartNumber(),
                 part.getDescription()
         );

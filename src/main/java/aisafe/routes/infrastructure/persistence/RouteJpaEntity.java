@@ -1,5 +1,6 @@
 package aisafe.routes.infrastructure.persistence;
 
+import aisafe.routes.domain.RouteStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +30,9 @@ public class RouteJpaEntity {
     @Column(nullable = false)
     private Integer minimumCapacity;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean active;
+    private RouteStatus status;
 
     @Version
     private Long version;
@@ -38,12 +40,12 @@ public class RouteJpaEntity {
     protected RouteJpaEntity() {}
 
     public RouteJpaEntity(String originCode, String destinationCode, Integer estimatedFlightTime,
-                          Double minimumRange, Integer minimumCapacity, boolean active) {
+                          Double minimumRange, Integer minimumCapacity, RouteStatus status) {
         this.originCode = originCode;
         this.destinationCode = destinationCode;
         this.estimatedFlightTime = estimatedFlightTime;
         this.minimumRange = minimumRange;
         this.minimumCapacity = minimumCapacity;
-        this.active = active;
+        this.status = status;
     }
 }

@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,17 +43,18 @@ class DeleteMaintenanceRecordUseCaseTest {
     @Test
     void ensureMaintenanceRecordIsDeletedSuccessfully() {
         MaintenanceRecord record = buildRecord();
-        when(maintenanceRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+        when(maintenanceRecordRepository.findByRecordId(record.getRecordId())).thenReturn(Optional.of(record));
 
-        assertDoesNotThrow(() -> deleteMaintenanceRecord.execute(1L));
+        assertDoesNotThrow(() -> deleteMaintenanceRecord.execute(record.getRecordId()));
         verify(maintenanceRecordRepository).delete(any(MaintenanceRecord.class));
     }
 
     @Test
     void ensureExceptionWhenMaintenanceRecordNotFound() {
-        when(maintenanceRecordRepository.findById(99L)).thenReturn(Optional.empty());
+        UUID randomId = UUID.randomUUID();
+        when(maintenanceRecordRepository.findByRecordId(randomId)).thenReturn(Optional.empty());
 
-        assertThrows(MaintenanceRecordNotFoundException.class, () -> deleteMaintenanceRecord.execute(99L));
+        assertThrows(MaintenanceRecordNotFoundException.class, () -> deleteMaintenanceRecord.execute(randomId));
         verify(maintenanceRecordRepository, never()).delete(any());
     }
 }

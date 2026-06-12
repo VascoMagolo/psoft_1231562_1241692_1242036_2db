@@ -13,7 +13,7 @@ package "User Aggregate" <<Aggregate>> {
   }
 
   class User <<Entity>> <<Root>> {
-    - id : Long
+    - userID : UUID
     - username : String
     - passwordHash : String
     - role : Role
@@ -139,24 +139,29 @@ package "Airport Aggregate" <<Aggregate>> {
 package "Route Aggregate" {
   enum RouteStatus <<Enum>> {
     ACTIVE
-    DEACTIVATED
+    INACTIVE
+    SUSPENDED
   }
 
   class Route <<Entity>> <<Root>> {
-    - id : Integer
-    - status : RouteStatus
-  }
-
-  class RouteVersion <<Entity>> {
-    - versionNumber : Integer
-    - distance : Double
     - estimatedFlightTime : Integer
-    - minRangeRequirement : Double
-    - minCapacityRequirement : Integer
-    - validFrom : DateTime
+    - minimumRange : Double
+    - minimumCapacity : Integer
+    - status : RouteStatus
+    - version : Long
   }
 
-  Route "1" *-- "*" RouteVersion : history
+  class RouteHistory <<Entity>> {
+    - originCode : String
+    - destinationCode : String
+    - changeDescription : String
+    - changedAt : DateTime
+    - changedBy : String
+  }
+
+  Route *-- IataCode : origin
+  Route *-- IataCode : destination
+  Route "1" *-- "*" RouteHistory : history
   Route --> RouteStatus : current status
 }
 
@@ -213,14 +218,14 @@ package "Maintenance Aggregate" <<Aggregate>> {
   }
 
   class MaintenanceRecord <<Entity>> <<Root>> {
-    - id : Long
+    - recordId : UUID
     - description : String
     - startDate : Date
     - expectedDuration : Integer
     - notes : String
     - status : MaintenanceStatus
     - aircraftRegistration : String
-    - parts : List<MaintenancePart>
+    - version : Long
   }
 
   class MaintenancePart <<Entity>> <<Root>> {
@@ -242,8 +247,8 @@ Aircraft "*" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AircraftCertification : certifies
 Airport "1" <-up- "*" AircraftCertification : certified at
 
-Route "1" --> "1" Airport : origin
-Route "1" --> "1" Airport : destination
+Route --> Airport : origin (by IataCode)
+Route --> Airport : destination (by IataCode)
 
 ScheduledFlight "1" --> "1" Route : follows
 ScheduledFlight "1" --> "1" Aircraft : uses

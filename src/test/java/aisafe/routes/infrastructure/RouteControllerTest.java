@@ -3,6 +3,7 @@ package aisafe.routes.infrastructure;
 import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteStatus;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +22,6 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -85,14 +85,14 @@ class RouteControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.originIataCode").value("OPO"))
                 .andExpect(jsonPath("$.destinationIataCode").value("LIS"))
-                .andExpect(jsonPath("$.active").value(true));
+                .andExpect(jsonPath("$.status").value(RouteStatus.ACTIVE.name()));
     }
 
     @Test
-    void ensureGetRouteByIdReturns200() throws Exception {
-        when(viewRouteDetails.execute(anyLong())).thenReturn(sampleRoute);
+    void ensureGetRouteByOriginDestinationReturns200() throws Exception {
+        when(viewRouteDetails.execute(anyString(), anyString())).thenReturn(sampleRoute);
 
-        mockMvc.perform(get("/api/routes/1"))
+        mockMvc.perform(get("/api/routes/OPO/LIS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.originIataCode").value("OPO"));
     }
@@ -100,13 +100,13 @@ class RouteControllerTest {
     @Test
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
-        deactivated.deactivate();
-        when(desactivateRoute.execute(anyLong(), any())).thenReturn(deactivated);
+        deactivated.setStatus(RouteStatus.INACTIVE);
+        when(desactivateRoute.execute(anyString(), anyString(), any())).thenReturn(deactivated);
 
-        mockMvc.perform(patch("/api/routes/1/deactivate")
+        mockMvc.perform(patch("/api/routes/OPO/LIS/deactivate")
                         .header("If-Match", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.active").value(false));
+                .andExpect(jsonPath("$.status").value(RouteStatus.INACTIVE.name()));
     }
 
     @Test

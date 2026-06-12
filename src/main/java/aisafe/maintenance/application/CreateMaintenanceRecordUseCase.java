@@ -48,7 +48,7 @@ public class CreateMaintenanceRecordUseCase {
         recordRepository.save(record);
 
         return new MaintenanceRecordResponse(
-                record.getId(), record.getDescription(), record.getStartDate(),
+                record.getRecordId(), record.getDescription(), record.getStartDate(),
                 record.getExpectedDuration(), record.getNotes(),
                 record.getPart().getPartNumber(), record.getTemplate().getName(),
                 record.getStatus().name(), request.registrationNumber(),

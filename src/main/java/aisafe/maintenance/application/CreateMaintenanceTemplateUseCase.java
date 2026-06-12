@@ -53,7 +53,6 @@ public class CreateMaintenanceTemplateUseCase {
         maintenanceTemplateRepository.save(template);
 
         return new MaintenanceTemplateResponse(
-                template.getId(),
                 template.getName(),
                 template.getTemplateType().name()
         );
