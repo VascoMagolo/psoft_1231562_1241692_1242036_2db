@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : getFuelEfficiency(registrationNumber, routeId?)
+activate Sys
+Sys --> Actor : returns fuel efficiency metrics
+deactivate Sys
+@enduml

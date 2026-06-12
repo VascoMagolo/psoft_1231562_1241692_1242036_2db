@@ -47,6 +47,7 @@ public class AircraftController {
     private final ViewCompatibleRoutesUseCase viewCompatibleRoutes;
     private final CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours;
     private final GetAircraftUtilizationUseCase getAircraftUtilization;
+    private final CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
@@ -54,7 +55,8 @@ public class AircraftController {
                               DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase,
                               ViewCompatibleRoutesUseCase viewCompatibleRoutes,
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
-                              GetAircraftUtilizationUseCase getAircraftUtilization) {
+                              GetAircraftUtilizationUseCase getAircraftUtilization,
+                              CalculateFuelEfficiencyUseCase calculateFuelEfficiency) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -65,6 +67,7 @@ public class AircraftController {
         this.viewCompatibleRoutes = viewCompatibleRoutes;
         this.calculateAircraftOperationalHours = calculateAircraftOperationalHours;
         this.getAircraftUtilization = getAircraftUtilization;
+        this.calculateFuelEfficiency = calculateFuelEfficiency;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
@@ -272,6 +275,23 @@ public class AircraftController {
             @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam java.time.LocalDate endDate) {
 
         List<UtilizationDataPointResponse> response = getAircraftUtilization.execute(registrationStr, startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Calculate fuel efficiency", description = "Calculates fuel efficiency metrics per aircraft and per route. (US227)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fuel efficiency calculated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid route ID supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
+    })
+    @GetMapping("/{registrationStr}/fuel-efficiency")
+    public ResponseEntity<FuelEfficiencyResponse> getFuelEfficiency(
+            @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
+            @Parameter(description = "Optional route ID to calculate specific fuel needs") @RequestParam(required = false) Long routeId) {
+
+        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, routeId);
         return ResponseEntity.ok(response);
     }
 

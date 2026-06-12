@@ -70,6 +70,9 @@ class AircraftControllerTest {
     private GetAircraftUtilizationUseCase getAircraftUtilization;
 
     @MockitoBean
+    private CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -82,6 +85,18 @@ class AircraftControllerTest {
         sampleResponse = new ViewAircraftDetailsResponse(
                 "CS-TPA", "A320", Manufacturer.AIRBUS, LocalDate.of(2020, 1, 1),
                 AircraftStatus.AVAILABLE, 150, 5000.0, List.of("WiFi"), 0L);
+    }
+
+    @Test
+    void ensureGetFuelEfficiencyReturns200() throws Exception {
+        when(calculateFuelEfficiency.execute(any(), any())).thenReturn(
+                new aisafe.aircrafts.application.dtos.FuelEfficiencyResponse("CS-TPA", 5.346, 1L, 2673.0)
+        );
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA/fuel-efficiency")
+                        .param("routeId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fuelNeededForRoute").value(2673.0));
     }
 
     @Test

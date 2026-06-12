@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*/compatible-routes").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*/operational-hours").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*/utilization").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/aircrafts/*/fuel-efficiency").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts/*").hasAnyRole("BACKOFFICE_OPERATOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/aircrafts").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/aircraftModels").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")

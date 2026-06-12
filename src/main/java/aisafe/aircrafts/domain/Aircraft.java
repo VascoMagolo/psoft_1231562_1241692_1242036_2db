@@ -65,4 +65,13 @@ public class Aircraft {
     public void setModel(AircraftModel model) { Assert.notNull(model, "Model must not be null."); this.model = model; }
     public void setFeatures(List<String> features) { this.features = features != null ? new ArrayList<>(features) : new ArrayList<>(); }
     public void setVersion(Long version) { this.version = version; }
+
+    /**
+     * Calculates the fuel consumption per distance unit (e.g., Liters per KM)
+     * based on the model's fuel capacity and the specific aircraft's operational range.
+     * @return the fuel consumption per distance unit
+     */
+    public Double getFuelConsumptionPerDistanceUnit() {
+        return model.getFuelCapacity() / this.range;
+    }
 }
