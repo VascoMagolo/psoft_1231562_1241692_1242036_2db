@@ -808,7 +808,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/fuel-efficiency?routeId=1",
+              "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/fuel-efficiency?origin=OPO&destination=LIS",
               "host": [
                 "{{base_url}}"
               ],
@@ -820,8 +820,12 @@
               ],
               "query": [
                 {
-                  "key": "routeId",
-                  "value": "1"
+                  "key": "origin",
+                  "value": "OPO"
+                },
+                {
+                  "key": "destination",
+                  "value": "LIS"
                 }
               ]
             }

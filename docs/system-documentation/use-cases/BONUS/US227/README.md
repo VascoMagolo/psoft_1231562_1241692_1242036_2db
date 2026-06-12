@@ -7,7 +7,7 @@
 ## Acceptance Criteria
 
 - The request must specify the aircraft by its `registrationNumber` in the URL.
-- The request can optionally specify a `routeId`.
+- The request can optionally specify an `origin` and `destination` IATA code pair to identify a route.
 - The system calculates the base fuel consumption per distance unit using the aircraft's operational range and the model's fuel capacity.
 - If a route is provided, the system also calculates the total fuel needed for that specific route based on its minimum range.
 - The system returns HTTP 200 with the `FuelEfficiencyResponse` DTO.
@@ -25,10 +25,10 @@
 
 ## Main Success Scenario
 
-1. The actor sends `GET /api/aircrafts/{registration}/fuel-efficiency?routeId={id}`.
+1. The actor sends `GET /api/aircrafts/{registration}/fuel-efficiency?origin={origin}&destination={destination}`.
 2. The system loads the aircraft by registration number.
 3. The system calculates the base fuel efficiency.
-4. If a route ID is provided, the system loads the route and calculates the fuel required.
+4. If an origin and destination are provided, the system loads the route and calculates the fuel required.
 5. The system returns HTTP 200 with the calculated metrics.
 
 ## Alternative / Exception Flows

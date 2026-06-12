@@ -8,10 +8,10 @@ participant "RouteRepository" as RouteRepo
 participant "Aircraft" as Aircraft
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/aircrafts/{registration}/fuel-efficiency?routeId=X
+ATCC -> Ctrl : GET /api/aircrafts/{registration}/fuel-efficiency?origin={origin}&destination={destination}
 activate Ctrl
 
-Ctrl -> UC : execute(registration, routeId)
+Ctrl -> UC : execute(registration, origin, destination)
 activate UC
 
 UC -> Repo : findByRegistrationNumber(registration)
@@ -32,10 +32,10 @@ else aircraft found
     Aircraft --> UC : fuelConsumption
     deactivate Aircraft
 
-    alt routeId provided
-        UC -> RouteRepo : findById(routeId)
+    alt origin and destination provided
+        UC -> RouteRepo : findByOriginAndDestination(origin, destination)
         activate RouteRepo
-        RouteRepo -> DB : SELECT FROM route WHERE id = ?
+        RouteRepo -> DB : SELECT FROM route WHERE origin_code = ? AND destination_code = ?
         activate DB
         DB --> RouteRepo : route record
         deactivate DB
@@ -52,7 +52,7 @@ else aircraft found
         end
     end
 
-    UC --> Ctrl : FuelEfficiencyResponse
+    UC --> Ctrl : FuelEfficiencyResponse\n{ registrationNumber, fuelConsumptionPerDistanceUnit,\n  routeOrigin, routeDestination, fuelNeededForRoute }
     deactivate UC
     Ctrl --> ATCC : 200 OK\nFuelEfficiencyResponse
 end

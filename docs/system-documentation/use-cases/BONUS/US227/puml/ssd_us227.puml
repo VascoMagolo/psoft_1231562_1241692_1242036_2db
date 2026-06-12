@@ -2,7 +2,7 @@
 autonumber
 actor "ATCC" as Actor
 participant "System" as Sys
-Actor -> Sys : getFuelEfficiency(registrationNumber, routeId?)
+Actor -> Sys : getFuelEfficiency(registrationNumber, origin?, destination?)
 activate Sys
 Sys --> Actor : returns fuel efficiency metrics
 deactivate Sys
