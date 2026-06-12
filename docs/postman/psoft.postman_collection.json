@@ -322,7 +322,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX2\",\r\n    \"manufacturer\": \"BOEING\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"maximumSeatingCapacity\": 230,\r\n    \"imagePath\": \"images/b737max.png\"\r\n}",
+              "raw": "{\r\n    \"modelName\": \"Boeing 737 MAX2\",\r\n    \"manufacturer\": \"BOEING\",\r\n    \"fuelCapacity\": 25941.0,\r\n    \"maxRange\": 6570.0,\r\n    \"cruisingSpeed\": 839.0,\r\n    \"maximumSeatingCapacity\": 230,\r\n    \"imagePath\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/EGLF_-_Boeing_737_Max_-_N7201S_%2843406207022%29.jpg/960px-EGLF_-_Boeing_737_Max_-_N7201S_%2843406207022%29.jpg\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -796,6 +796,32 @@
                 {
                   "key": "endDate",
                   "value": "2026-06-10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Fuel Efficiency",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/fuel-efficiency?routeId=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "{{aircraft_registration}}",
+                "fuel-efficiency"
+              ],
+              "query": [
+                {
+                  "key": "routeId",
+                  "value": "1"
                 }
               ]
             }
