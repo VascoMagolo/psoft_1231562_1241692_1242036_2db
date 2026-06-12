@@ -89,12 +89,13 @@ class AircraftControllerTest {
 
     @Test
     void ensureGetFuelEfficiencyReturns200() throws Exception {
-        when(calculateFuelEfficiency.execute(any(), any())).thenReturn(
-                new aisafe.aircrafts.application.dtos.FuelEfficiencyResponse("CS-TPA", 5.346, 1L, 2673.0)
+        when(calculateFuelEfficiency.execute(any(), any(), any())).thenReturn(
+                new aisafe.aircrafts.application.dtos.FuelEfficiencyResponse("CS-TPA", 5.346, "OPO", "LIS", 2673.0)
         );
 
         mockMvc.perform(get("/api/aircrafts/CS-TPA/fuel-efficiency")
-                        .param("routeId", "1"))
+                        .param("origin", "OPO")
+                        .param("destination", "LIS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fuelNeededForRoute").value(2673.0));
     }
