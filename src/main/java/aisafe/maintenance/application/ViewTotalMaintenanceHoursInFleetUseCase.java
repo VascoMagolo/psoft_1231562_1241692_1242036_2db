@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Views all maintenance hours from the whole fleet by joining all the maintenance record hours
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewTotalMaintenanceHoursInFleetUseCase {
     private final MaintenanceRecordRepository repository;

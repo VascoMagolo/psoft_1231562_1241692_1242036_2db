@@ -77,7 +77,7 @@ class MaintenanceControllerTest {
         sampleRecordId = UUID.randomUUID();
         sampleRecordResponse = new MaintenanceRecordResponse(
                 sampleRecordId, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, null, "P001", "Annual Check", "PLANNED", "CS-TPA", 0L);
+                4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L);
     }
 
     @Test
@@ -110,7 +110,7 @@ class MaintenanceControllerTest {
     void ensureCreateRecordReturns201() throws Exception {
         CreateMaintenanceRecordRequest request = new CreateMaintenanceRecordRequest(
                 "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, "P001", null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA");
+                4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA");
 
         when(createMaintenanceRecordUseCase.execute(any())).thenReturn(sampleRecordResponse);
 
@@ -133,7 +133,7 @@ class MaintenanceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.partNumber").value("P001"));
+                .andExpect(jsonPath("$.partNumbers[0]").value("P001"));
     }
 
     @Test

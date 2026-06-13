@@ -54,7 +54,7 @@ class CreateMaintenanceRecordUseCaseTest {
 
     private CreateMaintenanceRecordRequest buildRequest() {
         return new CreateMaintenanceRecordRequest(
-                "Engine inspection", START_DATE, 4, "P001", null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA");
+                "Engine inspection", START_DATE, 4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA");
     }
 
     @Test
@@ -66,14 +66,14 @@ class CreateMaintenanceRecordUseCaseTest {
         when(partRepository.findByPartNumber("P001")).thenReturn(Optional.of(part));
         when(templateRepository.findByName("Annual Check")).thenReturn(Optional.of(template));
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
-        when(recordRepository.existsByStartDateAndPartAndTemplate(any(), any(), any())).thenReturn(false);
+        when(recordRepository.existsByStartDateAndTemplate(any(), any())).thenReturn(false);
         doNothing().when(recordRepository).save(any(MaintenanceRecord.class));
 
         MaintenanceRecordResponse response = createMaintenanceRecord.execute(buildRequest());
 
         assertNotNull(response);
         assertEquals("Engine inspection", response.description());
-        assertEquals("P001", response.partNumber());
+        assertEquals(List.of("P001"), response.partNumbers());
         verify(recordRepository, times(1)).save(any(MaintenanceRecord.class));
     }
 
@@ -112,7 +112,7 @@ class CreateMaintenanceRecordUseCaseTest {
         when(partRepository.findByPartNumber("P001")).thenReturn(Optional.of(buildPart()));
         when(templateRepository.findByName("Annual Check")).thenReturn(Optional.of(buildTemplate()));
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(buildAircraft()));
-        when(recordRepository.existsByStartDateAndPartAndTemplate(any(), any(), any())).thenReturn(true);
+        when(recordRepository.existsByStartDateAndTemplate(any(), any())).thenReturn(true);
 
         assertThrows(MaintenanceRecordAlreadyExistsException.class, () ->
                 createMaintenanceRecord.execute(buildRequest()));

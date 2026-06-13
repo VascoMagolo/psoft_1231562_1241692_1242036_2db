@@ -5,10 +5,10 @@ import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.*;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-/**
- * Use case for creating a new maintenance record in the system.
- */
 @UseCase
 public class CreateMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository recordRepository;
@@ -23,26 +23,23 @@ public class CreateMaintenanceRecordUseCase {
         this.aircraftRepository = aircraftRepository;
     }
 
-    /**
-     * Creates a new maintenance record based on the provided request data and saves it to the repository.
-     * @param request the request containing the details of the maintenance record to be created
-     * @return a response containing information of the created maintenance record
-     */
     public MaintenanceRecordResponse execute(CreateMaintenanceRecordRequest request) {
-        MaintenancePart part = partRepository.findByPartNumber(request.part())
-                .orElseThrow(() -> new MaintenancePartNotFoundException("Part '" + request.part() + "' not found."));
+        List<MaintenancePart> parts = request.parts().stream()
+                .map(pn -> partRepository.findByPartNumber(pn)
+                        .orElseThrow(() -> new MaintenancePartNotFoundException("Part '" + pn + "' not found.")))
+                .collect(Collectors.toList());
         MaintenanceTemplate template = templateRepository.findByName(request.template())
                 .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Template '" + request.template() + "' not found."));
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(new RegistrationNumber(request.registrationNumber()))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number '" + request.registrationNumber() + "' not found."));
 
         MaintenanceRecord record = new MaintenanceRecord(
-                request.description(), request.startDate(), request.expectedDuration(),
-                part, request.notes(), template, request.status(), aircraft.getRegistrationNumber().getNumber()
+                UUID.randomUUID(), request.description(), request.startDate(), request.expectedDuration(),
+                parts, request.notes(), template, request.status(), aircraft.getRegistrationNumber().getNumber()
         );
 
-        if (recordRepository.existsByStartDateAndPartAndTemplate(record.getStartDate(), record.getPart(), record.getTemplate())) {
-            throw new MaintenanceRecordAlreadyExistsException("Record with the same start date, part, and template already exists.");
+        if (recordRepository.existsByStartDateAndTemplate(record.getStartDate(), record.getTemplate())) {
+            throw new MaintenanceRecordAlreadyExistsException("Record with the same start date and template already exists.");
         }
 
         recordRepository.save(record);
@@ -50,7 +47,8 @@ public class CreateMaintenanceRecordUseCase {
         return new MaintenanceRecordResponse(
                 record.getRecordId(), record.getDescription(), record.getStartDate(),
                 record.getExpectedDuration(), record.getNotes(),
-                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getParts().stream().map(MaintenancePart::getPartNumber).collect(Collectors.toList()),
+                record.getTemplate().getName(),
                 record.getStatus().name(), request.registrationNumber(),
                 record.getVersion()
         );

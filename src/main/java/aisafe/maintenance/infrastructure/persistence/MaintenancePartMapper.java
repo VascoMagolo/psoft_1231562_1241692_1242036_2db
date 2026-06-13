@@ -4,6 +4,7 @@ import aisafe.maintenance.domain.MaintenancePart;
 
 public class MaintenancePartMapper {
     public static MaintenancePart toDomain(MaintenancePartJpaEntity entity) {
+        if (entity == null) return null;
         return new MaintenancePart(
                 entity.getPartNumber(), entity.getName(), entity.getDescription(),
                 entity.getStockQuantity(), entity.getMinimumThreshold(), entity.getComponent());

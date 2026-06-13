@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface SpringDataMaintenanceRecordRepository extends JpaRepository<MaintenanceRecordJpaEntity, Long> {
-    boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePartJpaEntity part, MaintenanceTemplateJpaEntity template);
-    boolean existsByPart(MaintenancePartJpaEntity part);
+    boolean existsByStartDateAndTemplate(LocalDateTime startDate, MaintenanceTemplateJpaEntity template);
+    boolean existsByPartsContaining(MaintenancePartJpaEntity part);
     boolean existsByTemplate(MaintenanceTemplateJpaEntity template);
     boolean existsByAircraftRegistration(String aircraftRegistration);
     Page<MaintenanceRecordJpaEntity> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);

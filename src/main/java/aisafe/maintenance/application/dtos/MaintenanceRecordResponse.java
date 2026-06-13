@@ -1,6 +1,7 @@
 package aisafe.maintenance.application.dtos;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,7 @@ import java.util.UUID;
  * @param startDate
  * @param expectedDuration
  * @param notes
- * @param partNumber
+ * @param partNumbers
  * @param templateName
  * @param status
  * @param aircraftRegistration
@@ -22,7 +23,7 @@ public record MaintenanceRecordResponse(
         LocalDateTime startDate,
         Integer expectedDuration,
         String notes,
-        String partNumber,
+        List<String> partNumbers,
         String templateName,
         String status,
         String aircraftRegistration,
