@@ -3,7 +3,7 @@ autonumber
 actor "ATCC / Backoffice Operator" as Actor
 participant "RouteController" as Ctrl
 participant "UpdateRouteUseCase" as UpdateUC
-participant "DesactivateRouteUseCase" as DeactivateUC
+participant "DeactivateRouteUseCase" as DeactivateUC
 participant "RouteRepository" as Repo
 participant "RouteHistoryRepository" as HistoryRepo
 database "Database" as DB

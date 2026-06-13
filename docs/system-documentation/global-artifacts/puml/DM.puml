@@ -42,9 +42,9 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - manufacturingDate : Date
     - status : AircraftStatus
     - seatCapacity : Integer
+    - range : Double
     - features : List<String>
     - model : AircraftModel
-    - version : Long
   }
 
   class AircraftModel <<Entity>> <<Root>> {
@@ -52,10 +52,11 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
+    - maximumSeatingCapacity : Integer
     - imagePath : String
   }
   class RegistrationNumber <<ValueObject>> {
-    - registrationNumber : String
+    - number : String
   }
   Aircraft --> AircraftStatus : current status
   RegistrationNumber "1"-->"1" Aircraft
@@ -117,7 +118,7 @@ package "Airport Aggregate" <<Aggregate>> {
     - timezone : String
     - imagePath : String
     - operationalHours : String
-    - operationalStatus : AirportStatus
+    - status : AirportStatus
   }
 
   class AircraftCertification <<Entity>> {
@@ -148,7 +149,6 @@ package "Route Aggregate" {
     - minimumRange : Double
     - minimumCapacity : Integer
     - status : RouteStatus
-    - version : Long
   }
 
   class RouteHistory <<Entity>> {
@@ -175,7 +175,7 @@ package "Flight Aggregate" <<Aggregate>> {
   }
 
   class ScheduledFlight <<Entity>> <<Root>> {
-    - id : Integer
+    - id : Long
     - departureDateTime : DateTime
     - arrivalDateTime : DateTime
     - status : FlightStatus
@@ -220,7 +220,7 @@ package "Maintenance Aggregate" <<Aggregate>> {
   class MaintenanceRecord <<Entity>> <<Root>> {
     - recordId : UUID
     - description : String
-    - startDate : Date
+    - startDate : DateTime
     - expectedDuration : Integer
     - notes : String
     - status : MaintenanceStatus

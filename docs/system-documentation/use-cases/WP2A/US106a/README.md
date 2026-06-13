@@ -7,7 +7,7 @@
 ## Acceptance Criteria
 
 - The airport identified by the given IATA code must exist.
-- The aircraft model identified by the given ID must exist.
+- The aircraft model identified by the given name must exist.
 - The same aircraft model cannot be certified for the same airport more than once.
 - On success the system returns HTTP 201 with the certification representation and a HATEOAS link back to the airport.
 - Airport not found returns HTTP 404; aircraft model not found returns HTTP 404.
@@ -25,9 +25,9 @@
 
 ## Main Success Scenario
 
-1. The actor sends `POST /api/airports/{iataCode}/certifications` with `{ "aircraftModelId": <id> }`.
+1. The actor sends `POST /api/airports/{iataCode}/certifications` with `{ "aircraftModelName": "<name>" }`.
 2. The system looks up the airport by IATA code.
-3. The system looks up the aircraft model by ID.
+3. The system looks up the aircraft model by name.
 4. The system checks no certification already exists for this airport-model pair.
 5. The system persists the certification and returns HTTP 201.
 
@@ -42,7 +42,7 @@
 ## Design Justification
 
 - `AircraftCertification` is modelled as a separate **Entity** (own identity, own repository) rather than a collection on `Airport`, because certifications may eventually be queried independently (e.g., "which airports certify model X?").
-- Duplicate detection uses a repository query (`existsByAirportAndAircraftModelId`) rather than a unique constraint alone, to produce a domain-meaningful 409 error message instead of a generic DB exception.
+- Duplicate detection uses a repository query (`existsByAirportAndAircraftModelName`) rather than a unique constraint alone, to produce a domain-meaningful 409 error message instead of a generic DB exception.
 - `AircraftNotFoundException` (HTTP 404) and `DuplicateResourceException` (HTTP 409) are thrown instead of a generic `DomainException`, aligning error codes with the OpenAPI documentation and REST semantics.
 
 ## Sequence Diagrams
