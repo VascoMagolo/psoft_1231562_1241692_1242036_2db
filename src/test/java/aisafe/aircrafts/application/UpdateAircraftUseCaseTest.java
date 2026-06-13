@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +47,7 @@ class UpdateAircraftUseCaseTest {
         AircraftModel newModel = new AircraftModel("A321", Manufacturer.AIRBUS, 27000.0, 6500.0, 840.0, "a321.jpg", 200);
 
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
+        when(aircraftRepository.findVersionFor(any())).thenReturn(0L);
         when(aircraftModelRepository.findByModelName("A321")).thenReturn(Optional.of(newModel));
 
         ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registrationNumber, request, 0L);
@@ -55,7 +57,7 @@ class UpdateAircraftUseCaseTest {
         assertEquals(LocalDate.of(2021, 1, 1), response.manufacturingDate());
         assertEquals(160, response.seatCapacity());
         assertTrue(response.features().contains("Bluetooth"));
-        verify(aircraftRepository, times(1)).save(aircraft, 0L);
+        verify(aircraftRepository, times(1)).save(any(Aircraft.class));
     }
 
     @Test
@@ -65,7 +67,7 @@ class UpdateAircraftUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.empty());
 
         assertThrows(AircraftNotFoundException.class, () -> updateAircraftUseCase.execute(registrationNumber, request, 0L));
-        verify(aircraftRepository, never()).save(any(), anyLong());
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
     }
 
     @Test
@@ -73,9 +75,10 @@ class UpdateAircraftUseCaseTest {
         UpdateAircraftRequest request = new UpdateAircraftRequest("NON-EXISTENT", null, null, null, null);
 
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
+        when(aircraftRepository.findVersionFor(any())).thenReturn(0L);
         when(aircraftModelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 
         assertThrows(AircraftModelNotFoundException.class, () -> updateAircraftUseCase.execute(registrationNumber, request, 0L));
-        verify(aircraftRepository, never()).save(any(), anyLong());
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
     }
 }

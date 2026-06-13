@@ -6,19 +6,28 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteHistory;
+import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.DuplicateResourceException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Use case responsible for creating a new route.
  */
 @UseCase
-@RequiredArgsConstructor
 public class CreateRouteUseCase {
 
     private final RouteRepository routeRepository;
     private final AirportRepository airportRepository;
+    private final RouteHistoryRepository routeHistoryRepository;
+
+    public CreateRouteUseCase(RouteRepository routeRepository, AirportRepository airportRepository,
+                              RouteHistoryRepository routeHistoryRepository) {
+        this.routeRepository = routeRepository;
+        this.airportRepository = airportRepository;
+        this.routeHistoryRepository = routeHistoryRepository;
+    }
 
     /**
      * Validates and persists a new route based on the provided request.
@@ -48,6 +57,9 @@ public class CreateRouteUseCase {
                 request.minimumCapacity()
         );
 
-        return routeRepository.save(route);
+        routeRepository.save(route);
+        String createdBy = SecurityContextHolder.getContext().getAuthentication().getName();
+        routeHistoryRepository.save(new RouteHistory(originCode, destinationCode, "Route created", createdBy));
+        return route;
     }
 }

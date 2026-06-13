@@ -110,7 +110,7 @@ class AircraftControllerTest {
                         .param("startDate", "2023-01-01")
                         .param("endDate", "2023-01-31"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].date").value("2023-01-01"));
+                .andExpect(jsonPath("$._embedded.utilizationDataPointResponseList[0].date").value("2023-01-01"));
     }
 
     @Test

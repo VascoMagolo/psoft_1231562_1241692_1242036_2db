@@ -21,7 +21,7 @@ public record ViewAircraftDetailsResponse(
         List<String> features,
         Long version
 ) {
-    public static ViewAircraftDetailsResponse from(Aircraft aircraft) {
+    public static ViewAircraftDetailsResponse from(Aircraft aircraft, Long version) {
         return new ViewAircraftDetailsResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
@@ -31,7 +31,7 @@ public record ViewAircraftDetailsResponse(
                 aircraft.getSeatCapacity(),
                 aircraft.getRange(),
                 aircraft.getFeatures(),
-                aircraft.getVersion()
+                version
         );
     }
 }

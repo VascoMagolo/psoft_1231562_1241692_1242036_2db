@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
+import aisafe.routes.infrastructure.RouteController;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -235,13 +237,19 @@ public class AircraftController {
             @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
     })
     @GetMapping("/{registrationStr}/compatible-routes")
-    public ResponseEntity<List<CompatibleRouteResponse>> getCompatibleRoutes(
+    public ResponseEntity<CollectionModel<EntityModel<CompatibleRouteResponse>>> getCompatibleRoutes(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
             @PathVariable String registrationStr) {
 
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
-        List<CompatibleRouteResponse> routes = viewCompatibleRoutes.execute(registration);
-        return ResponseEntity.ok(routes);
+        List<EntityModel<CompatibleRouteResponse>> items = viewCompatibleRoutes.execute(registration).stream()
+                .map(r -> EntityModel.of(r,
+                        linkTo(methodOn(RouteController.class).getRouteDetails(r.originIataCode(), r.destinationIataCode())).withRel("route")))
+                .toList();
+        CollectionModel<EntityModel<CompatibleRouteResponse>> model = CollectionModel.of(items,
+                linkTo(methodOn(AircraftController.class).getCompatibleRoutes(registrationStr)).withSelfRel(),
+                linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft"));
+        return ResponseEntity.ok(model);
     }
 
     @Operation(summary = "Calculate total operational hours", description = "Calculates the total operational hours for a specific aircraft based on completed flights. (US206)")
@@ -252,13 +260,15 @@ public class AircraftController {
             @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
     })
     @GetMapping("/{registrationStr}/operational-hours")
-    public ResponseEntity<AircraftOperationalHoursResponse> getOperationalHours(
+    public ResponseEntity<EntityModel<AircraftOperationalHoursResponse>> getOperationalHours(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
             @PathVariable String registrationStr) {
 
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
         AircraftOperationalHoursResponse response = calculateAircraftOperationalHours.execute(registration);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(EntityModel.of(response,
+                linkTo(methodOn(AircraftController.class).getOperationalHours(registrationStr)).withSelfRel(),
+                linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft")));
     }
 
     @Operation(summary = "Get aircraft utilization rates over time", description = "Returns daily flight hours and utilization percentage for an aircraft in a given date range. (US223)")
@@ -269,13 +279,18 @@ public class AircraftController {
             @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
     })
     @GetMapping("/{registrationStr}/utilization")
-    public ResponseEntity<List<UtilizationDataPointResponse>> getAircraftUtilization(
+    public ResponseEntity<CollectionModel<EntityModel<UtilizationDataPointResponse>>> getAircraftUtilization(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
             @Parameter(description = "Start date (YYYY-MM-DD)") @RequestParam java.time.LocalDate startDate,
             @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam java.time.LocalDate endDate) {
 
-        List<UtilizationDataPointResponse> response = getAircraftUtilization.execute(registrationStr, startDate, endDate);
-        return ResponseEntity.ok(response);
+        List<EntityModel<UtilizationDataPointResponse>> items = getAircraftUtilization.execute(registrationStr, startDate, endDate).stream()
+                .map(EntityModel::of)
+                .toList();
+        CollectionModel<EntityModel<UtilizationDataPointResponse>> model = CollectionModel.of(items,
+                linkTo(methodOn(AircraftController.class).getAircraftUtilization(registrationStr, startDate, endDate)).withSelfRel(),
+                linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft"));
+        return ResponseEntity.ok(model);
     }
 
     @Operation(summary = "Calculate fuel efficiency", description = "Calculates fuel efficiency metrics per aircraft and per route. (US227)")
@@ -287,13 +302,15 @@ public class AircraftController {
             @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
     })
     @GetMapping("/{registrationStr}/fuel-efficiency")
-    public ResponseEntity<FuelEfficiencyResponse> getFuelEfficiency(
+    public ResponseEntity<EntityModel<FuelEfficiencyResponse>> getFuelEfficiency(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
             @Parameter(description = "Optional origin IATA code to calculate specific fuel needs") @RequestParam(required = false) String origin,
             @Parameter(description = "Optional destination IATA code to calculate specific fuel needs") @RequestParam(required = false) String destination) {
 
         FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, origin, destination);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(EntityModel.of(response,
+                linkTo(methodOn(AircraftController.class).getFuelEfficiency(registrationStr, origin, destination)).withSelfRel(),
+                linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft")));
     }
 
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {

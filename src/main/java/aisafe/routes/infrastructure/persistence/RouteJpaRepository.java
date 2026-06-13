@@ -29,17 +29,22 @@ public class RouteJpaRepository implements RouteRepository {
     }
 
     @Override
-    public Route save(Route route) {
+    public void save(Route route) {
         Optional<RouteJpaEntity> existing = springRepo.findByOriginCodeAndDestinationCode(
                 route.getOrigin().getCode(), route.getDestination().getCode());
         RouteJpaEntity jpaEntity = RouteMapper.toJpa(route);
         existing.ifPresent(e -> {
             jpaEntity.setId(e.getId());
-            jpaEntity.setVersion(route.getVersion());
+            jpaEntity.setVersion(e.getVersion());
         });
-        RouteJpaEntity saved = springRepo.save(jpaEntity);
-        route.setVersion(saved.getVersion());
-        return route;
+        springRepo.save(jpaEntity);
+    }
+
+    @Override
+    public Long findVersionFor(IataCode origin, IataCode destination) {
+        return springRepo.findByOriginCodeAndDestinationCode(origin.getCode(), destination.getCode())
+                .map(RouteJpaEntity::getVersion)
+                .orElse(0L);
     }
 
     @Override

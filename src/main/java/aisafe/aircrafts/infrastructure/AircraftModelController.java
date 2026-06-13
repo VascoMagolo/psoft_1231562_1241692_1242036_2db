@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -153,11 +154,17 @@ public class AircraftModelController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/top-utilized")
-    public ResponseEntity<List<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> getTopUtilizedModels(
+    public ResponseEntity<CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>>> getTopUtilizedModels(
             @Parameter(description = "Criteria for utilization ranking: 'HOURS' or 'ASSIGNMENTS'")
             @RequestParam(required = true) String criteria) {
 
-        List<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse> response = getTopUtilizedModels.execute(criteria);
-        return ResponseEntity.ok(response);
+        List<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> items =
+                getTopUtilizedModels.execute(criteria).stream()
+                        .map(EntityModel::of)
+                        .toList();
+        CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> model =
+                CollectionModel.of(items,
+                        linkTo(methodOn(AircraftModelController.class).getTopUtilizedModels(criteria)).withSelfRel());
+        return ResponseEntity.ok(model);
     }
 }

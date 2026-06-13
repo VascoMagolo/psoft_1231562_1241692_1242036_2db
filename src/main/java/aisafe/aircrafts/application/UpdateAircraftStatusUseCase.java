@@ -26,8 +26,9 @@ public class UpdateAircraftStatusUseCase {
         Aircraft aircraft = repository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registration.getNumber()));
 
-        if (!aircraft.getVersion().equals(clientVersion)) {
-            throw new ObjectOptimisticLockingFailureException(Aircraft.class, aircraft.getRegistrationNumber().getNumber());
+        Long currentVersion = repository.findVersionFor(registration);
+        if (!currentVersion.equals(clientVersion)) {
+            throw new ObjectOptimisticLockingFailureException(Aircraft.class, registration.getNumber());
         }
 
         if (!AircraftStatus.isValid(status)) {
@@ -35,13 +36,9 @@ public class UpdateAircraftStatusUseCase {
         }
         aircraft.changeStatus(AircraftStatus.valueOf(status.toUpperCase()));
 
+        repository.save(aircraft);
 
-        repository.save(aircraft, clientVersion);
-
-        return toDto(aircraft);
-    }
-
-    private ViewAircraftDetailsResponse toDto(Aircraft aircraft) {
-        return ViewAircraftDetailsResponse.from(aircraft);
+        Long newVersion = repository.findVersionFor(registration);
+        return ViewAircraftDetailsResponse.from(aircraft, newVersion);
     }
 }

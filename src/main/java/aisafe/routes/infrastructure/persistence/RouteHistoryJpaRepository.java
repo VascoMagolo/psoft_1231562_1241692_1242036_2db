@@ -37,4 +37,30 @@ public class RouteHistoryJpaRepository implements RouteHistoryRepository {
                 .map(RouteHistoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteAllByRoute(String originCode, String destinationCode) {
+        springRepo.deleteAllByRoute(originCode, destinationCode);
+    }
+
+    @Override
+    public long count() {
+        return springRepo.count();
+    }
+
+    @Override
+    public List<RouteHistory> findAll() {
+        return springRepo.findAll().stream()
+                .map(RouteHistoryMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void delete(RouteHistory history) {
+        springRepo.findAllByRoute(history.getOriginCode(), history.getDestinationCode()).stream()
+                .filter(e -> e.getChangedAt().equals(history.getChangedAt())
+                        && e.getChangedBy().equals(history.getChangedBy()))
+                .findFirst()
+                .ifPresent(springRepo::delete);
+    }
 }

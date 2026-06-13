@@ -10,7 +10,7 @@ import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.application.UseCase;
 
-@UseCase
+@UseCase(readOnly = true)
 public class CalculateFuelEfficiencyUseCase {
 
     private final AircraftRepository aircraftRepository;

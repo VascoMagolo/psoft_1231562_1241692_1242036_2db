@@ -7,17 +7,20 @@ import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.PaginatedResult;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Use case responsible for listing all routes originating from a specific airport.
  */
-@UseCase
-@RequiredArgsConstructor
+@UseCase(readOnly = true)
 public class ListRoutesFromAirportUseCase {
 
     private final RouteRepository routeRepository;
     private final AirportRepository airportRepository;
+
+    public ListRoutesFromAirportUseCase(RouteRepository routeRepository, AirportRepository airportRepository) {
+        this.routeRepository = routeRepository;
+        this.airportRepository = airportRepository;
+    }
 
     /**
      * Retrieves a paginated result of routes associated with the provided airport IATA code.

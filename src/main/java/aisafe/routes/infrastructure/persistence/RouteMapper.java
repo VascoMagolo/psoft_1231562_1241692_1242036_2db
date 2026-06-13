@@ -12,7 +12,6 @@ public class RouteMapper {
                 entity.getMinimumRange(),
                 entity.getMinimumCapacity()
         );
-        route.setVersion(entity.getVersion());
         route.setStatus(entity.getStatus());
         return route;
     }

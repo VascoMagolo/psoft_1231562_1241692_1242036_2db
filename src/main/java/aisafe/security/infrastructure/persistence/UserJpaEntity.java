@@ -2,9 +2,11 @@ package aisafe.security.infrastructure.persistence;
 
 import aisafe.security.domain.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "users")
 public class UserJpaEntity {
@@ -34,9 +36,4 @@ public class UserJpaEntity {
         this.role = role;
     }
 
-    public Long getId() { return id; }
-    public UUID getUserID() { return userID; }
-    public String getUsername() { return username; }
-    public String getPasswordHash() { return passwordHash; }
-    public Role getRole() { return role; }
 }

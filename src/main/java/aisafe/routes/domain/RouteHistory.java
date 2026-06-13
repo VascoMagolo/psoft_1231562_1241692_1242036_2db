@@ -1,10 +1,7 @@
 package aisafe.routes.domain;
 
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 
-@Getter
 public class RouteHistory {
 
     private String originCode;
@@ -22,6 +19,12 @@ public class RouteHistory {
         this.changedAt = LocalDateTime.now();
         this.changedBy = changedBy;
     }
+
+    public String getOriginCode() { return originCode; }
+    public String getDestinationCode() { return destinationCode; }
+    public String getChangeDescription() { return changeDescription; }
+    public LocalDateTime getChangedAt() { return changedAt; }
+    public String getChangedBy() { return changedBy; }
 
     public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
 }

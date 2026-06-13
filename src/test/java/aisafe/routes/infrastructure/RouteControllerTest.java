@@ -3,6 +3,7 @@ package aisafe.routes.infrastructure;
 import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
@@ -46,7 +47,7 @@ class RouteControllerTest {
     private UpdateRouteUseCase updateRoute;
 
     @MockitoBean
-    private DesactivateRouteUseCase desactivateRoute;
+    private DeactivateRouteUseCase deactivateRoute;
 
     @MockitoBean
     private ViewRouteDetailsUseCase viewRouteDetails;
@@ -59,6 +60,9 @@ class RouteControllerTest {
 
     @MockitoBean
     private DeleteRouteUseCase deleteRoute;
+
+    @MockitoBean
+    private RouteRepository routeRepository;
 
     @MockitoBean
     private JwtService jwtService;
@@ -101,7 +105,7 @@ class RouteControllerTest {
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
         deactivated.setStatus(RouteStatus.INACTIVE);
-        when(desactivateRoute.execute(anyString(), anyString(), any())).thenReturn(deactivated);
+        when(deactivateRoute.execute(anyString(), anyString(), any())).thenReturn(deactivated);
 
         mockMvc.perform(patch("/api/routes/OPO/LIS/deactivate")
                         .header("If-Match", "0"))

@@ -4,7 +4,6 @@ import aisafe.aircrafts.application.dtos.CompatibleRouteResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
-import aisafe.airports.domain.IataCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +54,7 @@ class ViewCompatibleRoutesUseCaseTest {
 
         assertNotNull(response);
         assertEquals(2, response.size());
-        assertEquals("LIS", response.get(0).origin().getCode());
+        assertEquals("LIS", response.get(0).originIataCode());
         verify(routeRepository, times(1)).findCompatibleRoutes(6000.0, 150);
     }
 

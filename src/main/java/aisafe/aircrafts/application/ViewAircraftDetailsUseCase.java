@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Use case for viewing the details of a specific aircraft.
  * The use case retrieves the aircraft by its registration number and returns a DTO with all the details
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewAircraftDetailsUseCase {
 
@@ -31,6 +31,7 @@ public class ViewAircraftDetailsUseCase {
         Aircraft aircraft = repository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registrationNumber.getNumber()));
 
-        return ViewAircraftDetailsResponse.from(aircraft);
+        Long version = repository.findVersionFor(registrationNumber);
+        return ViewAircraftDetailsResponse.from(aircraft, version);
     }
 }

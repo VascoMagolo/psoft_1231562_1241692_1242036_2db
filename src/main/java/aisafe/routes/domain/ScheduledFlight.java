@@ -1,6 +1,7 @@
 package aisafe.routes.domain;
 
 import aisafe.aircrafts.domain.Aircraft;
+import org.springframework.util.Assert;
 import java.time.OffsetDateTime;
 import java.time.Duration;
 
@@ -15,8 +16,14 @@ public class ScheduledFlight {
     private Route route;
     private Aircraft aircraft;
 
-    public ScheduledFlight(OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime, 
+    public ScheduledFlight(OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime,
                            FlightStatus status, Route route, Aircraft aircraft) {
+        Assert.notNull(departureDateTime, "Departure date/time must not be null.");
+        Assert.notNull(arrivalDateTime, "Arrival date/time must not be null.");
+        Assert.notNull(status, "Flight status must not be null.");
+        Assert.notNull(route, "Route must not be null.");
+        Assert.notNull(aircraft, "Aircraft must not be null.");
+        Assert.isTrue(departureDateTime.isBefore(arrivalDateTime), "Departure must be before arrival.");
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.status = status;

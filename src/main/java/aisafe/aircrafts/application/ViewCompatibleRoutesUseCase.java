@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Views which routes are compatible with a specific aircraft based on its range and capacity
  */
 
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewCompatibleRoutesUseCase {
     private final RouteRepository routeRepository;
@@ -39,8 +39,8 @@ public class ViewCompatibleRoutesUseCase {
         return routeRepository.findCompatibleRoutes(aircraft.getRange(), aircraft.getSeatCapacity())
                 .stream()
                 .map(route -> new CompatibleRouteResponse(
-                        route.getOrigin(),
-                        route.getDestination(),
+                        route.getOrigin().getCode(),
+                        route.getDestination().getCode(),
                         route.getEstimatedFlightTime(),
                         route.getMinimumRange(),
                         route.getMinimumCapacity()
