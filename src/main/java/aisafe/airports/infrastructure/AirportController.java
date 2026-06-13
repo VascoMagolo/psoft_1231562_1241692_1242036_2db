@@ -264,7 +264,7 @@ public class AirportController {
         List<EntityModel<RouteResponse>> routeModels = viewAirportRoutes.execute(iataCode.toUpperCase())
                 .stream()
                 .map(r -> EntityModel.of(r,
-                        linkTo(methodOn(RouteController.class).getRouteDetails(r.id())).withSelfRel()))
+                        linkTo(methodOn(RouteController.class).getRouteDetails(r.originIataCode(), r.destinationIataCode())).withSelfRel()))
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(routeModels,
                 linkTo(methodOn(AirportController.class).getRoutes(iataCode)).withSelfRel(),

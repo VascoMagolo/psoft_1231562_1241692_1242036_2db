@@ -3,6 +3,7 @@ package aisafe.maintenance.infrastructure.persistence;
 import aisafe.maintenance.domain.MaintenanceStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "maintenance_record")
@@ -13,6 +14,9 @@ public class MaintenanceRecordJpaEntity {
 
     @Version
     private Long version;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    private UUID recordId;
 
     @Column(nullable = false)
     private String description;
@@ -42,10 +46,11 @@ public class MaintenanceRecordJpaEntity {
 
     protected MaintenanceRecordJpaEntity() {}
 
-    public MaintenanceRecordJpaEntity(String description, LocalDateTime startDate, Integer expectedDuration,
+    public MaintenanceRecordJpaEntity(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                                       String notes, MaintenancePartJpaEntity part,
                                       MaintenanceTemplateJpaEntity template, MaintenanceStatus status,
                                       String aircraftRegistration) {
+        this.recordId = recordId;
         this.description = description;
         this.startDate = startDate;
         this.expectedDuration = expectedDuration;
@@ -58,6 +63,7 @@ public class MaintenanceRecordJpaEntity {
 
     public Long getId() { return id; }
     public Long getVersion() { return version; }
+    public UUID getRecordId() { return recordId; }
     public String getDescription() { return description; }
     public LocalDateTime getStartDate() { return startDate; }
     public Integer getExpectedDuration() { return expectedDuration; }

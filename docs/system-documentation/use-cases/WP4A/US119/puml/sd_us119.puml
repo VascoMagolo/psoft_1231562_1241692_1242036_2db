@@ -7,7 +7,7 @@ participant "MaintenanceRecordRepository" as Repo
 participant "MaintenanceRecord" as Entity
 database "Database" as DB
 
-MT -> Ctrl : PATCH /api/maintenance/records/{id}\n{ status: MaintenanceStatus, notes? }\nIf-Match: {version}
+MT -> Ctrl : PATCH /api/maintenance/records/{recordId}\n{ status: MaintenanceStatus, notes? }\nIf-Match: {version}
 activate Ctrl
 
 note right of Ctrl
@@ -17,12 +17,12 @@ note right of Ctrl
   If-Match header: current version for optimistic locking
 end note
 
-Ctrl -> UC : execute(id: Long,\n  request: UpdateMaintenanceRecordsRequest,\n  version: Long)
+Ctrl -> UC : execute(recordId: UUID,\n  request: UpdateMaintenanceRecordsRequest,\n  version: Long)
 activate UC
 
-UC -> Repo : findById(id)
+UC -> Repo : findByRecordId(recordId)
 activate Repo
-Repo -> DB : SELECT FROM maintenance_record WHERE id = ?
+Repo -> DB : SELECT FROM maintenance_record WHERE record_id = ?
 activate DB
 DB --> Repo : record data
 deactivate DB
@@ -33,8 +33,8 @@ alt record not found
   UC --> Ctrl : throws MaintenanceRecordNotFoundException
   Ctrl --> MT : 404 Not Found\n{ message: "Maintenance record not found." }
 else version mismatch
-  UC --> Ctrl : throws ObjectOptimisticLockingFailureException
-  Ctrl --> MT : 409 Conflict\n{ message: "Concurrent update conflict -- please retry" }
+  UC --> Ctrl : throws ConcurrencyException
+  Ctrl --> MT : 412 Precondition Failed\n{ message: "Concurrent update conflict -- please retry" }
 else update allowed
   UC -> Entity : setStatus(request.status())
   activate Entity
@@ -50,13 +50,13 @@ else update allowed
 
   UC -> Repo : save(record)
   activate Repo
-  Repo -> DB : UPDATE maintenance_record\nSET status = ?, notes = ?\nWHERE id = ? AND version = ?
+  Repo -> DB : UPDATE maintenance_record\nSET status = ?, notes = ?\nWHERE record_id = ? AND version = ?
   activate DB
   DB --> Repo
   deactivate DB
   deactivate Repo
 
-  UC --> Ctrl : MaintenanceRecordResponse\n{ id, description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+  UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
   deactivate UC
   Ctrl --> MT : 200 OK\nEntityModel<MaintenanceRecordResponse> with _links
 end

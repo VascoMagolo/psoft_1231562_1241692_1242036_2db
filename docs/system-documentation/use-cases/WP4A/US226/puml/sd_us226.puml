@@ -42,7 +42,7 @@ else part number is unique
   deactivate DB
   deactivate Repo
 
-  UC --> Ctrl : MaintenancePartResponse\n{ id, partNumber, description }
+  UC --> Ctrl : MaintenancePartResponse\n{ partNumber, description }
   deactivate UC
   Ctrl --> MS : 201 Created\nEntityModel<MaintenancePartResponse> with _links
 end

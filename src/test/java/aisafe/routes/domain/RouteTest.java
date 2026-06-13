@@ -11,7 +11,7 @@ class RouteTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         assertEquals("OPO", route.getOrigin().getCode());
         assertEquals("LIS", route.getDestination().getCode());
-        assertTrue(route.isActive());
+        assertEquals(RouteStatus.ACTIVE, route.getStatus());
     }
 
     @Test
@@ -46,10 +46,10 @@ class RouteTest {
     }
 
     @Test
-    void ensureDeactivateSetsActiveFalse() {
+    void ensureSetStatusInactiveSetsRouteInactive() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        route.deactivate();
-        assertFalse(route.isActive());
+        route.setStatus(RouteStatus.INACTIVE);
+        assertEquals(RouteStatus.INACTIVE, route.getStatus());
     }
 
     @Test

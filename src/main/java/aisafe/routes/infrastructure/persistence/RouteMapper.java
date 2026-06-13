@@ -12,9 +12,8 @@ public class RouteMapper {
                 entity.getMinimumRange(),
                 entity.getMinimumCapacity()
         );
-        route.setId(entity.getId());
         route.setVersion(entity.getVersion());
-        route.setActive(entity.isActive());
+        route.setStatus(entity.getStatus());
         return route;
     }
 
@@ -25,7 +24,7 @@ public class RouteMapper {
                 route.getEstimatedFlightTime(),
                 route.getMinimumRange(),
                 route.getMinimumCapacity(),
-                route.isActive()
+                route.getStatus()
         );
     }
 }

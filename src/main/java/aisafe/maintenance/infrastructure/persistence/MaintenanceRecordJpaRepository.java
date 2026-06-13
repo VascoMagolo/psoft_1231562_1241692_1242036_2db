@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
@@ -79,8 +80,8 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
-    public Optional<MaintenanceRecord> findById(Long id) {
-        return springRepo.findById(id).map(MaintenanceRecordMapper::toDomain);
+    public Optional<MaintenanceRecord> findByRecordId(UUID recordId) {
+        return springRepo.findByRecordId(recordId).map(MaintenanceRecordMapper::toDomain);
     }
 
     @Override
@@ -90,24 +91,25 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         MaintenanceTemplateJpaEntity templateJpa = templateSpringRepo.findByName(record.getTemplate().getName())
                 .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Template not found: " + record.getTemplate().getName()));
 
-        MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
-                record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
-                record.getNotes(), partJpa, templateJpa, record.getStatus(), record.getAircraftRegistration());
+        MaintenanceRecordJpaEntity existing = springRepo.findByRecordId(record.getRecordId()).orElse(null);
 
-        if (record.getId() != null) {
-            jpaEntity.setId(record.getId());
-            jpaEntity.setVersion(record.getVersion());
+        if (existing != null) {
+            existing.setStatus(record.getStatus());
+            existing.setNotes(record.getNotes());
+            existing.setVersion(record.getVersion());
+            MaintenanceRecordJpaEntity saved = springRepo.save(existing);
+            record.setVersion(saved.getVersion());
+        } else {
+            MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
+                    record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
+                    record.getNotes(), partJpa, templateJpa, record.getStatus(), record.getAircraftRegistration());
+            MaintenanceRecordJpaEntity saved = springRepo.save(jpaEntity);
+            record.setVersion(saved.getVersion());
         }
-
-        MaintenanceRecordJpaEntity saved = springRepo.save(jpaEntity);
-        record.setId(saved.getId());
-        record.setVersion(saved.getVersion());
     }
 
     @Override
     public void delete(MaintenanceRecord record) {
-        if (record.getId() != null) {
-            springRepo.deleteById(record.getId());
-        }
+        springRepo.findByRecordId(record.getRecordId()).ifPresent(springRepo::delete);
     }
 }

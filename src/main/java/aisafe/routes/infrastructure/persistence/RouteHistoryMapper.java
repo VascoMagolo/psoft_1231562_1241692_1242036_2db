@@ -6,11 +6,11 @@ public class RouteHistoryMapper {
 
     public static RouteHistory toDomain(RouteHistoryJpaEntity entity) {
         RouteHistory history = new RouteHistory(
-                entity.getRoute().getId(),
+                entity.getRoute().getOriginCode(),
+                entity.getRoute().getDestinationCode(),
                 entity.getChangeDescription(),
                 entity.getChangedBy()
         );
-        history.setId(entity.getId());
         history.setChangedAt(entity.getChangedAt());
         return history;
     }

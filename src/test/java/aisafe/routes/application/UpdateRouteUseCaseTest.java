@@ -1,5 +1,6 @@
 package aisafe.routes.application;
 
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.*;
 import aisafe.shared.domain.ConcurrencyException;
@@ -48,11 +49,12 @@ class UpdateRouteUseCaseTest {
     @Test
     void ensureRouteIsUpdatedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
         when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, null);
-        Route result = updateRoute.execute(1L, request, null);
+        Route result = updateRoute.execute("OPO", "LIS", request, null);
 
         assertEquals(60, result.getEstimatedFlightTime());
         verify(routeHistoryRepository).save(any(RouteHistory.class));
@@ -61,19 +63,21 @@ class UpdateRouteUseCaseTest {
     @Test
     void ensureVersionMismatchThrowsOptimisticLockException() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
 
         assertThrows(ConcurrencyException.class, () ->
-                updateRoute.execute(1L, new UpdateRouteRequest(60, 400.0, 180, null), 1L));
+                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(60, 400.0, 180, null), 1L));
         verify(routeRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenRouteNotFound() {
-        when(routeRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.empty());
 
         assertThrows(RouteNotFoundException.class, () ->
-                updateRoute.execute(99L, new UpdateRouteRequest(45, 300.0, 150, null), null));
+                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(45, 300.0, 150, null), null));
         verify(routeRepository, never()).save(any());
     }
 }

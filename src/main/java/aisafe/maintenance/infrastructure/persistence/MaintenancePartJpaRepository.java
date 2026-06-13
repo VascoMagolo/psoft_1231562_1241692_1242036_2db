@@ -40,8 +40,7 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
         if (existing != null) {
             jpaEntity.setId(existing.getId());
         }
-        MaintenancePartJpaEntity saved = springRepo.save(jpaEntity);
-        part.setId(saved.getId());
+        springRepo.save(jpaEntity);
     }
 
     @Override

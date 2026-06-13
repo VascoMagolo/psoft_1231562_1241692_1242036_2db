@@ -1,5 +1,6 @@
 package aisafe.routes.application;
 
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.*;
 import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.AfterEach;
@@ -47,30 +48,33 @@ class DesactivateRouteUseCaseTest {
     @Test
     void ensureRouteIsDeactivatedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
         when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Route result = desactivateRoute.execute(1L, null);
+        Route result = desactivateRoute.execute("OPO", "LIS", null);
 
-        assertFalse(result.isActive());
+        assertEquals(RouteStatus.INACTIVE, result.getStatus());
         verify(routeHistoryRepository).save(any(RouteHistory.class));
     }
 
     @Test
     void ensureVersionMismatchThrowsOptimisticLockException() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
 
         assertThrows(ConcurrencyException.class, () ->
-                desactivateRoute.execute(1L, 1L));
+                desactivateRoute.execute("OPO", "LIS", 1L));
         verify(routeRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenRouteNotFound() {
-        when(routeRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, () -> desactivateRoute.execute(99L, null));
+        assertThrows(RouteNotFoundException.class, () -> desactivateRoute.execute("OPO", "LIS", null));
         verify(routeRepository, never()).save(any());
     }
 }

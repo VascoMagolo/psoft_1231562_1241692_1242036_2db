@@ -808,7 +808,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/fuel-efficiency?routeId=1",
+              "raw": "{{base_url}}/api/aircrafts/{{aircraft_registration}}/fuel-efficiency?origin=OPO&destination=LIS",
               "host": [
                 "{{base_url}}"
               ],
@@ -820,8 +820,12 @@
               ],
               "query": [
                 {
-                  "key": "routeId",
-                  "value": "1"
+                  "key": "origin",
+                  "value": "OPO"
+                },
+                {
+                  "key": "destination",
+                  "value": "LIS"
                 }
               ]
             }
@@ -1338,9 +1342,13 @@
                 "exec": [
                   "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
                   "var jsonData = pm.response.json();",
-                  "pm.test(\"Has route ID\", () => pm.expect(jsonData.id).to.exist);",
-                  "if (jsonData.id) {",
-                  "    pm.collectionVariables.set(\"route_id\", String(jsonData.id));",
+                  "pm.test(\"Has origin and destination\", () => {",
+                  "    pm.expect(jsonData.originIataCode).to.be.a('string');",
+                  "    pm.expect(jsonData.destinationIataCode).to.be.a('string');",
+                  "});",
+                  "if (jsonData.originIataCode && jsonData.destinationIataCode) {",
+                  "    pm.collectionVariables.set(\"route_origin\", jsonData.originIataCode);",
+                  "    pm.collectionVariables.set(\"route_destination\", jsonData.destinationIataCode);",
                   "}"
                 ]
               }
@@ -1393,21 +1401,59 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/routes/{{route_id}}",
+              "raw": "{{base_url}}/api/routes/{{route_origin}}/{{route_destination}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "routes",
-                "{{route_id}}"
+                "{{route_origin}}",
+                "{{route_destination}}"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "Update Route [ATCC]",
+          "name": "View Route History [ATCC]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns HAL collection\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body._links).to.exist;",
+                  "    pm.expect(body._links.self).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/routes/{{route_origin}}/{{route_destination}}/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "{{route_origin}}",
+                "{{route_destination}}",
+                "history"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Route [ATCC | BACKOFFICE_OPERATOR]",
           "event": [
             {
               "listen": "test",
@@ -1438,14 +1484,15 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/routes/{{route_id}}",
+              "raw": "{{base_url}}/api/routes/{{route_origin}}/{{route_destination}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "routes",
-                "{{route_id}}"
+                "{{route_origin}}",
+                "{{route_destination}}"
               ]
             }
           },
@@ -1460,7 +1507,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Route is deactivated\", () => pm.expect(pm.response.json().active).to.equal(false));"
+                  "pm.test(\"Route is deactivated\", () => pm.expect(pm.response.json().status).to.equal(\"INACTIVE\"));"
                 ]
               }
             }
@@ -1474,14 +1521,15 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/routes/{{route_id}}/deactivate",
+              "raw": "{{base_url}}/api/routes/{{route_origin}}/{{route_destination}}/deactivate",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "routes",
-                "{{route_id}}",
+                "{{route_origin}}",
+                "{{route_destination}}",
                 "deactivate"
               ]
             }
@@ -1809,12 +1857,24 @@
       "value": "OPO"
     },
     {
-      "key": "route_id",
-      "value": "1"
+      "key": "route_origin",
+      "value": "OPO"
+    },
+    {
+      "key": "route_destination",
+      "value": "LIS"
     },
     {
       "key": "maintenance_record_id",
-      "value": "1"
+      "value": ""
+    },
+    {
+      "key": "maintenance_part_number",
+      "value": "ST-1001"
+    },
+    {
+      "key": "maintenance_template_name",
+      "value": "Inspection to the starter motor"
     }
   ]
 }

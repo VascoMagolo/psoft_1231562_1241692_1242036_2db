@@ -1,5 +1,6 @@
 package aisafe.routes.application;
 
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,18 +28,20 @@ class ViewRouteDetailsUseCaseTest {
     @Test
     void ensureRouteDetailsReturnedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
 
-        Route result = viewRouteDetails.execute(1L);
+        Route result = viewRouteDetails.execute("OPO", "LIS");
 
         assertNotNull(result);
-        verify(routeRepository).findById(1L);
+        verify(routeRepository).findByOriginAndDestination(any(IataCode.class), any(IataCode.class));
     }
 
     @Test
     void ensureExceptionWhenRouteNotFound() {
-        when(routeRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, () -> viewRouteDetails.execute(99L));
+        assertThrows(RouteNotFoundException.class, () -> viewRouteDetails.execute("OPO", "LIS"));
     }
 }

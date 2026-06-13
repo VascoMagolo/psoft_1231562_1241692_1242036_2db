@@ -30,30 +30,29 @@ public class RouteJpaRepository implements RouteRepository {
 
     @Override
     public Route save(Route route) {
+        Optional<RouteJpaEntity> existing = springRepo.findByOriginCodeAndDestinationCode(
+                route.getOrigin().getCode(), route.getDestination().getCode());
         RouteJpaEntity jpaEntity = RouteMapper.toJpa(route);
-        if (route.getId() != null) {
-            jpaEntity.setId(route.getId());
+        existing.ifPresent(e -> {
+            jpaEntity.setId(e.getId());
             jpaEntity.setVersion(route.getVersion());
-        }
+        });
         RouteJpaEntity saved = springRepo.save(jpaEntity);
-        route.setId(saved.getId());
         route.setVersion(saved.getVersion());
         return route;
     }
 
     @Override
-    public Optional<Route> findById(Long id) {
-        return springRepo.findById(id).map(RouteMapper::toDomain);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return springRepo.existsById(id);
+    public Optional<Route> findByOriginAndDestination(IataCode origin, IataCode destination) {
+        return springRepo.findByOriginCodeAndDestinationCode(origin.getCode(), destination.getCode())
+                .map(RouteMapper::toDomain);
     }
 
     @Override
     public void delete(Route route) {
-        springRepo.deleteById(route.getId());
+        springRepo.findByOriginCodeAndDestinationCode(
+                route.getOrigin().getCode(), route.getDestination().getCode())
+                .ifPresent(springRepo::delete);
     }
 
     @Override

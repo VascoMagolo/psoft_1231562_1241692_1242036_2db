@@ -289,9 +289,10 @@ public class AircraftController {
     @GetMapping("/{registrationStr}/fuel-efficiency")
     public ResponseEntity<FuelEfficiencyResponse> getFuelEfficiency(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)") @PathVariable String registrationStr,
-            @Parameter(description = "Optional route ID to calculate specific fuel needs") @RequestParam(required = false) Long routeId) {
+            @Parameter(description = "Optional origin IATA code to calculate specific fuel needs") @RequestParam(required = false) String origin,
+            @Parameter(description = "Optional destination IATA code to calculate specific fuel needs") @RequestParam(required = false) String destination) {
 
-        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, routeId);
+        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, origin, destination);
         return ResponseEntity.ok(response);
     }
 

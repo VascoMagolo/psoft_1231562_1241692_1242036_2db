@@ -9,15 +9,15 @@ participant "RouteHistoryRepository" as HistoryRepo
 database "Database" as DB
 
 == Update route details ==
-Actor -> Ctrl : PUT /api/routes/{id}\nIf-Match: {version}\n{ estimatedFlightTime?, minimumRange?,\n  minimumCapacity?, active? }
+Actor -> Ctrl : PUT /api/routes/{origin}/{destination}\nIf-Match: {version}\n{ estimatedFlightTime?, minimumRange?,\n  minimumCapacity?, active? }
 activate Ctrl
 
-Ctrl -> UpdateUC : execute(id: Long, request: UpdateRouteRequest, clientVersion: Long)
+Ctrl -> UpdateUC : execute(origin: String, destination: String,\n  request: UpdateRouteRequest, clientVersion: Long)
 activate UpdateUC
 
-UpdateUC -> Repo : findById(id)
+UpdateUC -> Repo : findByOriginAndDestination(origin, destination)
 activate Repo
-Repo -> DB : SELECT FROM route WHERE id = ?
+Repo -> DB : SELECT FROM route WHERE origin_code = ? AND destination_code = ?
 activate DB
 DB --> Repo : route record
 deactivate DB
@@ -26,22 +26,22 @@ deactivate Repo
 
 alt route not found
   UpdateUC --> Ctrl : throws RouteNotFoundException
-  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route '...→...' not found." }
 else route found
   alt version mismatch
-    UpdateUC --> Ctrl : throws ObjectOptimisticLockingFailureException
-    Ctrl --> Actor : 409 Conflict\n{ message: "The resource has been modified by another user." }
+    UpdateUC --> Ctrl : throws ConcurrencyException
+    Ctrl --> Actor : 412 Precondition Failed\n{ message: "The resource has been modified by another user." }
   else version matches
     UpdateUC -> Repo : save(route.updateRoute(\n  flightTime, range, capacity))
     activate Repo
-    Repo -> DB : UPDATE route SET ... WHERE id = ?
+    Repo -> DB : UPDATE route SET ... WHERE origin_code = ? AND destination_code = ?
     activate DB
     DB --> Repo : updated record
     deactivate DB
     Repo --> UpdateUC : Route
     deactivate Repo
 
-    UpdateUC -> HistoryRepo : save(new RouteHistory(route, changeDescription, changedBy))
+    UpdateUC -> HistoryRepo : save(new RouteHistory(origin, destination,\n  changeDescription, changedBy))
     activate HistoryRepo
     HistoryRepo -> DB : INSERT INTO route_history
     activate DB
@@ -50,7 +50,7 @@ else route found
     HistoryRepo --> UpdateUC : RouteHistory
     deactivate HistoryRepo
 
-    UpdateUC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active }
+    UpdateUC --> Ctrl : RouteResponse\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, status }
     deactivate UpdateUC
     Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
   end
@@ -59,15 +59,15 @@ end
 deactivate Ctrl
 
 == Deactivate route ==
-Actor -> Ctrl : PATCH /api/routes/{id}/deactivate\nIf-Match: {version}
+Actor -> Ctrl : PATCH /api/routes/{origin}/{destination}/deactivate\nIf-Match: {version}
 activate Ctrl
 
-Ctrl -> DeactivateUC : execute(id: Long, clientVersion: Long)
+Ctrl -> DeactivateUC : execute(origin: String, destination: String, clientVersion: Long)
 activate DeactivateUC
 
-DeactivateUC -> Repo : findById(id)
+DeactivateUC -> Repo : findByOriginAndDestination(origin, destination)
 activate Repo
-Repo -> DB : SELECT FROM route WHERE id = ?
+Repo -> DB : SELECT FROM route WHERE origin_code = ? AND destination_code = ?
 activate DB
 DB --> Repo : route record
 deactivate DB
@@ -76,23 +76,23 @@ deactivate Repo
 
 alt route not found
   DeactivateUC --> Ctrl : throws RouteNotFoundException
-  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route '...→...' not found." }
 else route found
   alt version mismatch
-    DeactivateUC --> Ctrl : throws ObjectOptimisticLockingFailureException
-    Ctrl --> Actor : 409 Conflict\n{ message: "The resource has been modified by another user." }
+    DeactivateUC --> Ctrl : throws ConcurrencyException
+    Ctrl --> Actor : 412 Precondition Failed\n{ message: "The resource has been modified by another user." }
   else version matches
-    DeactivateUC -> DeactivateUC : route.deactivate()
+    DeactivateUC -> DeactivateUC : route.setStatus(RouteStatus.INACTIVE)
     DeactivateUC -> Repo : save(route)
     activate Repo
-    Repo -> DB : UPDATE route SET active = false WHERE id = ?
+    Repo -> DB : UPDATE route SET status = 'INACTIVE' WHERE origin_code = ? AND destination_code = ?
     activate DB
     DB --> Repo : updated record
     deactivate DB
     Repo --> DeactivateUC : Route
     deactivate Repo
 
-    DeactivateUC -> HistoryRepo : save(new RouteHistory(route, "Route deactivated", changedBy))
+    DeactivateUC -> HistoryRepo : save(new RouteHistory(origin, destination,\n  "Route deactivated", changedBy))
     activate HistoryRepo
     HistoryRepo -> DB : INSERT INTO route_history
     activate DB
@@ -101,7 +101,7 @@ else route found
     HistoryRepo --> DeactivateUC : RouteHistory
     deactivate HistoryRepo
 
-    DeactivateUC --> Ctrl : RouteResponse\n{ id, ..., active: false }
+    DeactivateUC --> Ctrl : RouteResponse\n{ ..., status: INACTIVE }
     deactivate DeactivateUC
     Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
   end

@@ -2,6 +2,8 @@ package aisafe.maintenance.infrastructure;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
+
+import java.util.UUID;
 import aisafe.maintenance.application.dtos.*;
 import aisafe.shared.domain.PaginatedResult;
 import aisafe.shared.infrastructure.ETagUtils;
@@ -155,13 +157,13 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "404", description = "Maintenance record not found"),
             @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
     })
-    @PatchMapping("/records/{id}")
+    @PatchMapping("/records/{recordId}")
     public ResponseEntity<EntityModel<MaintenanceRecordResponse>> updateRecordStatusAndNotes(
-            @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id,
+            @Parameter(description = "UUID of the maintenance record") @PathVariable UUID recordId,
             @Parameter(description = "Current version entity state identifier for locking assessment") @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @Valid @RequestBody UpdateMaintenanceRecordsRequest request) {
         Long version = ETagUtils.parseVersion(ifMatchHeader);
-        MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(id, request, version);
+        MaintenanceRecordResponse updatedRecord = updateMaintenanceRecordUseCase.execute(recordId, request, version);
         return ResponseEntity.ok(toHateoasModel(updatedRecord));
     }
 
@@ -226,10 +228,10 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Maintenance record not found")
     })
-    @DeleteMapping("/records/{id}")
+    @DeleteMapping("/records/{recordId}")
     public ResponseEntity<Void> deleteMaintenanceRecord(
-            @Parameter(description = "Unique ID of the maintenance record") @PathVariable Long id) {
-        deleteMaintenanceRecordUseCase.execute(id);
+            @Parameter(description = "UUID of the maintenance record") @PathVariable UUID recordId) {
+        deleteMaintenanceRecordUseCase.execute(recordId);
         return ResponseEntity.noContent().build();
     }
 
