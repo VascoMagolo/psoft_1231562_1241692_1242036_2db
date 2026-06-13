@@ -1,4 +1,4 @@
-package aisafe.routes.infrastructure.persistence;
+package aisafe.routes.infrastructure.persistence.jpa;
 
 import aisafe.routes.domain.RouteStatus;
 import org.junit.jupiter.api.Test;
