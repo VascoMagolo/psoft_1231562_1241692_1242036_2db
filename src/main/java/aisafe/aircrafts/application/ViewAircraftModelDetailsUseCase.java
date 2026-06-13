@@ -7,7 +7,7 @@ import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.shared.application.UseCase;
 import org.springframework.transaction.annotation.Transactional;
 
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewAircraftModelDetailsUseCase {
 

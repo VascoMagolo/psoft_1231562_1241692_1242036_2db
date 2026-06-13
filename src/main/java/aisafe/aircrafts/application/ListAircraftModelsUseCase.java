@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Returns all stored aircraft models for the aircraft management screens and APIs.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ListAircraftModelsUseCase {
 

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * This use case is read-only and supports pagination and sorting.
  * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class SearchAircraftUseCase {
 

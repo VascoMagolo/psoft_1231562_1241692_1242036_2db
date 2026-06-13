@@ -45,7 +45,7 @@ class AddAirportCertificationUseCaseTest {
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(false);
 
-        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
+        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("A320")));
         verify(certificationRepository).save(any(AircraftCertification.class));
     }
 
@@ -53,7 +53,7 @@ class AddAirportCertificationUseCaseTest {
     void ensureExceptionWhenAirportNotFound() {
         when(airportRepository.findByIataCodeCode("XYZ")).thenReturn(Optional.empty());
 
-        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("XYZ", "A320")));
+        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("A320")));
         verify(certificationRepository, never()).save(any());
     }
 
@@ -63,7 +63,7 @@ class AddAirportCertificationUseCaseTest {
         when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("NON-EXISTENT")).thenReturn(false);
 
-        assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "NON-EXISTENT")));
+        assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("NON-EXISTENT")));
         verify(certificationRepository, never()).save(any());
     }
 
@@ -74,7 +74,7 @@ class AddAirportCertificationUseCaseTest {
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
+        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("A320")));
         verify(certificationRepository, never()).save(any());
     }
 }

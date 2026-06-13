@@ -2,6 +2,7 @@ package aisafe.routes.application;
 
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ class DeleteRouteUseCaseTest {
     @Mock
     private RouteRepository routeRepository;
 
+    @Mock
+    private RouteHistoryRepository routeHistoryRepository;
+
     @InjectMocks
     private DeleteRouteUseCase deleteRoute;
 
@@ -32,6 +36,7 @@ class DeleteRouteUseCaseTest {
                 .thenReturn(Optional.of(route));
 
         assertDoesNotThrow(() -> deleteRoute.execute("OPO", "LIS"));
+        verify(routeHistoryRepository).deleteAllByRoute("OPO", "LIS");
         verify(routeRepository).delete(any(Route.class));
     }
 

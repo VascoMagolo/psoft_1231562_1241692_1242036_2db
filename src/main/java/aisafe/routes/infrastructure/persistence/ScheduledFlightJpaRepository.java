@@ -1,7 +1,9 @@
 package aisafe.routes.infrastructure.persistence;
 
+import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.infrastructure.persistence.AircraftJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.SpringDataAircraftRepository;
+import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.ScheduledFlight;
 import aisafe.routes.domain.ScheduledFlightRepository;
 import org.springframework.stereotype.Repository;
@@ -29,16 +31,15 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
-    public ScheduledFlight save(ScheduledFlight flight) {
+    public void save(ScheduledFlight flight) {
         AircraftJpaEntity aircraftEntity = aircraftRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(flight.getAircraft().getRegistrationNumber().getNumber()))
-                .orElseThrow(() -> new IllegalArgumentException("Aircraft not found for flight"));
+                .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found for scheduled flight"));
 
-        // Find route logic using origin and destination since we don't have a direct route ID in the domain model easily accessible here without fetching
         RouteJpaEntity routeEntity = routeRepo.findByOriginCodeOrDestinationCode(flight.getRoute().getOrigin().getCode(), flight.getRoute().getDestination().getCode())
                 .stream()
                 .filter(r -> r.getOriginCode().equals(flight.getRoute().getOrigin().getCode()) && r.getDestinationCode().equals(flight.getRoute().getDestination().getCode()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Route not found for flight"));
+                .orElseThrow(() -> new RouteNotFoundException("Route not found for scheduled flight"));
 
         ScheduledFlightJpaEntity entity = new ScheduledFlightJpaEntity(
                 flight.getDepartureDateTime(),
@@ -49,8 +50,14 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
         );
         entity.setId(flight.getId());
 
-        ScheduledFlightJpaEntity saved = springRepo.save(entity);
-        return ScheduledFlightMapper.toDomain(saved);
+        springRepo.save(entity);
+    }
+
+    @Override
+    public void delete(ScheduledFlight flight) {
+        if (flight.getId() != null) {
+            springRepo.deleteById(flight.getId());
+        }
     }
 
     @Override

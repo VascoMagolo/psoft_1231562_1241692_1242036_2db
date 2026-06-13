@@ -1,7 +1,6 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
@@ -16,8 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Use case for retrieving statistics about airports
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class AirportStatisticsUseCase {
     private final AirportRepository airportRepository;
     private final RouteRepository routeRepository;

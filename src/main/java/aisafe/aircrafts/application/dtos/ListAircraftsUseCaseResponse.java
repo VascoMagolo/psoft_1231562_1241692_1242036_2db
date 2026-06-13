@@ -20,7 +20,7 @@ public record ListAircraftsUseCaseResponse(
         Double range,
         List<String> features,
         Long version) {
-    public static ListAircraftsUseCaseResponse from(Aircraft aircraft) {
+    public static ListAircraftsUseCaseResponse from(Aircraft aircraft, Long version) {
         return new ListAircraftsUseCaseResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
@@ -30,7 +30,7 @@ public record ListAircraftsUseCaseResponse(
                 aircraft.getSeatCapacity(),
                 aircraft.getRange(),
                 aircraft.getFeatures(),
-                aircraft.getVersion()
+                version
         );
     }
 }

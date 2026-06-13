@@ -31,9 +31,6 @@ public class AddAirportCertificationUseCase {
 
     public AircraftCertificationResponse execute(String iataCodeStr, AddCertificationRequest request) {
 
-        if (!request.airportCode().equalsIgnoreCase(iataCodeStr)) {
-            throw new IllegalArgumentException("airportCode in request body must match the IATA code in the path.");
-        }
         Airport airport = airportRepository.findByIataCodeCode(iataCodeStr.toUpperCase())
                 .orElseThrow(() -> new AirportNotFoundException(iataCodeStr));
 

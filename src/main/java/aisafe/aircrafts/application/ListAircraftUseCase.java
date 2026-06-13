@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * This use case is read-only and supports pagination and sorting.
  * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ListAircraftUseCase {
 
@@ -35,7 +35,7 @@ public class ListAircraftUseCase {
         PaginatedResult<Aircraft> domainResult = repository.findAll(pageNumber, pageSize);
 
         List<ListAircraftsUseCaseResponse> dtoList = domainResult.data().stream()
-                .map(ListAircraftsUseCaseResponse::from)
+                .map(a -> ListAircraftsUseCaseResponse.from(a, repository.findVersionFor(a.getRegistrationNumber())))
                 .collect(Collectors.toList());
 
         return new PaginatedResult<>(dtoList, domainResult.totalElements());

@@ -6,6 +6,7 @@ import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,28 +41,31 @@ public class RouteController {
     private final CreateRouteUseCase createRoute;
     private final ViewRouteHistoryUseCase viewRouteHistory;
     private final UpdateRouteUseCase updateRoute;
-    private final DesactivateRouteUseCase desactivateRoute;
+    private final DeactivateRouteUseCase deactivateRoute;
     private final ViewRouteDetailsUseCase viewRouteDetails;
     private final ListRoutesFromAirportUseCase listRoutesFromAirport;
     private final SearchRoutesUseCase searchRoutes;
     private final DeleteRouteUseCase deleteRoute;
+    private final RouteRepository routeRepository;
 
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
                            UpdateRouteUseCase updateRoute,
-                           DesactivateRouteUseCase desactivateRoute,
+                           DeactivateRouteUseCase deactivateRoute,
                            ViewRouteDetailsUseCase viewRouteDetails,
                            ListRoutesFromAirportUseCase listRoutesFromAirport,
                            SearchRoutesUseCase searchRoutes,
-                           DeleteRouteUseCase deleteRoute) {
+                           DeleteRouteUseCase deleteRoute,
+                           RouteRepository routeRepository) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
-        this.desactivateRoute = desactivateRoute;
+        this.deactivateRoute = deactivateRoute;
         this.viewRouteDetails = viewRouteDetails;
         this.listRoutesFromAirport = listRoutesFromAirport;
         this.searchRoutes = searchRoutes;
         this.deleteRoute = deleteRoute;
+        this.routeRepository = routeRepository;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
@@ -76,13 +80,15 @@ public class RouteController {
     }
 
     private EntityModel<RouteResponse> mapToModel(Route r) {
+        Long version = routeRepository.findVersionFor(r.getOrigin(), r.getDestination());
         RouteResponse response = new RouteResponse(
                 r.getOrigin().getCode(),
                 r.getDestination().getCode(),
                 r.getEstimatedFlightTime(),
                 r.getMinimumRange(),
                 r.getMinimumCapacity(),
-                r.getStatus());
+                r.getStatus(),
+                version);
         return toModel(response);
     }
 
@@ -164,7 +170,7 @@ public class RouteController {
             @Parameter(description = "IATA code of the destination airport") @PathVariable String destination,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch) {
         Long version = ETagUtils.parseVersion(ifMatch);
-        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(origin.toUpperCase(), destination.toUpperCase(), version)));
+        return ResponseEntity.ok(mapToModel(deactivateRoute.execute(origin.toUpperCase(), destination.toUpperCase(), version)));
     }
 
     // US113

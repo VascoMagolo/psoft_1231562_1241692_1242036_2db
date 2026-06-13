@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Gets the Top 5 most utilized aircraft models based on total flight hours or number of assignments.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class GetTopUtilizedModelsUseCase {
 

@@ -48,7 +48,8 @@ public class UpdateMaintenanceRecordUseCase {
         return new MaintenanceRecordResponse(
                 record.getRecordId(), record.getDescription(), record.getStartDate(),
                 record.getExpectedDuration(), record.getNotes(),
-                record.getPart().getPartNumber(), record.getTemplate().getName(),
+                record.getParts().stream().map(MaintenancePart::getPartNumber).toList(),
+                record.getTemplate().getName(),
                 record.getStatus().name(), record.getAircraftRegistration(),
                 record.getVersion()
         );

@@ -37,6 +37,13 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
     }
 
     @Override
+    public List<AircraftModel> findAll() {
+        return springRepo.findAll().stream()
+                .map(AircraftModelMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<AircraftModel> findAll(int pageNumber, int pageSize) {
         var springPageable = PageRequest.of(pageNumber, pageSize);
 

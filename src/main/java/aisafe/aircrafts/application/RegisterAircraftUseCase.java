@@ -52,18 +52,9 @@ public class RegisterAircraftUseCase {
                 request.range(),
                 request.features()
         );
-        aircraftRepository.save(aircraft, null);
+        aircraftRepository.save(aircraft);
 
-        return new ViewAircraftDetailsResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getModel().getManufacturer(),
-                aircraft.getManufacturingDate(),
-                aircraft.getStatus(),
-                aircraft.getSeatCapacity(),
-                aircraft.getRange(),
-                aircraft.getFeatures(),
-                aircraft.getVersion()
-        );
+        Long version = aircraftRepository.findVersionFor(regNum);
+        return ViewAircraftDetailsResponse.from(aircraft, version);
     }
 }

@@ -35,19 +35,17 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
-    public boolean existsByStartDateAndPartAndTemplate(LocalDateTime startDate, MaintenancePart part, MaintenanceTemplate template) {
-        MaintenancePartJpaEntity partJpa = partSpringRepo.findByPartNumber(part.getPartNumber()).orElse(null);
-        if (partJpa == null) return false;
+    public boolean existsByStartDateAndTemplate(LocalDateTime startDate, MaintenanceTemplate template) {
         MaintenanceTemplateJpaEntity templateJpa = templateSpringRepo.findByName(template.getName()).orElse(null);
         if (templateJpa == null) return false;
-        return springRepo.existsByStartDateAndPartAndTemplate(startDate, partJpa, templateJpa);
+        return springRepo.existsByStartDateAndTemplate(startDate, templateJpa);
     }
 
     @Override
-    public boolean existsByPart(MaintenancePart part) {
+    public boolean existsByPartsContaining(MaintenancePart part) {
         MaintenancePartJpaEntity partJpa = partSpringRepo.findByPartNumber(part.getPartNumber()).orElse(null);
         if (partJpa == null) return false;
-        return springRepo.existsByPart(partJpa);
+        return springRepo.existsByPartsContaining(partJpa);
     }
 
     @Override
@@ -86,8 +84,10 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
 
     @Override
     public void save(MaintenanceRecord record) {
-        MaintenancePartJpaEntity partJpa = partSpringRepo.findByPartNumber(record.getPart().getPartNumber())
-                .orElseThrow(() -> new MaintenancePartNotFoundException("Part not found: " + record.getPart().getPartNumber()));
+        List<MaintenancePartJpaEntity> partsJpa = record.getParts().stream()
+                .map(p -> partSpringRepo.findByPartNumber(p.getPartNumber())
+                        .orElseThrow(() -> new MaintenancePartNotFoundException("Part not found: " + p.getPartNumber())))
+                .collect(Collectors.toList());
         MaintenanceTemplateJpaEntity templateJpa = templateSpringRepo.findByName(record.getTemplate().getName())
                 .orElseThrow(() -> new MaintenanceTemplateNotFoundException("Template not found: " + record.getTemplate().getName()));
 
@@ -102,7 +102,7 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         } else {
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
                     record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
-                    record.getNotes(), partJpa, templateJpa, record.getStatus(), record.getAircraftRegistration());
+                    record.getNotes(), partsJpa, templateJpa, record.getStatus(), record.getAircraftRegistration());
             MaintenanceRecordJpaEntity saved = springRepo.save(jpaEntity);
             record.setVersion(saved.getVersion());
         }

@@ -9,7 +9,7 @@ participant "AircraftRepository" as AircraftRepo
 participant "MaintenanceRecordRepository" as Repo
 database "Database" as DB
 
-MT -> Ctrl : POST /api/maintenance/records\n{ description, startDate, expectedDuration,\n  part (partNumber), notes?, template (name),\n  status, registrationNumber }
+MT -> Ctrl : POST /api/maintenance/records\n{ description, startDate, expectedDuration,\n  parts (list of partNumbers), notes?, template (name),\n  status, registrationNumber }
 activate Ctrl
 
 note right of Ctrl
@@ -17,7 +17,7 @@ note right of Ctrl
   - description: not blank
   - startDate: not null
   - expectedDuration: >= 1
-  - part: not blank (part number)
+  - parts: not empty (list of part numbers)
   - template: not blank (template name)
   - status: not null (MaintenanceStatus enum)
   - registrationNumber: not blank
@@ -26,14 +26,16 @@ end note
 Ctrl -> UC : execute(request: CreateMaintenanceRecordRequest)
 activate UC
 
-UC -> PartRepo : findByPartNumber(request.part())
-activate PartRepo
-PartRepo -> DB : SELECT FROM maintenance_part WHERE part_number = ?
-activate DB
-DB --> PartRepo : part record
-deactivate DB
-PartRepo --> UC : Optional<MaintenancePart>
-deactivate PartRepo
+loop for each partNumber in request.parts()
+  UC -> PartRepo : findByPartNumber(partNumber)
+  activate PartRepo
+  PartRepo -> DB : SELECT FROM maintenance_part WHERE part_number = ?
+  activate DB
+  DB --> PartRepo : part record
+  deactivate DB
+  PartRepo --> UC : Optional<MaintenancePart>
+  deactivate PartRepo
+end
 
 UC -> TemplateRepo : findByName(request.template())
 activate TemplateRepo
@@ -57,7 +59,7 @@ alt part, template, or aircraft not found
   UC --> Ctrl : throws MaintenancePartNotFoundException\n/ MaintenanceTemplateNotFoundException\n/ AircraftNotFoundException
   Ctrl --> MT : 404 Not Found\n{ message: "... not found." }
 else all references found
-  UC -> Repo : existsByStartDateAndPartAndTemplate(startDate, part, template)
+  UC -> Repo : existsByStartDateAndTemplate(startDate, template)
   activate Repo
   Repo -> DB : SELECT COUNT(*) FROM maintenance_record WHERE ...
   activate DB
@@ -72,13 +74,13 @@ else all references found
   else record is unique
     UC -> Repo : save(record)
     activate Repo
-    Repo -> DB : INSERT INTO maintenance_record
+    Repo -> DB : INSERT INTO maintenance_record\n+ INSERT INTO maintenance_record_parts
     activate DB
     DB --> Repo
     deactivate DB
     deactivate Repo
 
-    UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+    UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumbers,\n  templateName, status,\n  aircraftRegistration, version }
     deactivate UC
     Ctrl --> MT : 201 Created\nEntityModel<MaintenanceRecordResponse> with _links
   end

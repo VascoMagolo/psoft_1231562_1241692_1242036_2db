@@ -5,16 +5,18 @@ import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.PaginatedResult;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Use case responsible for searching routes based on origin and destination criteria.
  */
-@UseCase
-@RequiredArgsConstructor
+@UseCase(readOnly = true)
 public class SearchRoutesUseCase {
 
     private final RouteRepository routeRepository;
+
+    public SearchRoutesUseCase(RouteRepository routeRepository) {
+        this.routeRepository = routeRepository;
+    }
 
     /**
      * Retrieves a paginated result of routes matching the provided origin and destination.

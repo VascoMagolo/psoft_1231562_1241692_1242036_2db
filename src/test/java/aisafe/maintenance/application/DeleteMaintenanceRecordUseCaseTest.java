@@ -36,7 +36,7 @@ class DeleteMaintenanceRecordUseCaseTest {
         MaintenancePart part = new MaintenancePart("PN-001", "Engine Filter", "A filter", 10, 2, MaintenanceComponent.ENGINE);
         MaintenanceTemplate template = new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
                 List.of("ModelA"), List.of("Check oil"), 500, 90);
-        return new MaintenanceRecord("Oil change", LocalDateTime.now(), 2, part, "notes", template,
+        return new MaintenanceRecord(UUID.randomUUID(), "Oil change", LocalDateTime.now(), 2, List.of(part), "notes", template,
                 MaintenanceStatus.PLANNED, "CS-ABD");
     }
 

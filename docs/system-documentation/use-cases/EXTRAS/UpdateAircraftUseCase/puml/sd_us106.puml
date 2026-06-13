@@ -38,20 +38,36 @@ alt aircraft not found
     UC --> Ctrl : throws AircraftNotFoundException
     Ctrl --> BO : 404 Not Found
 else aircraft found
-    UC -> Aircraft : update(request)
-    activate Aircraft
-    deactivate Aircraft
-    UC -> Repo : save(aircraft, ifMatch)
+    UC -> Repo : findVersionFor(registration)
     activate Repo
-    Repo -> DB : UPDATE aircraft ... WHERE version = ifMatch
+    Repo -> DB : SELECT version FROM aircraft WHERE registration_number = ?
     activate DB
-    DB --> Repo : success
+    DB --> Repo : currentVersion
     deactivate DB
-    Repo --> UC : savedAircraft
+    Repo --> UC : Long currentVersion
     deactivate Repo
-    UC --> Ctrl : ViewAircraftDetailsResponse\n{ registrationNumber, model, manufacturer,\n  manufacturingDate, status, seatCapacity,\n  features, version }
-    deactivate UC
-    Ctrl --> BO : 200 OK\nEntityModel<ViewAircraftDetailsResponse> with _links
+    alt version mismatch (currentVersion != ifMatch)
+        UC --> Ctrl : throws ObjectOptimisticLockingFailureException
+        Ctrl --> BO : 409 Conflict
+    else version matches
+        UC -> Aircraft : update(request)
+        activate Aircraft
+        deactivate Aircraft
+        UC -> Repo : save(aircraft)
+        activate Repo
+        Repo -> DB : UPDATE aircraft SET ...
+        activate DB
+        DB --> Repo
+        deactivate DB
+        deactivate Repo
+        UC -> Repo : findVersionFor(registration)
+        activate Repo
+        Repo --> UC : Long newVersion
+        deactivate Repo
+        UC --> Ctrl : ViewAircraftDetailsResponse\n{ registrationNumber, model, manufacturer,\n  manufacturingDate, status, seatCapacity,\n  features, version }
+        deactivate UC
+        Ctrl --> BO : 200 OK\nEntityModel<ViewAircraftDetailsResponse> with _links
+    end
 end
 
 deactivate Ctrl

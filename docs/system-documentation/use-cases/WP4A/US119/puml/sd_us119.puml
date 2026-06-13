@@ -56,7 +56,7 @@ else update allowed
   deactivate DB
   deactivate Repo
 
-  UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumber,\n  templateName, status,\n  aircraftRegistration, version }
+  UC --> Ctrl : MaintenanceRecordResponse\n{ recordId (UUID), description, startDate,\n  expectedDuration, notes, partNumbers,\n  templateName, status,\n  aircraftRegistration, version }
   deactivate UC
   Ctrl --> MT : 200 OK\nEntityModel<MaintenanceRecordResponse> with _links
 end

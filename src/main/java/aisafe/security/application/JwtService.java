@@ -37,7 +37,7 @@ public class JwtService {
         List<String> roles = List.of(user.getRole().name());
 
         return Jwts.builder()
-                .subject(user.getUserID().toString())
+                .subject(user.getUsername())
                 .claim("roles", roles)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
@@ -46,9 +46,9 @@ public class JwtService {
     }
 
     /**
-     * Extracts the subject (user ID) from the given JWT token.
+     * Extracts the subject (username) from the given JWT token.
      * @param token the JWT token from which to extract the subject
-     * @return the subject (user ID) contained in the token, or null if the token is invalid
+     * @return the subject (username) contained in the token, or null if the token is invalid
      */
     public String extractSubject(String token) {
         return parseClaims(token).getSubject();

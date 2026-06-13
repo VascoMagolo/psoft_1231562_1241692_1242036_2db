@@ -64,8 +64,8 @@ class AircraftModelControllerTest {
         mockMvc.perform(get("/api/aircraftModels/top-utilized")
                         .param("criteria", "HOURS"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].modelName").value("A320"))
-                .andExpect(jsonPath("$[0].utilizationValue").value(5000));
+                .andExpect(jsonPath("$._embedded.topUtilizedModelResponseList[0].modelName").value("A320"))
+                .andExpect(jsonPath("$._embedded.topUtilizedModelResponseList[0].utilizationValue").value(5000));
     }
 
     @Test

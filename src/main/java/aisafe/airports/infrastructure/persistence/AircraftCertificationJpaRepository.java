@@ -42,6 +42,18 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
     }
 
     @Override
+    public long count() {
+        return springRepo.count();
+    }
+
+    @Override
+    public List<AircraftCertification> findAll() {
+        return springRepo.findAll().stream()
+                .map(AircraftCertificationMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void save(AircraftCertification certification) {
         AirportJpaEntity jpaAirport = airportSpringRepo.findByIataCode(
                         certification.getAirport().getIataCode().getCode())
@@ -49,5 +61,18 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
                         certification.getAirport().getIataCode().getCode()));
 
         springRepo.save(new AircraftCertificationJpaEntity(jpaAirport, certification.getAircraftModelName()));
+    }
+
+    @Override
+    public void delete(AircraftCertification certification) {
+        AirportJpaEntity jpaAirport = airportSpringRepo.findByIataCode(
+                        certification.getAirport().getIataCode().getCode())
+                .orElseThrow(() -> new AirportNotFoundException(
+                        certification.getAirport().getIataCode().getCode()));
+
+        springRepo.findByAirport(jpaAirport).stream()
+                .filter(e -> e.getAircraftModelName().equals(certification.getAircraftModelName()))
+                .findFirst()
+                .ifPresent(springRepo::delete);
     }
 }

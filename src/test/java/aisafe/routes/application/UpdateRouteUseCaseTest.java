@@ -51,7 +51,6 @@ class UpdateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
                 .thenReturn(Optional.of(route));
-        when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
         UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, null);
         Route result = updateRoute.execute("OPO", "LIS", request, null);

@@ -1,7 +1,6 @@
 package aisafe.aircrafts.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.*;
-import aisafe.shared.domain.ConcurrencyException;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -70,26 +69,37 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
-    public void save(Aircraft aircraft, Long clientVersion) {
-        AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(aircraft.getRegistrationNumber().getNumber()))
+    public List<Aircraft> findAll() {
+        return springRepo.findAll().stream()
+                .map(jpa -> AircraftMapper.toDomain(jpa, AircraftModelMapper.toDomain(jpa.getModel())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void save(Aircraft aircraft) {
+        AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(
+                new RegistrationNumberJpaEmbeddable(aircraft.getRegistrationNumber().getNumber()))
                 .orElse(null);
 
         AircraftModelJpaEntity managedModel = modelSpringRepo.findByModelName(aircraft.getModel().getModelName())
-                .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model not found in DB: " + aircraft.getModel().getModelName()));
+                .orElseThrow(() -> new AircraftModelNotFoundException(
+                        "Aircraft model not found in DB: " + aircraft.getModel().getModelName()));
 
         AircraftJpaEntity newJpaData = AircraftMapper.toJpa(aircraft, managedModel);
 
         if (existingEntity != null) {
             newJpaData.setId(existingEntity.getId());
             newJpaData.setVersion(existingEntity.getVersion());
-
-            if (clientVersion != null && !clientVersion.equals(existingEntity.getVersion())) {
-                throw new ConcurrencyException("Version conflict detected for aircraft with registration number: " + aircraft.getRegistrationNumber().getNumber());
-            }
         }
 
-        AircraftJpaEntity saved = springRepo.save(newJpaData);
-        aircraft.setVersion(saved.getVersion());
+        springRepo.save(newJpaData);
+    }
+
+    @Override
+    public Long findVersionFor(RegistrationNumber reg) {
+        return springRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(reg.getNumber()))
+                .map(AircraftJpaEntity::getVersion)
+                .orElse(0L);
     }
 
     @Override

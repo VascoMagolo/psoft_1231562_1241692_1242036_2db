@@ -1,7 +1,6 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportGroupResponse;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
@@ -14,8 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Use case for listing airports grouped by region or country.
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class ListAirportsByRegionUseCase {
     private final AirportRepository airportRepository;
 

@@ -11,5 +11,6 @@ public record RouteResponse(
         Integer estimatedFlightTime,
         Double minimumRange,
         Integer minimumCapacity,
-        RouteStatus status
+        RouteStatus status,
+        Long version
 ) {}

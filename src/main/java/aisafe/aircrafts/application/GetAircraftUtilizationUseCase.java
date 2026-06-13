@@ -6,8 +6,7 @@ import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.routes.domain.ScheduledFlight;
 import aisafe.routes.domain.ScheduledFlightRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import aisafe.shared.application.UseCase;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-@Service
+@UseCase(readOnly = true)
 public class GetAircraftUtilizationUseCase {
 
     private final AircraftRepository aircraftRepository;
@@ -29,7 +28,6 @@ public class GetAircraftUtilizationUseCase {
         this.scheduledFlightRepository = scheduledFlightRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<UtilizationDataPointResponse> execute(String registration, LocalDate startDate, LocalDate endDate) {
         if (!aircraftRepository.existsByRegistrationNumber(new RegistrationNumber(registration))) {
             throw new AircraftNotFoundException("Aircraft not found.");

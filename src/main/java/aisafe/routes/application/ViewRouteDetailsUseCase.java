@@ -5,16 +5,18 @@ import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Use case responsible for retrieving the details of a specific route.
  */
-@UseCase
-@RequiredArgsConstructor
+@UseCase(readOnly = true)
 public class ViewRouteDetailsUseCase {
 
     private final RouteRepository routeRepository;
+
+    public ViewRouteDetailsUseCase(RouteRepository routeRepository) {
+        this.routeRepository = routeRepository;
+    }
 
     /**
      * Finds a route by its origin and destination or throws an exception if not found.

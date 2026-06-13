@@ -6,7 +6,9 @@ import aisafe.maintenance.domain.MaintenancePartRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @Profile("jpa")
@@ -21,6 +23,13 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
     @Override
     public long count() {
         return springRepo.count();
+    }
+
+    @Override
+    public List<MaintenancePart> findAll() {
+        return springRepo.findAll().stream()
+                .map(MaintenancePartMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override

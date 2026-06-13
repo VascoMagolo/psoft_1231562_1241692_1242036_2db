@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Calculates the total operational hours for a specific aircraft in the fleet.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class CalculateAircraftOperationalHoursUseCase {
 

@@ -236,7 +236,7 @@ public class AirportController {
     @PatchMapping("/{iataCode}/details")
     public ResponseEntity<EntityModel<AirportResponse>> updateDetails(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
-            @RequestBody UpdateAirportDetailsRequest request) {
+            @Valid @RequestBody UpdateAirportDetailsRequest request) {
         return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request)));
     }
 

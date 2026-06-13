@@ -18,7 +18,7 @@ public class Aircraft {
     private Double range;
     private AircraftModel model;
     private List<String> features;
-    private Long version;
+
     public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model,
                     RegistrationNumber registrationNumber, Integer seatCapacity, Double range, List<String> features) {
         Assert.notNull(status, "Status must not be null.");
@@ -52,7 +52,6 @@ public class Aircraft {
     public Double getRange() { return range; }
     public AircraftModel getModel() { return model; }
     public List<String> getFeatures() { return Collections.unmodifiableList(features); }
-    public Long getVersion() { return version; }
 
     public void setManufacturingDate(LocalDate manufacturingDate) { Assert.notNull(manufacturingDate, "Manufacturing date must not be null."); this.manufacturingDate = manufacturingDate; }
     public void setSeatCapacity(Integer seatCapacity) { Assert.notNull(seatCapacity, "Seat capacity must not be null."); Assert.isTrue(seatCapacity > 0, "Seat capacity must be greater than zero."); this.seatCapacity = seatCapacity; }
@@ -64,13 +63,7 @@ public class Aircraft {
     }
     public void setModel(AircraftModel model) { Assert.notNull(model, "Model must not be null."); this.model = model; }
     public void setFeatures(List<String> features) { this.features = features != null ? new ArrayList<>(features) : new ArrayList<>(); }
-    public void setVersion(Long version) { this.version = version; }
 
-    /**
-     * Calculates the fuel consumption per distance unit (e.g., Liters per KM)
-     * based on the model's fuel capacity and the specific aircraft's operational range.
-     * @return the fuel consumption per distance unit
-     */
     public Double getFuelConsumptionPerDistanceUnit() {
         return model.getFuelCapacity() / this.range;
     }

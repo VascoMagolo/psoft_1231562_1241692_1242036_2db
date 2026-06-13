@@ -41,7 +41,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
         MaintenanceRecord record = spy(new MaintenanceRecord(
-                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
         doReturn(0L).when(record).getVersion();
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
@@ -79,7 +79,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
         MaintenanceRecord record = spy(new MaintenanceRecord(
-                "Engine check", LocalDateTime.now(), 4, buildPart(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
         doReturn(1L).when(record).getVersion();
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));

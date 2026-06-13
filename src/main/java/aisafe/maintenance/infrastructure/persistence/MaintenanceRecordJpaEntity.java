@@ -3,6 +3,7 @@ package aisafe.maintenance.infrastructure.persistence;
 import aisafe.maintenance.domain.MaintenanceStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,9 +30,13 @@ public class MaintenanceRecordJpaEntity {
 
     private String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "part_id")
-    private MaintenancePartJpaEntity part;
+    @ManyToMany
+    @JoinTable(
+        name = "maintenance_record_parts",
+        joinColumns = @JoinColumn(name = "record_id"),
+        inverseJoinColumns = @JoinColumn(name = "part_id")
+    )
+    private List<MaintenancePartJpaEntity> parts;
 
     @ManyToOne
     @JoinColumn(name = "template_maintenance_id")
@@ -47,7 +52,7 @@ public class MaintenanceRecordJpaEntity {
     protected MaintenanceRecordJpaEntity() {}
 
     public MaintenanceRecordJpaEntity(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
-                                      String notes, MaintenancePartJpaEntity part,
+                                      String notes, List<MaintenancePartJpaEntity> parts,
                                       MaintenanceTemplateJpaEntity template, MaintenanceStatus status,
                                       String aircraftRegistration) {
         this.recordId = recordId;
@@ -55,7 +60,7 @@ public class MaintenanceRecordJpaEntity {
         this.startDate = startDate;
         this.expectedDuration = expectedDuration;
         this.notes = notes;
-        this.part = part;
+        this.parts = parts;
         this.template = template;
         this.status = status;
         this.aircraftRegistration = aircraftRegistration;
@@ -68,7 +73,7 @@ public class MaintenanceRecordJpaEntity {
     public LocalDateTime getStartDate() { return startDate; }
     public Integer getExpectedDuration() { return expectedDuration; }
     public String getNotes() { return notes; }
-    public MaintenancePartJpaEntity getPart() { return part; }
+    public List<MaintenancePartJpaEntity> getParts() { return parts; }
     public MaintenanceTemplateJpaEntity getTemplate() { return template; }
     public MaintenanceStatus getStatus() { return status; }
     public String getAircraftRegistration() { return aircraftRegistration; }

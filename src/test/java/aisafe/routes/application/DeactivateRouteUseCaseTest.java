@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DesactivateRouteUseCaseTest {
+class DeactivateRouteUseCaseTest {
 
     @Mock
     private RouteRepository routeRepository;
@@ -30,7 +30,7 @@ class DesactivateRouteUseCaseTest {
     private RouteHistoryRepository routeHistoryRepository;
 
     @InjectMocks
-    private DesactivateRouteUseCase desactivateRoute;
+    private DeactivateRouteUseCase deactivateRoute;
 
     @BeforeEach
     void setUpSecurityContext() {
@@ -50,9 +50,8 @@ class DesactivateRouteUseCaseTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
                 .thenReturn(Optional.of(route));
-        when(routeRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Route result = desactivateRoute.execute("OPO", "LIS", null);
+        Route result = deactivateRoute.execute("OPO", "LIS", null);
 
         assertEquals(RouteStatus.INACTIVE, result.getStatus());
         verify(routeHistoryRepository).save(any(RouteHistory.class));
@@ -65,7 +64,7 @@ class DesactivateRouteUseCaseTest {
                 .thenReturn(Optional.of(route));
 
         assertThrows(ConcurrencyException.class, () ->
-                desactivateRoute.execute("OPO", "LIS", 1L));
+                deactivateRoute.execute("OPO", "LIS", 1L));
         verify(routeRepository, never()).save(any());
     }
 
@@ -74,7 +73,7 @@ class DesactivateRouteUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
                 .thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, () -> desactivateRoute.execute("OPO", "LIS", null));
+        assertThrows(RouteNotFoundException.class, () -> deactivateRoute.execute("OPO", "LIS", null));
         verify(routeRepository, never()).save(any());
     }
 }

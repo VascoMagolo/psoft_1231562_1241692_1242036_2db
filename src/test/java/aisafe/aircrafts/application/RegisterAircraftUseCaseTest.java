@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,9 +41,15 @@ class RegisterAircraftUseCaseTest {
         AircraftModel model = buildModel(180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
+        when(aircraftRepository.findVersionFor(any(RegistrationNumber.class))).thenReturn(0L);
 
-        assertDoesNotThrow(() -> registerAircraft.execute(request));
-        verify(aircraftRepository, times(1)).save(any(Aircraft.class), any());
+        ViewAircraftDetailsResponse response = registerAircraft.execute(request);
+
+        assertEquals("CS-TPA", response.registrationNumber());
+        assertEquals("A320", response.model());
+        assertEquals(AircraftStatus.AVAILABLE, response.status());
+        assertEquals(150, response.seatCapacity());
+        verify(aircraftRepository, times(1)).save(any(Aircraft.class));
     }
 
     @Test
@@ -53,7 +60,7 @@ class RegisterAircraftUseCaseTest {
         when(modelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
     }
 
     @Test
@@ -66,7 +73,7 @@ class RegisterAircraftUseCaseTest {
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
 
         assertThrows(AircraftAlreadyExistsException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
     }
 
     @Test
@@ -79,6 +86,19 @@ class RegisterAircraftUseCaseTest {
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
+    }
+
+    @Test
+    void ensureExceptionWhenStatusIsInvalid() {
+        RegisterAircraftRequest request = new RegisterAircraftRequest(
+                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "FLYING", List.of());
+
+        AircraftModel model = buildModel(180);
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
+
+        assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
+        verify(aircraftRepository, never()).save(any(Aircraft.class));
     }
 }
