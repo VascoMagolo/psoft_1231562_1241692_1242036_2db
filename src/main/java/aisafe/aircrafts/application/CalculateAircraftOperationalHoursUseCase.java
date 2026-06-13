@@ -4,7 +4,7 @@ import aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.infrastructure.persistence.SpringDataScheduledFlightRepository;
+import aisafe.routes.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import org.springframework.transaction.annotation.Transactional;
 
