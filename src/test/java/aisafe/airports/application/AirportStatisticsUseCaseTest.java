@@ -1,11 +1,8 @@
 package aisafe.airports.application;
 
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
-import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.airports.domain.IataCode;
-import aisafe.routes.domain.Route;
-import aisafe.routes.domain.RouteRepository;
+import aisafe.airports.domain.AirportStatisticsData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,16 +20,12 @@ class AirportStatisticsUseCaseTest {
     @Mock
     private AirportRepository airportRepository;
 
-    @Mock
-    private RouteRepository routeRepository;
-
     @InjectMocks
     private AirportStatisticsUseCase airportStatistics;
 
     @Test
-    void ensureEmptyFleetReturnsEmptyList() {
-        when(airportRepository.findAll()).thenReturn(List.of());
-        when(routeRepository.findAll()).thenReturn(List.of());
+    void ensureEmptyResultReturnsEmptyList() {
+        when(airportRepository.findStatistics()).thenReturn(List.of());
 
         List<AirportStatisticsResponse> result = airportStatistics.execute();
 
@@ -40,28 +33,12 @@ class AirportStatisticsUseCaseTest {
     }
 
     @Test
-    void ensureAirportsAreSortedByDescendingRouteCount() {
-        Airport lis = mock(Airport.class);
-        Airport opo = mock(Airport.class);
-        IataCode lisCode = new IataCode("LIS");
-        IataCode opoCode = new IataCode("OPO");
-
-        when(lis.getIataCode()).thenReturn(lisCode);
-        when(lis.getName()).thenReturn("Lisbon Airport");
-        when(lis.getCity()).thenReturn("Lisbon");
-        when(lis.getCountry()).thenReturn("Portugal");
-
-        when(opo.getIataCode()).thenReturn(opoCode);
-        when(opo.getName()).thenReturn("Porto Airport");
-        when(opo.getCity()).thenReturn("Porto");
-        when(opo.getCountry()).thenReturn("Portugal");
-
-        Route lisToOpo = new Route("LIS", "OPO", 30, 150.0, 80);
-        Route opoToLis = new Route("OPO", "LIS", 30, 150.0, 80);
-        Route lisToMad = new Route("LIS", "MAD", 60, 300.0, 150);
-
-        when(airportRepository.findAll()).thenReturn(List.of(lis, opo));
-        when(routeRepository.findAll()).thenReturn(List.of(lisToOpo, opoToLis, lisToMad));
+    void ensureResultPreservesOrderFromRepository() {
+        var data = List.of(
+                new AirportStatisticsData("LIS", "Lisbon Airport", "Lisbon", "Portugal", 3L),
+                new AirportStatisticsData("OPO", "Porto Airport", "Porto", "Portugal", 2L)
+        );
+        when(airportRepository.findStatistics()).thenReturn(data);
 
         List<AirportStatisticsResponse> result = airportStatistics.execute();
 

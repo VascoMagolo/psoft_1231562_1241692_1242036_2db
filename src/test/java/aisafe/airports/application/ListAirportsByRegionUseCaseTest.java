@@ -25,9 +25,8 @@ class ListAirportsByRegionUseCaseTest {
     private ListAirportsByRegionUseCase listAirportsByRegion;
 
     private Airport buildAirport(String iata, String country, String region) {
-        Airport a = new Airport(iata, iata + " Airport", "City", country, region, "UTC",
+        return new Airport(iata, iata + " Airport", "City", country, region, "UTC",
                 0.0, 0.0, List.of(new Runway("01/19", 2500, "010/190")));
-        return a;
     }
 
     @Test
@@ -35,7 +34,7 @@ class ListAirportsByRegionUseCaseTest {
         Airport lis = buildAirport("LIS", "Portugal", "Europe");
         Airport jfk = buildAirport("JFK", "USA", "North America");
 
-        when(airportRepository.findAll()).thenReturn(List.of(lis, jfk));
+        when(airportRepository.findAllOrderedByRegion()).thenReturn(List.of(lis, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 
@@ -50,7 +49,7 @@ class ListAirportsByRegionUseCaseTest {
         Airport opo = buildAirport("OPO", "Portugal", "Europe");
         Airport jfk = buildAirport("JFK", "USA", "North America");
 
-        when(airportRepository.findAll()).thenReturn(List.of(lis, opo, jfk));
+        when(airportRepository.findAllOrderedByCountry()).thenReturn(List.of(lis, opo, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("country");
 
@@ -62,7 +61,7 @@ class ListAirportsByRegionUseCaseTest {
     @Test
     void ensureNullRegionFallsBackToUnknown() {
         Airport a = buildAirport("XXX", "Unknown Country", null);
-        when(airportRepository.findAll()).thenReturn(List.of(a));
+        when(airportRepository.findAllOrderedByRegion()).thenReturn(List.of(a));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 
