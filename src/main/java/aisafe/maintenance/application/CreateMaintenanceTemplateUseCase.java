@@ -7,8 +7,8 @@ import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.maintenance.application.dtos.CreateMaintenanceTemplateRequest;
 import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
 import aisafe.maintenance.domain.MaintenanceTemplate;
-import aisafe.maintenance.domain.MaintenanceTemplateAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
+import aisafe.shared.domain.DuplicateResourceException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +47,7 @@ public class CreateMaintenanceTemplateUseCase {
         );
 
         if(maintenanceTemplateRepository.existsByName(template.getName())){
-            throw new MaintenanceTemplateAlreadyExistsException("A template with the name " + template.getName() + " already exists.");
+            throw new DuplicateResourceException("A template with the name " + template.getName() + " already exists.");
         }
 
         maintenanceTemplateRepository.save(template);

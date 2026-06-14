@@ -3,6 +3,7 @@ package aisafe.aircrafts.application;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.DuplicateResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +43,7 @@ class RegisterAircraftModelUseCaseTest {
     void ensureExceptionWhenModelNameAlreadyExists() {
         when(repository.existsByModelName("A320")).thenReturn(true);
 
-        assertThrows(AircraftModelAlreadyExistsException.class, () ->
+        assertThrows(DuplicateResourceException.class, () ->
                 registerAircraftModel.execute(buildRequest()));
         verify(repository, never()).save(any());
     }
