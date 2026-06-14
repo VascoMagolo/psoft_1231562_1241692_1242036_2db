@@ -4,6 +4,7 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.DuplicateResourceException;
 
 /**
  * Use case for registering a new aircraft model. Validates that the model name is unique and then creates and saves the new model.
@@ -25,7 +26,7 @@ public class RegisterAircraftModelUseCase {
      */
     public AircraftModelResponse execute(RegisterAircraftModelRequest request) {
         if (repository.existsByModelName(request.modelName())) {
-            throw new AircraftModelAlreadyExistsException("An aircraft model with name '" + request.modelName() + "' already exists.");
+            throw new DuplicateResourceException("An aircraft model with name '" + request.modelName() + "' already exists.");
         }
 
         AircraftModel newModel = new AircraftModel(
