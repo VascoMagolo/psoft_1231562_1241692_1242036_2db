@@ -3,6 +3,7 @@ package aisafe.airports.infrastructure.persistence.jpa;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,25 +52,30 @@ public class AirportJpaEntity {
 
     @ElementCollection
     @CollectionTable(name = "airport_runways", joinColumns = @JoinColumn(name = "airport_id"))
+    @BatchSize(size = 25)
     private List<RunwayEmbeddable> runways = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_contacts", joinColumns = @JoinColumn(name = "airport_id"))
+    @BatchSize(size = 25)
     private List<ContactEmbeddable> contacts = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_services", joinColumns = @JoinColumn(name = "airport_id"))
     @Column(name = "description")
+    @BatchSize(size = 25)
     private List<String> services = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_terminals", joinColumns = @JoinColumn(name = "airport_id"))
     @Column(name = "name")
+    @BatchSize(size = 25)
     private List<String> terminals = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_gates", joinColumns = @JoinColumn(name = "airport_id"))
     @Column(name = "identifier")
+    @BatchSize(size = 25)
     private List<String> gates = new ArrayList<>();
 
     public AirportJpaEntity() {}
