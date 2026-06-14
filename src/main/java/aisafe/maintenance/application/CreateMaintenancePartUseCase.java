@@ -4,8 +4,8 @@ import aisafe.shared.application.UseCase;
 import aisafe.maintenance.application.dtos.CreateMaintenancePartRequest;
 import aisafe.maintenance.application.dtos.MaintenancePartResponse;
 import aisafe.maintenance.domain.MaintenancePart;
-import aisafe.maintenance.domain.MaintenancePartAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
+import aisafe.shared.domain.DuplicateResourceException;
 
 /**
  * Use case for creating a new maintenance part in the system.
@@ -34,7 +34,7 @@ public class CreateMaintenancePartUseCase {
         );
 
         if (maintenancePartRepository.existsByPartNumber(part.getPartNumber())) {
-            throw new MaintenancePartAlreadyExistsException("Part with the same part number already exists: " + part.getPartNumber());
+            throw new DuplicateResourceException("Part with the same part number already exists: " + part.getPartNumber());
         }
 
         maintenancePartRepository.save(part);

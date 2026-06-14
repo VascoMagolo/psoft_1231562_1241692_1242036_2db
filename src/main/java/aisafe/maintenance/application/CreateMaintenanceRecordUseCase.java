@@ -5,6 +5,8 @@ import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.*;
+import aisafe.shared.domain.DuplicateResourceException;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public class CreateMaintenanceRecordUseCase {
         );
 
         if (recordRepository.existsByStartDateAndTemplate(record.getStartDate(), record.getTemplate())) {
-            throw new MaintenanceRecordAlreadyExistsException("Record with the same start date and template already exists.");
+            throw new DuplicateResourceException("Record with the same start date and template already exists.");
         }
 
         recordRepository.save(record);
