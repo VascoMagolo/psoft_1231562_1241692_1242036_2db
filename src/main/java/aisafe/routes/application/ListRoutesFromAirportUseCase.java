@@ -33,7 +33,7 @@ public class ListRoutesFromAirportUseCase {
     public PaginatedResult<Route> execute(String iataCode, int pageNumber, int pageSize) {
         String originCode = iataCode.trim().toUpperCase();
 
-        if (!airportRepository.existsByIataCodeCode(originCode)) {
+        if (!airportRepository.existsByIataCode(new IataCode(originCode))) {
             throw new AirportNotFoundException(originCode);
         }
 

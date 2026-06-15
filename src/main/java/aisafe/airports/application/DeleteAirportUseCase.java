@@ -19,7 +19,7 @@ public class DeleteAirportUseCase {
     }
 
     public void execute(String iataCode) {
-        Airport airport = airportRepository.findByIataCodeCode(iataCode)
+        Airport airport = airportRepository.findByIataCode(new IataCode(iataCode))
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
         IataCode code = new IataCode(iataCode);
         if (!routeRepository.findByOriginOrDestination(code, code).isEmpty()) {

@@ -60,7 +60,7 @@ public class Airport {
         if (gates != null) this.gates = new ArrayList<>(gates);
     }
 
-    public void setStatus(AirportStatus status) { this.status = status; }
+    public void changeStatus(AirportStatus status) { this.status = status; }
 
     public IataCode getIataCode() { return iataCode; }
     public String getName() { return name; }

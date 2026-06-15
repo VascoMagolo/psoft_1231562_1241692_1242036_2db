@@ -6,6 +6,7 @@ import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportStatus;
+import aisafe.airports.domain.IataCode;
 
 /**
  * Use case for updating the details of an existing airport
@@ -25,9 +26,9 @@ public class UpdateAirportStatusUseCase {
      * @return a DTO containing the updated details of the airport after the status change
      */
     public AirportResponse execute(String iataCode, AirportStatus status) {
-        Airport airport = airportRepository.findByIataCodeCode(iataCode)
+        Airport airport = airportRepository.findByIataCode(new IataCode(iataCode))
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
-        airport.setStatus(status);
+        airport.changeStatus(status);
         airportRepository.save(airport);
         return AirportResponse.from(airport);
     }

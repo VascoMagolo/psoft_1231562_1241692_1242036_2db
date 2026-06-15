@@ -6,6 +6,7 @@ import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Contact;
 import aisafe.airports.domain.Gate;
 import aisafe.airports.domain.Service;
@@ -31,7 +32,7 @@ public class UpdateAirportDetailsUseCase {
      * @return a DTO containing the updated details of the airport after the update is applied
      */
     public AirportResponse execute(String iataCode, UpdateAirportDetailsRequest request) {
-        Airport airport = airportRepository.findByIataCodeCode(iataCode)
+        Airport airport = airportRepository.findByIataCode(new IataCode(iataCode))
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
 
         List<Contact> contacts = request.contacts() == null ? null :

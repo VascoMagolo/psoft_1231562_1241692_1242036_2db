@@ -4,6 +4,7 @@ import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportStatisticsData;
+import aisafe.airports.domain.IataCode;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -29,14 +30,14 @@ public class AirportJpaRepository implements AirportRepository {
     }
 
     @Override
-    public Optional<Airport> findByIataCodeCode(String code) {
-        return springRepo.findByIataCode(code)
+    public Optional<Airport> findByIataCode(IataCode code) {
+        return springRepo.findByIataCode(code.getCode())
                 .map(AirportMapper::toDomain);
     }
 
     @Override
-    public boolean existsByIataCodeCode(String code) {
-        return springRepo.existsByIataCode(code);
+    public boolean existsByIataCode(IataCode code) {
+        return springRepo.existsByIataCode(code.getCode());
     }
 
     @Override

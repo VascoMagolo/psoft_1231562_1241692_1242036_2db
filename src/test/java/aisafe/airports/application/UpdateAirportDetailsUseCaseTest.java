@@ -5,6 +5,7 @@ import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +38,7 @@ class UpdateAirportDetailsUseCaseTest {
     @Test
     void ensureAirportDetailsAreUpdatedSuccessfully() {
         Airport airport = buildAirport("LIS");
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", null, null, null, null, null);
@@ -50,7 +51,7 @@ class UpdateAirportDetailsUseCaseTest {
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.findByIataCodeCode("XXX")).thenReturn(Optional.empty());
+        when(airportRepository.findByIataCode(new IataCode("XXX"))).thenReturn(Optional.empty());
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", null, null, null, null, null);
