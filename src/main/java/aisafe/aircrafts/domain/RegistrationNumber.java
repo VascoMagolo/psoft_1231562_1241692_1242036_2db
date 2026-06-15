@@ -14,13 +14,13 @@ public final class RegistrationNumber {
 
     public RegistrationNumber(String number) {
         if (number == null || number.trim().isEmpty()) {
-            throw new IllegalArgumentException("Aircraft registration number cannot be empty.");
+            throw new InvalidRegistrationNumberException("Aircraft registration number cannot be empty.");
         }
 
         String upperCaseNumber = number.trim().toUpperCase();
 
         if (!PATTERN.matcher(upperCaseNumber).matches()) {
-            throw new IllegalArgumentException("Invalid registration number format. Expected format: XX-XXX (e.g., CS-TPA).");
+            throw new InvalidRegistrationNumberException("Invalid registration number format. Expected format: XX-XXX (e.g., CS-TPA).");
         }
 
         this.number = upperCaseNumber;
