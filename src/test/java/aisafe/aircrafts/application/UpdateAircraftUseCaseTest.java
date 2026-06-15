@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -72,5 +73,15 @@ class UpdateAircraftUseCaseTest {
         when(aircraftModelRepository.findByModelName("NON_EXISTENT")).thenReturn(Optional.empty());
 
         assertThrows(AircraftModelNotFoundException.class, () -> updateAircraftUseCase.execute(registrationNumber, request, 0L));
+    }
+
+    @Test
+    void ensureExceptionOnConcurrencyMismatch() {
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A320", null, null, null, null, null);
+        when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
+        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(1L); // Database has version 1
+
+        assertThrows(ObjectOptimisticLockingFailureException.class, () ->
+                updateAircraftUseCase.execute(registrationNumber, request, 0L)); // Client provides version 0
     }
 }

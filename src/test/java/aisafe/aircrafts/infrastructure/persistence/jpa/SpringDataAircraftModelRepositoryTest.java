@@ -4,6 +4,7 @@ import aisafe.aircrafts.domain.Manufacturer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,5 +50,29 @@ class SpringDataAircraftModelRepositoryTest {
 
         assertTrue(repository.existsByModelName("B737-TEST"));
         assertFalse(repository.existsByModelName("NON_EXISTENT"));
+    }
+
+    @Test
+    void ensureUniqueModelNameConstraint() {
+        AircraftModelJpaEntity entity1 = new AircraftModelJpaEntity();
+        entity1.setModelName("UNIQUE-MODEL");
+        entity1.setManufacturer(Manufacturer.AIRBUS);
+        entity1.setFuelCapacity(1000.0);
+        entity1.setMaxRange(1000.0);
+        entity1.setCruisingSpeed(500.0);
+        entity1.setMaximumSeatingCapacity(100);
+        repository.save(entity1);
+
+        AircraftModelJpaEntity entity2 = new AircraftModelJpaEntity();
+        entity2.setModelName("UNIQUE-MODEL"); // Duplicate
+        entity2.setManufacturer(Manufacturer.BOEING);
+        entity2.setFuelCapacity(2000.0);
+        entity2.setMaxRange(2000.0);
+        entity2.setCruisingSpeed(600.0);
+        entity2.setMaximumSeatingCapacity(200);
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            repository.saveAndFlush(entity2);
+        });
     }
 }
