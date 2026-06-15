@@ -5,6 +5,7 @@ import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelRequest;
+import aisafe.shared.domain.PaginatedResult;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -71,12 +72,16 @@ public class AircraftModelController {
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<ListAircraftModelsUseCaseResponse> assembler) {
 
-        List<ListAircraftModelsUseCaseResponse> modelsList = listAircraftModels.execute(
+        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModels.execute(
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
 
-        Page<ListAircraftModelsUseCaseResponse> modelsPage = new PageImpl<>(modelsList, pageable, modelsList.size());
+        Page<ListAircraftModelsUseCaseResponse> modelsPage = new PageImpl<>(
+                result.data(),
+                pageable,
+                result.totalElements()
+        );
 
         PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>> pagedModel =
                 assembler.toModel(modelsPage, model -> EntityModel.of(model)
