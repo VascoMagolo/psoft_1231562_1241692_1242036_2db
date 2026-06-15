@@ -4,21 +4,19 @@ import aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Calculates the total operational hours for a specific aircraft in the fleet.
  */
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class CalculateAircraftOperationalHoursUseCase {
 
-    private final SpringDataScheduledFlightRepository flightRepository;
+    private final ScheduledFlightRepository flightRepository;
     private final AircraftRepository aircraftRepository;
 
-    public CalculateAircraftOperationalHoursUseCase(SpringDataScheduledFlightRepository flightRepository, 
+    public CalculateAircraftOperationalHoursUseCase(ScheduledFlightRepository flightRepository, 
                                                     AircraftRepository aircraftRepository) {
         this.flightRepository = flightRepository;
         this.aircraftRepository = aircraftRepository;
@@ -29,7 +27,7 @@ public class CalculateAircraftOperationalHoursUseCase {
             throw new AircraftNotFoundException("Aircraft with registration " + registrationNumber.getNumber() + " not found.");
         }
 
-        Double totalHours = flightRepository.calculateTotalOperationalHoursByRegistration(registrationNumber.getNumber());
+        Double totalHours = flightRepository.calculateTotalOperationalHoursByRegistration(registrationNumber);
         if (totalHours == null) {
             totalHours = 0.0;
         }
