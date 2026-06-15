@@ -1,11 +1,9 @@
 package aisafe.airports.domain;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
-/**
- * Embeddable class representing a contact method for an airport
- */
-public class Contact {
+public final class Contact {
     private final ContactType type;
     private final String value;
     private final String description;
@@ -46,4 +44,22 @@ public class Contact {
     public ContactType getType() { return type; }
     public String getValue() { return value; }
     public String getDescription() { return description; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Contact that = (Contact) o;
+        return type == that.type && Objects.equals(value, that.value) && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value, description);
+    }
+
+    @Override
+    public String toString() {
+        return "Contact{type=" + type + ", value='" + value + "'}";
+    }
 }
