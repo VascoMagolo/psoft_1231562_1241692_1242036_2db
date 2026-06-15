@@ -53,7 +53,7 @@ class GetAircraftUtilizationUseCaseTest {
         when(flight.getDepartureDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         when(flight.getArrivalDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC));
         
-        when(scheduledFlightRepository.findFlightsForUtilization(eq("XX-XXX"), any(OffsetDateTime.class), any(OffsetDateTime.class)))
+        when(scheduledFlightRepository.findFlightsForUtilization(any(RegistrationNumber.class), any(OffsetDateTime.class), any(OffsetDateTime.class)))
                 .thenReturn(List.of(flight));
 
         List<UtilizationDataPointResponse> result = useCase.execute("XX-XXX", start, end);

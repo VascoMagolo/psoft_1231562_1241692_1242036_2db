@@ -36,7 +36,8 @@ public class GetAircraftUtilizationUseCase {
         OffsetDateTime start = startDate.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime end = endDate.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC).minusNanos(1);
 
-        List<ScheduledFlight> flights = scheduledFlightRepository.findFlightsForUtilization(registration, start, end);
+        RegistrationNumber reg = new RegistrationNumber(registration);
+        List<ScheduledFlight> flights = scheduledFlightRepository.findFlightsForUtilization(reg, start, end);
 
         Map<LocalDate, Double> dailyHours = new TreeMap<>();
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {

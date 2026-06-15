@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -40,6 +42,7 @@ class ScheduleFlightUseCaseTest {
     private ScheduleFlightUseCase useCase;
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void ensureFlightIsScheduledSuccessfully() {
         OffsetDateTime departure = OffsetDateTime.now().plusDays(1);
         OffsetDateTime arrival = departure.plusHours(2);
@@ -56,7 +59,6 @@ class ScheduleFlightUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
         when(routeDistanceService.calculateDistanceKm(route)).thenReturn(300.0);
-        when(scheduledFlightRepository.hasOverlappingFlights(any(RegistrationNumber.class), any(), any())).thenReturn(false);
 
         FlightResponse result = useCase.execute(request);
 

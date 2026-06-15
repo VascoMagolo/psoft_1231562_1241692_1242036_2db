@@ -39,8 +39,7 @@ class ViewScheduledFlightsByAircraftUseCaseTest {
         when(scheduledFlightRepository.findByAircraftRegistration(registrationNumber)).thenReturn(List.of(flight));
         
         // Mocking FlightResponse requirements
-        when(flight.getAircraft()).thenReturn(mock(aisafe.aircrafts.domain.Aircraft.class));
-        when(flight.getAircraft().getRegistrationNumber()).thenReturn(new RegistrationNumber(aircraftId));
+        when(flight.getAircraftRegistrationNumber()).thenReturn(new RegistrationNumber(aircraftId));
         when(flight.getRoute()).thenReturn(mock(aisafe.routes.domain.Route.class));
         when(flight.getRoute().getOrigin()).thenReturn(new aisafe.airports.domain.IataCode("OPO"));
         when(flight.getRoute().getDestination()).thenReturn(new aisafe.airports.domain.IataCode("LIS"));
