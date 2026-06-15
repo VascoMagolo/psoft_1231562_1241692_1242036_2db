@@ -57,8 +57,8 @@ class CreateRouteUseCaseTest {
     void ensureRouteIsCreatedSuccessfully() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(false);
 
         Route result = createRoute.execute(request);
@@ -74,7 +74,7 @@ class CreateRouteUseCaseTest {
     void ensureExceptionThrownWhenOriginAirportNotFound() {
         CreateRouteRequest request = new CreateRouteRequest("XXX", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> createRoute.execute(request));
         verify(routeRepository, never()).save(any());
@@ -84,8 +84,8 @@ class CreateRouteUseCaseTest {
     void ensureExceptionThrownWhenDestinationAirportNotFound() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "XXX", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> createRoute.execute(request));
         verify(routeRepository, never()).save(any());
@@ -95,8 +95,8 @@ class CreateRouteUseCaseTest {
     void ensureExceptionThrownWhenRouteAlreadyExists() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(true);
 
         DuplicateResourceException ex = assertThrows(DuplicateResourceException.class, () -> createRoute.execute(request));

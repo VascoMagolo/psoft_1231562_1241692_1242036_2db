@@ -39,10 +39,10 @@ public class CreateRouteUseCase {
         String originCode = request.originIataCode().trim().toUpperCase();
         String destinationCode = request.destinationIataCode().trim().toUpperCase();
 
-        if (!airportRepository.existsByIataCodeCode(originCode)) {
+        if (!airportRepository.existsByIataCode(new IataCode(originCode))) {
             throw new AirportNotFoundException(originCode);
         }
-        if (!airportRepository.existsByIataCodeCode(destinationCode)) {
+        if (!airportRepository.existsByIataCode(new IataCode(destinationCode))) {
             throw new AirportNotFoundException(destinationCode);
         }
         if (routeRepository.existsByOriginAndDestination(new IataCode(originCode), new IataCode(destinationCode))) {

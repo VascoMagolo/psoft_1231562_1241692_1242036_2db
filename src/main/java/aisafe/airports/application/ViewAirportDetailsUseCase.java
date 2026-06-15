@@ -4,6 +4,7 @@ import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 
 /**
  * Use case for viewing the details of a specific airport.
@@ -23,7 +24,7 @@ public class ViewAirportDetailsUseCase {
      */
     public AirportResponse execute(String iataCode) {
         return AirportResponse.from(
-                airportRepository.findByIataCodeCode(iataCode)
+                airportRepository.findByIataCode(new IataCode(iataCode))
                         .orElseThrow(() -> new AirportNotFoundException(iataCode))
         );
     }

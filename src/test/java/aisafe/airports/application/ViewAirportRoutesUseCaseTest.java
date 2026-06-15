@@ -33,7 +33,7 @@ class ViewAirportRoutesUseCaseTest {
     @Test
     void ensureRoutesReturnedForExistingAirport() {
         Route route = new Route("LIS", "OPO", 45, 300.0, 150);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.findByOriginOrDestination(any(IataCode.class), any(IataCode.class)))
                 .thenReturn(List.of(route));
 
@@ -45,7 +45,7 @@ class ViewAirportRoutesUseCaseTest {
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> viewAirportRoutes.execute("XXX"));
         verify(routeRepository, never()).findByOriginOrDestination(any(), any());

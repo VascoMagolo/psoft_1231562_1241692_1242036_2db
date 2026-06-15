@@ -28,7 +28,7 @@ public class ViewAirportRoutesUseCase {
      * @return a list of routes associated with the specified airport
      */
     public List<RouteResponse> execute(String iataCode) {
-        if (!airportRepository.existsByIataCodeCode(iataCode)) {
+        if (!airportRepository.existsByIataCode(new IataCode(iataCode))) {
             throw new AirportNotFoundException(iataCode);
         }
         IataCode code = new IataCode(iataCode);

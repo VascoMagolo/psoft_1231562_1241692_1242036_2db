@@ -4,6 +4,7 @@ import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportStatus;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ class UpdateAirportStatusUseCaseTest {
     @Test
     void ensureStatusIsUpdatedSuccessfully() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
 
         assertDoesNotThrow(() -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED));
         verify(airportRepository).save(airport);
@@ -43,7 +44,7 @@ class UpdateAirportStatusUseCaseTest {
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.findByIataCodeCode("XYZ")).thenReturn(Optional.empty());
+        when(airportRepository.findByIataCode(new IataCode("XYZ"))).thenReturn(Optional.empty());
 
         assertThrows(AirportNotFoundException.class, () -> updateAirportStatus.execute("XYZ", AirportStatus.CLOSED));
         verify(airportRepository, never()).save(any());
