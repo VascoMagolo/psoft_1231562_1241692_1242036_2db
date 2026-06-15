@@ -1,8 +1,9 @@
-package aisafe.routes.infrastructure.persistence.jpa;
+package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftMapper;
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftModelMapper;
-import aisafe.routes.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.routes.infrastructure.persistence.jpa.RouteMapper;
 
 public class ScheduledFlightMapper {
 

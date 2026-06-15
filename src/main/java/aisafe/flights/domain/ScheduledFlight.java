@@ -1,6 +1,7 @@
-package aisafe.routes.domain;
+package aisafe.flights.domain;
 
 import aisafe.aircrafts.domain.Aircraft;
+import aisafe.routes.domain.Route;
 import org.springframework.util.Assert;
 import java.time.OffsetDateTime;
 import java.time.Duration;

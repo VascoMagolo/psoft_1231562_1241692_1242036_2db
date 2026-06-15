@@ -1,4 +1,4 @@
-package aisafe.routes.infrastructure.persistence.jpa;
+package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.TopUtilizedModelProjection;
 import org.springframework.data.domain.Pageable;

@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.domain.ResourceInUseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

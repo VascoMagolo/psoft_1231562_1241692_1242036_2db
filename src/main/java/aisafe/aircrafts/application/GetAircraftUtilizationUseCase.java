@@ -4,8 +4,8 @@ import aisafe.aircrafts.application.dtos.UtilizationDataPointResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.domain.ScheduledFlight;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 
 import java.time.Duration;

@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftNotFoundException;

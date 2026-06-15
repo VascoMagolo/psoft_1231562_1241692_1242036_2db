@@ -1,11 +1,13 @@
-package aisafe.routes.infrastructure.persistence.jpa;
+package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftRepository;
 import aisafe.routes.domain.RouteNotFoundException;
-import aisafe.routes.domain.ScheduledFlight;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
+import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
+import aisafe.routes.infrastructure.persistence.jpa.SpringDataRouteRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;

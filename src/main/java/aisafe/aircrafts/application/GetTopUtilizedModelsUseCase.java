@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
 import aisafe.aircrafts.infrastructure.persistence.jpa.TopUtilizedModelProjection;
-import aisafe.routes.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
+import aisafe.flights.infrastructure.persistence.SpringDataScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;

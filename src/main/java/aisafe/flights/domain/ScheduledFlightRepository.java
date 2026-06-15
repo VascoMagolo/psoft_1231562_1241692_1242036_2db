@@ -1,4 +1,4 @@
-package aisafe.routes.domain;
+package aisafe.flights.domain;
 
 import aisafe.airports.domain.IataCode;
 import aisafe.shared.domain.BaseRepository;

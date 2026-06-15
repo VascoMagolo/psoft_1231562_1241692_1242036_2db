@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
 import aisafe.aircrafts.infrastructure.persistence.jpa.TopUtilizedModelProjection;
-import aisafe.routes.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
+import aisafe.flights.infrastructure.persistence.SpringDataScheduledFlightRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

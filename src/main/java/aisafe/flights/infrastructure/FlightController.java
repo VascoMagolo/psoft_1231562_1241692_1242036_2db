@@ -35,6 +35,7 @@ public class FlightController {
 
     private EntityModel<FlightResponse> toModel(FlightResponse flight) {
         return EntityModel.of(flight,
+                linkTo(methodOn(FlightController.class).scheduleFlight(null)).withRel("schedule"),
                 linkTo(methodOn(FlightController.class).getScheduledFlightsByAircraft(flight.aircraftId())).withRel("aircraft-flights"));
     }
 

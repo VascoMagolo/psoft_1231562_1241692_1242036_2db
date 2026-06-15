@@ -7,7 +7,8 @@ import java.time.OffsetDateTime;
 
 public record ScheduleFlightRequest(
         @NotBlank String aircraftId,
-        @NotNull Long routeId,
+        @NotBlank String originIataCode,
+        @NotBlank String destinationIataCode,
         @NotNull OffsetDateTime departureDateTime,
         @NotNull OffsetDateTime arrivalDateTime
 ) {}

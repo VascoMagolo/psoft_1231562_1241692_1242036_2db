@@ -1,9 +1,9 @@
 package aisafe.routes.application;
 
-import aisafe.flights.domain.FlightRepository;
 import aisafe.routes.application.dtos.ActiveRouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public class ListActiveRoutesUseCase {
 
     private final RouteRepository routeRepository;
-    private final FlightRepository flightRepository;
+    private final ScheduledFlightRepository scheduledFlightRepository;
     private final RouteDistanceService routeDistanceService;
 
     public List<ActiveRouteResponse> execute(String status, String sortBy) {
@@ -39,15 +39,14 @@ public class ListActiveRoutesUseCase {
 
     private ActiveRouteResponse toResponse(Route route) {
         return new ActiveRouteResponse(
-                route.getId(),
                 route.getOrigin().getCode(),
                 route.getDestination().getCode(),
                 route.getEstimatedFlightTime(),
                 route.getMinimumRange(),
                 route.getMinimumCapacity(),
-                route.isActive(),
+                route.getStatus(),
                 routeDistanceService.calculateDistanceKm(route),
-                flightRepository.countByRouteId(route.getId())
+                scheduledFlightRepository.countByRoute(route.getOrigin(), route.getDestination())
         );
     }
 }

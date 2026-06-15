@@ -6,44 +6,52 @@ import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.flights.application.dtos.ScheduleFlightRequest;
 import aisafe.flights.domain.AircraftUnavailableException;
-import aisafe.flights.domain.Flight;
-import aisafe.flights.domain.FlightRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.RouteDistanceService;
+import aisafe.flights.domain.FlightStatus;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import aisafe.shared.domain.DomainException;
 import lombok.RequiredArgsConstructor;
 
 @UseCase
 @RequiredArgsConstructor
-public class  ScheduleFlightUseCase {
+public class ScheduleFlightUseCase {
 
-    private final FlightRepository flightRepository;
+    private final ScheduledFlightRepository scheduledFlightRepository;
     private final RouteRepository routeRepository;
     private final AircraftRepository aircraftRepository;
     private final RouteDistanceService routeDistanceService;
 
-    public Flight execute(ScheduleFlightRequest request) {
+    public ScheduledFlight execute(ScheduleFlightRequest request) {
         String aircraftId = request.aircraftId().trim().toUpperCase();
-        Route route = routeRepository.findById(request.routeId())
-                .orElseThrow(() -> new RouteNotFoundException(String.valueOf(request.routeId())));
+        String origin = request.originIataCode().trim().toUpperCase();
+        String destination = request.destinationIataCode().trim().toUpperCase();
+
+        Route route = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination))
+                .orElseThrow(() -> new RouteNotFoundException(origin + " -> " + destination));
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(new RegistrationNumber(aircraftId))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraftId));
 
-        if (routeDistanceService.calculateDistanceKm(route) > aircraft.getModel().getMaxRange()) {
+        if (routeDistanceService.calculateDistanceKm(route) > aircraft.getRange()) {
             throw new DomainException("Route distance exceeds aircraft maximum range.");
         }
-        if (flightRepository.hasOverlappingFlights(aircraftId, request.departureDateTime(), request.arrivalDateTime())) {
+        if (scheduledFlightRepository.hasOverlappingFlights(aircraftId, request.departureDateTime(), request.arrivalDateTime())) {
             throw new AircraftUnavailableException(aircraftId);
         }
 
-        return flightRepository.save(new Flight(
-                aircraftId,
-                route.getId(),
+        ScheduledFlight scheduledFlight = new ScheduledFlight(
                 request.departureDateTime(),
-                request.arrivalDateTime()
-        ));
+                request.arrivalDateTime(),
+                FlightStatus.SCHEDULED,
+                route,
+                aircraft
+        );
+        scheduledFlightRepository.save(scheduledFlight);
+        return scheduledFlight;
     }
 }
