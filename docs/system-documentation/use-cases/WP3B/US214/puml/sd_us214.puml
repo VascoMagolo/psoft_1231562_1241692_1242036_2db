@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "ListActiveRoutesUseCase" as UC
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/routes?status=active&sortBy={sortBy}
+activate Ctrl
+
+Ctrl -> UC : execute(status="active", sortBy)
+activate UC
+
+UC -> Repo : findActiveAndSort(sortBy)
+activate Repo
+Repo -> DB : SELECT * FROM route WHERE active = true ORDER BY sortBy
+activate DB
+DB --> Repo : returns sorted route records
+deactivate DB
+Repo --> UC : returns list of sorted routes
+deactivate Repo
+
+UC --> Ctrl : returns List<RouteResponse>
+deactivate UC
+
+Ctrl --> BO : returns list of active Route details sorted by criteria
+deactivate Ctrl
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "ListActiveRoutesUseCase" as UC
+participant "RouteRepository" as RouteRepo
+participant "AirportRepository" as AirportRepo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/routes?status=active&sortBy={sortBy}
+activate Ctrl
+
+Ctrl -> UC : execute(status="active", sortBy)
+activate UC
+
+UC -> RouteRepo : findActiveRoutes()
+activate RouteRepo
+RouteRepo -> DB : SELECT * FROM route WHERE active = true
+activate DB
+DB --> RouteRepo : returns active route records
+deactivate DB
+RouteRepo --> UC : returns list of active routes
+deactivate RouteRepo
+
+alt sortBy == "distance"
+    loop for each route
+        UC -> AirportRepo : findCoordinates(route.originIata, route.destinationIata)
+        activate AirportRepo
+        AirportRepo --> UC : returns origin and destination Airports
+        deactivate AirportRepo
+    end
+
+end
+
+UC --> Ctrl : returns List<RouteResponse>
+deactivate UC
+
+Ctrl --> BO : returns list of active Route details sorted by criteria
+deactivate Ctrl
+@enduml

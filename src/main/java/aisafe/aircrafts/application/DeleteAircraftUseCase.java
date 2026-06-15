@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
@@ -34,7 +34,7 @@ public class DeleteAircraftUseCase {
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registration.getNumber()));
 
-        if (flightRepository.existsByAircraftRegistration(registration.getNumber())) {
+        if (flightRepository.existsByAircraftRegistration(registration)) {
             throw new ResourceInUseException("Cannot delete aircraft because it is assigned to scheduled flights.");
         }
 

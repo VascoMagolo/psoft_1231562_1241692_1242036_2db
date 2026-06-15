@@ -1,0 +1,37 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "RouteController" as Ctrl
+participant "SearchAlternativeRoutesUseCase" as UC
+participant "NetworkGraphService" as GraphSvc
+participant "RouteRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/routes/alternatives?origin={originIata}&destination={destinationIata}
+activate Ctrl
+
+Ctrl -> UC : execute(originIata, destinationIata)
+activate UC
+
+UC -> GraphSvc : findAlternativePaths(originIata, destinationIata)
+activate GraphSvc
+
+GraphSvc -> Repo : findAllActiveRoutes()
+activate Repo
+Repo -> DB : SELECT * FROM route WHERE active = true
+activate DB
+DB --> Repo : returns all active routes
+deactivate DB
+Repo --> GraphSvc : returns allRoutes
+deactivate Repo
+
+
+GraphSvc --> UC : returns List<Path> alternativePaths
+deactivate GraphSvc
+
+UC --> Ctrl : returns AlternativeRoutesResponse(alternativePaths)
+deactivate UC
+
+Ctrl --> BO : returns list of alternative Route paths
+deactivate Ctrl
+@enduml

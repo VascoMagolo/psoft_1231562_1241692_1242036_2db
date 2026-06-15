@@ -4,8 +4,8 @@ import aisafe.aircrafts.application.dtos.UtilizationDataPointResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.domain.ScheduledFlight;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -53,7 +53,7 @@ class GetAircraftUtilizationUseCaseTest {
         when(flight.getDepartureDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         when(flight.getArrivalDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC));
         
-        when(scheduledFlightRepository.findFlightsForUtilization(eq("XX-XXX"), any(OffsetDateTime.class), any(OffsetDateTime.class)))
+        when(scheduledFlightRepository.findFlightsForUtilization(any(RegistrationNumber.class), any(OffsetDateTime.class), any(OffsetDateTime.class)))
                 .thenReturn(List.of(flight));
 
         List<UtilizationDataPointResponse> result = useCase.execute("XX-XXX", start, end);

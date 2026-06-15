@@ -3,6 +3,7 @@ package aisafe.routes.infrastructure.persistence.jpa;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.RouteStatus;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -63,6 +64,13 @@ public class RouteJpaRepository implements RouteRepository {
     @Override
     public List<Route> findAll() {
         return springRepo.findAll().stream()
+                .map(RouteMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Route> findAllActive() {
+        return springRepo.findByStatus(RouteStatus.ACTIVE).stream()
                 .map(RouteMapper::toDomain)
                 .collect(Collectors.toList());
     }

@@ -1,7 +1,8 @@
-package aisafe.routes.infrastructure.persistence.jpa;
+package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
-import aisafe.routes.domain.FlightStatus;
+import aisafe.flights.domain.FlightStatus;
+import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

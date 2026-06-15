@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "System" as Sys
+
+BO -> Sys : getActiveRoutes(status, sortBy)
+activate Sys
+Sys --> BO : returns list of active Route details sorted by criteria
+deactivate Sys
+@enduml

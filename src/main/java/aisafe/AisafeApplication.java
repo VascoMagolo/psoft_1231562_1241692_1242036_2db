@@ -10,7 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AisafeApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AisafeApplication.class, args);
+
+        SpringApplication.run(AisafeApplication.class, args);
 	}
 
 }
