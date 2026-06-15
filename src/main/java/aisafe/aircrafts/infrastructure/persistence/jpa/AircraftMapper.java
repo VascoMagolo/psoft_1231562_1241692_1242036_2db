@@ -19,7 +19,6 @@ public class AircraftMapper {
                 entity.getRange(),
                 entity.getFeatures()
         );
-        aircraft.setVersion(entity.getVersion());
         return aircraft;
     }
 
