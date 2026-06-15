@@ -82,6 +82,13 @@ public class AirportJpaRepository implements AirportRepository {
     }
 
     @Override
+    public Long findVersionFor(IataCode code) {
+        return springRepo.findByIataCode(code.getCode())
+                .map(AirportJpaEntity::getVersion)
+                .orElse(0L);
+    }
+
+    @Override
     public void save(Airport airport) {
         AirportJpaEntity existing = springRepo.findByIataCode(airport.getIataCode().getCode()).orElse(null);
         AirportJpaEntity jpaData = AirportMapper.toJpa(airport);

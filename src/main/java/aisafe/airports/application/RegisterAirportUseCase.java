@@ -61,6 +61,7 @@ public class RegisterAirportUseCase {
         airport.updateDetails(request.operationalHours(), null, request.imagePath(), services, terminals, gates);
 
         airportRepository.save(airport);
-        return AirportResponse.from(airport);
+        Long version = airportRepository.findVersionFor(new IataCode(request.iataCode()));
+        return AirportResponse.from(airport, version);
     }
 }
