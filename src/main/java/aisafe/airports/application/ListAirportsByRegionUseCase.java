@@ -2,8 +2,8 @@ package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportGroupResponse;
-import aisafe.airports.application.dtos.AirportResponse;
-import aisafe.airports.domain.Airport;
+import aisafe.airports.application.dtos.AirportGroupSummaryResponse;
+import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.AirportRepository;
 
 import java.util.LinkedHashMap;
@@ -20,18 +20,20 @@ public class ListAirportsByRegionUseCase {
 
     public List<AirportGroupResponse> execute(String groupBy) {
         boolean byCountry = "country".equalsIgnoreCase(groupBy);
-        List<Airport> airports = byCountry
-                ? airportRepository.findAllOrderedByCountry()
-                : airportRepository.findAllOrderedByRegion();
+        List<AirportGroupingData> rows = byCountry
+                ? airportRepository.findAllGroupingByCountry()
+                : airportRepository.findAllGroupingByRegion();
 
-        return airports.stream()
+        return rows.stream()
                 .collect(Collectors.groupingBy(
-                        a -> byCountry ? a.getCountry() : (a.getRegion() != null ? a.getRegion() : "Unknown"),
+                        r -> byCountry ? r.country() : (r.region() != null ? r.region() : "Unknown"),
                         LinkedHashMap::new,
                         Collectors.toList()
                 ))
                 .entrySet().stream()
-                .map(e -> new AirportGroupResponse(e.getKey(), e.getValue().stream().map(AirportResponse::from).toList()))
+                .map(e -> new AirportGroupResponse(e.getKey(), e.getValue().stream()
+                        .map(r -> new AirportGroupSummaryResponse(r.iataCode().getCode(), r.name(), r.region(), r.country()))
+                        .toList()))
                 .toList();
     }
 }

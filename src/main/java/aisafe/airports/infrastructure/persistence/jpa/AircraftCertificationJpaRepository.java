@@ -1,5 +1,6 @@
 package aisafe.airports.infrastructure.persistence.jpa;
 
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.airports.domain.AircraftCertification;
 import aisafe.airports.domain.AircraftCertificationRepository;
 import aisafe.airports.domain.Airport;
@@ -34,11 +35,11 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
     }
 
     @Override
-    public boolean existsByAirportAndAircraftModelName(Airport airport, String aircraftModelName) {
+    public boolean existsByAirportAndAircraftModelName(Airport airport, ModelName aircraftModelName) {
         AirportJpaEntity jpaAirport = airportSpringRepo.findByIataCode(airport.getIataCode().getCode())
                 .orElse(null);
         if (jpaAirport == null) return false;
-        return springRepo.existsByAirportAndAircraftModelName(jpaAirport, aircraftModelName);
+        return springRepo.existsByAirportAndAircraftModelName(jpaAirport, aircraftModelName.getName());
     }
 
     @Override
@@ -60,7 +61,7 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
                 .orElseThrow(() -> new AirportNotFoundException(
                         certification.getAirport().getIataCode().getCode()));
 
-        springRepo.save(new AircraftCertificationJpaEntity(jpaAirport, certification.getAircraftModelName()));
+        springRepo.save(new AircraftCertificationJpaEntity(jpaAirport, certification.getAircraftModelName().getName()));
     }
 
     @Override
@@ -71,7 +72,7 @@ public class AircraftCertificationJpaRepository implements AircraftCertification
                         certification.getAirport().getIataCode().getCode()));
 
         springRepo.findByAirport(jpaAirport).stream()
-                .filter(e -> e.getAircraftModelName().equals(certification.getAircraftModelName()))
+                .filter(e -> e.getAircraftModelName().equals(certification.getAircraftModelName().getName()))
                 .findFirst()
                 .ifPresent(springRepo::delete);
     }

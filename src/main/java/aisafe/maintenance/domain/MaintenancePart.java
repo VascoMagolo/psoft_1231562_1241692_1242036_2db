@@ -1,7 +1,5 @@
 package aisafe.maintenance.domain;
 
-import org.springframework.util.Assert;
-
 public class MaintenancePart {
     private String partNumber;
     private String name;
@@ -12,13 +10,13 @@ public class MaintenancePart {
 
     public MaintenancePart(String partNumber, String name, String description,
                            Integer stockQuantity, Integer minimumThreshold, MaintenanceComponent component) {
-        Assert.hasText(name, "Part name must not be empty.");
-        Assert.notNull(partNumber, "Part number must not be null.");
-        Assert.notNull(stockQuantity, "Stock quantity must not be null.");
-        Assert.notNull(minimumThreshold, "Minimum threshold must not be null.");
-        Assert.notNull(component, "Component must not be null");
-        Assert.isTrue(stockQuantity >= 0, "Stock quantity must be non-negative.");
-        Assert.isTrue(minimumThreshold >= 0, "Minimum threshold must be non-negative.");
+        if (name == null || name.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Part name must not be empty.");
+        if (partNumber == null) throw new MaintenanceInvalidFieldException("Part number must not be null.");
+        if (stockQuantity == null) throw new MaintenanceInvalidFieldException("Stock quantity must not be null.");
+        if (minimumThreshold == null) throw new MaintenanceInvalidFieldException("Minimum threshold must not be null.");
+        if (component == null) throw new MaintenanceInvalidFieldException("Component must not be null");
+        if (stockQuantity < 0) throw new MaintenanceInvalidFieldException("Stock quantity must be non-negative.");
+        if (minimumThreshold < 0) throw new MaintenanceInvalidFieldException("Minimum threshold must be non-negative.");
         this.partNumber = partNumber;
         this.name = name;
         this.description = description;
@@ -34,4 +32,17 @@ public class MaintenancePart {
     public Integer getMinimumThreshold() { return minimumThreshold; }
     public MaintenanceComponent getComponent() { return component; }
 
+    public void updateDetails(String description, Integer stockQuantity, Integer minimumThreshold) {
+        if (stockQuantity != null) {
+            if (stockQuantity < 0) throw new MaintenanceInvalidFieldException("Stock quantity must be non-negative.");
+            this.stockQuantity = stockQuantity;
+        }
+        if (minimumThreshold != null) {
+            if (minimumThreshold < 0) throw new MaintenanceInvalidFieldException("Minimum threshold must be non-negative.");
+            this.minimumThreshold = minimumThreshold;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+    }
 }

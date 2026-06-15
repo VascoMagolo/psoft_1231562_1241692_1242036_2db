@@ -27,31 +27,53 @@ class CoordinatesTest {
 
     @Test
     void ensureNullLatitudeThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(null, -9.13));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(null, -9.13));
     }
 
     @Test
     void ensureNullLongitudeThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(38.77, null));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(38.77, null));
     }
 
     @Test
     void ensureLatitudeBelowMinThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(-91.0, 0.0));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(-91.0, 0.0));
     }
 
     @Test
     void ensureLatitudeAboveMaxThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(91.0, 0.0));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(91.0, 0.0));
     }
 
     @Test
     void ensureLongitudeBelowMinThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(0.0, -181.0));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(0.0, -181.0));
     }
 
     @Test
     void ensureLongitudeAboveMaxThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new Coordinates(0.0, 181.0));
+        assertThrows(InvalidCoordinatesException.class, () -> new Coordinates(0.0, 181.0));
+    }
+
+    @Test
+    void ensureEqualCoordinatesAreEqual() {
+        assertEquals(new Coordinates(38.77, -9.13), new Coordinates(38.77, -9.13));
+    }
+
+    @Test
+    void ensureDifferentCoordinatesAreNotEqual() {
+        assertNotEquals(new Coordinates(38.77, -9.13), new Coordinates(51.47, -0.46));
+    }
+
+    @Test
+    void ensureHashCodeIsConsistentWithEquals() {
+        assertEquals(new Coordinates(38.77, -9.13).hashCode(), new Coordinates(38.77, -9.13).hashCode());
+    }
+
+    @Test
+    void ensureToStringContainsValues() {
+        String str = new Coordinates(38.77, -9.13).toString();
+        assertTrue(str.contains("38.77"));
+        assertTrue(str.contains("-9.13"));
     }
 }

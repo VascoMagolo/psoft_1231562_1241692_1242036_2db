@@ -3,8 +3,12 @@ package aisafe.airports.infrastructure;
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.airports.domain.AirportStatus;
+import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.domain.RouteStatus;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.domain.ConcurrencyException;
+import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -78,7 +85,7 @@ class AirportControllerTest {
                 "Europe/Lisbon", null, null, "OPERATIONAL",
                 new AirportResponse.CoordinatesRecord(38.77, -9.13),
                 List.of(new AirportResponse.RunwayRecord("03/21", 3000, "030/210")),
-                List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), 0L);
     }
 
     @Test
@@ -127,12 +134,135 @@ class AirportControllerTest {
     void ensureUpdateAirportStatusReturns200() throws Exception {
         UpdateAirportStatusRequest request = new UpdateAirportStatusRequest(AirportStatus.CLOSED);
 
-        when(updateAirportStatus.execute(anyString(), any())).thenReturn(sampleAirportResponse);
+        when(updateAirportStatus.execute(anyString(), any(), anyLong())).thenReturn(sampleAirportResponse);
 
         mockMvc.perform(patch("/api/airports/LIS/status")
+                        .header(HttpHeaders.IF_MATCH, "\"0\"")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.iataCode").value("LIS"));
+    }
+
+    @Test
+    void ensureUpdateAirportStatusReturns400WhenIfMatchMissing() throws Exception {
+        UpdateAirportStatusRequest request = new UpdateAirportStatusRequest(AirportStatus.CLOSED);
+
+        mockMvc.perform(patch("/api/airports/LIS/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureUpdateAirportStatusReturns412OnVersionMismatch() throws Exception {
+        UpdateAirportStatusRequest request = new UpdateAirportStatusRequest(AirportStatus.CLOSED);
+
+        when(updateAirportStatus.execute(anyString(), any(), anyLong()))
+                .thenThrow(new ConcurrencyException("Airport version mismatch. Please fetch the latest version and retry."));
+
+        mockMvc.perform(patch("/api/airports/LIS/status")
+                        .header(HttpHeaders.IF_MATCH, "\"0\"")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isPreconditionFailed());
+    }
+
+    @Test
+    void ensureUpdateAirportDetailsReturns200() throws Exception {
+        UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
+                "06:00-23:00", null, null, null, null, null);
+
+        when(updateAirportDetails.execute(anyString(), any(), anyLong())).thenReturn(sampleAirportResponse);
+
+        mockMvc.perform(patch("/api/airports/LIS/details")
+                        .header(HttpHeaders.IF_MATCH, "\"0\"")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.iataCode").value("LIS"));
+    }
+
+    @Test
+    void ensureUpdateAirportDetailsReturns400WhenIfMatchMissing() throws Exception {
+        UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
+                "06:00-23:00", null, null, null, null, null);
+
+        mockMvc.perform(patch("/api/airports/LIS/details")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureUpdateAirportDetailsReturns412OnVersionMismatch() throws Exception {
+        UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
+                "06:00-23:00", null, null, null, null, null);
+
+        when(updateAirportDetails.execute(anyString(), any(), anyLong()))
+                .thenThrow(new ConcurrencyException("Airport version mismatch. Please fetch the latest version and retry."));
+
+        mockMvc.perform(patch("/api/airports/LIS/details")
+                        .header(HttpHeaders.IF_MATCH, "\"0\"")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isPreconditionFailed());
+    }
+
+    @Test
+    void ensureAddCertificationReturns201() throws Exception {
+        AddCertificationRequest request = new AddCertificationRequest("A320");
+
+        when(addCertification.execute(anyString(), any())).thenReturn(new AircraftCertificationResponse("LIS", "A320"));
+
+        mockMvc.perform(post("/api/airports/LIS/certifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.airportIataCode").value("LIS"))
+                .andExpect(jsonPath("$.aircraftModelName").value("A320"));
+    }
+
+    @Test
+    void ensureSearchAirportsReturns200() throws Exception {
+        when(searchAirport.execute(any(), any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(sampleAirportResponse), 1));
+
+        mockMvc.perform(get("/api/airports/search")
+                        .param("name", "Lisbon"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetRoutesReturns200() throws Exception {
+        when(viewAirportRoutes.execute(anyString()))
+                .thenReturn(List.of(new RouteResponse("LIS", "OPO", 60, 500.0, 100, RouteStatus.ACTIVE, 0L)));
+
+        mockMvc.perform(get("/api/airports/LIS/routes"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetBusiestAirportsReturns200() throws Exception {
+        when(airportStatistics.execute())
+                .thenReturn(List.of(new AirportStatisticsResponse("LIS", "Lisbon Airport", "Lisbon", "Portugal", 5)));
+
+        mockMvc.perform(get("/api/airports/statistics/busiest"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetAirportsGroupedReturns200() throws Exception {
+        when(listAirportsByRegion.execute(any()))
+                .thenReturn(List.of(new AirportGroupResponse("Europe", List.of())));
+
+        mockMvc.perform(get("/api/airports/grouped"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureDeleteAirportReturns204() throws Exception {
+        mockMvc.perform(delete("/api/airports/LIS"))
+                .andExpect(status().isNoContent());
     }
 }

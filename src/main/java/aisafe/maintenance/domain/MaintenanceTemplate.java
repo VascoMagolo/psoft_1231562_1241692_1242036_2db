@@ -1,6 +1,5 @@
 package aisafe.maintenance.domain;
 
-import org.springframework.util.Assert;
 import java.util.List;
 
 public class MaintenanceTemplate {
@@ -13,13 +12,13 @@ public class MaintenanceTemplate {
 
     public MaintenanceTemplate(String name, MaintenanceType templateType, List<String> applicableModelNames,
                                List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
-        Assert.notNull(name, "Name cannot be null");
-        Assert.notNull(templateType, "Template cannot be null");
-        Assert.notNull(applicableModelNames, "Template must have applicable models");
-        Assert.notNull(checklist, "Template must have a checklist");
-        Assert.notNull(intervalFlightHours, "Template must have an interval in flight hours");
-        Assert.notNull(intervalDays, "Template must have an interval in days");
-        Assert.hasText(name, "Name cannot be empty");
+        if (name == null) throw new MaintenanceInvalidFieldException("Name cannot be null");
+        if (name.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Name cannot be empty");
+        if (templateType == null) throw new MaintenanceInvalidFieldException("Template cannot be null");
+        if (applicableModelNames == null) throw new MaintenanceInvalidFieldException("Template must have applicable models");
+        if (checklist == null) throw new MaintenanceInvalidFieldException("Template must have a checklist");
+        if (intervalFlightHours == null) throw new MaintenanceInvalidFieldException("Template must have an interval in flight hours");
+        if (intervalDays == null) throw new MaintenanceInvalidFieldException("Template must have an interval in days");
         this.name = name;
         this.templateType = templateType;
         this.applicableModelNames = applicableModelNames;
@@ -35,4 +34,15 @@ public class MaintenanceTemplate {
     public Integer getIntervalFlightHours() { return intervalFlightHours; }
     public Integer getIntervalDays() { return intervalDays; }
 
+    public void updateDetails(List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
+        if (checklist != null && !checklist.isEmpty()) {
+            this.checklist = checklist;
+        }
+        if (intervalFlightHours != null) {
+            this.intervalFlightHours = intervalFlightHours;
+        }
+        if (intervalDays != null) {
+            this.intervalDays = intervalDays;
+        }
+    }
 }

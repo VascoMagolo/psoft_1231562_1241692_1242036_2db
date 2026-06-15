@@ -1,0 +1,49 @@
+@startuml
+autonumber
+actor "Maintenance Technician" as Tech
+participant "MaintenanceController" as Ctrl
+participant "UpdateMaintenancePartUseCase" as UC
+participant "MaintenancePartRepository" as Repo
+participant "MaintenancePart" as Part
+database "Database" as DB
+
+Tech -> Ctrl : PATCH /api/maintenance/parts/{partNumber}\n(UpdateMaintenancePartRequest)
+activate Ctrl
+
+Ctrl -> UC : execute(partNumber, request)
+activate UC
+
+UC -> Repo : findByPartNumber(partNumber)
+activate Repo
+Repo -> DB : SELECT FROM maintenance_part WHERE part_number = ?
+activate DB
+DB --> Repo : part record
+deactivate DB
+Repo --> UC : Optional<MaintenancePart>
+deactivate Repo
+
+alt part not found
+    UC --> Ctrl : throws MaintenancePartNotFoundException
+    Ctrl --> Tech : 404 Not Found
+else part found
+    UC -> Part : updateDetails(request.description(), request.stockQuantity(), request.minimumThreshold())
+    activate Part
+    Part --> UC
+    deactivate Part
+
+    UC -> Repo : save(part)
+    activate Repo
+    Repo -> DB : UPDATE maintenance_part
+    activate DB
+    DB --> Repo : success
+    deactivate DB
+    Repo --> UC
+    deactivate Repo
+
+    UC --> Ctrl : MaintenancePartResponse
+    deactivate UC
+
+    Ctrl --> Tech : 200 OK (MaintenancePartResponse)
+end
+deactivate Ctrl
+@enduml
