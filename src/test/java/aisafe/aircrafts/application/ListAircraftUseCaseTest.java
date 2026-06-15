@@ -53,4 +53,16 @@ class ListAircraftUseCaseTest {
         assertEquals(5000.0, response.range());
         assertTrue(response.features().isEmpty());
     }
+
+    @Test
+    void ensureListReturnsEmptyPageWhenNoAircraftExist() {
+        PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(), 0L);
+        when(aircraftRepository.findAll(0, 10)).thenReturn(domainResult);
+
+        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(0, 10);
+
+        assertNotNull(result);
+        assertTrue(result.data().isEmpty());
+        assertEquals(0L, result.totalElements());
+    }
 }

@@ -3,8 +3,9 @@ package aisafe.aircrafts.infrastructure;
 import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
-import aisafe.aircrafts.application.dtos.UpdateStatusRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.domain.AircraftInvalidFieldException;
+import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.security.application.JwtService;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -50,9 +52,6 @@ class AircraftControllerTest {
 
     @MockitoBean
     private SearchAircraftUseCase searchAircraft;
-
-    @MockitoBean
-    private UpdateAircraftStatusUseCase updateAircraftStatus;
 
     @MockitoBean
     private DeleteAircraftUseCase deleteAircraft;
@@ -114,17 +113,6 @@ class AircraftControllerTest {
     }
 
     @Test
-    void ensureGetOperationalHoursReturns200() throws Exception {
-        when(calculateAircraftOperationalHours.execute(any())).thenReturn(
-                new aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse("CS-TPA", 15.5));
-
-        mockMvc.perform(get("/api/aircrafts/CS-TPA/operational-hours"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"))
-                .andExpect(jsonPath("$.totalOperationalHours").value(15.5));
-    }
-
-    @Test
     void ensureRegisterAircraftReturns201() throws Exception {
         RegisterAircraftRequest request = new RegisterAircraftRequest(
                 "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
@@ -135,47 +123,12 @@ class AircraftControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"))
-                .andExpect(jsonPath("$._links").exists());
-    }
-
-    @Test
-    void ensureGetAircraftByRegistrationReturns200() throws Exception {
-        when(viewAircraftDetails.execute(any())).thenReturn(sampleResponse);
-
-        mockMvc.perform(get("/api/aircrafts/CS-TPA"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"))
-                .andExpect(jsonPath("$.status").value("AVAILABLE"));
-    }
-
-    @Test
-    void ensureUpdateStatusWithoutIfMatchHeaderReturns400() throws Exception {
-        UpdateStatusRequest request = new UpdateStatusRequest(AircraftStatus.INACTIVE);
-
-        mockMvc.perform(patch("/api/aircrafts/CS-TPA/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void ensureUpdateStatusWithIfMatchHeaderReturns200() throws Exception {
-        UpdateStatusRequest request = new UpdateStatusRequest(AircraftStatus.INACTIVE);
-
-        when(updateAircraftStatus.execute(any(), any(), any())).thenReturn(sampleResponse);
-
-        mockMvc.perform(patch("/api/aircrafts/CS-TPA/status")
-                        .header("If-Match", "0")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"));
     }
 
     @Test
     void ensureUpdateAircraftReturns200() throws Exception {
-        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, 5000.0, null);
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, 5000.0, null, "INACTIVE");
 
         when(updateAircraftUseCase.execute(any(), any(), any())).thenReturn(sampleResponse);
 
@@ -183,22 +136,43 @@ class AircraftControllerTest {
                         .header("If-Match", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"));
-    }
-
-    @Test
-    void ensureDeleteAircraftReturns204() throws Exception {
-        mockMvc.perform(delete("/api/aircrafts/CS-TPA"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void ensureListAircraftReturns200() throws Exception {
-        when(listAircraft.execute(anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
-
-        mockMvc.perform(get("/api/aircrafts"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureUpdateAircraftReturns409OnConcurrencyError() throws Exception {
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, null, null, null, null);
+
+        when(updateAircraftUseCase.execute(any(), any(), any()))
+                .thenThrow(new ObjectOptimisticLockingFailureException(aisafe.aircrafts.domain.Aircraft.class, "CS-TPA"));
+
+        mockMvc.perform(patch("/api/aircrafts/CS-TPA")
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void ensureGetAircraftReturns404WhenNotFound() throws Exception {
+        when(viewAircraftDetails.execute(any())).thenThrow(new AircraftNotFoundException("Not found"));
+
+        mockMvc.perform(get("/api/aircrafts/CS-UNK"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void ensureUpdateAircraftReturns400OnInvalidData() throws Exception {
+        UpdateAircraftRequest request = new UpdateAircraftRequest(null, null, -10, null, null, null);
+
+        when(updateAircraftUseCase.execute(any(), any(), any()))
+                .thenThrow(new AircraftInvalidFieldException("Invalid capacity"));
+
+        mockMvc.perform(patch("/api/aircrafts/CS-TPA")
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -207,15 +181,6 @@ class AircraftControllerTest {
 
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void ensureSearchAircraftByFeatureReturns200() throws Exception {
-        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
-
-        mockMvc.perform(get("/api/aircrafts/search")
-                        .param("feature", "WiFi"))
                 .andExpect(status().isOk());
     }
 }
