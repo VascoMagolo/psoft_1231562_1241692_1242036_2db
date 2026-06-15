@@ -1,5 +1,6 @@
 package aisafe.airports.infrastructure.persistence.jpa;
 
+import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.AirportStatisticsData;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
@@ -9,8 +10,6 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
-import aisafe.airports.domain.Airport;
 
 import java.util.List;
 
@@ -77,32 +76,38 @@ class AirportJpaRepositoryTest {
     }
 
     @Test
-    void ensureFindAllOrderedByRegionReturnsSortedList() {
+    void ensureFindAllGroupingByRegionReturnsSortedRows() {
         em.persist(buildAirport("LIS", "Portugal", "Europe"));
         em.persist(buildAirport("SIN", "Singapore", "Asia"));
         em.persist(buildAirport("CDG", "France", null));
         em.flush();
 
-        List<Airport> result = repository.findAllOrderedByRegion();
+        List<AirportGroupingData> result = repository.findAllGroupingByRegion();
 
         assertEquals(3, result.size());
-        assertEquals("SIN", result.get(0).getIataCode().getCode());
-        assertEquals("LIS", result.get(1).getIataCode().getCode());
-        assertEquals("CDG", result.get(2).getIataCode().getCode());
+        assertEquals("SIN", result.get(0).iataCode().getCode());
+        assertEquals("Asia", result.get(0).region());
+        assertEquals("LIS", result.get(1).iataCode().getCode());
+        assertEquals("Europe", result.get(1).region());
+        assertEquals("CDG", result.get(2).iataCode().getCode());
+        assertNull(result.get(2).region());
     }
 
     @Test
-    void ensureFindAllOrderedByCountryReturnsSortedList() {
+    void ensureFindAllGroupingByCountryReturnsSortedRows() {
         em.persist(buildAirport("LIS", "Portugal", "Europe"));
         em.persist(buildAirport("CDG", "France", "Europe"));
         em.persist(buildAirport("JFK", "USA", "North America"));
         em.flush();
 
-        List<Airport> result = repository.findAllOrderedByCountry();
+        List<AirportGroupingData> result = repository.findAllGroupingByCountry();
 
         assertEquals(3, result.size());
-        assertEquals("CDG", result.get(0).getIataCode().getCode());
-        assertEquals("LIS", result.get(1).getIataCode().getCode());
-        assertEquals("JFK", result.get(2).getIataCode().getCode());
+        assertEquals("CDG", result.get(0).iataCode().getCode());
+        assertEquals("France", result.get(0).country());
+        assertEquals("LIS", result.get(1).iataCode().getCode());
+        assertEquals("Portugal", result.get(1).country());
+        assertEquals("JFK", result.get(2).iataCode().getCode());
+        assertEquals("USA", result.get(2).country());
     }
 }

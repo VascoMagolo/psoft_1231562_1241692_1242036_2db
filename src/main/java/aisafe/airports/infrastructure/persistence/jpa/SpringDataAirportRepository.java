@@ -33,11 +33,20 @@ public interface SpringDataAirportRepository extends JpaRepository<AirportJpaEnt
             """, nativeQuery = true)
     List<AirportStatisticsRow> findStatistics();
 
-    @Query("SELECT a FROM AirportJpaEntity a ORDER BY COALESCE(a.region, 'Unknown') ASC")
-    List<AirportJpaEntity> findAllOrderedByRegion();
+    @Query("SELECT a.iataCode AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
+           "FROM AirportJpaEntity a ORDER BY COALESCE(a.region, 'Unknown') ASC")
+    List<AirportGroupingProjection> findAllGroupingByRegion();
 
-    @Query("SELECT a FROM AirportJpaEntity a ORDER BY a.country ASC")
-    List<AirportJpaEntity> findAllOrderedByCountry();
+    @Query("SELECT a.iataCode AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
+           "FROM AirportJpaEntity a ORDER BY a.country ASC")
+    List<AirportGroupingProjection> findAllGroupingByCountry();
+
+    interface AirportGroupingProjection {
+        String getIataCode();
+        String getName();
+        String getRegion();
+        String getCountry();
+    }
 
     interface AirportStatisticsRow {
         String getIataCode();

@@ -14,6 +14,6 @@ public interface AirportRepository extends BaseRepository<Airport> {
     boolean existsByIataCode(IataCode code);
     PaginatedResult<Airport> searchAirports(String name, String city, String country, int pageNumber, int pageSize);
     List<AirportStatisticsData> findStatistics();
-    List<Airport> findAllOrderedByRegion();
-    List<Airport> findAllOrderedByCountry();
+    List<AirportGroupingData> findAllGroupingByRegion();
+    List<AirportGroupingData> findAllGroupingByCountry();
 }
