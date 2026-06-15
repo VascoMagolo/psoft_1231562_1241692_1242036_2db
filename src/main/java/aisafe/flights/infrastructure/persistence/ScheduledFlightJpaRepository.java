@@ -50,7 +50,8 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
         );
         entity.setId(flight.getId());
 
-        springRepo.save(entity);
+        ScheduledFlightJpaEntity saved = springRepo.save(entity);
+        flight.setId(saved.getId());
     }
 
     @Override
@@ -73,6 +74,13 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
+    public List<ScheduledFlight> findByAircraftRegistration(String registration) {
+        return springRepo.findByAircraftRegistration(registration).stream()
+                .map(ScheduledFlightMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public long count() {
         return springRepo.count();
     }
@@ -85,7 +93,17 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
+    public boolean hasOverlappingFlights(String registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime) {
+        return springRepo.hasOverlappingFlights(registration, departureDateTime, arrivalDateTime);
+    }
+
+    @Override
     public boolean existsByAircraftRegistration(String registration) {
         return springRepo.existsByAircraftRegistrationNumberNumber(registration);
+    }
+
+    @Override
+    public long countByRoute(aisafe.airports.domain.IataCode origin, aisafe.airports.domain.IataCode destination) {
+        return springRepo.countByRoute(origin.getCode(), destination.getCode());
     }
 }

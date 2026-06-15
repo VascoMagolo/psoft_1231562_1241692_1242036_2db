@@ -42,5 +42,23 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "AND f.departureDateTime <= :endDate")
     List<ScheduledFlightJpaEntity> findFlightsForUtilization(@Param("registration") String registration, @Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
+    @Query("SELECT f FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.aircraft.registrationNumber.number = :registration " +
+           "ORDER BY f.departureDateTime ASC")
+    List<ScheduledFlightJpaEntity> findByAircraftRegistration(@Param("registration") String registration);
+
+    @Query("SELECT COUNT(f) > 0 FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.aircraft.registrationNumber.number = :registration " +
+           "AND f.departureDateTime < :arrivalDateTime " +
+           "AND f.arrivalDateTime > :departureDateTime")
+    boolean hasOverlappingFlights(@Param("registration") String registration,
+                                  @Param("departureDateTime") OffsetDateTime departureDateTime,
+                                  @Param("arrivalDateTime") OffsetDateTime arrivalDateTime);
+
+    @Query("SELECT COUNT(f) FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.route.originCode = :originCode " +
+           "AND f.route.destinationCode = :destinationCode")
+    long countByRoute(@Param("originCode") String originCode, @Param("destinationCode") String destinationCode);
+
     boolean existsByAircraftRegistrationNumberNumber(String registration);
 }
