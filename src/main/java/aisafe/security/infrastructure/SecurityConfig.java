@@ -80,6 +80,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/records").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/maintenance/parts").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/templates/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/api/maintenance/parts/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/maintenance/records/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/maintenance/templates/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/maintenance/parts/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")

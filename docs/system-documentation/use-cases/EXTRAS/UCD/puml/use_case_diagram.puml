@@ -9,10 +9,13 @@ rectangle "Extra Use Cases" {
   usecase "Update aircraft details" as UC_UpdateAircraft
   usecase "Delete aircraft" as UC_DeleteAircraft
   usecase "Delete aircraft model" as UC_DeleteAircraftModel
+  usecase "Update maintenance components" as UC_UpdateMaintenance
 }
 
 BO --> UC_UpdateAircraft
 BO --> UC_DeleteAircraft
 BO --> UC_DeleteAircraftModel
+actor "Maintenance Technician" as Tech
+Tech --> UC_UpdateMaintenance
 
 @enduml

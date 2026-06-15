@@ -33,63 +33,63 @@ class MaintenanceRecordTest {
 
     @Test
     void ensureBlankDescriptionThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "  ", LocalDateTime.now(), 4,
                         List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullStartDateThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", null, 4,
                         List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullExpectedDurationThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), null,
                         List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureZeroExpectedDurationThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 0,
                         List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullPartsThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
                         null, null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureEmptyPartsThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
                         List.of(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullAircraftThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
                         List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, null));
     }
 
     @Test
     void ensureNullTemplateThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
                         List.of(buildPart()), null, null, MaintenanceStatus.PLANNED, "CS-TPA"));
     }
 
     @Test
     void ensureNullStatusThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
                         List.of(buildPart()), null, buildTemplate(), null, "CS-TPA"));
     }

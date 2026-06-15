@@ -14,43 +14,43 @@ class MaintenancePartTest {
 
     @Test
     void ensureBlankNameThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "  ", null, 10, 2, MaintenanceComponent.ENGINE));
     }
 
     @Test
     void ensureNullPartNumberThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart(null, "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE));
     }
 
     @Test
     void ensureNullStockQuantityThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "Engine Filter", null, null, 2, MaintenanceComponent.ENGINE));
     }
 
     @Test
     void ensureNullMinimumThresholdThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "Engine Filter", null, 10, null, MaintenanceComponent.ENGINE));
     }
 
     @Test
     void ensureNullComponentThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "Engine Filter", null, 10, 2, null));
     }
 
     @Test
     void ensureNegativeStockQuantityThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "Engine Filter", null, -1, 2, MaintenanceComponent.ENGINE));
     }
 
     @Test
     void ensureNegativeMinimumThresholdThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart("P001", "Engine Filter", null, 10, -1, MaintenanceComponent.ENGINE));
     }
 
