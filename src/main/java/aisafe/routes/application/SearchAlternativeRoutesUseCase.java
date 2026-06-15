@@ -2,6 +2,7 @@ package aisafe.routes.application;
 
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.shared.application.UseCase;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,10 @@ public class SearchAlternativeRoutesUseCase {
         if (normalizedOrigin.equals(normalizedDestination)) {
             throw new IllegalArgumentException("Origin and destination cannot be the same.");
         }
-        if (!airportRepository.existsByIataCodeCode(normalizedOrigin)) {
+        if (!airportRepository.existsByIataCode(new IataCode(normalizedOrigin))) {
             throw new AirportNotFoundException(normalizedOrigin);
         }
-        if (!airportRepository.existsByIataCodeCode(normalizedDestination)) {
+        if (!airportRepository.existsByIataCode(new IataCode(normalizedDestination))) {
             throw new AirportNotFoundException(normalizedDestination);
         }
 

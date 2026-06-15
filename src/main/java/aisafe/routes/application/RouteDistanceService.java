@@ -16,9 +16,9 @@ public class RouteDistanceService {
     private final AirportRepository airportRepository;
 
     public double calculateDistanceKm(Route route) {
-        Airport origin = airportRepository.findByIataCodeCode(route.getOrigin().getCode())
+        Airport origin = airportRepository.findByIataCode(route.getOrigin())
                 .orElseThrow(() -> new AirportNotFoundException(route.getOrigin().getCode()));
-        Airport destination = airportRepository.findByIataCodeCode(route.getDestination().getCode())
+        Airport destination = airportRepository.findByIataCode(route.getDestination())
                 .orElseThrow(() -> new AirportNotFoundException(route.getDestination().getCode()));
 
         return calculateDistanceKm(origin.getCoordinates(), destination.getCoordinates());
