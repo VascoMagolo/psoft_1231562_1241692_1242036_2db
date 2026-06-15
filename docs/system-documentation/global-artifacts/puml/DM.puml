@@ -3,7 +3,7 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 hide circle
 
-package "User Aggregate" <<Aggregate>> {
+package "Security Aggregate" <<Aggregate>> {
   enum Role <<Enum>> {
     ADMIN
     BACKOFFICE_OPERATOR
@@ -36,7 +36,10 @@ package "Aircraft Aggregate" <<Aggregate>> {
     AIRBUS
     EMBRAER
     BOMBARDIER
-    OTHER
+    ATR
+    COMAC
+    SUKHOI
+    MITSUBISHI
   }
   class Aircraft <<Entity>> <<Root>> {
     - manufacturingDate : Date
@@ -47,7 +50,7 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - model : AircraftModel
   }
 
-  class AircraftModel <<Entity>> <<Root>> {
+  class AircraftModel <<Entity>> {
     - modelName : String
     - fuelCapacity : Double
     - maxRange : Double
@@ -144,6 +147,14 @@ package "Route Aggregate" {
     SUSPENDED
   }
 
+  enum FlightStatus <<Enum>> {
+    SCHEDULED
+    DELAYED
+    IN_FLIGHT
+    COMPLETED
+    CANCELED
+  }
+
   class Route <<Entity>> <<Root>> {
     - estimatedFlightTime : Integer
     - minimumRange : Double
@@ -159,21 +170,6 @@ package "Route Aggregate" {
     - changedBy : String
   }
 
-  Route *-- IataCode : origin
-  Route *-- IataCode : destination
-  Route "1" *-- "*" RouteHistory : history
-  Route --> RouteStatus : current status
-}
-
-package "Flight Aggregate" <<Aggregate>> {
-  enum FlightStatus <<Enum>> {
-    SCHEDULED
-    DELAYED
-    IN_FLIGHT
-    COMPLETED
-    CANCELED
-  }
-
   class ScheduledFlight <<Entity>> <<Root>> {
     - id : Long
     - departureDateTime : DateTime
@@ -181,31 +177,20 @@ package "Flight Aggregate" <<Aggregate>> {
     - status : FlightStatus
   }
 
+  Route *-- IataCode : origin
+  Route *-- IataCode : destination
+  Route "1" *-- "*" RouteHistory : history
+  Route --> RouteStatus : current status
   ScheduledFlight --> FlightStatus : current status
 }
 
 
-package "Maintenance Aggregate" <<Aggregate>> {
-  enum MaintenanceStatus <<Enum>> {
-     PLANNED
-     IN_PROGRESS
-     COMPLETED
-     CANCELED
-  }
-
+package "Maintenance Template Aggregate" <<Aggregate>> {
   enum MaintenanceType <<Enum>> {
     INSPECTION
     SCHEDULED_MAINTENANCE
     OVERHAUL
     MODIFICATION
-  }
-
-  enum MaintenanceComponent <<Enum>> {
-    ENGINE
-    AIRFRAME
-    AVIONICS
-    INTERIOR
-    EXTERIOR
   }
 
   class MaintenanceTemplate <<Entity>> <<Root>> {
@@ -216,7 +201,16 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - intervalFlightHours : Integer
     - intervalDays : Integer
   }
+  MaintenanceTemplate --> MaintenanceType : applies type
+}
 
+package "Maintenance Record Aggregate" <<Aggregate>> {
+  enum MaintenanceStatus <<Enum>> {
+     PLANNED
+     IN_PROGRESS
+     COMPLETED
+     CANCELED
+  }
   class MaintenanceRecord <<Entity>> <<Root>> {
     - recordId : UUID
     - description : String
@@ -227,7 +221,17 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - aircraftRegistration : String
     - version : Long
   }
+  MaintenanceRecord --> MaintenanceStatus : current status
+}
 
+package "Maintenance Part Aggregate" <<Aggregate>> {
+  enum MaintenanceComponent <<Enum>> {
+    ENGINE
+    AIRFRAME
+    AVIONICS
+    INTERIOR
+    EXTERIOR
+  }
   class MaintenancePart <<Entity>> <<Root>> {
     - partNumber : String
     - name : String
@@ -236,9 +240,6 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - minimumThreshold : Integer
     - component : MaintenanceComponent
   }
-
-  MaintenanceTemplate --> MaintenanceType : applies type
-  MaintenanceRecord --> MaintenanceStatus : current status
   MaintenancePart --> MaintenanceComponent : targets
 }
 

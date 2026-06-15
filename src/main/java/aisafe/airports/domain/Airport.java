@@ -1,6 +1,6 @@
 package aisafe.airports.domain;
 
-import org.springframework.util.Assert;
+import aisafe.shared.domain.DomainException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,11 +29,11 @@ public class Airport {
 
     public Airport(String iataCode, String name, String city, String country, String region,
                    String timezone, Double latitude, Double longitude, List<Runway> runways) {
-        Assert.hasText(name, "Airport name cannot be blank");
-        Assert.hasText(city, "City cannot be blank");
-        Assert.hasText(country, "Country cannot be blank");
-        Assert.hasText(timezone, "Timezone cannot be blank");
-        Assert.notEmpty(runways, "Airport must have at least one runway");
+        if (name == null || name.isBlank()) throw new DomainException("Airport name cannot be blank");
+        if (city == null || city.isBlank()) throw new DomainException("City cannot be blank");
+        if (country == null || country.isBlank()) throw new DomainException("Country cannot be blank");
+        if (timezone == null || timezone.isBlank()) throw new DomainException("Timezone cannot be blank");
+        if (runways == null || runways.isEmpty()) throw new DomainException("Airport must have at least one runway");
 
         this.iataCode = new IataCode(iataCode);
         this.name = name.trim();

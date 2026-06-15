@@ -50,4 +50,14 @@ class ListAircraftModelsUseCaseTest {
         assertEquals("a320.jpg", response.imagePath());
         assertEquals(180, response.maximumSeatingCapacity());
     }
+
+    @Test
+    void ensureListReturnsEmptyWhenNoModelsExist() {
+        when(aircraftModelRepository.findAll(0, 10)).thenReturn(List.of());
+
+        List<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 }
