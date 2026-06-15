@@ -2,6 +2,7 @@ package aisafe.shared.infrastructure;
 
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
+import aisafe.aircrafts.domain.InvalidRegistrationNumberException;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
@@ -67,7 +68,8 @@ public class GlobalExceptionHandler {
             DomainException.class,
             IllegalArgumentException.class,
             InvalidIataCodeException.class,
-            InvalidContactException.class
+            InvalidContactException.class,
+            InvalidRegistrationNumberException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
