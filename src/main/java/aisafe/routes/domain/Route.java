@@ -18,31 +18,31 @@ public class Route {
                  Double minimumRange, Integer minimumCapacity) {
 
         if (originCode == null || originCode.isBlank()) {
-            throw new DomainException("Origin cannot be blank");
+            throw new InvalidRouteException("Origin cannot be blank");
         }
         if (destinationCode == null || destinationCode.isBlank()) {
-            throw new DomainException("Destination cannot be blank");
+            throw new InvalidRouteException("Destination cannot be blank");
         }
         if (estimatedFlightTime == null) {
-            throw new DomainException("estimatedFlightTime must not be null");
+            throw new InvalidRouteException("estimatedFlightTime must not be null");
         }
         if (estimatedFlightTime <= 0) {
-            throw new DomainException("Invalid flight time");
+            throw new InvalidRouteException("Invalid flight time");
         }
         if (minimumRange == null) {
-            throw new DomainException("minimumRange must not be null");
+            throw new InvalidRouteException("minimumRange must not be null");
         }
         if (minimumRange <= 0) {
-            throw new DomainException("Invalid minimum range");
+            throw new InvalidRouteException("Invalid minimum range");
         }
         if (minimumCapacity == null) {
-            throw new DomainException("minimumCapacity must not be null");
+            throw new InvalidRouteException("minimumCapacity must not be null");
         }
         if (minimumCapacity <= 0) {
-            throw new DomainException("Invalid minimum capacity");
+            throw new InvalidRouteException("Invalid minimum capacity");
         }
         if (originCode.trim().equalsIgnoreCase(destinationCode.trim())) {
-            throw new DomainException("Origin and destination cannot be the same");
+            throw new InvalidRouteException("Origin and destination cannot be the same");
         }
 
         this.origin = new IataCode(originCode);
@@ -65,19 +65,19 @@ public class Route {
     public void updateRoute(Integer flightTime, Double range, Integer capacity) {
         if (flightTime != null) {
             if (flightTime <= 0) {
-                throw new DomainException("Invalid flight time");
+                throw new InvalidRouteException("Invalid flight time");
             }
             this.estimatedFlightTime = flightTime;
         }
         if (range != null) {
             if (range <= 0) {
-                throw new DomainException("Invalid minimum range");
+                throw new InvalidRouteException("Invalid minimum range");
             }
             this.minimumRange = range;
         }
         if (capacity != null) {
             if (capacity <= 0) {
-                throw new DomainException("Invalid minimum capacity");
+                throw new InvalidRouteException("Invalid minimum capacity");
             }
             this.minimumCapacity = capacity;
         }

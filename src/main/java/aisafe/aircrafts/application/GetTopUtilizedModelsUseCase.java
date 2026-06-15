@@ -4,7 +4,6 @@ import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
 import aisafe.flights.domain.ModelUtilizationData;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
-import aisafe.shared.domain.DomainException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ public class GetTopUtilizedModelsUseCase {
         } else if ("ASSIGNMENTS".equalsIgnoreCase(criteria)) {
             data = repository.findTopModelsByAssignments(5);
         } else {
-            throw new DomainException("Invalid criteria. Must be 'HOURS' or 'ASSIGNMENTS'.");
+            throw new InvalidUtilizationCriteriaException("Invalid criteria. Must be 'HOURS' or 'ASSIGNMENTS'.");
         }
 
         return data.stream()

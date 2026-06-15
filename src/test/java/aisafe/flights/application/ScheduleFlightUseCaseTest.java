@@ -40,7 +40,7 @@ class ScheduleFlightUseCaseTest {
     private ScheduleFlightUseCase useCase;
 
     @Test
-    void executeSuccessfullySchedulesFlight() {
+    void ensureFlightIsScheduledSuccessfully() {
         OffsetDateTime departure = OffsetDateTime.now().plusDays(1);
         OffsetDateTime arrival = departure.plusHours(2);
         ScheduleFlightRequest request = new ScheduleFlightRequest("CS-TPA", "OPO", "LIS", departure, arrival);
@@ -56,7 +56,7 @@ class ScheduleFlightUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
         when(routeDistanceService.calculateDistanceKm(route)).thenReturn(300.0);
-        when(scheduledFlightRepository.hasOverlappingFlights(any(), any(), any())).thenReturn(false);
+        when(scheduledFlightRepository.hasOverlappingFlights(any(RegistrationNumber.class), any(), any())).thenReturn(false);
 
         FlightResponse result = useCase.execute(request);
 

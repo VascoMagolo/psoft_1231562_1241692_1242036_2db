@@ -1,6 +1,7 @@
 package aisafe.flights.domain;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.shared.domain.BaseRepository;
 
 import java.time.OffsetDateTime;
@@ -9,11 +10,12 @@ import java.util.Optional;
 
 public interface ScheduledFlightRepository extends BaseRepository<ScheduledFlight> {
     Optional<ScheduledFlight> findById(Long id);
-    List<ScheduledFlight> findByAircraftRegistration(String registration);
-    List<ScheduledFlight> findFlightsForUtilization(String registration, OffsetDateTime start, OffsetDateTime end);
-    boolean hasOverlappingFlights(String registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime);
-    boolean existsByAircraftRegistration(String registration);
+    List<ScheduledFlight> findByAircraftRegistration(RegistrationNumber registration);
+    List<ScheduledFlight> findFlightsForUtilization(RegistrationNumber registration, OffsetDateTime start, OffsetDateTime end);
+    boolean hasOverlappingFlights(RegistrationNumber registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime);
+    boolean existsByAircraftRegistration(RegistrationNumber registration);
     long countByRoute(IataCode origin, IataCode destination);
     List<ModelUtilizationData> findTopModelsByFlightHours(int limit);
     List<ModelUtilizationData> findTopModelsByAssignments(int limit);
+    Double calculateTotalOperationalHoursByRegistration(RegistrationNumber registration);
 }

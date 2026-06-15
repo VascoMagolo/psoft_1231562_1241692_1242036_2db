@@ -1,6 +1,6 @@
 package aisafe.flights.domain;
 
-import aisafe.aircrafts.domain.Aircraft;
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.routes.domain.Route;
 import aisafe.shared.domain.DomainException;
 import java.time.OffsetDateTime;
@@ -15,33 +15,33 @@ public class ScheduledFlight {
     private OffsetDateTime arrivalDateTime;
     private FlightStatus status;
     private Route route;
-    private Aircraft aircraft;
+    private RegistrationNumber aircraftRegistrationNumber;
 
     public ScheduledFlight(OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime,
-                           FlightStatus status, Route route, Aircraft aircraft) {
+                           FlightStatus status, Route route, RegistrationNumber aircraftRegistrationNumber) {
         if (departureDateTime == null) {
-            throw new DomainException("Departure date/time must not be null.");
+            throw new InvalidFlightScheduleException("Departure date/time must not be null.");
         }
         if (arrivalDateTime == null) {
-            throw new DomainException("Arrival date/time must not be null.");
+            throw new InvalidFlightScheduleException("Arrival date/time must not be null.");
         }
         if (status == null) {
-            throw new DomainException("Flight status must not be null.");
+            throw new InvalidFlightScheduleException("Flight status must not be null.");
         }
         if (route == null) {
-            throw new DomainException("Route must not be null.");
+            throw new InvalidFlightScheduleException("Route must not be null.");
         }
-        if (aircraft == null) {
-            throw new DomainException("Aircraft must not be null.");
+        if (aircraftRegistrationNumber == null) {
+            throw new InvalidFlightScheduleException("Aircraft registration number must not be null.");
         }
         if (!departureDateTime.isBefore(arrivalDateTime)) {
-            throw new DomainException("Departure must be before arrival.");
+            throw new InvalidFlightScheduleException("Departure must be before arrival.");
         }
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.status = status;
         this.route = route;
-        this.aircraft = aircraft;
+        this.aircraftRegistrationNumber = aircraftRegistrationNumber;
     }
 
     public Long getId() { return id; }
@@ -51,7 +51,7 @@ public class ScheduledFlight {
     public OffsetDateTime getArrivalDateTime() { return arrivalDateTime; }
     public FlightStatus getStatus() { return status; }
     public Route getRoute() { return route; }
-    public Aircraft getAircraft() { return aircraft; }
+    public RegistrationNumber getAircraftRegistrationNumber() { return aircraftRegistrationNumber; }
 
     public Duration getDuration() {
         if (departureDateTime == null || arrivalDateTime == null) return Duration.ZERO;

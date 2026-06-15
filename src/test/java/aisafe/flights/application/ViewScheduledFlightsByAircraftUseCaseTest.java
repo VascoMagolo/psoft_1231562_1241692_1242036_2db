@@ -29,16 +29,14 @@ class ViewScheduledFlightsByAircraftUseCaseTest {
     private ViewScheduledFlightsByAircraftUseCase useCase;
 
     @Test
-    void executeReturnsFlights() {
+    void ensureReturnsFlights() {
         String aircraftId = "CS-TPA";
+        RegistrationNumber registrationNumber = new RegistrationNumber(aircraftId);
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
         
         ScheduledFlight flight = mock(ScheduledFlight.class);
-        // Need to mock dependencies of FlightResponse.from(flight)
-        // Or better, just mock what FlightResponse.from uses.
-        // But since I'm using mock(ScheduledFlight.class), I need to mock its getters.
         
-        when(scheduledFlightRepository.findByAircraftRegistration(aircraftId)).thenReturn(List.of(flight));
+        when(scheduledFlightRepository.findByAircraftRegistration(registrationNumber)).thenReturn(List.of(flight));
         
         // Mocking FlightResponse requirements
         when(flight.getAircraft()).thenReturn(mock(aisafe.aircrafts.domain.Aircraft.class));

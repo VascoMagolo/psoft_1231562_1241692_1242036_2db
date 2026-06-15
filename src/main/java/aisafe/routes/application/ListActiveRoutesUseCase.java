@@ -6,7 +6,7 @@ import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
-import aisafe.shared.domain.DomainException;
+import aisafe.shared.domain.InvalidListingCriteriaException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Comparator;
@@ -22,7 +22,7 @@ public class ListActiveRoutesUseCase {
 
     public List<ActiveRouteResponse> execute(String status, String sortBy) {
         if (status != null && !status.equalsIgnoreCase("active")) {
-            throw new DomainException("Only active route listing is supported.");
+            throw new InvalidListingCriteriaException("Only active route listing is supported.");
         }
         String normalizedSort = sortBy == null ? "distance" : sortBy.trim().toLowerCase();
         if (!normalizedSort.equals("distance") && !normalizedSort.equals("popularity")) {

@@ -17,7 +17,7 @@ public record FlightResponse(
     public static FlightResponse from(ScheduledFlight flight) {
         return new FlightResponse(
                 flight.getId(),
-                flight.getAircraft().getRegistrationNumber().getNumber(),
+                flight.getAircraftRegistrationNumber().getNumber(),
                 flight.getRoute().getOrigin().getCode(),
                 flight.getRoute().getDestination().getCode(),
                 flight.getDepartureDateTime(),

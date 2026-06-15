@@ -24,7 +24,7 @@ public class ViewScheduledFlightsByAircraftUseCase {
         if (!aircraftRepository.existsByRegistrationNumber(registrationNumber)) {
             throw new AircraftNotFoundException("Aircraft not found: " + normalizedAircraftId);
         }
-        return scheduledFlightRepository.findByAircraftRegistration(normalizedAircraftId).stream()
+        return scheduledFlightRepository.findByAircraftRegistration(registrationNumber).stream()
                 .map(FlightResponse::from)
                 .toList();
     }
