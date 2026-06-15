@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : getCompatibleRoutes(registrationNumber)
+activate Sys
+Sys --> Actor : returns list of compatible routes
+deactivate Sys
+@enduml

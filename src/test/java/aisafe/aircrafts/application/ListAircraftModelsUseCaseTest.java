@@ -40,6 +40,14 @@ class ListAircraftModelsUseCaseTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("A320", result.get(0).modelName());
+        
+        ListAircraftModelsUseCaseResponse response = result.get(0);
+        assertEquals("A320", response.modelName());
+        assertEquals(Manufacturer.AIRBUS, response.manufacturer());
+        assertEquals(26730.0, response.fuelCapacity());
+        assertEquals(6150.0, response.maxRange());
+        assertEquals(833.0, response.cruisingSpeed());
+        assertEquals("a320.jpg", response.imagePath());
+        assertEquals(180, response.maximumSeatingCapacity());
     }
 }

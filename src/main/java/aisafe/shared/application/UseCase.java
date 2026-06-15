@@ -1,6 +1,7 @@
 package aisafe.shared.application;
 
 import aisafe.shared.infrastructure.UseCaseLoggingAdvice;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -35,4 +36,6 @@ import java.lang.annotation.Target;
 @Validated
 @Transactional
 public @interface UseCase {
+    @AliasFor(annotation = Transactional.class, attribute = "readOnly")
+    boolean readOnly() default false;
 }

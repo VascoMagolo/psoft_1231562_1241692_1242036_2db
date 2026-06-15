@@ -4,7 +4,6 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 public class MaintenanceTemplate {
-    private Long id;
     private String name;
     private MaintenanceType templateType;
     private List<String> applicableModelNames;
@@ -29,7 +28,6 @@ public class MaintenanceTemplate {
         this.intervalDays = intervalDays;
     }
 
-    public Long getId() { return id; }
     public String getName() { return name; }
     public MaintenanceType getTemplateType() { return templateType; }
     public List<String> getApplicableModelNames() { return applicableModelNames; }
@@ -37,5 +35,4 @@ public class MaintenanceTemplate {
     public Integer getIntervalFlightHours() { return intervalFlightHours; }
     public Integer getIntervalDays() { return intervalDays; }
 
-    public void setId(Long id) { this.id = id; }
 }

@@ -4,6 +4,7 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.DuplicateResourceException;
 
 /**
  * Use case for registering a new aircraft in the system.
@@ -35,7 +36,7 @@ public class RegisterAircraftUseCase {
         RegistrationNumber regNum = new RegistrationNumber(request.registrationNumber());
 
         if (aircraftRepository.existsByRegistrationNumber(regNum)) {
-            throw new AircraftAlreadyExistsException("Registration number already exists");
+            throw new DuplicateResourceException("Registration number already exists");
         }
         if (!AircraftStatus.isValid(request.status())) {
             throw new AircraftInvalidFieldException("Invalid status value: " + request.status());
@@ -49,19 +50,12 @@ public class RegisterAircraftUseCase {
                 model,
                 regNum,
                 request.seatCapacity(),
+                request.range(),
                 request.features()
         );
-        aircraftRepository.save(aircraft, null);
+        aircraftRepository.save(aircraft);
 
-        return new ViewAircraftDetailsResponse(
-                aircraft.getRegistrationNumber().getNumber(),
-                aircraft.getModel().getModelName(),
-                aircraft.getModel().getManufacturer(),
-                aircraft.getManufacturingDate(),
-                aircraft.getStatus(),
-                aircraft.getSeatCapacity(),
-                aircraft.getFeatures(),
-                aircraft.getVersion()
-        );
+        Long version = aircraftRepository.findVersionFor(regNum);
+        return ViewAircraftDetailsResponse.from(aircraft, version);
     }
 }

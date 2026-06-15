@@ -1,20 +1,16 @@
 package aisafe.routes.domain;
 
 import aisafe.airports.domain.IataCode;
-import lombok.Getter;
 import org.springframework.util.Assert;
 
-@Getter
 public class Route {
 
-    private Long id;
     private IataCode origin;
     private IataCode destination;
     private Integer estimatedFlightTime;
     private Double minimumRange;
     private Integer minimumCapacity;
-    private boolean active;
-    private Long version;
+    private RouteStatus status;
 
     protected Route() {}
 
@@ -36,11 +32,17 @@ public class Route {
         this.estimatedFlightTime = estimatedFlightTime;
         this.minimumRange = minimumRange;
         this.minimumCapacity = minimumCapacity;
-        this.active = true;
+        this.status = RouteStatus.ACTIVE;
     }
 
-    public void setId(Long id) { this.id = id; }
-    public void setVersion(Long version) { this.version = version; }
+    public IataCode getOrigin() { return origin; }
+    public IataCode getDestination() { return destination; }
+    public Integer getEstimatedFlightTime() { return estimatedFlightTime; }
+    public Double getMinimumRange() { return minimumRange; }
+    public Integer getMinimumCapacity() { return minimumCapacity; }
+    public RouteStatus getStatus() { return status; }
+
+    public void setStatus(RouteStatus status) { this.status = status; }
 
     public void updateRoute(Integer flightTime, Double range, Integer capacity) {
         if (flightTime != null) {
@@ -57,11 +59,4 @@ public class Route {
         }
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public void deactivate() {
-        this.active = false;
-    }
 }

@@ -1,0 +1,51 @@
+@startuml
+autonumber
+actor "ATCC" as ATCC
+participant "AircraftController" as Ctrl
+participant "GetAircraftUtilizationUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "ScheduledFlightRepository" as FlightRepo
+database "Database" as DB
+
+ATCC -> Ctrl : GET /api/aircrafts/{registration}/utilization\n?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+activate Ctrl
+
+Ctrl -> UC : execute(registration, startDate, endDate)
+activate UC
+
+UC -> Repo : existsByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT COUNT(*) FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : count
+deactivate DB
+Repo --> UC : boolean
+deactivate Repo
+
+alt aircraft not found
+    UC --> Ctrl : throws AircraftNotFoundException
+    Ctrl --> ATCC : 404 Not Found
+else aircraft found
+    UC -> FlightRepo : findFlightsForUtilization(registration, start, end)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT * FROM scheduled_flight\nWHERE registration_number = ? AND departure_date_time >= ? ...
+    activate DB
+    DB --> FlightRepo : list of flights
+    deactivate DB
+    FlightRepo --> UC : List<ScheduledFlight>
+    deactivate FlightRepo
+
+    note right of UC
+      Calculate daily hours:
+      - Iterate over range
+      - Map flights to corresponding days
+      - Calculate utilization % per day
+    end note
+
+    UC --> Ctrl : List<UtilizationDataPointResponse>
+    deactivate UC
+    Ctrl --> ATCC : 200 OK\nList<UtilizationDataPointResponse>
+end
+
+deactivate Ctrl
+@enduml

@@ -59,7 +59,7 @@ else all models resolved
     deactivate DB
     deactivate Repo
 
-    UC --> Ctrl : MaintenanceTemplateResponse\n{ id, name, description }
+    UC --> Ctrl : MaintenanceTemplateResponse\n{ name, description }
     deactivate UC
     Ctrl --> MS : 201 Created\nEntityModel<MaintenanceTemplateResponse> with _links
   end

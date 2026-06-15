@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Returns all stored aircraft models for the aircraft management screens and APIs.
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ListAircraftModelsUseCase {
 
@@ -31,10 +31,8 @@ public class ListAircraftModelsUseCase {
 
         List<AircraftModel> modelsList = repository.findAll(pageNumber, pageSize);
 
-        return modelsList.stream().map(model -> new ListAircraftModelsUseCaseResponse(
-                model.getModelName(),
-                model.getManufacturer().name(),
-                model.getMaximumSeatingCapacity()
-        )).collect(Collectors.toList());
+        return modelsList.stream()
+                .map(ListAircraftModelsUseCaseResponse::from)
+                .collect(Collectors.toList());
     }
 }

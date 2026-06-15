@@ -6,6 +6,7 @@ import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Gate;
 import aisafe.airports.domain.Runway;
 import aisafe.airports.domain.Service;
@@ -30,7 +31,7 @@ public class RegisterAirportUseCase {
      * @return a DTO containing the details of the newly registered airport.
      */
     public AirportResponse execute(RegisterAirportRequest request) {
-        if (airportRepository.existsByIataCodeCode(request.iataCode())) {
+        if (airportRepository.existsByIataCode(new IataCode(request.iataCode()))) {
             throw new DuplicateResourceException("Airport with IATA code '" + request.iataCode() + "' already exists.");
         }
 

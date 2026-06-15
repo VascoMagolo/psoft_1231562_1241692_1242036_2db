@@ -6,7 +6,7 @@ participant "SearchAircraftUseCase" as UC
 participant "AircraftRepository" as Repo
 database "Database" as DB
 
-ATCC -> Ctrl : GET /api/aircrafts/search\n?modelName=X&status=Y&year=Z&page=0&size=20
+ATCC -> Ctrl : GET /api/aircrafts/search\n?modelName=X&status=Y&year=Z&feature=W&page=0&size=20
 activate Ctrl
 
 note right of Ctrl
@@ -14,16 +14,17 @@ note right of Ctrl
   - modelName: String
   - status: AircraftStatus enum
   - year: Integer (manufacturing year)
+  - feature: String (e.g. WiFi)
   - page, size (Pageable)
   Default page size: 20
 end note
 
-Ctrl -> UC : execute(modelName: String, status: String,\n  year: Integer, pageNumber, pageSize)
+Ctrl -> UC : execute(modelName: String, status: String,\n  year: Integer, feature: String, pageNumber, pageSize)
 activate UC
 
-UC -> Repo : searchAircrafts(modelName, status, year, pageNumber, pageSize)
+UC -> Repo : searchAircrafts(modelName, status, year, feature, pageNumber, pageSize)
 activate Repo
-Repo -> DB : SELECT FROM aircraft\nWHERE model_name = ? AND status = ? AND year = ?\n(dynamic query, LIMIT ? OFFSET ?)
+Repo -> DB : SELECT FROM aircraft\nWHERE model_name = ? AND status = ? AND year = ? AND feature IN features\n(dynamic query, LIMIT ? OFFSET ?)
 activate DB
 DB --> Repo : PaginatedResult<Aircraft>
 deactivate DB

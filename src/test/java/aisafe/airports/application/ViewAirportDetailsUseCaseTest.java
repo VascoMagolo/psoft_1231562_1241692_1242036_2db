@@ -4,6 +4,7 @@ import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,17 +36,17 @@ class ViewAirportDetailsUseCaseTest {
     @Test
     void ensureAirportDetailsReturnedSuccessfully() {
         Airport airport = buildAirport("LIS");
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
 
         AirportResponse result = viewAirportDetails.execute("LIS");
 
         assertNotNull(result);
-        verify(airportRepository).findByIataCodeCode("LIS");
+        verify(airportRepository).findByIataCode(new IataCode("LIS"));
     }
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.findByIataCodeCode("XXX")).thenReturn(Optional.empty());
+        when(airportRepository.findByIataCode(new IataCode("XXX"))).thenReturn(Optional.empty());
 
         assertThrows(AirportNotFoundException.class, () -> viewAirportDetails.execute("XXX"));
     }

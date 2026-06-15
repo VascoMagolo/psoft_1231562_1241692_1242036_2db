@@ -1,0 +1,39 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AircraftModelController" as Ctrl
+participant "GetTopUtilizedModelsUseCase" as UC
+participant "ScheduledFlightRepository" as FlightRepo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/aircraftModels/top-utilized?criteria=HOURS|ASSIGNMENTS
+activate Ctrl
+
+Ctrl -> UC : execute(criteria)
+activate UC
+
+alt criteria == ASSIGNMENTS
+    UC -> FlightRepo : findTopModelsByAssignments(Limit: 5)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT model, COUNT(*) ... GROUP BY model ORDER BY count DESC LIMIT 5
+    activate DB
+    DB --> FlightRepo : list of Object[]
+    deactivate DB
+    FlightRepo --> UC : List<TopAircraftModelResponse>
+    deactivate FlightRepo
+else criteria == HOURS
+    UC -> FlightRepo : findTopModelsByFlightHours(Limit: 5)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT model, SUM(DATEDIFF(...)) ... GROUP BY model ORDER BY sum DESC LIMIT 5
+    activate DB
+    DB --> FlightRepo : list of Object[]
+    deactivate DB
+    FlightRepo --> UC : List<TopAircraftModelResponse>
+    deactivate FlightRepo
+end
+
+UC --> Ctrl : List<TopAircraftModelResponse>
+deactivate UC
+Ctrl --> BO : 200 OK\nCollectionModel<TopAircraftModelResponse>
+deactivate Ctrl
+@enduml

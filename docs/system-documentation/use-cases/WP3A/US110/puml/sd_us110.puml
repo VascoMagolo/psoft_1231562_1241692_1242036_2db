@@ -67,7 +67,7 @@ else both airports exist
     RouteRepo --> UC : Route
     deactivate RouteRepo
 
-    UC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active: true }
+    UC --> Ctrl : RouteResponse\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, status: ACTIVE }
     deactivate UC
     Ctrl --> Actor : 201 Created\nEntityModel<RouteResponse> with _links
   end

@@ -17,10 +17,11 @@ public record ViewAircraftDetailsResponse(
         LocalDate manufacturingDate,
         AircraftStatus status,
         Integer seatCapacity,
+        Double range,
         List<String> features,
         Long version
 ) {
-    public static ViewAircraftDetailsResponse from(Aircraft aircraft) {
+    public static ViewAircraftDetailsResponse from(Aircraft aircraft, Long version) {
         return new ViewAircraftDetailsResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
@@ -28,8 +29,9 @@ public record ViewAircraftDetailsResponse(
                 aircraft.getManufacturingDate(),
                 aircraft.getStatus(),
                 aircraft.getSeatCapacity(),
+                aircraft.getRange(),
                 aircraft.getFeatures(),
-                aircraft.getVersion()
+                version
         );
     }
 }

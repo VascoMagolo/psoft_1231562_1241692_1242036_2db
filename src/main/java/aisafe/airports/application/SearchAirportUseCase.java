@@ -1,7 +1,6 @@
 package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
@@ -13,8 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Use case for searching airports based on various criteria.
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class SearchAirportUseCase {
     private final AirportRepository airportRepository;
 

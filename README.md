@@ -47,7 +47,7 @@ Requests flow through three layers within each bounded context:
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                      infrastructure/                        │
-│         Controllers, filters, Spring Security config        │
+│   Controllers, JPA adapters, filters, Spring Security config│
 │   AirportController, RouteController, etc.                  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -74,25 +74,33 @@ src/main/java/aisafe/
 ├── aircrafts/
 │   ├── domain/          # Aircraft, AircraftModel, RegistrationNumber, etc.
 │   ├── application/     # RegisterAircraftUseCase, ListAircraftUseCase, etc.
-│   └── infrastructure/  # AircraftController, AircraftModelController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # AircraftController, AircraftModelController
 ├── airports/
 │   ├── domain/          # Airport, Runway, IataCode, AirportStatus, etc.
 │   ├── application/     # RegisterAirportUseCase, SearchAirportUseCase, etc.
-│   └── infrastructure/  # AirportController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # AirportController
 ├── routes/
 │   ├── domain/          # Route, RouteHistory, RouteRepository, etc.
 │   ├── application/     # CreateRouteUseCase, SearchRoutesUseCase, etc.
-│   └── infrastructure/  # RouteController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # RouteController
 ├── maintenance/
 │   ├── domain/          # MaintenanceRecord, MaintenancePart, MaintenanceTemplate, etc.
 │   ├── application/     # CreateMaintenanceRecordUseCase, etc.
-│   └── infrastructure/  # MaintenanceController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # MaintenanceController
 ├── security/
 │   ├── domain/          # User, Role, UserRepository
 │   ├── application/     # AuthenticateUserUseCase, JwtService, etc.
 │   └── infrastructure/  # JwtAuthenticationFilter, AuthController, SecurityConfig
 └── shared/
-    ├── domain/          # DomainException, DuplicateResourceException
+    ├── domain/          # DomainException, DuplicateResourceException, ConcurrencyException, PaginatedResult
     ├── application/     # UseCase (base interface + annotations)
     └── infrastructure/  # GlobalExceptionHandler, OpenApiConfig, Bootstrap, etc.
 ```

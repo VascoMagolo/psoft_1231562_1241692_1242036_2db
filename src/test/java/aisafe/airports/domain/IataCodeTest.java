@@ -48,4 +48,24 @@ class IataCodeTest {
     void ensureSpecialCharactersThrowException() {
         assertThrows(InvalidIataCodeException.class, () -> new IataCode("L!S"));
     }
+
+    @Test
+    void ensureEqualCodesAreEqual() {
+        assertEquals(new IataCode("LIS"), new IataCode("LIS"));
+    }
+
+    @Test
+    void ensureDifferentCodesAreNotEqual() {
+        assertNotEquals(new IataCode("LIS"), new IataCode("OPO"));
+    }
+
+    @Test
+    void ensureHashCodeIsConsistentWithEquals() {
+        assertEquals(new IataCode("LIS").hashCode(), new IataCode("LIS").hashCode());
+    }
+
+    @Test
+    void ensureToStringReturnsCode() {
+        assertEquals("LIS", new IataCode("LIS").toString());
+    }
 }

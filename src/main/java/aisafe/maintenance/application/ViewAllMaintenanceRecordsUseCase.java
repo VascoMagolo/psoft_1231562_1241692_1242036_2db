@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Views all maintenance records from a specific aircraft using its registration number
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewAllMaintenanceRecordsUseCase {
     private final MaintenanceRecordRepository repository;
@@ -43,7 +43,7 @@ public class ViewAllMaintenanceRecordsUseCase {
 
     private ViewAllMaintenanceRecordsResponse toResponse(MaintenanceRecord record) {
         return new ViewAllMaintenanceRecordsResponse(
-                record.getPart().getPartNumber(),
+                record.getParts().stream().map(p -> p.getPartNumber()).toList(),
                 record.getTemplate().getName(),
                 record.getStartDate(),
                 record.getExpectedDuration(),

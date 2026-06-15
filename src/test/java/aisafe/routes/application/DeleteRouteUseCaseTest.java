@@ -1,6 +1,8 @@
 package aisafe.routes.application;
 
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import org.junit.jupiter.api.Test;
@@ -21,23 +23,29 @@ class DeleteRouteUseCaseTest {
     @Mock
     private RouteRepository routeRepository;
 
+    @Mock
+    private RouteHistoryRepository routeHistoryRepository;
+
     @InjectMocks
     private DeleteRouteUseCase deleteRoute;
 
     @Test
     void ensureRouteIsDeletedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
 
-        assertDoesNotThrow(() -> deleteRoute.execute(1L));
+        assertDoesNotThrow(() -> deleteRoute.execute("OPO", "LIS"));
+        verify(routeHistoryRepository).deleteAllByRoute("OPO", "LIS");
         verify(routeRepository).delete(any(Route.class));
     }
 
     @Test
     void ensureExceptionWhenRouteNotFound() {
-        when(routeRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, () -> deleteRoute.execute(99L));
+        assertThrows(RouteNotFoundException.class, () -> deleteRoute.execute("OPO", "LIS"));
         verify(routeRepository, never()).delete(any());
     }
 }

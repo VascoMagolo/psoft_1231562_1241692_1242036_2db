@@ -236,7 +236,7 @@ public class AirportController {
     @PatchMapping("/{iataCode}/details")
     public ResponseEntity<EntityModel<AirportResponse>> updateDetails(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
-            @RequestBody UpdateAirportDetailsRequest request) {
+            @Valid @RequestBody UpdateAirportDetailsRequest request) {
         return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request)));
     }
 
@@ -264,7 +264,7 @@ public class AirportController {
         List<EntityModel<RouteResponse>> routeModels = viewAirportRoutes.execute(iataCode.toUpperCase())
                 .stream()
                 .map(r -> EntityModel.of(r,
-                        linkTo(methodOn(RouteController.class).getRouteDetails(r.id())).withSelfRel()))
+                        linkTo(methodOn(RouteController.class).getRouteDetails(r.originIataCode(), r.destinationIataCode())).withSelfRel()))
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(routeModels,
                 linkTo(methodOn(AirportController.class).getRoutes(iataCode)).withSelfRel(),

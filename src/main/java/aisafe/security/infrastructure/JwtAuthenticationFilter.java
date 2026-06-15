@@ -46,7 +46,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtService.isTokenValid(token)) {
                 String subject = jwtService.extractSubject(token);
                 List<String> roles = jwtService.extractRoles(token);
-                // Convert roles to Spring Security authorities
                 var authorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .map(a -> (GrantedAuthority) a)
@@ -55,6 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var authentication = new UsernamePasswordAuthenticationToken(
                         subject, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+                return;
             }
         }
 

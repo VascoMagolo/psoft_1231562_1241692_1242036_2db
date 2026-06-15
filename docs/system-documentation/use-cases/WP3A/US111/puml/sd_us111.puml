@@ -7,35 +7,35 @@ participant "RouteRepository" as RouteRepo
 participant "RouteHistoryRepository" as HistoryRepo
 database "Database" as DB
 
-Actor -> Ctrl : GET /api/routes/{id}/history
+Actor -> Ctrl : GET /api/routes/{origin}/{destination}/history
 activate Ctrl
 
-Ctrl -> UC : execute(routeId: Long)
+Ctrl -> UC : execute(origin: String, destination: String)
 activate UC
 
-UC -> RouteRepo : findById(routeId)
+UC -> RouteRepo : existsByOriginAndDestination(origin, destination)
 activate RouteRepo
-RouteRepo -> DB : SELECT FROM route WHERE id = ?
+RouteRepo -> DB : SELECT EXISTS(FROM route WHERE origin_code = ? AND destination_code = ?)
 activate DB
-DB --> RouteRepo : route record
+DB --> RouteRepo : boolean
 deactivate DB
-RouteRepo --> UC : Optional<Route>
+RouteRepo --> UC : boolean
 deactivate RouteRepo
 
 alt route not found
   UC --> Ctrl : throws RouteNotFoundException
-  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route '...→...' not found." }
 else route found
-  UC -> HistoryRepo : findAllByRouteId(routeId)
+  UC -> HistoryRepo : findAllByRoute(origin, destination)
   activate HistoryRepo
-  HistoryRepo -> DB : SELECT FROM route_history WHERE route_id = ?
+  HistoryRepo -> DB : SELECT FROM route_history WHERE origin_code = ? AND destination_code = ?
   activate DB
   DB --> HistoryRepo : history records
   deactivate DB
   HistoryRepo --> UC : List<RouteHistory>
   deactivate HistoryRepo
 
-  UC --> Ctrl : List<RouteHistoryResponse>\n[{ id, routeId, changeDescription,\n   changedAt, changedBy }]
+  UC --> Ctrl : List<RouteHistoryResponse>\n[{ originCode, destinationCode,\n   changeDescription, changedAt, changedBy }]
   deactivate UC
   Ctrl --> Actor : 200 OK\nCollectionModel<EntityModel<RouteHistoryResponse>>\nwith _links (self, route)
 end

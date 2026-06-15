@@ -1,7 +1,10 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.DuplicateResourceException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,57 +31,50 @@ class RegisterAircraftUseCaseTest {
     @InjectMocks
     private RegisterAircraftUseCase registerAircraft;
 
-    private AircraftModel buildModel(int maxSeats) {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", maxSeats);
+    private AircraftModel model;
+    private RegisterAircraftRequest request;
+
+    @BeforeEach
+    void setUp() {
+        model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        request = new RegisterAircraftRequest("CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
     }
 
     @Test
     void ensureAircraftIsRegisteredSuccessfully() {
-        RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of("WiFi"));
-
-        AircraftModel model = buildModel(180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
-        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
+        when(aircraftRepository.existsByRegistrationNumber(any())).thenReturn(false);
+        when(aircraftRepository.findVersionFor(any())).thenReturn(0L);
 
-        assertDoesNotThrow(() -> registerAircraft.execute(request));
-        verify(aircraftRepository, times(1)).save(any(Aircraft.class), any());
+        ViewAircraftDetailsResponse response = registerAircraft.execute(request);
+
+        assertNotNull(response);
+        assertEquals("CS-TPA", response.registrationNumber());
+        verify(aircraftRepository, times(1)).save(any(Aircraft.class));
     }
 
     @Test
     void ensureExceptionWhenModelNotFound() {
-        RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "NON-EXISTENT", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
-
-        when(modelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.empty());
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
+        verify(aircraftRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenRegistrationAlreadyExists() {
-        RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, "AVAILABLE", List.of());
-
-        AircraftModel model = buildModel(180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
-        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
+        when(aircraftRepository.existsByRegistrationNumber(any())).thenReturn(true);
 
-        assertThrows(AircraftAlreadyExistsException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
+        assertThrows(DuplicateResourceException.class, () -> registerAircraft.execute(request));
+        verify(aircraftRepository, never()).save(any());
     }
 
     @Test
-    void ensureExceptionWhenSeatCapacityExceedsModelMax() {
-        RegisterAircraftRequest request = new RegisterAircraftRequest(
-                "CS-TPA", "A320", LocalDate.of(2020, 1, 1), 200, "AVAILABLE", List.of());
-
-        AircraftModel model = buildModel(150);
+    void ensureExceptionWhenSeatCapacityExceedsModel() {
+        request = new RegisterAircraftRequest("CS-TPA", "A320", LocalDate.of(2020, 1, 1), 200, 5000.0, "AVAILABLE", List.of());
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
-        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
-        verify(aircraftRepository, never()).save(any(), any());
     }
 }

@@ -3,7 +3,6 @@ package aisafe.maintenance.domain;
 import org.springframework.util.Assert;
 
 public class MaintenancePart {
-    private Long id;
     private String partNumber;
     private String name;
     private String description;
@@ -28,7 +27,6 @@ public class MaintenancePart {
         this.component = component;
     }
 
-    public Long getId() { return id; }
     public String getPartNumber() { return partNumber; }
     public String getName() { return name; }
     public String getDescription() { return description; }
@@ -36,5 +34,4 @@ public class MaintenancePart {
     public Integer getMinimumThreshold() { return minimumThreshold; }
     public MaintenanceComponent getComponent() { return component; }
 
-    public void setId(Long id) { this.id = id; }
 }

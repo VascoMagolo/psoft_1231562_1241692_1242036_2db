@@ -1,0 +1,44 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "AircraftController" as Ctrl
+participant "CalculateAircraftOperationalHoursUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "ScheduledFlightRepository" as FlightRepo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/aircrafts/{registration}/operational-hours
+activate Ctrl
+
+Ctrl -> UC : execute(registration)
+activate UC
+
+UC -> Repo : existsByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT COUNT(*) FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : count
+deactivate DB
+Repo --> UC : boolean
+deactivate Repo
+
+alt aircraft not found
+    UC --> Ctrl : throws AircraftNotFoundException
+    Ctrl --> BO : 404 Not Found
+else aircraft found
+    UC -> FlightRepo : calculateTotalOperationalHoursByRegistration(registration)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT COALESCE(SUM(DATEDIFF(...)), 0) FROM scheduled_flight ...
+    activate DB
+    DB --> FlightRepo : hours (Double)
+    deactivate DB
+    FlightRepo --> UC : Double
+    deactivate FlightRepo
+
+    UC --> Ctrl : Double (hours)
+    deactivate UC
+    Ctrl --> BO : 200 OK\nDouble
+end
+
+deactivate Ctrl
+@enduml

@@ -20,6 +20,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import aisafe.routes.domain.FlightStatus;
+import aisafe.routes.domain.ScheduledFlight;
+import aisafe.routes.domain.ScheduledFlightRepository;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
+
 /**
  * Simple initialization component that populates the database with some sample
  * data on application startup.
@@ -34,6 +41,7 @@ public class Bootstrap implements ApplicationRunner {
     private final MaintenanceTemplateRepository maintenanceTemplateRepository;
     private final MaintenanceRecordRepository maintenanceRecordRepository;
     private final RouteRepository routeRepository;
+    private final ScheduledFlightRepository scheduledFlightRepository;
     private final PasswordEncoder passwordEncoder;
 
     public Bootstrap(UserRepository userRepository, AircraftModelRepository aircraftModelRepository,
@@ -41,6 +49,7 @@ public class Bootstrap implements ApplicationRunner {
             AirportRepository airportRepository, MaintenancePartRepository maintenancePartRepository,
             MaintenanceTemplateRepository maintenanceTemplateRepository,
             MaintenanceRecordRepository maintenanceRecordRepository, RouteRepository routeRepository,
+            ScheduledFlightRepository scheduledFlightRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.aircraftModelRepository = aircraftModelRepository;
@@ -50,6 +59,7 @@ public class Bootstrap implements ApplicationRunner {
         this.maintenanceTemplateRepository = maintenanceTemplateRepository;
         this.maintenanceRecordRepository = maintenanceRecordRepository;
         this.routeRepository = routeRepository;
+        this.scheduledFlightRepository = scheduledFlightRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -82,12 +92,12 @@ public class Bootstrap implements ApplicationRunner {
             AircraftModel e195e2 = aircraftModelRepository.findByModelName("Embraer E195-E2").orElseThrow();
 
             aircraftRepository.save(new Aircraft(AircraftStatus.AVAILABLE, LocalDate.parse("2019-05-25"), a320neo,
-                    new RegistrationNumber("CS-TKA"), 180, List.of("WiFi", "In-flight entertainment")),null);
+                    new RegistrationNumber("CS-TKA"), 180, a320neo.getMaxRange(), List.of("WiFi", "In-flight entertainment")));
             aircraftRepository.save(new Aircraft(AircraftStatus.UNDER_MAINTENANCE, LocalDate.parse("2020-08-15"),
-                    b737max, new RegistrationNumber("CS-TKB"), 200,
-                    List.of("WiFi", "In-flight entertainment", "Extra legroom")),null);
+                    b737max, new RegistrationNumber("CS-TKB"), 200, b737max.getMaxRange(),
+                    List.of("WiFi", "In-flight entertainment", "Extra legroom")));
             aircraftRepository.save(new Aircraft(AircraftStatus.IN_FLIGHT, LocalDate.parse("2018-03-10"), e195e2,
-                    new RegistrationNumber("CS-TKC"), 120, List.of("WiFi")),null);
+                    new RegistrationNumber("CS-TKC"), 120, e195e2.getMaxRange(), List.of("WiFi")));
         }
 
         // bootstrap for airport package
@@ -126,6 +136,30 @@ public class Bootstrap implements ApplicationRunner {
             routeRepository.save(new Route("OPO", "MAD", 90, 850.0, 100));
             routeRepository.save(new Route("MAD", "CDG", 120, 1050.0, 120));
             routeRepository.save(new Route("CDG", "LHR", 60, 340.0, 100));
+            if (scheduledFlightRepository.count() == 0) {
+                OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+                
+                Aircraft managedAircraft1 = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-TKA")).orElseThrow();
+                Aircraft managedAircraft2 = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-TKB")).orElseThrow();
+                
+                Route managedRoute1 = routeRepository.findByOriginAndDestination(new aisafe.airports.domain.IataCode("LIS"), new aisafe.airports.domain.IataCode("OPO"), 0, 10).data().get(0);
+                Route managedRoute2 = routeRepository.findByOriginAndDestination(new aisafe.airports.domain.IataCode("LIS"), new aisafe.airports.domain.IataCode("MAD"), 0, 10).data().get(0);
+                
+                // Completed flight for aircraft 1
+                scheduledFlightRepository.save(new ScheduledFlight(
+                        now.minusDays(2), now.minusDays(2).plusHours(2),
+                        FlightStatus.COMPLETED, managedRoute1, managedAircraft1));
+                        
+                // Completed flight for aircraft 1
+                scheduledFlightRepository.save(new ScheduledFlight(
+                        now.minusDays(1), now.minusDays(1).plusHours(3),
+                        FlightStatus.COMPLETED, managedRoute2, managedAircraft1));
+                        
+                // Completed flight for aircraft 2
+                scheduledFlightRepository.save(new ScheduledFlight(
+                        now.minusDays(3), now.minusDays(3).plusHours(4),
+                        FlightStatus.COMPLETED, managedRoute1, managedAircraft2));
+            }
         }
 
         // bootstrap for maintenance package
@@ -151,11 +185,11 @@ public class Bootstrap implements ApplicationRunner {
                     .orElseThrow();
             Aircraft aircraft2 = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-TKB"))
                     .orElseThrow();
-            maintenanceRecordRepository.save(new MaintenanceRecord("Simple inspection to the starter motor",
-                    LocalDateTime.parse("2024-06-01T10:00:00"), 120, part, "No issues found during the inspection.",
+            maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Simple inspection to the starter motor",
+                    LocalDateTime.parse("2024-06-01T10:00:00"), 120, List.of(part), "No issues found during the inspection.",
                     template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber().getNumber()));
-            maintenanceRecordRepository.save(new MaintenanceRecord("Detailed inspection to the starter motor",
-                    LocalDateTime.parse("2024-06-10T14:00:00"), 240, part,
+            maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Detailed inspection to the starter motor",
+                    LocalDateTime.parse("2024-06-10T14:00:00"), 240, List.of(part),
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
                     MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber().getNumber()));
         }

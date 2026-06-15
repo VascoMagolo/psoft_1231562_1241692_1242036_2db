@@ -1,0 +1,60 @@
+@startuml sd_deleteAircraftModel
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "AircraftModelController" as Ctrl
+participant "DeleteAircraftModelUseCase" as UC
+participant "AircraftModelRepository" as Repo
+participant "AircraftRepository" as Repo2
+database "Database" as DB
+
+BO -> Ctrl : DELETE /api/aircraftModels/{modelName}
+activate Ctrl
+
+Ctrl -> UC : execute(modelName)
+activate UC
+
+UC -> Repo : findByModelName(modelName)
+activate Repo
+Repo -> DB : SELECT FROM aircraft_model WHERE model_name = ?
+activate DB
+DB --> Repo : model record
+deactivate DB
+Repo --> UC : Optional<AircraftModel>
+deactivate Repo
+
+alt model not found
+    UC --> Ctrl : throws AircraftModelNotFoundException
+    Ctrl --> BO : 404 Not Found
+else model found
+    UC -> Repo2 : anyAircraftExistsForModel(modelName)
+    activate Repo2
+    Repo2 -> DB : SELECT COUNT(*) FROM aircraft WHERE model_name = ?
+    activate DB
+    DB --> Repo2 : count
+    deactivate DB
+    Repo2 --> UC : boolean
+    deactivate Repo2
+
+    alt model in use
+        UC --> Ctrl : throws ResourceInUseException
+        Ctrl --> BO : 409 Conflict
+    else model not in use
+        UC -> Repo : delete(model)
+        activate Repo
+        Repo -> DB : DELETE FROM aircraft_model WHERE model_name = ?
+        activate DB
+        DB --> Repo : success
+        deactivate DB
+        deactivate Repo
+        UC --> Ctrl : void
+        deactivate UC
+        Ctrl --> BO : 204 No Content
+    end
+end
+
+deactivate Ctrl
+@enduml

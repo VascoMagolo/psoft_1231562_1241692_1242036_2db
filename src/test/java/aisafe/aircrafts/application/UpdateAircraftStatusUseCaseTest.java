@@ -28,17 +28,16 @@ class UpdateAircraftStatusUseCaseTest {
     private Aircraft buildAircraft() {
         AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
         return new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model,
-                new RegistrationNumber("CS-TPA"), 150, List.of());
+                new RegistrationNumber("CS-TPA"), 150, 5000.0, List.of());
     }
 
     @Test
     void ensureStatusIsUpdatedSuccessfully() {
-        Aircraft aircraft = spy(buildAircraft());
-        doReturn(0L).when(aircraft).getVersion();
-        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
+        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(buildAircraft()));
+        when(repository.findVersionFor(any())).thenReturn(0L);
 
         assertDoesNotThrow(() -> updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "INACTIVE", 0L));
-        verify(repository).save(eq(aircraft), eq(0L));
+        verify(repository).save(any(Aircraft.class));
     }
 
     @Test
@@ -47,28 +46,26 @@ class UpdateAircraftStatusUseCaseTest {
 
         assertThrows(AircraftNotFoundException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-XXX"), "INACTIVE", 0L));
-        verify(repository, never()).save(any(), any());
+        verify(repository, never()).save(any(Aircraft.class));
     }
 
     @Test
     void ensureExceptionWhenVersionMismatch() {
-        Aircraft aircraft = spy(buildAircraft());
-        doReturn(1L).when(aircraft).getVersion();
-        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
+        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(buildAircraft()));
+        when(repository.findVersionFor(any())).thenReturn(1L);
 
         assertThrows(ObjectOptimisticLockingFailureException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "INACTIVE", 0L));
-        verify(repository, never()).save(any(), any());
+        verify(repository, never()).save(any(Aircraft.class));
     }
 
     @Test
     void ensureExceptionWhenStatusIsInvalid() {
-        Aircraft aircraft = spy(buildAircraft());
-        doReturn(0L).when(aircraft).getVersion();
-        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
+        when(repository.findByRegistrationNumber(any())).thenReturn(Optional.of(buildAircraft()));
+        when(repository.findVersionFor(any())).thenReturn(0L);
 
         assertThrows(AircraftInvalidFieldException.class, () ->
                 updateAircraftStatus.execute(new RegistrationNumber("CS-TPA"), "FLYING", 0L));
-        verify(repository, never()).save(any(), any());
+        verify(repository, never()).save(any(Aircraft.class));
     }
 }

@@ -5,13 +5,21 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteHistory;
+import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.DuplicateResourceException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,17 +34,32 @@ class CreateRouteUseCaseTest {
     @Mock
     private AirportRepository airportRepository;
 
+    @Mock
+    private RouteHistoryRepository routeHistoryRepository;
+
     @InjectMocks
     private CreateRouteUseCase createRoute;
+
+    @BeforeEach
+    void setUpSecurityContext() {
+        var auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
+        var ctx = SecurityContextHolder.createEmptyContext();
+        ctx.setAuthentication(auth);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void ensureRouteIsCreatedSuccessfully() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(false);
-        when(routeRepository.save(any(Route.class))).thenAnswer(i -> i.getArguments()[0]);
 
         Route result = createRoute.execute(request);
 
@@ -44,13 +67,14 @@ class CreateRouteUseCaseTest {
         assertEquals("OPO", result.getOrigin().getCode());
         assertEquals("LIS", result.getDestination().getCode());
         verify(routeRepository, times(1)).save(any(Route.class));
+        verify(routeHistoryRepository, times(1)).save(any(RouteHistory.class));
     }
 
     @Test
     void ensureExceptionThrownWhenOriginAirportNotFound() {
         CreateRouteRequest request = new CreateRouteRequest("XXX", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> createRoute.execute(request));
         verify(routeRepository, never()).save(any());
@@ -60,8 +84,8 @@ class CreateRouteUseCaseTest {
     void ensureExceptionThrownWhenDestinationAirportNotFound() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "XXX", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> createRoute.execute(request));
         verify(routeRepository, never()).save(any());
@@ -71,8 +95,8 @@ class CreateRouteUseCaseTest {
     void ensureExceptionThrownWhenRouteAlreadyExists() {
         CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
 
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(true);
 
         DuplicateResourceException ex = assertThrows(DuplicateResourceException.class, () -> createRoute.execute(request));

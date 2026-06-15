@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -37,15 +38,17 @@ public class AircraftModelController {
     private final DeleteAircraftModelUseCase deleteAircraftModel;
     private final UpdateAircraftModelUseCase updateAircraftModel;
     private final ViewAircraftModelDetailsUseCase viewAircraftModelDetails;
+    private final GetTopUtilizedModelsUseCase getTopUtilizedModels;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
                                    ListAircraftModelsUseCase listAircraftModels,
-                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel, ViewAircraftModelDetailsUseCase viewAircraftModelDetails) {
+                                   DeleteAircraftModelUseCase deleteAircraftModel, UpdateAircraftModelUseCase updateAircraftModel, ViewAircraftModelDetailsUseCase viewAircraftModelDetails, GetTopUtilizedModelsUseCase getTopUtilizedModels) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
         this.deleteAircraftModel = deleteAircraftModel;
         this.updateAircraftModel = updateAircraftModel;
         this.viewAircraftModelDetails = viewAircraftModelDetails;
+        this.getTopUtilizedModels = getTopUtilizedModels;
     }
 
     @Operation(summary = "Register a new aircraft model")
@@ -141,5 +144,27 @@ public class AircraftModelController {
         entityModel.add(linkTo(methodOn(AircraftModelController.class).getAllAircraftModels(Pageable.unpaged(), null)).withRel("all-models"));
 
         return ResponseEntity.ok(entityModel);
+    }
+
+    @Operation(summary = "Get top 5 most utilized aircraft models", description = "Returns the top 5 most utilized aircraft models based on total flight hours or number of assignments. (US204)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Top utilized models returned successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid criteria supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/top-utilized")
+    public ResponseEntity<CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>>> getTopUtilizedModels(
+            @Parameter(description = "Criteria for utilization ranking: 'HOURS' or 'ASSIGNMENTS'")
+            @RequestParam(required = true) String criteria) {
+
+        List<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> items =
+                getTopUtilizedModels.execute(criteria).stream()
+                        .map(EntityModel::of)
+                        .toList();
+        CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> model =
+                CollectionModel.of(items,
+                        linkTo(methodOn(AircraftModelController.class).getTopUtilizedModels(criteria)).withSelfRel());
+        return ResponseEntity.ok(model);
     }
 }

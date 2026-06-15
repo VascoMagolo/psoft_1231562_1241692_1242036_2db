@@ -17,5 +17,5 @@ public record RegisterAircraftModelRequest(
         @NotNull @DecimalMin("1.0") Double fuelCapacity,
         @NotNull @DecimalMin("1.0") Double cruisingSpeed,
         @NotNull @Min(1) Integer maximumSeatingCapacity,
-        @NotBlank String imagePath
+        String imagePath
 ) {}
