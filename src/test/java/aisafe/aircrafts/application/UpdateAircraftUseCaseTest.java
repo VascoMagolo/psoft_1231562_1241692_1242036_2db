@@ -40,7 +40,6 @@ class UpdateAircraftUseCaseTest {
         registrationNumber = new RegistrationNumber("CS-TPA");
         model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
         aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, 5000.0, List.of());
-        aircraft.setVersion(0L);
     }
 
     @Test
@@ -48,6 +47,7 @@ class UpdateAircraftUseCaseTest {
         UpdateAircraftRequest request = new UpdateAircraftRequest("A320", LocalDate.of(2021, 1, 1), 160, 5500.0, List.of("WiFi"), "INACTIVE");
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(0L).thenReturn(1L);
 
         ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registrationNumber, request, 0L);
 
@@ -69,6 +69,7 @@ class UpdateAircraftUseCaseTest {
     void ensureExceptionWhenModelNotFound() {
         UpdateAircraftRequest request = new UpdateAircraftRequest("NON_EXISTENT", null, null, null, null, null);
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
+        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(0L);
         when(aircraftModelRepository.findByModelName("NON_EXISTENT")).thenReturn(Optional.empty());
 
         assertThrows(AircraftModelNotFoundException.class, () -> updateAircraftUseCase.execute(registrationNumber, request, 0L));
@@ -77,8 +78,8 @@ class UpdateAircraftUseCaseTest {
     @Test
     void ensureExceptionOnConcurrencyMismatch() {
         UpdateAircraftRequest request = new UpdateAircraftRequest("A320", null, null, null, null, null);
-        aircraft.setVersion(1L); // Database has version 1
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
+        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(1L); // Database has version 1
 
         assertThrows(ConcurrencyException.class, () ->
                 updateAircraftUseCase.execute(registrationNumber, request, 0L)); // Client provides version 0

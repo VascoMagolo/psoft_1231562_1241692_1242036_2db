@@ -25,7 +25,7 @@ public class UpdateAircraftUseCase {
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration " + registration.getNumber() + " not found."));
 
-        Long currentVersion = aircraft.getVersion();
+        Long currentVersion = aircraftRepository.findVersionFor(registration);
         if (currentVersion != null && !currentVersion.equals(clientVersion)) {
             throw new ConcurrencyException("The aircraft has been updated by another user. Please refresh and try again.");
         }
@@ -55,6 +55,8 @@ public class UpdateAircraftUseCase {
 
         aircraftRepository.save(aircraft);
 
-        return ViewAircraftDetailsResponse.from(aircraft, aircraft.getVersion());
+        Long newVersion = aircraftRepository.findVersionFor(registration);
+
+        return ViewAircraftDetailsResponse.from(aircraft, newVersion);
     }
 }
