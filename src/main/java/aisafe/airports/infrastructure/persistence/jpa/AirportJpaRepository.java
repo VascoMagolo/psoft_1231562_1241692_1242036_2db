@@ -1,6 +1,7 @@
 package aisafe.airports.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportStatisticsData;
@@ -67,16 +68,16 @@ public class AirportJpaRepository implements AirportRepository {
     }
 
     @Override
-    public List<Airport> findAllOrderedByRegion() {
-        return springRepo.findAllOrderedByRegion().stream()
-                .map(AirportMapper::toDomain)
+    public List<AirportGroupingData> findAllGroupingByRegion() {
+        return springRepo.findAllGroupingByRegion().stream()
+                .map(p -> new AirportGroupingData(new IataCode(p.getIataCode()), p.getName(), p.getRegion(), p.getCountry()))
                 .toList();
     }
 
     @Override
-    public List<Airport> findAllOrderedByCountry() {
-        return springRepo.findAllOrderedByCountry().stream()
-                .map(AirportMapper::toDomain)
+    public List<AirportGroupingData> findAllGroupingByCountry() {
+        return springRepo.findAllGroupingByCountry().stream()
+                .map(p -> new AirportGroupingData(new IataCode(p.getIataCode()), p.getName(), p.getRegion(), p.getCountry()))
                 .toList();
     }
 
