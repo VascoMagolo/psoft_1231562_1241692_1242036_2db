@@ -17,7 +17,6 @@ public class Aircraft {
     private Double range;
     private AircraftModel model;
     private List<String> features;
-    private Long version;
 
     public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model,
                     RegistrationNumber registrationNumber, Integer seatCapacity, Double range, List<String> features) {
@@ -68,8 +67,6 @@ public class Aircraft {
     public Double getRange() { return range; }
     public AircraftModel getModel() { return model; }
     public List<String> getFeatures() { return Collections.unmodifiableList(features); }
-    public Long getVersion() { return version; }
-    public void setVersion(Long version) { this.version = version; }
 
     public Double getFuelConsumptionPerDistanceUnit() {
         return model.getFuelCapacity() / this.range;
