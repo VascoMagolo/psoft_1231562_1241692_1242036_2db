@@ -1,17 +1,34 @@
 package aisafe.airports.domain;
 
-import org.springframework.util.Assert;
+import java.util.Objects;
 
-/**
- * Represents a service offered at an airport.
- */
-public class Service {
+public final class Service {
     private final String description;
 
     public Service(String description) {
-        Assert.hasText(description, "Service description cannot be empty");
+        if (description == null || description.trim().isEmpty()) {
+            throw new InvalidServiceException("Service description cannot be empty.");
+        }
         this.description = description;
     }
 
     public String getDescription() { return description; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Service that = (Service) o;
+        return Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description);
+    }
+
+    @Override
+    public String toString() {
+        return "Service{description='" + description + "'}";
+    }
 }

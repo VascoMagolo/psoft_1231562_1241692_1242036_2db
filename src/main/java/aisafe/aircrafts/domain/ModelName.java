@@ -1,15 +1,15 @@
-package aisafe.airports.domain;
+package aisafe.aircrafts.domain;
 
 import java.util.Objects;
 
-public final class Terminal {
+public final class ModelName {
     private final String name;
 
-    public Terminal(String name) {
+    public ModelName(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new InvalidTerminalException("Terminal name cannot be empty.");
+            throw new AircraftModelInvalidFieldException("Aircraft model name cannot be blank.");
         }
-        this.name = name;
+        this.name = name.trim();
     }
 
     public String getName() { return name; }
@@ -18,7 +18,7 @@ public final class Terminal {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Terminal that = (Terminal) o;
+        ModelName that = (ModelName) o;
         return Objects.equals(name, that.name);
     }
 
@@ -29,6 +29,6 @@ public final class Terminal {
 
     @Override
     public String toString() {
-        return "Terminal{name='" + name + "'}";
+        return name;
     }
 }
