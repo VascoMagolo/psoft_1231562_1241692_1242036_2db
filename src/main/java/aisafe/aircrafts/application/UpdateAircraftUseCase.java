@@ -55,6 +55,13 @@ public class UpdateAircraftUseCase {
             aircraft.setFeatures(request.features());
         }
 
+        if (request.status() != null && !request.status().isBlank()) {
+            if (!AircraftStatus.isValid(request.status())) {
+                throw new AircraftInvalidFieldException("Invalid status value: " + request.status());
+            }
+            aircraft.changeStatus(AircraftStatus.valueOf(request.status().toUpperCase()));
+        }
+
         aircraftRepository.save(aircraft);
 
         Long newVersion = aircraftRepository.findVersionFor(registration);

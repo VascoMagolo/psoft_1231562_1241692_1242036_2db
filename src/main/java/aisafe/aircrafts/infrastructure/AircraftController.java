@@ -43,7 +43,6 @@ public class AircraftController {
     private final ListAircraftUseCase listAircraft;
     private final RegisterAircraftUseCase registerAircraft;
     private final SearchAircraftUseCase searchAircraft;
-    private final UpdateAircraftStatusUseCase updateAircraftStatus;
     private final DeleteAircraftUseCase deleteAircraft;
     private final UpdateAircraftUseCase updateAircraftUseCase;
     private final ViewCompatibleRoutesUseCase viewCompatibleRoutes;
@@ -53,7 +52,6 @@ public class AircraftController {
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
-                              UpdateAircraftStatusUseCase updateAircraftStatus,
                               DeleteAircraftUseCase deleteAircraft, UpdateAircraftUseCase updateAircraftUseCase,
                               ViewCompatibleRoutesUseCase viewCompatibleRoutes,
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
@@ -63,7 +61,6 @@ public class AircraftController {
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
         this.searchAircraft = searchAircraft;
-        this.updateAircraftStatus = updateAircraftStatus;
         this.deleteAircraft = deleteAircraft;
         this.updateAircraftUseCase = updateAircraftUseCase;
         this.viewCompatibleRoutes = viewCompatibleRoutes;
@@ -168,29 +165,6 @@ public class AircraftController {
         return ResponseEntity.ok(pagedModel);
     }
 
-    @Operation(summary = "Update aircraft operational status", description = "Updates the status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check. (US105)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Aircraft status updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid status configuration or missing required parameters"),
-            @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
-            @ApiResponse(responseCode = "404", description = "Aircraft profile not found"),
-            @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
-    })
-    @PatchMapping("/{registrationStr}/status")
-    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftStatus(
-            @Parameter(description = "Registration identification key of the target aircraft") @PathVariable String registrationStr,
-            @Parameter(description = "Current version entity state identifier for locking assessment")
-            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
-            @Valid @RequestBody UpdateStatusRequest request) {
-
-        Long version = ETagUtils.parseVersion(ifMatchHeader);
-        RegistrationNumber registration = new RegistrationNumber(registrationStr);
-
-        ViewAircraftDetailsResponse updatedAircraft = updateAircraftStatus.execute(registration, String.valueOf(request.status()), version);
-        return ResponseEntity.ok(toHateoasModel(updatedAircraft, registration));
-    }
-
     @Operation(summary = "Delete an aircraft", description = "Permanently removes an aircraft by registration number. Requires ATCC or Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Aircraft deleted successfully"),
@@ -208,7 +182,7 @@ public class AircraftController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update aircraft details", description = "Updates the technical details of an existing aircraft.")
+    @Operation(summary = "Update aircraft details and status", description = "Updates the technical details and/or the operational status of an existing aircraft. Requires the 'If-Match' header specifying the current resource version to perform Optimistic Concurrency Locking check. (US105)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Aircraft details updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
@@ -218,7 +192,7 @@ public class AircraftController {
             @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
     })
     @PatchMapping("/{registrationStr}")
-    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraftDetails(
+    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraft(
             @PathVariable String registrationStr,
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @RequestBody UpdateAircraftRequest request) {
@@ -317,7 +291,7 @@ public class AircraftController {
         EntityModel<ViewAircraftDetailsResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registration.getNumber())).withSelfRel());
         model.add(linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged(), null)).withRel("all-aircrafts"));
-        model.add(linkTo(methodOn(AircraftController.class).updateAircraftStatus(registration.getNumber(), null, null)).withRel("update-status"));
+        model.add(linkTo(methodOn(AircraftController.class).updateAircraft(registration.getNumber(), null, null)).withRel("update-aircraft"));
         return model;
     }
 

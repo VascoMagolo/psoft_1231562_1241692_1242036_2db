@@ -16,5 +16,6 @@ public record UpdateAircraftRequest(
         LocalDate manufacturingDate,
         Integer seatCapacity,
         Double range,
-        List<String> features
+        List<String> features,
+        String status
 ) {}

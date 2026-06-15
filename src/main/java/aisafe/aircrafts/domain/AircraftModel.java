@@ -1,7 +1,5 @@
 package aisafe.aircrafts.domain;
 
-import org.springframework.util.Assert;
-
 /**
  * Represents an aircraft model template. (Pure Domain Model)
  * It stores the manufacturer data and capacity limits used when registering individual aircraft.
@@ -17,17 +15,17 @@ public class AircraftModel {
     private String imagePath;
 
     public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, String imagePath, Integer maximumSeatingCapacity) {
-        Assert.hasText(modelName, "modelName must not be blank");
-        Assert.notNull(manufacturer, "manufacturer must not be null");
-        Assert.notNull(fuelCapacity, "fuelCapacity must not be null");
-        Assert.notNull(maxRange, "maxRange must not be null");
-        Assert.notNull(cruisingSpeed, "cruisingSpeed must not be null");
-        Assert.notNull(maximumSeatingCapacity, "maximumSeatingCapacity must not be null");
+        if (modelName == null || modelName.isBlank()) throw new AircraftInvalidFieldException("modelName must not be blank");
+        if (manufacturer == null) throw new AircraftInvalidFieldException("manufacturer must not be null");
+        if (fuelCapacity == null) throw new AircraftInvalidFieldException("fuelCapacity must not be null");
+        if (maxRange == null) throw new AircraftInvalidFieldException("maxRange must not be null");
+        if (cruisingSpeed == null) throw new AircraftInvalidFieldException("cruisingSpeed must not be null");
+        if (maximumSeatingCapacity == null) throw new AircraftInvalidFieldException("maximumSeatingCapacity must not be null");
 
-        Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");
-        Assert.isTrue(fuelCapacity > 0, "fuelCapacity must be greater than zero");
-        Assert.isTrue(cruisingSpeed > 0, "cruisingSpeed must be greater than zero");
-        Assert.isTrue(maximumSeatingCapacity > 0, "maximumSeatingCapacity must be greater than zero");
+        if (maxRange <= 0) throw new AircraftInvalidFieldException("maxRange must be greater than zero");
+        if (fuelCapacity <= 0) throw new AircraftInvalidFieldException("fuelCapacity must be greater than zero");
+        if (cruisingSpeed <= 0) throw new AircraftInvalidFieldException("cruisingSpeed must be greater than zero");
+        if (maximumSeatingCapacity <= 0) throw new AircraftInvalidFieldException("maximumSeatingCapacity must be greater than zero");
 
         this.modelName = modelName;
         this.manufacturer = manufacturer;
@@ -51,26 +49,26 @@ public class AircraftModel {
     }
 
     public void setFuelCapacity(Double fuelCapacity) {
-        Assert.notNull(fuelCapacity, "fuelCapacity must not be null");
-        Assert.isTrue(fuelCapacity > 0, "fuelCapacity must be greater than zero");
+        if (fuelCapacity == null) throw new AircraftInvalidFieldException("fuelCapacity must not be null");
+        if (fuelCapacity <= 0) throw new AircraftInvalidFieldException("fuelCapacity must be greater than zero");
         this.fuelCapacity = fuelCapacity;
     }
 
     public void setMaxRange(Double maxRange) {
-        Assert.notNull(maxRange, "maxRange must not be null");
-        Assert.isTrue(maxRange > 0, "maxRange must be greater than zero");
+        if (maxRange == null) throw new AircraftInvalidFieldException("maxRange must not be null");
+        if (maxRange <= 0) throw new AircraftInvalidFieldException("maxRange must be greater than zero");
         this.maxRange = maxRange;
     }
 
     public void setCruisingSpeed(Double cruisingSpeed) {
-        Assert.notNull(cruisingSpeed, "cruisingSpeed must not be null");
-        Assert.isTrue(cruisingSpeed > 0, "cruisingSpeed must be greater than zero");
+        if (cruisingSpeed == null) throw new AircraftInvalidFieldException("cruisingSpeed must not be null");
+        if (cruisingSpeed <= 0) throw new AircraftInvalidFieldException("cruisingSpeed must be greater than zero");
         this.cruisingSpeed = cruisingSpeed;
     }
 
     public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) {
-        Assert.notNull(maximumSeatingCapacity, "maximumSeatingCapacity must not be null");
-        Assert.isTrue(maximumSeatingCapacity > 0, "maximumSeatingCapacity must be greater than zero");
+        if (maximumSeatingCapacity == null) throw new AircraftInvalidFieldException("maximumSeatingCapacity must not be null");
+        if (maximumSeatingCapacity <= 0) throw new AircraftInvalidFieldException("maximumSeatingCapacity must be greater than zero");
         this.maximumSeatingCapacity = maximumSeatingCapacity;
     }
 }

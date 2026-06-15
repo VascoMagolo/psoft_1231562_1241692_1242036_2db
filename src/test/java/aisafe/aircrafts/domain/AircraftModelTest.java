@@ -16,43 +16,43 @@ class AircraftModelTest {
 
     @Test
     void ensureBlankModelNameThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("  ", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureNullManufacturerThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", null, 26730.0, 6150.0, 833.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureZeroMaxRangeThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 0.0, 833.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureNegativeMaxRangeThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, -100.0, 833.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureZeroFuelCapacityThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", Manufacturer.AIRBUS, 0.0, 6150.0, 833.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureZeroCruisingSpeedThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 0.0, "a320.jpg", 180));
     }
 
     @Test
     void ensureZeroSeatingCapacityThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(AircraftInvalidFieldException.class, () ->
                 new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 0));
     }
 
