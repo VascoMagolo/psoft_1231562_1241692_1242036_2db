@@ -41,7 +41,7 @@ class AddAirportCertificationUseCaseTest {
     @Test
     void ensureCertificationIsAddedSuccessfully() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(false);
 
@@ -51,7 +51,7 @@ class AddAirportCertificationUseCaseTest {
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.findByIataCodeCode("XYZ")).thenReturn(Optional.empty());
+        when(airportRepository.findByIataCode(new IataCode("XYZ"))).thenReturn(Optional.empty());
 
         assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("A320")));
         verify(certificationRepository, never()).save(any());
@@ -60,7 +60,7 @@ class AddAirportCertificationUseCaseTest {
     @Test
     void ensureExceptionWhenModelNotFound() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("NON-EXISTENT")).thenReturn(false);
 
         assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("NON-EXISTENT")));
@@ -70,7 +70,7 @@ class AddAirportCertificationUseCaseTest {
     @Test
     void ensureExceptionWhenCertificationAlreadyExists() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(true);
 

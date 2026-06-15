@@ -10,8 +10,8 @@ import java.util.Optional;
  * Repository interface for managing Airport entities.
  */
 public interface AirportRepository extends BaseRepository<Airport> {
-    Optional<Airport> findByIataCodeCode(String code);
-    boolean existsByIataCodeCode(String code);
+    Optional<Airport> findByIataCode(IataCode code);
+    boolean existsByIataCode(IataCode code);
     PaginatedResult<Airport> searchAirports(String name, String city, String country, int pageNumber, int pageSize);
     List<AirportStatisticsData> findStatistics();
     List<Airport> findAllOrderedByRegion();

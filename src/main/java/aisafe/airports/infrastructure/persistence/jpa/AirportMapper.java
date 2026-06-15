@@ -42,7 +42,7 @@ public class AirportMapper {
                 .map(Gate::new)
                 .collect(Collectors.toList());
 
-        airport.setStatus(AirportStatus.valueOf(entity.getStatus()));
+        airport.changeStatus(AirportStatus.valueOf(entity.getStatus()));
         airport.updateDetails(entity.getOperationalHours(), contacts, entity.getImagePath(), services, terminals, gates);
 
         return airport;
