@@ -140,7 +140,7 @@ package "Airport Aggregate" <<Aggregate>> {
   Airport *-- "*" Service
 }
 
-package "Route Aggregate" {
+package "Flight Aggregate" <<Aggregate>> {
   enum RouteStatus <<Enum>> {
     ACTIVE
     INACTIVE
@@ -185,7 +185,8 @@ package "Route Aggregate" {
 }
 
 
-package "Maintenance Template Aggregate" <<Aggregate>> {
+package "Maintenance Aggregate" <<Aggregate>> {
+
   enum MaintenanceType <<Enum>> {
     INSPECTION
     SCHEDULED_MAINTENANCE
@@ -202,15 +203,14 @@ package "Maintenance Template Aggregate" <<Aggregate>> {
     - intervalDays : Integer
   }
   MaintenanceTemplate --> MaintenanceType : applies type
-}
 
-package "Maintenance Record Aggregate" <<Aggregate>> {
   enum MaintenanceStatus <<Enum>> {
      PLANNED
      IN_PROGRESS
      COMPLETED
      CANCELED
   }
+  
   class MaintenanceRecord <<Entity>> <<Root>> {
     - recordId : UUID
     - description : String
@@ -222,9 +222,7 @@ package "Maintenance Record Aggregate" <<Aggregate>> {
     - version : Long
   }
   MaintenanceRecord --> MaintenanceStatus : current status
-}
 
-package "Maintenance Part Aggregate" <<Aggregate>> {
   enum MaintenanceComponent <<Enum>> {
     ENGINE
     AIRFRAME
@@ -232,6 +230,7 @@ package "Maintenance Part Aggregate" <<Aggregate>> {
     INTERIOR
     EXTERIOR
   }
+  
   class MaintenancePart <<Entity>> <<Root>> {
     - partNumber : String
     - name : String
