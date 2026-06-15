@@ -1,21 +1,23 @@
 package aisafe.airports.domain;
 
+import aisafe.aircrafts.domain.ModelName;
+
 public class AircraftCertification {
 
     private final Airport airport;
-    private final String aircraftModelName;
+    private final ModelName aircraftModelName;
 
-    public AircraftCertification(Airport airport, String aircraftModelName) {
+    public AircraftCertification(Airport airport, ModelName aircraftModelName) {
         if (airport == null) {
             throw new InvalidAircraftCertificationException("Airport cannot be null.");
         }
-        if (aircraftModelName == null || aircraftModelName.trim().isEmpty()) {
-            throw new InvalidAircraftCertificationException("Aircraft model name cannot be blank.");
+        if (aircraftModelName == null) {
+            throw new InvalidAircraftCertificationException("Aircraft model name cannot be null.");
         }
         this.airport = airport;
         this.aircraftModelName = aircraftModelName;
     }
 
     public Airport getAirport() { return airport; }
-    public String getAircraftModelName() { return aircraftModelName; }
+    public ModelName getAircraftModelName() { return aircraftModelName; }
 }
