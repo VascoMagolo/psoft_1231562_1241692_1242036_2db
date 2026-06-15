@@ -49,7 +49,7 @@ public class FlightController {
     @PostMapping
     public ResponseEntity<EntityModel<FlightResponse>> scheduleFlight(
             @Valid @RequestBody ScheduleFlightRequest request) {
-        FlightResponse response = FlightResponse.from(scheduleFlight.execute(request));
+        FlightResponse response = scheduleFlight.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(response));
     }
 
@@ -63,7 +63,6 @@ public class FlightController {
     public ResponseEntity<CollectionModel<EntityModel<FlightResponse>>> getScheduledFlightsByAircraft(
             @RequestParam String aircraftId) {
         List<EntityModel<FlightResponse>> flights = viewScheduledFlightsByAircraft.execute(aircraftId).stream()
-                .map(FlightResponse::from)
                 .map(this::toModel)
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(flights,

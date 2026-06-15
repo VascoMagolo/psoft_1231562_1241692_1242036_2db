@@ -14,4 +14,6 @@ public interface ScheduledFlightRepository extends BaseRepository<ScheduledFligh
     boolean hasOverlappingFlights(String registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime);
     boolean existsByAircraftRegistration(String registration);
     long countByRoute(IataCode origin, IataCode destination);
+    List<ModelUtilizationData> findTopModelsByFlightHours(int limit);
+    List<ModelUtilizationData> findTopModelsByAssignments(int limit);
 }

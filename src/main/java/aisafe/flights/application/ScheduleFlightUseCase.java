@@ -4,6 +4,7 @@ import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.flights.application.dtos.FlightResponse;
 import aisafe.flights.application.dtos.ScheduleFlightRequest;
 import aisafe.flights.domain.AircraftUnavailableException;
 import aisafe.airports.domain.IataCode;
@@ -27,7 +28,7 @@ public class ScheduleFlightUseCase {
     private final AircraftRepository aircraftRepository;
     private final RouteDistanceService routeDistanceService;
 
-    public ScheduledFlight execute(ScheduleFlightRequest request) {
+    public FlightResponse execute(ScheduleFlightRequest request) {
         String aircraftId = request.aircraftId().trim().toUpperCase();
         String origin = request.originIataCode().trim().toUpperCase();
         String destination = request.destinationIataCode().trim().toUpperCase();
@@ -52,6 +53,6 @@ public class ScheduleFlightUseCase {
                 aircraft
         );
         scheduledFlightRepository.save(scheduledFlight);
-        return scheduledFlight;
+        return FlightResponse.from(scheduledFlight);
     }
 }

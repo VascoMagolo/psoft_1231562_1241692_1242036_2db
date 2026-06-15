@@ -4,12 +4,13 @@ import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.AlternativeRouteResponse;
+import aisafe.routes.domain.InvalidRouteException;
 import aisafe.shared.application.UseCase;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@UseCase
+@UseCase(readOnly = true)
 @RequiredArgsConstructor
 public class SearchAlternativeRoutesUseCase {
 
@@ -21,7 +22,7 @@ public class SearchAlternativeRoutesUseCase {
         String normalizedDestination = destination.trim().toUpperCase();
 
         if (normalizedOrigin.equals(normalizedDestination)) {
-            throw new IllegalArgumentException("Origin and destination cannot be the same.");
+            throw new InvalidRouteException("Origin and destination cannot be the same.");
         }
         if (!airportRepository.existsByIataCode(new IataCode(normalizedOrigin))) {
             throw new AirportNotFoundException(normalizedOrigin);

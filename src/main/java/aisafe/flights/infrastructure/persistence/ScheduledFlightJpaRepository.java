@@ -16,8 +16,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.RegistrationNumberJpaEmbeddable;
+import org.springframework.context.annotation.Profile;
+import aisafe.flights.domain.ModelUtilizationData;
+import org.springframework.data.domain.PageRequest;
 
 @Repository
+@Profile("jpa")
 public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
 
     private final SpringDataScheduledFlightRepository springRepo;
@@ -30,6 +34,20 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
         this.springRepo = springRepo;
         this.aircraftRepo = aircraftRepo;
         this.routeRepo = routeRepo;
+    }
+
+    @Override
+    public List<ModelUtilizationData> findTopModelsByFlightHours(int limit) {
+        return springRepo.findTopModelsByFlightHours(PageRequest.of(0, limit)).stream()
+                .map(p -> new ModelUtilizationData(p.getModelName(), p.getUtilizationValue()))
+                .toList();
+    }
+
+    @Override
+    public List<ModelUtilizationData> findTopModelsByAssignments(int limit) {
+        return springRepo.findTopModelsByAssignments(PageRequest.of(0, limit)).stream()
+                .map(p -> new ModelUtilizationData(p.getModelName(), p.getUtilizationValue()))
+                .toList();
     }
 
     @Override

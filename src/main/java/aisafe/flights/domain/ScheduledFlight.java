@@ -2,7 +2,7 @@ package aisafe.flights.domain;
 
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.routes.domain.Route;
-import org.springframework.util.Assert;
+import aisafe.shared.domain.DomainException;
 import java.time.OffsetDateTime;
 import java.time.Duration;
 
@@ -19,12 +19,24 @@ public class ScheduledFlight {
 
     public ScheduledFlight(OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime,
                            FlightStatus status, Route route, Aircraft aircraft) {
-        Assert.notNull(departureDateTime, "Departure date/time must not be null.");
-        Assert.notNull(arrivalDateTime, "Arrival date/time must not be null.");
-        Assert.notNull(status, "Flight status must not be null.");
-        Assert.notNull(route, "Route must not be null.");
-        Assert.notNull(aircraft, "Aircraft must not be null.");
-        Assert.isTrue(departureDateTime.isBefore(arrivalDateTime), "Departure must be before arrival.");
+        if (departureDateTime == null) {
+            throw new DomainException("Departure date/time must not be null.");
+        }
+        if (arrivalDateTime == null) {
+            throw new DomainException("Arrival date/time must not be null.");
+        }
+        if (status == null) {
+            throw new DomainException("Flight status must not be null.");
+        }
+        if (route == null) {
+            throw new DomainException("Route must not be null.");
+        }
+        if (aircraft == null) {
+            throw new DomainException("Aircraft must not be null.");
+        }
+        if (!departureDateTime.isBefore(arrivalDateTime)) {
+            throw new DomainException("Departure must be before arrival.");
+        }
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.status = status;

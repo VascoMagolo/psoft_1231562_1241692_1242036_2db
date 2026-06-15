@@ -5,7 +5,7 @@ import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.application.UseCase;
 import lombok.RequiredArgsConstructor;
 
-@UseCase
+@UseCase(readOnly = true)
 @RequiredArgsConstructor
 public class CalculateTotalNetworkDistanceUseCase {
 

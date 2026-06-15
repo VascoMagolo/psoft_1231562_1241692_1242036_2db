@@ -16,7 +16,7 @@ public class NetworkGraphService {
     public List<List<String>> findAlternativePaths(String origin, String destination) {
         Map<String, List<String>> graph = buildGraph(routeRepository.findAllActive());
         List<List<String>> paths = new ArrayList<>();
-        dfs(origin, destination, graph, new LinkedHashSet<>(), paths, graph.size());
+        dfs(origin, destination, graph, new LinkedHashSet<>(), paths, 5);
         return paths.stream()
                 .filter(path -> path.size() > 2)
                 .toList();

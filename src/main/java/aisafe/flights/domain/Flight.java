@@ -1,6 +1,6 @@
 package aisafe.flights.domain;
 
-import org.springframework.util.Assert;
+import aisafe.shared.domain.DomainException;
 
 import java.time.OffsetDateTime;
 
@@ -14,11 +14,21 @@ public class Flight {
 
     public Flight(String aircraftRegistrationNumber, Long routeId,
                   OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime) {
-        Assert.hasText(aircraftRegistrationNumber, "Aircraft registration number cannot be blank");
-        Assert.notNull(routeId, "Route ID must not be null");
-        Assert.notNull(departureDateTime, "Departure datetime must not be null");
-        Assert.notNull(arrivalDateTime, "Arrival datetime must not be null");
-        Assert.isTrue(arrivalDateTime.isAfter(departureDateTime), "Arrival datetime must be after departure datetime");
+        if (aircraftRegistrationNumber == null || aircraftRegistrationNumber.isBlank()) {
+            throw new DomainException("Aircraft registration number cannot be blank");
+        }
+        if (routeId == null) {
+            throw new DomainException("Route ID must not be null");
+        }
+        if (departureDateTime == null) {
+            throw new DomainException("Departure datetime must not be null");
+        }
+        if (arrivalDateTime == null) {
+            throw new DomainException("Arrival datetime must not be null");
+        }
+        if (!arrivalDateTime.isAfter(departureDateTime)) {
+            throw new DomainException("Arrival datetime must be after departure datetime");
+        }
 
         this.aircraftRegistrationNumber = aircraftRegistrationNumber.trim().toUpperCase();
         this.routeId = routeId;

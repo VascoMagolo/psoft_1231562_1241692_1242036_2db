@@ -1,16 +1,18 @@
 package aisafe.routes.application;
 
 import aisafe.routes.application.dtos.ActiveRouteResponse;
+import aisafe.routes.domain.InvalidSortParameterException;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
+import aisafe.shared.domain.DomainException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Comparator;
 import java.util.List;
 
-@UseCase
+@UseCase(readOnly = true)
 @RequiredArgsConstructor
 public class ListActiveRoutesUseCase {
 
@@ -20,11 +22,11 @@ public class ListActiveRoutesUseCase {
 
     public List<ActiveRouteResponse> execute(String status, String sortBy) {
         if (status != null && !status.equalsIgnoreCase("active")) {
-            throw new IllegalArgumentException("Only active route listing is supported.");
+            throw new DomainException("Only active route listing is supported.");
         }
         String normalizedSort = sortBy == null ? "distance" : sortBy.trim().toLowerCase();
         if (!normalizedSort.equals("distance") && !normalizedSort.equals("popularity")) {
-            throw new IllegalArgumentException("sortBy must be distance or popularity.");
+            throw new InvalidSortParameterException("sortBy must be distance or popularity.");
         }
 
         Comparator<ActiveRouteResponse> comparator = normalizedSort.equals("popularity")
