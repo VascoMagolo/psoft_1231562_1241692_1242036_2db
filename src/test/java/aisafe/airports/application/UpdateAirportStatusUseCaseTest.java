@@ -6,6 +6,7 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.AirportStatus;
 import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,9 +37,11 @@ class UpdateAirportStatusUseCaseTest {
     @Test
     void ensureStatusIsUpdatedSuccessfully() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
+        IataCode code = new IataCode("LIS");
+        when(airportRepository.findByIataCode(code)).thenReturn(Optional.of(airport));
+        when(airportRepository.findVersionFor(code)).thenReturn(0L);
 
-        assertDoesNotThrow(() -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED));
+        assertDoesNotThrow(() -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED, 0L));
         verify(airportRepository).save(airport);
     }
 
@@ -46,7 +49,18 @@ class UpdateAirportStatusUseCaseTest {
     void ensureExceptionWhenAirportNotFound() {
         when(airportRepository.findByIataCode(new IataCode("XYZ"))).thenReturn(Optional.empty());
 
-        assertThrows(AirportNotFoundException.class, () -> updateAirportStatus.execute("XYZ", AirportStatus.CLOSED));
+        assertThrows(AirportNotFoundException.class, () -> updateAirportStatus.execute("XYZ", AirportStatus.CLOSED, 0L));
+        verify(airportRepository, never()).save(any());
+    }
+
+    @Test
+    void ensureConcurrencyExceptionWhenVersionMismatches() {
+        Airport airport = buildAirport();
+        IataCode code = new IataCode("LIS");
+        when(airportRepository.findByIataCode(code)).thenReturn(Optional.of(airport));
+        when(airportRepository.findVersionFor(code)).thenReturn(5L);
+
+        assertThrows(ConcurrencyException.class, () -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED, 0L));
         verify(airportRepository, never()).save(any());
     }
 }

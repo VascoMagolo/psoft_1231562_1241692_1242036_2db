@@ -5,8 +5,10 @@ import aisafe.airports.application.dtos.*;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.infrastructure.RouteController;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.ETagUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +21,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,8 +83,8 @@ public class AirportController {
         String code = airport.iataCode();
         return EntityModel.of(airport,
                 linkTo(methodOn(AirportController.class).getAirport(code)).withSelfRel(),
-                linkTo(methodOn(AirportController.class).updateStatus(code, null)).withRel("update-status"),
-                linkTo(methodOn(AirportController.class).updateDetails(code, null)).withRel("update-details"),
+                linkTo(methodOn(AirportController.class).updateStatus(code, null, null)).withRel("update-status"),
+                linkTo(methodOn(AirportController.class).updateDetails(code, null, null)).withRel("update-details"),
                 linkTo(methodOn(AirportController.class).getRoutes(code)).withRel("routes"),
                 linkTo(methodOn(AirportController.class).addCertification(code, null)).withRel("certifications"));
     }
@@ -202,17 +205,19 @@ public class AirportController {
     @Operation(summary = "Update airport operational status", description = "Changes the airport status to OPERATIONAL, CLOSED, or UNDER_MAINTENANCE. Requires Backoffice Operator role. (US109)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid or missing status value"),
+            @ApiResponse(responseCode = "400", description = "Invalid or missing status value, or missing/invalid If-Match header"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
+            @ApiResponse(responseCode = "412", description = "Version mismatch - fetch the latest version and retry")
     })
     @PatchMapping("/{iataCode}/status")
     public ResponseEntity<EntityModel<AirportResponse>> updateStatus(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @Parameter(in = ParameterIn.HEADER, name = "If-Match", required = false, description = "Current resource version for optimistic concurrency control") @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch,
             @Valid @RequestBody UpdateAirportStatusRequest request) {
-        return ResponseEntity.ok(toModel(updateAirportStatus.execute(iataCode.toUpperCase(), request.status())));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(toModel(updateAirportStatus.execute(iataCode.toUpperCase(), request.status(), version)));
     }
 
     /**
@@ -228,16 +233,19 @@ public class AirportController {
     @Operation(summary = "Update airport details", description = "Updates optional fields: operational hours, contact information, image, services, terminals, and gates. Requires Backoffice Operator role. (US208)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Details updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing or invalid If-Match header"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
+            @ApiResponse(responseCode = "412", description = "Version mismatch - fetch the latest version and retry")
     })
     @PatchMapping("/{iataCode}/details")
     public ResponseEntity<EntityModel<AirportResponse>> updateDetails(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @Parameter(in = ParameterIn.HEADER, name = "If-Match", required = false, description = "Current resource version for optimistic concurrency control") @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch,
             @Valid @RequestBody UpdateAirportDetailsRequest request) {
-        return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request)));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request, version)));
     }
 
     /**

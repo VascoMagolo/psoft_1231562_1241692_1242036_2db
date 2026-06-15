@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface AirportRepository extends BaseRepository<Airport> {
     Optional<Airport> findByIataCode(IataCode code);
     boolean existsByIataCode(IataCode code);
+    Long findVersionFor(IataCode code);
     PaginatedResult<Airport> searchAirports(String name, String city, String country, int pageNumber, int pageSize);
     List<AirportStatisticsData> findStatistics();
     List<AirportGroupingData> findAllGroupingByRegion();

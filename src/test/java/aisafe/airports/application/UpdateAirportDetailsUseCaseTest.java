@@ -7,6 +7,7 @@ import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,12 +39,14 @@ class UpdateAirportDetailsUseCaseTest {
     @Test
     void ensureAirportDetailsAreUpdatedSuccessfully() {
         Airport airport = buildAirport("LIS");
-        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
+        IataCode code = new IataCode("LIS");
+        when(airportRepository.findByIataCode(code)).thenReturn(Optional.of(airport));
+        when(airportRepository.findVersionFor(code)).thenReturn(0L);
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", null, null, null, null, null);
 
-        AirportResponse result = updateAirportDetails.execute("LIS", request);
+        AirportResponse result = updateAirportDetails.execute("LIS", request, 0L);
 
         assertNotNull(result);
         verify(airportRepository).save(any(Airport.class));
@@ -56,7 +59,21 @@ class UpdateAirportDetailsUseCaseTest {
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", null, null, null, null, null);
 
-        assertThrows(AirportNotFoundException.class, () -> updateAirportDetails.execute("XXX", request));
+        assertThrows(AirportNotFoundException.class, () -> updateAirportDetails.execute("XXX", request, 0L));
+        verify(airportRepository, never()).save(any());
+    }
+
+    @Test
+    void ensureConcurrencyExceptionWhenVersionMismatches() {
+        Airport airport = buildAirport("LIS");
+        IataCode code = new IataCode("LIS");
+        when(airportRepository.findByIataCode(code)).thenReturn(Optional.of(airport));
+        when(airportRepository.findVersionFor(code)).thenReturn(3L);
+
+        UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
+                "06:00-23:00", null, null, null, null, null);
+
+        assertThrows(ConcurrencyException.class, () -> updateAirportDetails.execute("LIS", request, 0L));
         verify(airportRepository, never()).save(any());
     }
 }
