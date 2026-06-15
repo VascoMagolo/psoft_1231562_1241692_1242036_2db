@@ -64,6 +64,12 @@ class MaintenanceControllerTest {
     private DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
 
     @MockitoBean
+    private UpdateMaintenancePartUseCase updateMaintenancePartUseCase;
+
+    @MockitoBean
+    private UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -78,6 +84,32 @@ class MaintenanceControllerTest {
         sampleRecordResponse = new MaintenanceRecordResponse(
                 sampleRecordId, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
                 4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L);
+    }
+
+    @Test
+    void ensureUpdateTemplateReturns200() throws Exception {
+        UpdateMaintenanceTemplateRequest request = new UpdateMaintenanceTemplateRequest(List.of("Check engine"), 150, 45);
+
+        when(updateMaintenanceTemplateUseCase.execute(any(), any())).thenReturn(new MaintenanceTemplateResponse("Annual Check", "INSPECTION"));
+
+        mockMvc.perform(patch("/api/maintenance/templates/Annual Check")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Annual Check"));
+    }
+
+    @Test
+    void ensureUpdatePartReturns200() throws Exception {
+        UpdateMaintenancePartRequest request = new UpdateMaintenancePartRequest("New description", 20, 10);
+
+        when(updateMaintenancePartUseCase.execute(any(), any())).thenReturn(new MaintenancePartResponse("P001", "New description"));
+
+        mockMvc.perform(patch("/api/maintenance/parts/P001")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.partNumber").value("P001"));
     }
 
     @Test

@@ -7,6 +7,7 @@ This package documents additional use cases that were implemented but are not pa
 - `UpdateAircraftUseCase` - Update aircraft details (`PATCH /api/aircrafts/{registration}`)
 - `DeleteAircraftUseCase` - Delete an aircraft (`DELETE /api/aircrafts/{registration}`)
 - `DeleteAircraftModelUseCase` - Delete an aircraft model (`DELETE /api/aircraftModels/{modelName}`)
+- `UpdateMaintenanceComponentsUseCase` - Update maintenance parts and templates (`PATCH /api/maintenance/parts/{partNumber}`, `PATCH /api/maintenance/templates/{name}`)
 
 ## Notes
 

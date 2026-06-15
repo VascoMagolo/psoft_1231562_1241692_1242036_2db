@@ -44,6 +44,8 @@ public class MaintenanceController {
     private final DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase;
     private final DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase;
     private final DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
+    private final UpdateMaintenancePartUseCase updateMaintenancePartUseCase;
+    private final UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -53,7 +55,9 @@ public class MaintenanceController {
             ViewTotalMaintenanceHoursInFleetUseCase viewTotalMaintenanceHoursInFleetUseCase,
             DeleteMaintenanceRecordUseCase deleteMaintenanceRecordUseCase,
             DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase,
-            DeleteMaintenancePartUseCase deleteMaintenancePartUseCase) {
+            DeleteMaintenancePartUseCase deleteMaintenancePartUseCase,
+            UpdateMaintenancePartUseCase updateMaintenancePartUseCase,
+            UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -63,6 +67,8 @@ public class MaintenanceController {
         this.deleteMaintenanceRecordUseCase = deleteMaintenanceRecordUseCase;
         this.deleteMaintenanceTemplateUseCase = deleteMaintenanceTemplateUseCase;
         this.deleteMaintenancePartUseCase = deleteMaintenancePartUseCase;
+        this.updateMaintenancePartUseCase = updateMaintenancePartUseCase;
+        this.updateMaintenanceTemplateUseCase = updateMaintenanceTemplateUseCase;
     }
 
     /**
@@ -88,6 +94,21 @@ public class MaintenanceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
+    @Operation(summary = "Update maintenance template", description = "Updates details of an existing maintenance template.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Template updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Maintenance template not found")
+    })
+    @PatchMapping("/templates/{name}")
+    public ResponseEntity<MaintenanceTemplateResponse> updateMaintenanceTemplate(
+            @Parameter(description = "Name of the maintenance template") @PathVariable String name,
+            @Valid @RequestBody UpdateMaintenanceTemplateRequest request) {
+        return ResponseEntity.ok(updateMaintenanceTemplateUseCase.execute(name, request));
+    }
+
     /**
      * Endpoint to register a new maintenance part in the system.
      * 
@@ -109,6 +130,21 @@ public class MaintenanceController {
         EntityModel<MaintenancePartResponse> model = EntityModel.of(response,
                 linkTo(methodOn(MaintenanceController.class).createMaintenanceRecord(null)).withRel("create-record"));
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
+    }
+
+    @Operation(summary = "Update a maintenance part", description = "Updates details of an existing maintenance part.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Part updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data supplied"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Maintenance part not found")
+    })
+    @PatchMapping("/parts/{partNumber}")
+    public ResponseEntity<MaintenancePartResponse> updateMaintenancePart(
+            @Parameter(description = "Part number of the maintenance part") @PathVariable String partNumber,
+            @Valid @RequestBody UpdateMaintenancePartRequest request) {
+        return ResponseEntity.ok(updateMaintenancePartUseCase.execute(partNumber, request));
     }
 
     /**
@@ -139,7 +175,7 @@ public class MaintenanceController {
      * Endpoint to update the operational status and notes of an existing
      * maintenance record.
      * 
-     * @param id            the unique ID of the maintenance record to be updated
+     * @param recordId      the unique ID of the maintenance record to be updated
      * @param ifMatchHeader the value of the 'If-Match' header containing the
      *                      current version of the resource for Optimistic
      *                      Concurrency Locking check
