@@ -1,6 +1,9 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
 import aisafe.flights.infrastructure.persistence.SpringDataScheduledFlightRepository;
+import aisafe.airports.domain.IataCode;
+import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +25,38 @@ class RouteRepositoryTest {
     private SpringDataRouteRepository springRepo;
 
     @Autowired
+    private RouteRepository routeRepository;
+
+    @Autowired
     private SpringDataScheduledFlightRepository flightRepo;
+
+    @Test
+    void ensureFindByOriginAndDestinationWorksWithIataCode() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        IataCode origin = new IataCode("LIS");
+        IataCode destination = new IataCode("OPO");
+        Route route = new Route(origin.getCode(), destination.getCode(), 45, 300.0, 150);
+        routeRepository.save(route);
+
+        Optional<Route> found = routeRepository.findByOriginAndDestination(origin, destination);
+
+        assertTrue(found.isPresent());
+        assertEquals("LIS", found.get().getOrigin().getCode());
+        assertEquals("OPO", found.get().getDestination().getCode());
+    }
+
+    @Test
+    void ensureFindByOriginAndDestinationReturnsEmptyWhenNotFound() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        IataCode origin = new IataCode("LIS");
+        IataCode destination = new IataCode("MAD");
+
+        Optional<Route> found = routeRepository.findByOriginAndDestination(origin, destination);
+
+        assertFalse(found.isPresent());
+    }
 
     @Test
     void findCompatibleRoutesFiltersCorrectly() {
