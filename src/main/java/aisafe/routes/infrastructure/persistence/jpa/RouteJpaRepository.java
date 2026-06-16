@@ -3,6 +3,7 @@ package aisafe.routes.infrastructure.persistence.jpa;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.RouteSummaryData;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
@@ -116,5 +117,20 @@ public class RouteJpaRepository implements RouteRepository {
         return springRepo.findCompatibleRoutes(range, capacity).stream()
                 .map(RouteMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RouteSummaryData> listSummariesForAirport(IataCode code) {
+        return springRepo.findSummariesByAirportCode(code.getCode()).stream()
+                .map(r -> new RouteSummaryData(
+                        new IataCode(r.getOriginCode()),
+                        new IataCode(r.getDestinationCode()),
+                        r.getEstimatedFlightTime(),
+                        r.getMinimumRange(),
+                        r.getMinimumCapacity(),
+                        r.getStatus(),
+                        r.getVersion()
+                ))
+                .toList();
     }
 }

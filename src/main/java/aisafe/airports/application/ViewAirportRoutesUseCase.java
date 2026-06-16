@@ -9,9 +9,6 @@ import aisafe.routes.domain.RouteRepository;
 
 import java.util.List;
 
-/**
- * Use case for viewing all routes associated with a specific airport
- */
 @UseCase(readOnly = true)
 public class ViewAirportRoutesUseCase {
     private final AirportRepository airportRepository;
@@ -22,25 +19,20 @@ public class ViewAirportRoutesUseCase {
         this.routeRepository = routeRepository;
     }
 
-    /**
-     * Retrieves a list of all routes that either originate from or are destined for the specified airport.
-     * @param iataCode the IATA code of the airport for which to retrieve routes
-     * @return a list of routes associated with the specified airport
-     */
     public List<RouteResponse> execute(String iataCode) {
-        if (!airportRepository.existsByIataCode(new IataCode(iataCode))) {
+        IataCode code = new IataCode(iataCode);
+        if (!airportRepository.existsByIataCode(code)) {
             throw new AirportNotFoundException(iataCode);
         }
-        IataCode code = new IataCode(iataCode);
-        return routeRepository.findByOriginOrDestination(code, code).stream()
-                .map(r -> new RouteResponse(
-                        r.getOrigin().getCode(),
-                        r.getDestination().getCode(),
-                        r.getEstimatedFlightTime(),
-                        r.getMinimumRange(),
-                        r.getMinimumCapacity(),
-                        r.getStatus(),
-                        routeRepository.findVersionFor(r.getOrigin(), r.getDestination())
+        return routeRepository.listSummariesForAirport(code).stream()
+                .map(s -> new RouteResponse(
+                        s.origin().getCode(),
+                        s.destination().getCode(),
+                        s.estimatedFlightTime(),
+                        s.minimumRange(),
+                        s.minimumCapacity(),
+                        s.status(),
+                        s.version()
                 ))
                 .toList();
     }
