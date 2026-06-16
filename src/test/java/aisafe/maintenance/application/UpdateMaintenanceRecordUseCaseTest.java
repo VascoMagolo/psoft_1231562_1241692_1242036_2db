@@ -1,5 +1,6 @@
 package aisafe.maintenance.application;
 
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
 import aisafe.maintenance.domain.*;
@@ -40,11 +41,11 @@ class UpdateMaintenanceRecordUseCaseTest {
     void ensureRecordIsUpdatedSuccessfully() {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
-        MaintenanceRecord record = spy(new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
-        doReturn(0L).when(record).getVersion();
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA"));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
+        when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
         doNothing().when(recordRepository).save(any());
 
         UUID recordId = record.getRecordId();
@@ -78,14 +79,14 @@ class UpdateMaintenanceRecordUseCaseTest {
     void ensureExceptionWhenVersionMismatch() {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
-        MaintenanceRecord record = spy(new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
-        doReturn(1L).when(record).getVersion();
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA"));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
+        when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(1L); // Database has version 1
 
         assertThrows(ConcurrencyException.class, () ->
-                updateMaintenanceRecord.execute(record.getRecordId(), request, 0L));
+                updateMaintenanceRecord.execute(record.getRecordId(), request, 0L)); // Client provides version 0
         verify(recordRepository, never()).save(any());
     }
 }

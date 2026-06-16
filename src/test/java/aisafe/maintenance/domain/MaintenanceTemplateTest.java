@@ -57,4 +57,16 @@ class MaintenanceTemplateTest {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceTemplate("Annual Inspection", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check"), 500, null));
     }
+
+    @Test
+    void ensureEqualsAndHashCodeWorkBasedOnIdentity() {
+        MaintenanceTemplate temp1 = new MaintenanceTemplate("T1", MaintenanceType.INSPECTION, List.of("M1"), List.of("C1"), 100, 30);
+        MaintenanceTemplate temp2 = new MaintenanceTemplate("T1", MaintenanceType.OVERHAUL, List.of("M2"), List.of("C2"), 500, 365);
+        MaintenanceTemplate temp3 = new MaintenanceTemplate("T2", MaintenanceType.INSPECTION, List.of("M1"), List.of("C1"), 100, 30);
+
+        assertEquals(temp1, temp2);
+        assertNotEquals(temp1, temp3);
+        assertEquals(temp1.hashCode(), temp2.hashCode());
+        assertNotEquals(temp1.hashCode(), temp3.hashCode());
+    }
 }

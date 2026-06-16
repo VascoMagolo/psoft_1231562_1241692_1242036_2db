@@ -25,7 +25,7 @@ class MaintenanceRecordTest {
     void ensureValidRecordIsCreated() {
         MaintenanceRecord record = new MaintenanceRecord(
                 UUID.randomUUID(), "Engine inspection", LocalDateTime.now(), 4,
-                List.of(buildPart()), "Some notes", buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA");
+                List.of(buildPart()), "Some notes", buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA"));
         assertEquals(MaintenanceStatus.PLANNED, record.getStatus());
         assertEquals("Engine inspection", record.getDescription());
         assertEquals(4, record.getExpectedDuration());
@@ -35,42 +35,42 @@ class MaintenanceRecordTest {
     void ensureBlankDescriptionThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "  ", LocalDateTime.now(), 4,
-                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureNullStartDateThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", null, 4,
-                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureNullExpectedDurationThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), null,
-                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureZeroExpectedDurationThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 0,
-                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureNullPartsThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
-                        null, null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        null, null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureEmptyPartsThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
-                        List.of(), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
@@ -84,20 +84,20 @@ class MaintenanceRecordTest {
     void ensureNullTemplateThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
-                        List.of(buildPart()), null, null, MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, null, MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureNullStatusThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
-                        List.of(buildPart()), null, buildTemplate(), null, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), null, new RegistrationNumber("CS-TPA")));
     }
 
     @Test
     void ensureNotesAreOptional() {
         assertDoesNotThrow(() ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
-                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, "CS-TPA"));
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA")));
     }
 }
