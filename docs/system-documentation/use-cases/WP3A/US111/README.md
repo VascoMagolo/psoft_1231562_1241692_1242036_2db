@@ -10,7 +10,7 @@
 
 - Every route update or deactivation must generate a history entry.
 - History entries must include timestamp, operation type, and modified fields.
-- Route history must be retrievable by route ID.
+- Route history must be retrievable by origin and destination IATA codes.
 - History entries are immutable.
 - On success the system returns HTTP 200 with the route history.
 - If the route does not exist, the system returns HTTP 404.
@@ -33,7 +33,7 @@
 
 ## Main Success Scenario
 
-1. The ATCC requests `GET /api/routes/{id}/history`.
+1. The ATCC requests `GET /api/routes/{origin}/{destination}/history`.
 2. The system validates the route existence.
 3. The system retrieves all history entries associated with the route.
 4. The system returns HTTP 200 with the route history.

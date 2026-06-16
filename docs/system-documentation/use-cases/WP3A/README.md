@@ -5,9 +5,9 @@ This package documents the flight route-related use cases currently implemented 
 ## Covered use cases
 
 - `US110` - Create a flight route (`POST /api/routes`)
-- `US111` - Keep track of route history (`GET /api/routes/{id}/history`)
-- `US112` - Update route details & Deactivate a route (`PUT /api/routes/{id}` / `PATCH /api/routes/{id}/deactivate`)
-- `US113` - View route details & View routes from airport (`GET /api/routes/{id}` / `GET /api/routes/airport/{iataCode}`)
+- `US111` - Keep track of route history (`GET /api/routes/{origin}/{destination}/history`)
+- `US112` - Update route details & Deactivate a route (`PUT /api/routes/{origin}/{destination}` / `PATCH /api/routes/{origin}/{destination}/deactivate`)
+- `US113` - View route details & View routes from airport (`GET /api/routes/{origin}/{destination}` / `GET /api/routes/airport/{iataCode}`)
 - `US114` - Search routes (`GET /api/routes/search`)
 
 ## Supporting endpoints
