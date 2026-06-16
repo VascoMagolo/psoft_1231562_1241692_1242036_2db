@@ -28,7 +28,7 @@ alt aircraft not found
 else aircraft found
     UC -> FlightRepo : calculateTotalOperationalHoursByRegistration(registration)
     activate FlightRepo
-    FlightRepo -> DB : SELECT COALESCE(SUM(DATEDIFF(...)), 0) FROM scheduled_flight ...
+    FlightRepo -> DB : SELECT COALESCE(SUM(TIMESTAMPDIFF(...)), 0) FROM scheduled_flight ...
     activate DB
     DB --> FlightRepo : hours (Double)
     deactivate DB

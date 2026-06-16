@@ -24,7 +24,7 @@ alt criteria == ASSIGNMENTS
 else criteria == HOURS
     UC -> FlightRepo : findTopModelsByFlightHours(Limit: 5)
     activate FlightRepo
-    FlightRepo -> DB : SELECT model, SUM(DATEDIFF(...)) ... GROUP BY model ORDER BY sum DESC LIMIT 5
+    FlightRepo -> DB : SELECT model, SUM(TIMESTAMPDIFF(...)) ... GROUP BY model ORDER BY sum DESC LIMIT 5
     activate DB
     DB --> FlightRepo : list of Object[]
     deactivate DB
