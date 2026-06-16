@@ -1,13 +1,12 @@
 package aisafe.security.application;
 
 
+import aisafe.shared.application.SuppressArgLogging;
 import aisafe.shared.application.UseCase;
-import aisafe.shared.infrastructure.SuppressArgLogging;
 import aisafe.security.application.dtos.AuthResponse;
 import aisafe.security.application.dtos.LoginRequest;
 import aisafe.security.domain.InvalidCredentialsException;
 import aisafe.security.domain.UserRepository;
-import aisafe.shared.infrastructure.UseCaseLoggingAdvice;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 

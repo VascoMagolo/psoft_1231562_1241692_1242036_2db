@@ -1,6 +1,5 @@
 package aisafe.flights.infrastructure.persistence;
 
-import aisafe.aircrafts.infrastructure.persistence.jpa.TopUtilizedModelProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +16,7 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "WHERE f.status = 'COMPLETED' " +
            "GROUP BY f.aircraft.model.modelName " +
            "ORDER BY utilizationValue DESC")
-    List<TopUtilizedModelProjection> findTopModelsByAssignments(Pageable pageable);
+    List<ModelUtilizationProjection> findTopModelsByAssignments(Pageable pageable);
 
     @Query(value = "SELECT am.model_name AS modelName, " +
                    "SUM(DATEDIFF(SECOND, f.departure_date_time, f.arrival_date_time)) / 3600 AS utilizationValue " +
@@ -27,7 +26,7 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
                    "WHERE f.status = 'COMPLETED' " +
                    "GROUP BY am.model_name " +
                    "ORDER BY utilizationValue DESC", nativeQuery = true)
-    List<TopUtilizedModelProjection> findTopModelsByFlightHours(Pageable pageable);
+    List<ModelUtilizationProjection> findTopModelsByFlightHours(Pageable pageable);
 
     @Query(value = "SELECT COALESCE(SUM(DATEDIFF(SECOND, f.departure_date_time, f.arrival_date_time)), 0) / 3600.0 " +       
                    "FROM scheduled_flight f " +

@@ -159,7 +159,10 @@ class ArchitectureTest {
     // TODO #55: enable once SecurityContextHolder is removed from routes application layer
     // static final ArchRule application_no_security_context_holder = ...
 
-    // TODO #76: enable once GetTopUtilizedModelsUseCase and
-    // CalculateAircraftOperationalHoursUseCase use domain ports instead of JPA classes
-    // static final ArchRule application_no_infrastructure_dependency = ...
+    @ArchTest
+    static final ArchRule application_no_infrastructure_dependency =
+        noClasses()
+            .that().resideInAPackage("aisafe.*.application..")
+            .should().dependOnClassesThat().resideInAPackage("aisafe.*.infrastructure..")
+            .because("application layer must not depend on infrastructure layer");
 }
