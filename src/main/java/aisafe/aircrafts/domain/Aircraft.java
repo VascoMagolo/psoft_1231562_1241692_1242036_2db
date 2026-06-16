@@ -20,6 +20,19 @@ public class Aircraft {
 
     public Aircraft(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model,
                     RegistrationNumber registrationNumber, Integer seatCapacity, Double range, List<String> features) {
+        validateFields(status, manufacturingDate, model, registrationNumber, seatCapacity, range);
+
+        this.status = status;
+        this.manufacturingDate = manufacturingDate;
+        this.model = model;
+        this.registrationNumber = registrationNumber;
+        this.seatCapacity = seatCapacity;
+        this.range = range;
+        this.features = features != null ? new ArrayList<>(features) : new ArrayList<>();
+    }
+
+    private void validateFields(AircraftStatus status, LocalDate manufacturingDate, AircraftModel model,
+                                RegistrationNumber registrationNumber, Integer seatCapacity, Double range) {
         if (status == null) throw new AircraftInvalidFieldException("Status must not be null.");
         if (manufacturingDate == null) throw new AircraftInvalidFieldException("Manufacturing date must not be null.");
         if (model == null) throw new AircraftInvalidFieldException("Model must not be null.");
@@ -29,14 +42,17 @@ public class Aircraft {
         if (range == null) throw new AircraftInvalidFieldException("Range must not be null.");
         if (range <= 0) throw new AircraftInvalidFieldException("Range must be greater than zero.");
         if (range > model.getMaxRange()) throw new AircraftInvalidFieldException("Aircraft range cannot exceed model's maximum range (" + model.getMaxRange() + ")");
+    }
 
-        this.status = status;
-        this.manufacturingDate = manufacturingDate;
-        this.model = model;
-        this.registrationNumber = registrationNumber;
-        this.seatCapacity = seatCapacity;
-        this.range = range;
-        this.features = features != null ? new ArrayList<>(features) : new ArrayList<>();
+    public void updateDetails(AircraftModel model, LocalDate manufacturingDate, Integer seatCapacity, Double range, List<String> features, AircraftStatus status) {
+        if (model != null) this.model = model;
+        if (manufacturingDate != null) this.manufacturingDate = manufacturingDate;
+        if (seatCapacity != null) this.seatCapacity = seatCapacity;
+        if (range != null) this.range = range;
+        if (features != null) this.features = new ArrayList<>(features);
+        if (status != null) this.status = status;
+
+        validateFields(this.status, this.manufacturingDate, this.model, this.registrationNumber, this.seatCapacity, this.range);
     }
 
     public void changeStatus(AircraftStatus newStatus) {
@@ -51,31 +67,6 @@ public class Aircraft {
     public Double getRange() { return range; }
     public AircraftModel getModel() { return model; }
     public List<String> getFeatures() { return Collections.unmodifiableList(features); }
-
-    public void setManufacturingDate(LocalDate manufacturingDate) {
-        if (manufacturingDate == null) throw new AircraftInvalidFieldException("Manufacturing date must not be null.");
-        this.manufacturingDate = manufacturingDate;
-    }
-
-    public void setSeatCapacity(Integer seatCapacity) {
-        if (seatCapacity == null) throw new AircraftInvalidFieldException("Seat capacity must not be null.");
-        if (seatCapacity <= 0) throw new AircraftInvalidFieldException("Seat capacity must be greater than zero.");
-        this.seatCapacity = seatCapacity;
-    }
-
-    public void setRange(Double range) {
-        if (range == null) throw new AircraftInvalidFieldException("Range must not be null.");
-        if (range <= 0) throw new AircraftInvalidFieldException("Range must be greater than zero.");
-        if (range > model.getMaxRange()) throw new AircraftInvalidFieldException("Aircraft range cannot exceed model's maximum range (" + model.getMaxRange() + ")");
-        this.range = range;
-    }
-
-    public void setModel(AircraftModel model) {
-        if (model == null) throw new AircraftInvalidFieldException("Model must not be null.");
-        this.model = model;
-    }
-
-    public void setFeatures(List<String> features) { this.features = features != null ? new ArrayList<>(features) : new ArrayList<>(); }
 
     public Double getFuelConsumptionPerDistanceUnit() {
         return model.getFuelCapacity() / this.range;

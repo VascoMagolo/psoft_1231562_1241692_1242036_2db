@@ -44,31 +44,20 @@ public class AircraftModel {
     public Integer getMaximumSeatingCapacity() { return maximumSeatingCapacity; }
     public String getImagePath() { return imagePath; }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void updateDetails(Double fuelCapacity, Double maxRange, Double cruisingSpeed, Integer maximumSeatingCapacity, String imagePath) {
+        if (fuelCapacity != null) this.fuelCapacity = fuelCapacity;
+        if (maxRange != null) this.maxRange = maxRange;
+        if (cruisingSpeed != null) this.cruisingSpeed = cruisingSpeed;
+        if (maximumSeatingCapacity != null) this.maximumSeatingCapacity = maximumSeatingCapacity;
+        if (imagePath != null) this.imagePath = imagePath;
+
+        validateFields(this.fuelCapacity, this.maxRange, this.cruisingSpeed, this.maximumSeatingCapacity);
     }
 
-    public void setFuelCapacity(Double fuelCapacity) {
-        if (fuelCapacity == null) throw new AircraftInvalidFieldException("fuelCapacity must not be null");
-        if (fuelCapacity <= 0) throw new AircraftInvalidFieldException("fuelCapacity must be greater than zero");
-        this.fuelCapacity = fuelCapacity;
-    }
-
-    public void setMaxRange(Double maxRange) {
-        if (maxRange == null) throw new AircraftInvalidFieldException("maxRange must not be null");
-        if (maxRange <= 0) throw new AircraftInvalidFieldException("maxRange must be greater than zero");
-        this.maxRange = maxRange;
-    }
-
-    public void setCruisingSpeed(Double cruisingSpeed) {
-        if (cruisingSpeed == null) throw new AircraftInvalidFieldException("cruisingSpeed must not be null");
-        if (cruisingSpeed <= 0) throw new AircraftInvalidFieldException("cruisingSpeed must be greater than zero");
-        this.cruisingSpeed = cruisingSpeed;
-    }
-
-    public void setMaximumSeatingCapacity(Integer maximumSeatingCapacity) {
-        if (maximumSeatingCapacity == null) throw new AircraftInvalidFieldException("maximumSeatingCapacity must not be null");
-        if (maximumSeatingCapacity <= 0) throw new AircraftInvalidFieldException("maximumSeatingCapacity must be greater than zero");
-        this.maximumSeatingCapacity = maximumSeatingCapacity;
+    private void validateFields(Double fuelCapacity, Double maxRange, Double cruisingSpeed, Integer maximumSeatingCapacity) {
+        if (fuelCapacity == null || fuelCapacity <= 0) throw new AircraftInvalidFieldException("fuelCapacity must be greater than zero");
+        if (maxRange == null || maxRange <= 0) throw new AircraftInvalidFieldException("maxRange must be greater than zero");
+        if (cruisingSpeed == null || cruisingSpeed <= 0) throw new AircraftInvalidFieldException("cruisingSpeed must be greater than zero");
+        if (maximumSeatingCapacity == null || maximumSeatingCapacity <= 0) throw new AircraftInvalidFieldException("maximumSeatingCapacity must be greater than zero");
     }
 }

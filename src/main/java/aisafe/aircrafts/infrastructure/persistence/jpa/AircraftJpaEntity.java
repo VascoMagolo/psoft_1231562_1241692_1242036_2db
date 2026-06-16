@@ -38,7 +38,7 @@ public class AircraftJpaEntity {
     @JoinColumn(name = "model_id")
     private AircraftModelJpaEntity model;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "aircraft_features", joinColumns = @JoinColumn(name = "aircraft_id"))
     @Column(name = "feature")
     private List<String> features;

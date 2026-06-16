@@ -4,6 +4,7 @@ import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,14 +35,14 @@ class ListAircraftModelsUseCaseTest {
 
     @Test
     void ensureListReturnsModelsSuccessfully() {
-        when(aircraftModelRepository.findAll(0, 10)).thenReturn(List.of(aircraftModel));
+        when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(aircraftModel), 1L));
 
-        List<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(1, result.data().size());
         
-        ListAircraftModelsUseCaseResponse response = result.get(0);
+        ListAircraftModelsUseCaseResponse response = result.data().get(0);
         assertEquals("A320", response.modelName());
         assertEquals(Manufacturer.AIRBUS, response.manufacturer());
         assertEquals(26730.0, response.fuelCapacity());
@@ -53,11 +54,11 @@ class ListAircraftModelsUseCaseTest {
 
     @Test
     void ensureListReturnsEmptyWhenNoModelsExist() {
-        when(aircraftModelRepository.findAll(0, 10)).thenReturn(List.of());
+        when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
-        List<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.data().isEmpty());
     }
 }

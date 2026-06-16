@@ -6,6 +6,7 @@ import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import aisafe.shared.domain.PaginatedResult;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,12 +28,14 @@ public class ListAircraftModelsUseCase {
      * @param pageSize the number of items per page
      * @return a plain Java List of aircraft model DTOs
      */
-    public List<ListAircraftModelsUseCaseResponse> execute(int pageNumber, int pageSize) {
+    public PaginatedResult<ListAircraftModelsUseCaseResponse> execute(int pageNumber, int pageSize) {
 
-        List<AircraftModel> modelsList = repository.findAll(pageNumber, pageSize);
+        PaginatedResult<AircraftModel> modelsResult = repository.findAll(pageNumber, pageSize);
 
-        return modelsList.stream()
+        List<ListAircraftModelsUseCaseResponse> data = modelsResult.data().stream()
                 .map(ListAircraftModelsUseCaseResponse::from)
                 .collect(Collectors.toList());
+
+        return new PaginatedResult<>(data, modelsResult.totalElements());
     }
 }
