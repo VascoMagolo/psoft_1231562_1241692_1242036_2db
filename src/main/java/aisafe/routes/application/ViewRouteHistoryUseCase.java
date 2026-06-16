@@ -2,12 +2,14 @@ package aisafe.routes.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.domain.RouteHistory;
 import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @UseCase(readOnly = true)
 public class ViewRouteHistoryUseCase {
@@ -25,12 +27,21 @@ public class ViewRouteHistoryUseCase {
      *
      * @param origin      the IATA code of the origin airport
      * @param destination the IATA code of the destination airport
-     * @return a list of history entries for the specified route
+     * @return a list of history responses for the specified route
      */
-    public List<RouteHistory> execute(String origin, String destination) {
+    public List<RouteHistoryResponse> execute(String origin, String destination) {
         if (!routeRepository.existsByOriginAndDestination(new IataCode(origin), new IataCode(destination))) {
             throw new RouteNotFoundException(origin + "-" + destination);
         }
-        return historyRepository.findAllByRoute(origin, destination);
+        return historyRepository.findAllByRoute(origin, destination)
+                .stream()
+                .map(h -> new RouteHistoryResponse(
+                        h.getOriginCode(),
+                        h.getDestinationCode(),
+                        h.getChangeDescription(),
+                        h.getChangedAt(),
+                        h.getChangedBy()
+                ))
+                .collect(Collectors.toList());
     }
 }

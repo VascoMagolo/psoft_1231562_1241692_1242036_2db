@@ -10,5 +10,6 @@ public record CreateRouteRequest(
         @NotBlank String destinationIataCode,
         @NotNull @Min(1) Integer estimatedFlightTime,
         @NotNull @Positive Double minimumRange,
-        @NotNull @Min(1) Integer minimumCapacity
+        @NotNull @Min(1) Integer minimumCapacity,
+        @NotBlank String createdBy
 ) {}

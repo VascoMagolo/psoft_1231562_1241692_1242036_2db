@@ -1,6 +1,7 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +33,10 @@ class ViewRouteHistoryUseCaseTest {
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(true);
         when(historyRepository.findAllByRoute("OPO", "LIS")).thenReturn(List.of(entry));
 
-        List<RouteHistory> result = viewRouteHistory.execute("OPO", "LIS");
+        List<RouteHistoryResponse> result = viewRouteHistory.execute("OPO", "LIS");
 
         assertEquals(1, result.size());
-        assertEquals("Route created", result.get(0).getChangeDescription());
+        assertEquals("Route created", result.get(0).changeDescription());
     }
 
     @Test

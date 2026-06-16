@@ -5,12 +5,12 @@ import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteHistory;
 import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.DuplicateResourceException;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Use case responsible for creating a new route.
@@ -33,9 +33,9 @@ public class CreateRouteUseCase {
      * Validates and persists a new route based on the provided request.
      *
      * @param request the data required to create the route
-     * @return the created route
+     * @return the created route response
      */
-    public Route execute(CreateRouteRequest request) {
+    public RouteResponse execute(CreateRouteRequest request) {
         String originCode = request.originIataCode().trim().toUpperCase();
         String destinationCode = request.destinationIataCode().trim().toUpperCase();
 
@@ -58,8 +58,7 @@ public class CreateRouteUseCase {
         );
 
         routeRepository.save(route);
-        String createdBy = SecurityContextHolder.getContext().getAuthentication().getName();
-        routeHistoryRepository.save(new RouteHistory(originCode, destinationCode, "Route created", createdBy));
-        return route;
+        routeHistoryRepository.save(new RouteHistory(originCode, destinationCode, "Route created", request.createdBy()));
+        return RouteResponse.from(route);
     }
 }

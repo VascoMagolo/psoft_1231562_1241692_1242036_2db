@@ -1,5 +1,6 @@
 package aisafe.routes.application.dtos;
 
+import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteStatus;
 
 /**
@@ -13,4 +14,16 @@ public record RouteResponse(
         Integer minimumCapacity,
         RouteStatus status,
         Long version
-) {}
+) {
+    public static RouteResponse from(Route route) {
+        return new RouteResponse(
+                route.getOrigin().getCode(),
+                route.getDestination().getCode(),
+                route.getEstimatedFlightTime(),
+                route.getMinimumRange(),
+                route.getMinimumCapacity(),
+                route.getStatus(),
+                null
+        );
+    }
+}
