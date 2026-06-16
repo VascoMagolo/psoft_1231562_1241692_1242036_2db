@@ -34,7 +34,8 @@ public class UpdateMaintenanceRecordUseCase {
         MaintenanceRecord record = recordRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record with ID " + recordId + " not found."));
 
-        if (!record.getVersion().equals(clientVersion)) {
+        Long currentVersion = recordRepository.findVersionFor(recordId);
+        if (!currentVersion.equals(clientVersion)) {
             throw new ConcurrencyException("Maintenance record version mismatch.");
         }
 
@@ -44,14 +45,16 @@ public class UpdateMaintenanceRecordUseCase {
         }
 
         recordRepository.save(record);
+        
+        Long newVersion = recordRepository.findVersionFor(recordId);
 
         return new MaintenanceRecordResponse(
                 record.getRecordId(), record.getDescription(), record.getStartDate(),
                 record.getExpectedDuration(), record.getNotes(),
                 record.getParts().stream().map(MaintenancePart::getPartNumber).toList(),
                 record.getTemplate().getName(),
-                record.getStatus().name(), record.getAircraftRegistration(),
-                record.getVersion()
+                record.getStatus().name(), record.getAircraftRegistration().getNumber(),
+                newVersion
         );
     }
 }

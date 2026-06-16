@@ -1,5 +1,6 @@
 package aisafe.maintenance.domain;
 
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.shared.domain.BaseRepository;
 import aisafe.shared.domain.PaginatedResult;
 
@@ -11,7 +12,9 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
     boolean existsByStartDateAndTemplate(LocalDateTime startDate, MaintenanceTemplate template);
     boolean existsByPartsContaining(MaintenancePart part);
     boolean existsByTemplate(MaintenanceTemplate template);
-    boolean existsByAircraftRegistration(String aircraftRegistration);
+    boolean existsByAircraftRegistration(RegistrationNumber registrationNumber);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     Optional<MaintenanceRecord> findByRecordId(UUID recordId);
+    Long findVersionFor(UUID recordId);
+    Long sumTotalMaintenanceHours();
 }

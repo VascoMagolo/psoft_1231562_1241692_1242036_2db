@@ -1,5 +1,6 @@
 package aisafe.maintenance.application;
 
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenanceRecord;
@@ -37,7 +38,7 @@ class DeleteMaintenanceRecordUseCaseTest {
         MaintenanceTemplate template = new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
                 List.of("ModelA"), List.of("Check oil"), 500, 90);
         return new MaintenanceRecord(UUID.randomUUID(), "Oil change", LocalDateTime.now(), 2, List.of(part), "notes", template,
-                MaintenanceStatus.PLANNED, "CS-ABD");
+                MaintenanceStatus.PLANNED, new RegistrationNumber("CS-ABD"));
     }
 
     @Test

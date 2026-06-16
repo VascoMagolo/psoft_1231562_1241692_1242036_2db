@@ -218,7 +218,7 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - expectedDuration : Integer
     - notes : String
     - status : MaintenanceStatus
-    - aircraftRegistration : String
+    - aircraftRegistration : RegistrationNumber
     - version : Long
   }
   MaintenanceRecord --> MaintenanceStatus : current status

@@ -59,4 +59,16 @@ class MaintenancePartTest {
         assertDoesNotThrow(() ->
                 new MaintenancePart("P001", "Engine Filter", null, 0, 0, MaintenanceComponent.ENGINE));
     }
+
+    @Test
+    void ensureEqualsAndHashCodeWorkBasedOnIdentity() {
+        MaintenancePart part1 = new MaintenancePart("P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
+        MaintenancePart part2 = new MaintenancePart("P001", "Different Name", "Different desc", 5, 1, MaintenanceComponent.ENGINE);
+        MaintenancePart part3 = new MaintenancePart("P002", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
+
+        assertEquals(part1, part2);
+        assertNotEquals(part1, part3);
+        assertEquals(part1.hashCode(), part2.hashCode());
+        assertNotEquals(part1.hashCode(), part3.hashCode());
+    }
 }

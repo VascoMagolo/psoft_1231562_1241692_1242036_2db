@@ -1,12 +1,12 @@
 package aisafe.maintenance.domain;
 
+import aisafe.aircrafts.domain.RegistrationNumber;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public class MaintenanceRecord {
     private UUID recordId;
-    private Long version;
     private String description;
     private LocalDateTime startDate;
     private Integer expectedDuration;
@@ -14,11 +14,11 @@ public class MaintenanceRecord {
     private List<MaintenancePart> parts;
     private MaintenanceTemplate template;
     private MaintenanceStatus status;
-    private String aircraftRegistration;
+    private RegistrationNumber aircraftRegistration;
 
     public MaintenanceRecord(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                              List<MaintenancePart> parts, String notes, MaintenanceTemplate template,
-                             MaintenanceStatus status, String aircraftRegistration) {
+                             MaintenanceStatus status, RegistrationNumber aircraftRegistration) {
         if (recordId == null) throw new MaintenanceInvalidFieldException("Record ID must not be null.");
         if (description == null || description.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Description must not be blank.");
         if (startDate == null) throw new MaintenanceInvalidFieldException("Start date must not be null.");
@@ -41,7 +41,6 @@ public class MaintenanceRecord {
     }
 
     public UUID getRecordId() { return recordId; }
-    public Long getVersion() { return version; }
     public String getDescription() { return description; }
     public LocalDateTime getStartDate() { return startDate; }
     public Integer getExpectedDuration() { return expectedDuration; }
@@ -49,9 +48,8 @@ public class MaintenanceRecord {
     public List<MaintenancePart> getParts() { return parts; }
     public MaintenanceTemplate getTemplate() { return template; }
     public MaintenanceStatus getStatus() { return status; }
-    public String getAircraftRegistration() { return aircraftRegistration; }
+    public RegistrationNumber getAircraftRegistration() { return aircraftRegistration; }
 
-    public void setVersion(Long version) { this.version = version; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(MaintenanceStatus status) { this.status = status; }
 }
