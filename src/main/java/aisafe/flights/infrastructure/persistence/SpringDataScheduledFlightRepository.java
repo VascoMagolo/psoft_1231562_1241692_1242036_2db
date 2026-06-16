@@ -18,20 +18,17 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "ORDER BY utilizationValue DESC")
     List<ModelUtilizationProjection> findTopModelsByAssignments(Pageable pageable);
 
-    @Query(value = "SELECT am.model_name AS modelName, " +
-                   "SUM(DATEDIFF(SECOND, f.departure_date_time, f.arrival_date_time)) / 3600 AS utilizationValue " +
-                   "FROM scheduled_flight f " +
-                   "JOIN aircrafts a ON f.aircraft_id = a.id " +
-                   "JOIN aircraft_models am ON a.model_id = am.id " +
-                   "WHERE f.status = 'COMPLETED' " +
-                   "GROUP BY am.model_name " +
-                   "ORDER BY utilizationValue DESC", nativeQuery = true)
+    @Query("SELECT f.aircraft.model.modelName AS modelName, " +
+           "SUM(TIMESTAMPDIFF(SECOND, f.departureDateTime, f.arrivalDateTime)) / 3600 AS utilizationValue " +
+           "FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.status = 'COMPLETED' " +
+           "GROUP BY f.aircraft.model.modelName " +
+           "ORDER BY utilizationValue DESC")
     List<ModelUtilizationProjection> findTopModelsByFlightHours(Pageable pageable);
 
-    @Query(value = "SELECT COALESCE(SUM(DATEDIFF(SECOND, f.departure_date_time, f.arrival_date_time)), 0) / 3600.0 " +       
-                   "FROM scheduled_flight f " +
-                   "JOIN aircrafts a ON f.aircraft_id = a.id " +
-                   "WHERE f.status = 'COMPLETED' AND a.registration_number = :registration", nativeQuery = true)
+    @Query("SELECT COALESCE(SUM(TIMESTAMPDIFF(SECOND, f.departureDateTime, f.arrivalDateTime)), 0) / 3600.0 " +
+           "FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.status = 'COMPLETED' AND f.aircraft.registrationNumber.number = :registration")
     Double calculateTotalOperationalHoursByRegistration(@Param("registration") String registration);
 
     @Query("SELECT f FROM ScheduledFlightJpaEntity f " +
