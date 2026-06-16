@@ -61,6 +61,18 @@ class MaintenancePartTest {
     }
 
     @Test
+    void ensureInvariantsRemainImmutableDuringUpdate() {
+        MaintenancePart part = new MaintenancePart("P001", "Engine Filter", "Old desc", 10, 2, MaintenanceComponent.ENGINE);
+        
+        part.updateDetails("New desc", 20, 5);
+        
+        assertEquals("P001", part.getPartNumber());
+        assertEquals("Engine Filter", part.getName());
+        assertEquals(MaintenanceComponent.ENGINE, part.getComponent());
+        assertEquals("New desc", part.getDescription());
+    }
+
+    @Test
     void ensureEqualsAndHashCodeWorkBasedOnIdentity() {
         MaintenancePart part1 = new MaintenancePart("P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
         MaintenancePart part2 = new MaintenancePart("P001", "Different Name", "Different desc", 5, 1, MaintenanceComponent.ENGINE);
