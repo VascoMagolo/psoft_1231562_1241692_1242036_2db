@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +45,7 @@ class CreateMaintenanceRecordUseCaseTest {
     @BeforeEach
     void setUp() {
         request = new CreateMaintenanceRecordRequest(
-                "Test maintenance", LocalDateTime.of(2023, 1, 1, 10, 0), 8, List.of("P001"), "Notes", "Template1", MaintenanceStatus.PLANNED, "CS-TPA"
+                "Test maintenance", LocalDateTime.of(2023, 1, 1, 10, 0), 8, List.of("P001"), "Notes", "Template1", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE)
         );
         part = new MaintenancePart("P001", "Part1", "Desc1", 10, 2, MaintenanceComponent.ENGINE);
         template = new MaintenanceTemplate("Template1", MaintenanceType.INSPECTION, List.of("Model1"), List.of("Check1"), 100, 30);
@@ -63,6 +64,7 @@ class CreateMaintenanceRecordUseCaseTest {
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.aircraftRegistration());
+        assertEquals(Set.of("ENGINE"), response.components());
         verify(recordRepository, times(1)).save(any(MaintenanceRecord.class));
     }
 

@@ -2,6 +2,7 @@ package aisafe.maintenance.application.dtos;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -16,6 +17,7 @@ import java.util.UUID;
  * @param status
  * @param aircraftRegistration
  * @param version
+ * @param components
  */
 public record MaintenanceRecordResponse(
         UUID id,
@@ -27,5 +29,6 @@ public record MaintenanceRecordResponse(
         String templateName,
         String status,
         String aircraftRegistration,
-        Long version
+        Long version,
+        Set<String> components
 ) {}

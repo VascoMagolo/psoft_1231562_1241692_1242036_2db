@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -83,7 +84,7 @@ class MaintenanceControllerTest {
         sampleRecordId = UUID.randomUUID();
         sampleRecordResponse = new MaintenanceRecordResponse(
                 sampleRecordId, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L);
+                4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L, Set.of("ENGINE"));
     }
 
     @Test
@@ -142,7 +143,7 @@ class MaintenanceControllerTest {
     void ensureCreateRecordReturns201() throws Exception {
         CreateMaintenanceRecordRequest request = new CreateMaintenanceRecordRequest(
                 "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA");
+                4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE));
 
         when(createMaintenanceRecordUseCase.execute(any())).thenReturn(sampleRecordResponse);
 
@@ -151,6 +152,7 @@ class MaintenanceControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.description").value("Engine inspection"))
+                .andExpect(jsonPath("$.components").isArray())
                 .andExpect(jsonPath("$._links.update-record").exists());
     }
 
