@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +46,7 @@ class MaintenanceRecordRepositoryTest {
         UUID recordId = UUID.randomUUID();
         MaintenanceRecordJpaEntity record = new MaintenanceRecordJpaEntity(
                 recordId, "Oil change", LocalDateTime.now(), 4, "notes",
-                List.of(part), template, MaintenanceStatus.PLANNED, "CS-TPA");
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA");
         recordRepository.save(record);
 
         var found = recordRepository.findByRecordId(recordId);
@@ -56,8 +57,8 @@ class MaintenanceRecordRepositoryTest {
 
     @Test
     void ensureSumTotalExpectedDurationWorks() {
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, "CS-A"));
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R2", LocalDateTime.now(), 10, null, List.of(part), template, MaintenanceStatus.PLANNED, "CS-B"));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-A"));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R2", LocalDateTime.now(), 10, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-B"));
 
         Long total = recordRepository.sumTotalExpectedDuration();
         assertEquals(15L, total);
@@ -65,7 +66,7 @@ class MaintenanceRecordRepositoryTest {
 
     @Test
     void ensureExistsByAircraftRegistrationWorks() {
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, "CS-TPA"));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA"));
 
         assertTrue(recordRepository.existsByAircraftRegistration("CS-TPA"));
         assertFalse(recordRepository.existsByAircraftRegistration("UNKNOWN"));

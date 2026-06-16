@@ -6,7 +6,9 @@ import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
 import aisafe.maintenance.domain.*;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Updates an existing maintenance record with respective status and notes for it
@@ -54,7 +56,8 @@ public class UpdateMaintenanceRecordUseCase {
                 record.getParts().stream().map(MaintenancePart::getPartNumber).toList(),
                 record.getTemplate().getName(),
                 record.getStatus().name(), record.getAircraftRegistration().getNumber(),
-                newVersion
+                newVersion,
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
         );
     }
 }

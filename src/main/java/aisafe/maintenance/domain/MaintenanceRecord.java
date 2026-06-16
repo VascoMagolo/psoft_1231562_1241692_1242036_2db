@@ -3,6 +3,7 @@ package aisafe.maintenance.domain;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class MaintenanceRecord {
@@ -14,11 +15,12 @@ public class MaintenanceRecord {
     private List<MaintenancePart> parts;
     private MaintenanceTemplate template;
     private MaintenanceStatus status;
+    private Set<MaintenanceComponent> components;
     private RegistrationNumber aircraftRegistration;
 
     public MaintenanceRecord(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                              List<MaintenancePart> parts, String notes, MaintenanceTemplate template,
-                             MaintenanceStatus status, RegistrationNumber aircraftRegistration) {
+                             MaintenanceStatus status, Set<MaintenanceComponent> components, RegistrationNumber aircraftRegistration) {
         if (recordId == null) throw new MaintenanceInvalidFieldException("Record ID must not be null.");
         if (description == null || description.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Description must not be blank.");
         if (startDate == null) throw new MaintenanceInvalidFieldException("Start date must not be null.");
@@ -29,6 +31,8 @@ public class MaintenanceRecord {
         if (aircraftRegistration == null) throw new MaintenanceInvalidFieldException("Record must have an aircraft registration number.");
         if (template == null) throw new MaintenanceInvalidFieldException("Maintenance template must not be null.");
         if (status == null) throw new MaintenanceInvalidFieldException("Maintenance status must not be null.");
+        if (components == null) throw new MaintenanceInvalidFieldException("Maintenance components must not be null.");
+        if (components.isEmpty()) throw new MaintenanceInvalidFieldException("Maintenance components must contain at least one entry.");
         this.recordId = recordId;
         this.description = description;
         this.startDate = startDate;
@@ -37,6 +41,7 @@ public class MaintenanceRecord {
         this.notes = notes;
         this.template = template;
         this.status = status;
+        this.components = Set.copyOf(components);
         this.aircraftRegistration = aircraftRegistration;
     }
 
@@ -48,6 +53,7 @@ public class MaintenanceRecord {
     public List<MaintenancePart> getParts() { return parts; }
     public MaintenanceTemplate getTemplate() { return template; }
     public MaintenanceStatus getStatus() { return status; }
+    public Set<MaintenanceComponent> getComponents() { return components; }
     public RegistrationNumber getAircraftRegistration() { return aircraftRegistration; }
 
     public void setNotes(String notes) { this.notes = notes; }

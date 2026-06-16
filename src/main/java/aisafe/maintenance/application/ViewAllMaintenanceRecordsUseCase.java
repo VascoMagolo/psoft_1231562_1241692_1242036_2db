@@ -11,6 +11,7 @@ import aisafe.shared.domain.PaginatedResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +50,8 @@ public class ViewAllMaintenanceRecordsUseCase {
                 record.getExpectedDuration(),
                 record.getStatus(),
                 record.getNotes(),
-                record.getAircraftRegistration().getNumber()
+                record.getAircraftRegistration().getNumber(),
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
         );
     }
 }
