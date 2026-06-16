@@ -4,7 +4,7 @@ import aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class CalculateAircraftOperationalHoursUseCaseTest {
 
     @Mock
-    private SpringDataScheduledFlightRepository flightRepository;
+    private ScheduledFlightRepository flightRepository;
 
     @Mock
     private AircraftRepository aircraftRepository;
@@ -30,7 +30,7 @@ class CalculateAircraftOperationalHoursUseCaseTest {
     void executeReturnsCalculatedHours() {
         RegistrationNumber registration = new RegistrationNumber("CS-TKA");
         when(aircraftRepository.existsByRegistrationNumber(registration)).thenReturn(true);
-        when(flightRepository.calculateTotalOperationalHoursByRegistration(registration.getNumber())).thenReturn(15.5);
+        when(flightRepository.calculateTotalOperationalHoursByRegistration(registration)).thenReturn(15.5);
 
         AircraftOperationalHoursResponse response = useCase.execute(registration);
 
@@ -43,7 +43,7 @@ class CalculateAircraftOperationalHoursUseCaseTest {
     void executeReturnsZeroWhenNullHours() {
         RegistrationNumber registration = new RegistrationNumber("CS-TKA");
         when(aircraftRepository.existsByRegistrationNumber(registration)).thenReturn(true);
-        when(flightRepository.calculateTotalOperationalHoursByRegistration(registration.getNumber())).thenReturn(null);
+        when(flightRepository.calculateTotalOperationalHoursByRegistration(registration)).thenReturn(null);
 
         AircraftOperationalHoursResponse response = useCase.execute(registration);
 
@@ -58,6 +58,6 @@ class CalculateAircraftOperationalHoursUseCaseTest {
         when(aircraftRepository.existsByRegistrationNumber(registration)).thenReturn(false);
 
         assertThrows(AircraftNotFoundException.class, () -> useCase.execute(registration));
-        verify(flightRepository, never()).calculateTotalOperationalHoursByRegistration(anyString());
+        verify(flightRepository, never()).calculateTotalOperationalHoursByRegistration(any(RegistrationNumber.class));
     }
 }

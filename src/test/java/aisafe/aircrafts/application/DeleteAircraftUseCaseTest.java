@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.domain.*;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.domain.ResourceInUseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ class DeleteAircraftUseCaseTest {
     @Test
     void ensureExceptionWhenAircraftInUseByFlights() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
-        when(flightRepository.existsByAircraftRegistration(registrationNumber.getNumber())).thenReturn(true);
+        when(flightRepository.existsByAircraftRegistration(registrationNumber)).thenReturn(true);
 
         assertThrows(ResourceInUseException.class, () -> deleteAircraftUseCase.execute(registrationNumber));
         verify(aircraftRepository, never()).delete(any());

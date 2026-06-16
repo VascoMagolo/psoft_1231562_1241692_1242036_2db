@@ -2,7 +2,8 @@ package aisafe.routes.domain;
 
 import java.time.LocalDateTime;
 
-public class RouteHistory {
+public class
+RouteHistory {
 
     private String originCode;
     private String destinationCode;

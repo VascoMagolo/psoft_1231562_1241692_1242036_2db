@@ -1,7 +1,7 @@
 package aisafe.routes.domain;
 
 import aisafe.airports.domain.IataCode;
-import org.springframework.util.Assert;
+import aisafe.shared.domain.DomainException;
 
 public class Route {
 
@@ -17,15 +17,33 @@ public class Route {
     public Route(String originCode, String destinationCode, Integer estimatedFlightTime,
                  Double minimumRange, Integer minimumCapacity) {
 
-        Assert.hasText(originCode, "Origin cannot be blank");
-        Assert.hasText(destinationCode, "Destination cannot be blank");
-        Assert.notNull(estimatedFlightTime, "estimatedFlightTime must not be null");
-        Assert.isTrue(estimatedFlightTime > 0, "Invalid flight time");
-        Assert.notNull(minimumRange, "minimumRange must not be null");
-        Assert.isTrue(minimumRange > 0, "Invalid minimum range");
-        Assert.notNull(minimumCapacity, "minimumCapacity must not be null");
-        Assert.isTrue(minimumCapacity > 0, "Invalid minimum capacity");
-        Assert.isTrue(!originCode.trim().equalsIgnoreCase(destinationCode.trim()), "Origin and destination cannot be the same");
+        if (originCode == null || originCode.isBlank()) {
+            throw new InvalidRouteException("Origin cannot be blank");
+        }
+        if (destinationCode == null || destinationCode.isBlank()) {
+            throw new InvalidRouteException("Destination cannot be blank");
+        }
+        if (estimatedFlightTime == null) {
+            throw new InvalidRouteException("estimatedFlightTime must not be null");
+        }
+        if (estimatedFlightTime <= 0) {
+            throw new InvalidRouteException("Invalid flight time");
+        }
+        if (minimumRange == null) {
+            throw new InvalidRouteException("minimumRange must not be null");
+        }
+        if (minimumRange <= 0) {
+            throw new InvalidRouteException("Invalid minimum range");
+        }
+        if (minimumCapacity == null) {
+            throw new InvalidRouteException("minimumCapacity must not be null");
+        }
+        if (minimumCapacity <= 0) {
+            throw new InvalidRouteException("Invalid minimum capacity");
+        }
+        if (originCode.trim().equalsIgnoreCase(destinationCode.trim())) {
+            throw new InvalidRouteException("Origin and destination cannot be the same");
+        }
 
         this.origin = new IataCode(originCode);
         this.destination = new IataCode(destinationCode);
@@ -46,15 +64,21 @@ public class Route {
 
     public void updateRoute(Integer flightTime, Double range, Integer capacity) {
         if (flightTime != null) {
-            Assert.isTrue(flightTime > 0, "Invalid flight time");
+            if (flightTime <= 0) {
+                throw new InvalidRouteException("Invalid flight time");
+            }
             this.estimatedFlightTime = flightTime;
         }
         if (range != null) {
-            Assert.isTrue(range > 0, "Invalid minimum range");
+            if (range <= 0) {
+                throw new InvalidRouteException("Invalid minimum range");
+            }
             this.minimumRange = range;
         }
         if (capacity != null) {
-            Assert.isTrue(capacity > 0, "Invalid minimum capacity");
+            if (capacity <= 0) {
+                throw new InvalidRouteException("Invalid minimum capacity");
+            }
             this.minimumCapacity = capacity;
         }
     }

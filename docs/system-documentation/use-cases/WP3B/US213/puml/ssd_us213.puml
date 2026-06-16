@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "System" as Sys
+
+BO -> Sys : getScheduledFlights(aircraftId)
+activate Sys
+Sys --> BO : returns list of Scheduled Flight details for the aircraft
+deactivate Sys
+@enduml

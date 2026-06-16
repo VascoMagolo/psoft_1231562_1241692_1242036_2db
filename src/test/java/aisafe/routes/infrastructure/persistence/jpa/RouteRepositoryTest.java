@@ -1,5 +1,6 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
+import aisafe.flights.infrastructure.persistence.SpringDataScheduledFlightRepository;
 import aisafe.routes.domain.RouteStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

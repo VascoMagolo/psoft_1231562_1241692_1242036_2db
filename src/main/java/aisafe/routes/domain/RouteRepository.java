@@ -15,6 +15,7 @@ public interface RouteRepository extends BaseRepository<Route> {
     PaginatedResult<Route> findByOriginAndDestination(IataCode origin, IataCode destination, int pageNumber, int pageSize);
     boolean existsByOriginAndDestination(IataCode origin, IataCode destination);
     List<Route> findByOriginOrDestination(IataCode origin, IataCode destination);
+    List<Route> findAllActive();
     List<Route> findCompatibleRoutes(Double range, Integer capacity);
     Long findVersionFor(IataCode origin, IataCode destination);
 }

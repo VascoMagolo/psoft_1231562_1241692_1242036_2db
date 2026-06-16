@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "System" as Sys
+
+BO -> Sys : searchAlternativeRoutes(originIata, destinationIata)
+activate Sys
+Sys --> BO : returns list of alternative Route paths
+deactivate Sys
+@enduml

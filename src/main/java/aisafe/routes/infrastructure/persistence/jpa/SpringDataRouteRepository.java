@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import aisafe.routes.domain.RouteStatus;
 
 public interface SpringDataRouteRepository extends JpaRepository<RouteJpaEntity, Long> {
     Optional<RouteJpaEntity> findByOriginCodeAndDestinationCode(String originCode, String destinationCode);
@@ -16,6 +17,7 @@ public interface SpringDataRouteRepository extends JpaRepository<RouteJpaEntity,
     Page<RouteJpaEntity> findByOriginCodeAndDestinationCode(String originCode, String destinationCode, Pageable pageable);
     boolean existsByOriginCodeAndDestinationCode(String originCode, String destinationCode);
     List<RouteJpaEntity> findByOriginCodeOrDestinationCode(String originCode, String destinationCode);
+    List<RouteJpaEntity> findByStatus(RouteStatus status);
 
     @Query("SELECT r FROM RouteJpaEntity r WHERE r.status = aisafe.routes.domain.RouteStatus.ACTIVE AND r.minimumRange <= :range AND r.minimumCapacity <= :capacity")
     List<RouteJpaEntity> findCompatibleRoutes(@Param("range") Double range, @Param("capacity") Integer capacity);
