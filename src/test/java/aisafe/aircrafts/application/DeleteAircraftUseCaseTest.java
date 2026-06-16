@@ -46,7 +46,7 @@ class DeleteAircraftUseCaseTest {
     @Test
     void ensureAircraftIsDeletedSuccessfully() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
-        when(flightRepository.existsByAircraftRegistration(registrationNumber.getNumber())).thenReturn(false);
+        when(flightRepository.existsByAircraftRegistration(registrationNumber)).thenReturn(false);
         when(recordRepository.existsByAircraftRegistration(registrationNumber.getNumber())).thenReturn(false);
 
         assertDoesNotThrow(() -> deleteAircraftUseCase.execute(registrationNumber));
@@ -73,7 +73,7 @@ class DeleteAircraftUseCaseTest {
     @Test
     void ensureExceptionWhenAircraftInUseByMaintenance() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
-        when(flightRepository.existsByAircraftRegistration(registrationNumber.getNumber())).thenReturn(false);
+        when(flightRepository.existsByAircraftRegistration(registrationNumber)).thenReturn(false);
         when(recordRepository.existsByAircraftRegistration(registrationNumber.getNumber())).thenReturn(true);
 
         assertThrows(ResourceInUseException.class, () -> deleteAircraftUseCase.execute(registrationNumber));
