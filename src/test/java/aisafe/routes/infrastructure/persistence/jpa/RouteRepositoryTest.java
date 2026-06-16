@@ -42,4 +42,56 @@ class RouteRepositoryTest {
         assertEquals("XXX", result.get(0).getOriginCode());
         assertEquals("YYY", result.get(0).getDestinationCode());
     }
+
+    @Test
+    void ensureListSummariesForAirportReturnsRoutesWhereAirportIsOrigin() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        springRepo.save(new RouteJpaEntity("LIS", "OPO", 45, 300.0, 150, RouteStatus.ACTIVE));
+        springRepo.save(new RouteJpaEntity("MAD", "CDG", 90, 800.0, 200, RouteStatus.ACTIVE));
+
+        List<SpringDataRouteRepository.RouteSummaryRow> result = springRepo.findSummariesByAirportCode("LIS");
+
+        assertEquals(1, result.size());
+        assertEquals("LIS", result.get(0).getOriginCode());
+        assertEquals("OPO", result.get(0).getDestinationCode());
+    }
+
+    @Test
+    void ensureListSummariesForAirportReturnsRoutesWhereAirportIsDestination() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        springRepo.save(new RouteJpaEntity("CDG", "LIS", 120, 1200.0, 180, RouteStatus.ACTIVE));
+        springRepo.save(new RouteJpaEntity("MAD", "CDG", 90, 800.0, 200, RouteStatus.ACTIVE));
+
+        List<SpringDataRouteRepository.RouteSummaryRow> result = springRepo.findSummariesByAirportCode("LIS");
+
+        assertEquals(1, result.size());
+        assertEquals("CDG", result.get(0).getOriginCode());
+        assertEquals("LIS", result.get(0).getDestinationCode());
+    }
+
+    @Test
+    void ensureListSummariesForAirportExcludesRoutesForOtherAirports() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        springRepo.save(new RouteJpaEntity("MAD", "CDG", 90, 800.0, 200, RouteStatus.ACTIVE));
+        springRepo.save(new RouteJpaEntity("FRA", "AMS", 60, 600.0, 120, RouteStatus.ACTIVE));
+
+        List<SpringDataRouteRepository.RouteSummaryRow> result = springRepo.findSummariesByAirportCode("LIS");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void ensureListSummariesForAirportReturnsVersionFromJpaEntity() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+        springRepo.saveAndFlush(new RouteJpaEntity("LIS", "OPO", 45, 300.0, 150, RouteStatus.ACTIVE));
+
+        List<SpringDataRouteRepository.RouteSummaryRow> result = springRepo.findSummariesByAirportCode("LIS");
+
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0).getVersion());
+    }
 }

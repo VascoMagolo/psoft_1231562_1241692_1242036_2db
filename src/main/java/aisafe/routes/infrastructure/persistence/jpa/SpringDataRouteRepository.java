@@ -21,4 +21,20 @@ public interface SpringDataRouteRepository extends JpaRepository<RouteJpaEntity,
 
     @Query("SELECT r FROM RouteJpaEntity r WHERE r.status = aisafe.routes.domain.RouteStatus.ACTIVE AND r.minimumRange <= :range AND r.minimumCapacity <= :capacity")
     List<RouteJpaEntity> findCompatibleRoutes(@Param("range") Double range, @Param("capacity") Integer capacity);
+
+    @Query("SELECT r.originCode AS originCode, r.destinationCode AS destinationCode, " +
+           "r.estimatedFlightTime AS estimatedFlightTime, r.minimumRange AS minimumRange, " +
+           "r.minimumCapacity AS minimumCapacity, r.status AS status, r.version AS version " +
+           "FROM RouteJpaEntity r WHERE r.originCode = :code OR r.destinationCode = :code")
+    List<RouteSummaryRow> findSummariesByAirportCode(@Param("code") String code);
+
+    interface RouteSummaryRow {
+        String getOriginCode();
+        String getDestinationCode();
+        Integer getEstimatedFlightTime();
+        Double getMinimumRange();
+        Integer getMinimumCapacity();
+        aisafe.routes.domain.RouteStatus getStatus();
+        Long getVersion();
+    }
 }
