@@ -59,6 +59,18 @@ class MaintenanceTemplateTest {
     }
 
     @Test
+    void ensureInvariantsRemainImmutableDuringUpdate() {
+        MaintenanceTemplate template = new MaintenanceTemplate("T1", MaintenanceType.INSPECTION, List.of("M1"), List.of("C1"), 100, 30);
+        
+        template.updateDetails(List.of("C2"), 200, 60);
+        
+        assertEquals("T1", template.getName());
+        assertEquals(MaintenanceType.INSPECTION, template.getTemplateType());
+        assertEquals(List.of("M1"), template.getApplicableModelNames());
+        assertEquals(List.of("C2"), template.getChecklist());
+    }
+
+    @Test
     void ensureEqualsAndHashCodeWorkBasedOnIdentity() {
         MaintenanceTemplate temp1 = new MaintenanceTemplate("T1", MaintenanceType.INSPECTION, List.of("M1"), List.of("C1"), 100, 30);
         MaintenanceTemplate temp2 = new MaintenanceTemplate("T1", MaintenanceType.OVERHAUL, List.of("M2"), List.of("C2"), 500, 365);
