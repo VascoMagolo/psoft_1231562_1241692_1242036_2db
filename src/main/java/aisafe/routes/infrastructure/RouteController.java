@@ -111,7 +111,7 @@ public class RouteController {
     @PostMapping
     public ResponseEntity<EntityModel<RouteResponse>> createRoute(
             @Valid @RequestBody CreateRouteRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapToModel(createRoute.execute(request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(createRoute.execute(request)));
     }
 
     // US214
@@ -160,14 +160,9 @@ public class RouteController {
         String originUpper = origin.toUpperCase();
         String destinationUpper = destination.toUpperCase();
         List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(originUpper, destinationUpper).stream()
-                .map(h -> {
-                    RouteHistoryResponse response = new RouteHistoryResponse(
-                            h.getOriginCode(), h.getDestinationCode(),
-                            h.getChangeDescription(), h.getChangedAt(), h.getChangedBy());
-                    return EntityModel.of(response,
+                .map(response -> EntityModel.of(response,
                             linkTo(methodOn(RouteController.class).getRouteDetails(originUpper, destinationUpper))
-                                    .withRel("route"));
-                })
+                                    .withRel("route")))
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(historyModels,
                 linkTo(methodOn(RouteController.class).getRouteHistory(originUpper, destinationUpper)).withSelfRel(),
@@ -224,7 +219,7 @@ public class RouteController {
     public ResponseEntity<EntityModel<RouteResponse>> getRouteDetails(
             @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
             @Parameter(description = "IATA code of the destination airport") @PathVariable String destination) {
-        return ResponseEntity.ok(mapToModel(viewRouteDetails.execute(origin.toUpperCase(), destination.toUpperCase())));
+        return ResponseEntity.ok(toModel(viewRouteDetails.execute(origin.toUpperCase(), destination.toUpperCase())));
     }
 
     // US113

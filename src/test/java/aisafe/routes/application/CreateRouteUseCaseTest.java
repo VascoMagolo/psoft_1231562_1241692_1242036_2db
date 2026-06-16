@@ -40,39 +40,26 @@ class CreateRouteUseCaseTest {
     @InjectMocks
     private CreateRouteUseCase createRoute;
 
-    @BeforeEach
-    void setUpSecurityContext() {
-        var auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
-        var ctx = SecurityContextHolder.createEmptyContext();
-        ctx.setAuthentication(auth);
-        SecurityContextHolder.setContext(ctx);
-    }
-
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
     void ensureRouteIsCreatedSuccessfully() {
-        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
+        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150, "admin");
 
         when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
         when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(false);
 
-        Route result = createRoute.execute(request);
+        var result = createRoute.execute(request);
 
         assertNotNull(result);
-        assertEquals("OPO", result.getOrigin().getCode());
-        assertEquals("LIS", result.getDestination().getCode());
+        assertEquals("OPO", result.originIataCode());
+        assertEquals("LIS", result.destinationIataCode());
         verify(routeRepository, times(1)).save(any(Route.class));
         verify(routeHistoryRepository, times(1)).save(any(RouteHistory.class));
     }
 
     @Test
     void ensureExceptionThrownWhenOriginAirportNotFound() {
-        CreateRouteRequest request = new CreateRouteRequest("XXX", "LIS", 45, 300.0, 150);
+        CreateRouteRequest request = new CreateRouteRequest("XXX", "LIS", 45, 300.0, 150, "admin");
 
         when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
@@ -82,7 +69,7 @@ class CreateRouteUseCaseTest {
 
     @Test
     void ensureExceptionThrownWhenDestinationAirportNotFound() {
-        CreateRouteRequest request = new CreateRouteRequest("OPO", "XXX", 45, 300.0, 150);
+        CreateRouteRequest request = new CreateRouteRequest("OPO", "XXX", 45, 300.0, 150, "admin");
 
         when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
         when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
@@ -93,7 +80,7 @@ class CreateRouteUseCaseTest {
 
     @Test
     void ensureExceptionThrownWhenRouteAlreadyExists() {
-        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
+        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150, "admin");
 
         when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
         when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);

@@ -2,6 +2,7 @@ package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
@@ -85,9 +86,9 @@ class RouteControllerTest {
 
     @Test
     void ensureCreateRouteReturns201() throws Exception {
-        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150);
+        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150, "admin");
 
-        when(createRoute.execute(any())).thenReturn(sampleRoute);
+        when(createRoute.execute(any())).thenReturn(RouteResponse.from(sampleRoute));
 
         mockMvc.perform(post("/api/routes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +101,7 @@ class RouteControllerTest {
 
     @Test
     void ensureGetRouteByOriginDestinationReturns200() throws Exception {
-        when(viewRouteDetails.execute(anyString(), anyString())).thenReturn(sampleRoute);
+        when(viewRouteDetails.execute(anyString(), anyString())).thenReturn(RouteResponse.from(sampleRoute));
 
         mockMvc.perform(get("/api/routes/OPO/LIS"))
                 .andExpect(status().isOk())

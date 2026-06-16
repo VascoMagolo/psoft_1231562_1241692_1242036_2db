@@ -1,6 +1,7 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
@@ -31,11 +32,14 @@ class ViewRouteDetailsUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
                 .thenReturn(Optional.of(route));
 
-        Route result = viewRouteDetails.execute("OPO", "LIS");
+        RouteResponse result = viewRouteDetails.execute("OPO", "LIS");
 
         assertNotNull(result);
+        assertEquals("OPO", result.originIataCode());
+        assertEquals("LIS", result.destinationIataCode());
         verify(routeRepository).findByOriginAndDestination(any(IataCode.class), any(IataCode.class));
     }
+
 
     @Test
     void ensureExceptionWhenRouteNotFound() {
