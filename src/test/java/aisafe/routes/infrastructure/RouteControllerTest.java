@@ -3,6 +3,7 @@ package aisafe.routes.infrastructure;
 import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
@@ -128,5 +129,62 @@ class RouteControllerTest {
         mockMvc.perform(get("/api/routes/airport/OPO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.routeResponseList[0].originIataCode").value("OPO"));
+    }
+
+    @Test
+    void ensureGetActiveRoutesReturns200() throws Exception {
+        when(listActiveRoutes.execute(any(), any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/routes")
+                        .param("status", "active")
+                        .param("sortBy", "distance"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetAlternativeRoutesReturns200() throws Exception {
+        when(searchAlternativeRoutes.execute(anyString(), anyString())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/routes/alternatives")
+                        .param("origin", "LIS")
+                        .param("destination", "MAD"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetRouteHistoryReturns200() throws Exception {
+        when(viewRouteHistory.execute(anyString(), anyString())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/routes/LIS/MAD/history"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureUpdateRouteReturns200() throws Exception {
+        UpdateRouteRequest request = new UpdateRouteRequest(50, 400.0, 200, true);
+        when(updateRoute.execute(anyString(), anyString(), any(), any())).thenReturn(sampleRoute);
+
+        mockMvc.perform(put("/api/routes/LIS/MAD")
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchRoutesReturns200() throws Exception {
+        when(searchRoutes.execute(any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(sampleRoute), 1L));
+
+        mockMvc.perform(get("/api/routes/search")
+                        .param("origin", "LIS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.routeResponseList[0].originIataCode").value("OPO"));
+    }
+
+    @Test
+    void ensureDeleteRouteReturns204() throws Exception {
+        mockMvc.perform(delete("/api/routes/LIS/MAD"))
+                .andExpect(status().isNoContent());
     }
 }
