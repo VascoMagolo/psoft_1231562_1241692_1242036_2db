@@ -12,8 +12,8 @@
 - A route can be deactivated instead of permanently deleted.
 - Deactivated routes cannot be used for operational planning.
 - Every update or deactivation generates a route history entry.
-- Updating route details is performed with `PUT /api/routes/{id}`.
-- Deactivating a route is performed with `PATCH /api/routes/{id}/deactivate`.
+- Updating route details is performed with `PUT /api/routes/{origin}/{destination}`.
+- Deactivating a route is performed with `PATCH /api/routes/{origin}/{destination}/deactivate`.
 - On success the system returns HTTP 200 with the updated route representation.
 - If the route does not exist, the system returns HTTP 404.
 
@@ -35,7 +35,7 @@
 
 ## Main Success Scenario
 
-1. The actor sends `PUT /api/routes/{id}` to update route details or `PATCH /api/routes/{id}/deactivate` to deactivate the route.
+1. The actor sends `PUT /api/routes/{origin}/{destination}` to update route details or `PATCH /api/routes/{origin}/{destination}/deactivate` to deactivate the route.
 2. The system validates the request.
 3. The system verifies that the route exists.
 4. The system updates or deactivates the route.

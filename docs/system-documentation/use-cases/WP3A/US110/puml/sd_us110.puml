@@ -55,7 +55,7 @@ else both airports exist
   deactivate RouteRepo
 
   alt route already exists
-    UC --> Ctrl : throws IllegalArgumentException
+    UC --> Ctrl : throws DuplicateResourceException
     Ctrl --> Actor : 409 Conflict\n{ message: "A route between these airports already exists." }
   else route does not exist
     UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity))
