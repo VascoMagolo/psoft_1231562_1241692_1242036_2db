@@ -2,6 +2,7 @@ package aisafe.aircrafts.infrastructure.persistence.jpa;
 
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -44,13 +45,15 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
     }
 
     @Override
-    public List<AircraftModel> findAll(int pageNumber, int pageSize) {
+    public PaginatedResult<AircraftModel> findAll(int pageNumber, int pageSize) {
         var springPageable = PageRequest.of(pageNumber, pageSize);
+        var page = springRepo.findAll(springPageable);
 
-        return springRepo.findAll(springPageable)
-                .stream()
+        List<AircraftModel> list = page.stream()
                 .map(AircraftModelMapper::toDomain)
                 .collect(Collectors.toList());
+
+        return new PaginatedResult<>(list, page.getTotalElements());
     }
 
     @Override

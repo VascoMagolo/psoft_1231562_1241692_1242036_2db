@@ -1,12 +1,14 @@
 package aisafe.maintenance.domain;
 
+import java.util.Objects;
+
 public class MaintenancePart {
-    private String partNumber;
-    private String name;
+    private final String partNumber;
+    private final String name;
     private String description;
     private Integer stockQuantity;
     private Integer minimumThreshold;
-    private MaintenanceComponent component;
+    private final MaintenanceComponent component;
 
     public MaintenancePart(String partNumber, String name, String description,
                            Integer stockQuantity, Integer minimumThreshold, MaintenanceComponent component) {
@@ -44,5 +46,18 @@ public class MaintenancePart {
         if (description != null) {
             this.description = description;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MaintenancePart that = (MaintenancePart) o;
+        return Objects.equals(partNumber, that.partNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(partNumber);
     }
 }

@@ -35,7 +35,7 @@ public class ListAircraftUseCase {
         PaginatedResult<Aircraft> domainResult = repository.findAll(pageNumber, pageSize);
 
         List<ListAircraftsUseCaseResponse> dtoList = domainResult.data().stream()
-                .map(a -> ListAircraftsUseCaseResponse.from(a, repository.findVersionFor(a.getRegistrationNumber())))
+                .map(a -> ListAircraftsUseCaseResponse.from(a, null))
                 .collect(Collectors.toList());
 
         return new PaginatedResult<>(dtoList, domainResult.totalElements());

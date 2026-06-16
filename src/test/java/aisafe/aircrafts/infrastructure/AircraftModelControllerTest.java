@@ -6,6 +6,7 @@ import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
@@ -108,7 +109,7 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureGetAllModelsReturns200() throws Exception {
-        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(List.of());
+        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
         mockMvc.perform(get("/api/aircraftModels"))
                 .andExpect(status().isOk());

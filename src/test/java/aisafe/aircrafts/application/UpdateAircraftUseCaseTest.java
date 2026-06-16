@@ -3,13 +3,13 @@ package aisafe.aircrafts.application;
 import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,8 +46,8 @@ class UpdateAircraftUseCaseTest {
     void ensureAircraftIsUpdatedSuccessfully() {
         UpdateAircraftRequest request = new UpdateAircraftRequest("A320", LocalDate.of(2021, 1, 1), 160, 5500.0, List.of("WiFi"), "INACTIVE");
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
-        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(0L).thenReturn(1L);
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(0L).thenReturn(1L);
 
         ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registrationNumber, request, 0L);
 
@@ -81,7 +81,7 @@ class UpdateAircraftUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
         when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(1L); // Database has version 1
 
-        assertThrows(ObjectOptimisticLockingFailureException.class, () ->
+        assertThrows(ConcurrencyException.class, () ->
                 updateAircraftUseCase.execute(registrationNumber, request, 0L)); // Client provides version 0
     }
 }

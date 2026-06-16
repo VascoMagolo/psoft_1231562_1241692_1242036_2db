@@ -20,9 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import aisafe.routes.domain.FlightStatus;
-import aisafe.routes.domain.ScheduledFlight;
-import aisafe.routes.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.FlightStatus;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -148,17 +148,17 @@ public class Bootstrap implements ApplicationRunner {
                 // Completed flight for aircraft 1
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(2), now.minusDays(2).plusHours(2),
-                        FlightStatus.COMPLETED, managedRoute1, managedAircraft1));
+                        FlightStatus.COMPLETED, managedRoute1, managedAircraft1.getRegistrationNumber()));
                         
                 // Completed flight for aircraft 1
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(1), now.minusDays(1).plusHours(3),
-                        FlightStatus.COMPLETED, managedRoute2, managedAircraft1));
+                        FlightStatus.COMPLETED, managedRoute2, managedAircraft1.getRegistrationNumber()));
                         
                 // Completed flight for aircraft 2
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(3), now.minusDays(3).plusHours(4),
-                        FlightStatus.COMPLETED, managedRoute1, managedAircraft2));
+                        FlightStatus.COMPLETED, managedRoute1, managedAircraft2.getRegistrationNumber()));
             }
         }
 
@@ -187,11 +187,11 @@ public class Bootstrap implements ApplicationRunner {
                     .orElseThrow();
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Simple inspection to the starter motor",
                     LocalDateTime.parse("2024-06-01T10:00:00"), 120, List.of(part), "No issues found during the inspection.",
-                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber().getNumber()));
+                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber()));
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Detailed inspection to the starter motor",
                     LocalDateTime.parse("2024-06-10T14:00:00"), 240, List.of(part),
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
-                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber().getNumber()));
+                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber()));
         }
     }
 }

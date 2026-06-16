@@ -65,6 +65,12 @@ class RouteControllerTest {
     private RouteRepository routeRepository;
 
     @MockitoBean
+    private ListActiveRoutesUseCase listActiveRoutes;
+
+    @MockitoBean
+    private SearchAlternativeRoutesUseCase searchAlternativeRoutes;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

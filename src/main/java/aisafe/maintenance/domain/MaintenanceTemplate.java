@@ -1,11 +1,12 @@
 package aisafe.maintenance.domain;
 
+import java.util.Objects;
 import java.util.List;
 
 public class MaintenanceTemplate {
-    private String name;
-    private MaintenanceType templateType;
-    private List<String> applicableModelNames;
+    private final String name;
+    private final MaintenanceType templateType;
+    private final List<String> applicableModelNames;
     private List<String> checklist;
     private Integer intervalFlightHours;
     private Integer intervalDays;
@@ -44,5 +45,18 @@ public class MaintenanceTemplate {
         if (intervalDays != null) {
             this.intervalDays = intervalDays;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MaintenanceTemplate that = (MaintenanceTemplate) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

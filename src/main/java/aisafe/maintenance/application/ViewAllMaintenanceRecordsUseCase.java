@@ -49,7 +49,7 @@ public class ViewAllMaintenanceRecordsUseCase {
                 record.getExpectedDuration(),
                 record.getStatus(),
                 record.getNotes(),
-                record.getAircraftRegistration()
+                record.getAircraftRegistration().getNumber()
         );
     }
 }
