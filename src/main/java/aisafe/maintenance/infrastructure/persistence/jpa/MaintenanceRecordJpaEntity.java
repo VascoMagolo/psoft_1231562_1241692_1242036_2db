@@ -2,6 +2,8 @@ package aisafe.maintenance.infrastructure.persistence.jpa;
 
 import aisafe.maintenance.domain.MaintenanceStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +33,7 @@ public class MaintenanceRecordJpaEntity {
     private String notes;
 
     @ManyToMany
+    @BatchSize(size = 20)
     @JoinTable(
         name = "maintenance_record_parts",
         joinColumns = @JoinColumn(name = "record_id"),

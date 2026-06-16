@@ -23,10 +23,8 @@ public class ViewTotalMaintenanceHoursInFleetUseCase {
      * @return a response containing the total maintenance hours in the fleet
      */
     public ViewTotalMaintenanceHoursInFleetResponse execute() {
-        Integer totalHours = repository.findAll().stream()
-                .map(MaintenanceRecord::getExpectedDuration)
-                .reduce(0, Integer::sum);
+        Long totalHours = repository.sumTotalMaintenanceHours();
 
-        return new ViewTotalMaintenanceHoursInFleetResponse(totalHours);
+        return new ViewTotalMaintenanceHoursInFleetResponse(totalHours.intValue());
     }
 }

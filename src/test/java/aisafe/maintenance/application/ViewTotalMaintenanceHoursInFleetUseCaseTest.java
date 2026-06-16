@@ -25,7 +25,7 @@ class ViewTotalMaintenanceHoursInFleetUseCaseTest {
 
     @Test
     void ensureEmptyFleetReturnsZeroHours() {
-        when(repository.findAll()).thenReturn(List.of());
+        when(repository.sumTotalMaintenanceHours()).thenReturn(0L);
 
         ViewTotalMaintenanceHoursInFleetResponse result = viewTotalHours.execute();
 
@@ -34,11 +34,7 @@ class ViewTotalMaintenanceHoursInFleetUseCaseTest {
 
     @Test
     void ensureTotalHoursAreSummedCorrectly() {
-        MaintenanceRecord r1 = mock(MaintenanceRecord.class);
-        MaintenanceRecord r2 = mock(MaintenanceRecord.class);
-        when(r1.getExpectedDuration()).thenReturn(4);
-        when(r2.getExpectedDuration()).thenReturn(8);
-        when(repository.findAll()).thenReturn(List.of(r1, r2));
+        when(repository.sumTotalMaintenanceHours()).thenReturn(12L);
 
         ViewTotalMaintenanceHoursInFleetResponse result = viewTotalHours.execute();
 

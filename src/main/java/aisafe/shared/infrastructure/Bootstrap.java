@@ -187,11 +187,11 @@ public class Bootstrap implements ApplicationRunner {
                     .orElseThrow();
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Simple inspection to the starter motor",
                     LocalDateTime.parse("2024-06-01T10:00:00"), 120, List.of(part), "No issues found during the inspection.",
-                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber().getNumber()));
+                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber()));
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Detailed inspection to the starter motor",
                     LocalDateTime.parse("2024-06-10T14:00:00"), 240, List.of(part),
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
-                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber().getNumber()));
+                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber()));
         }
     }
 }
