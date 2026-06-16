@@ -10,6 +10,6 @@ public class MaintenanceRecordMapper {
                 entity.getRecordId(), entity.getDescription(), entity.getStartDate(), entity.getExpectedDuration(),
                 entity.getParts().stream().map(MaintenancePartMapper::toDomain).toList(), entity.getNotes(),
                 MaintenanceTemplateMapper.toDomain(entity.getTemplate()),
-                entity.getStatus(), new RegistrationNumber(entity.getAircraftRegistration()));
+                entity.getStatus(), entity.getComponents(), new RegistrationNumber(entity.getAircraftRegistration()));
     }
 }

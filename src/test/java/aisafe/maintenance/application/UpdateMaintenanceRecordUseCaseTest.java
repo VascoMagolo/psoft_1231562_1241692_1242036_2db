@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +43,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
         MaintenanceRecord record = new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
         when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
@@ -80,7 +81,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
         MaintenanceRecord record = new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, new RegistrationNumber("CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
         when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(1L); // Database has version 1

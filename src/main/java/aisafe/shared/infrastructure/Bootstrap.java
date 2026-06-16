@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import aisafe.flights.domain.FlightStatus;
 import aisafe.flights.domain.ScheduledFlight;
@@ -187,11 +188,11 @@ public class Bootstrap implements ApplicationRunner {
                     .orElseThrow();
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Simple inspection to the starter motor",
                     LocalDateTime.parse("2024-06-01T10:00:00"), 120, List.of(part), "No issues found during the inspection.",
-                    template, MaintenanceStatus.PLANNED, aircraft1.getRegistrationNumber()));
+                    template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), aircraft1.getRegistrationNumber()));
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Detailed inspection to the starter motor",
                     LocalDateTime.parse("2024-06-10T14:00:00"), 240, List.of(part),
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
-                    MaintenanceStatus.PLANNED, aircraft2.getRegistrationNumber()));
+                    MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), aircraft2.getRegistrationNumber()));
         }
     }
 }

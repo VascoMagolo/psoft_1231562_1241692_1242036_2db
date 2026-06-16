@@ -9,8 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -112,7 +114,8 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         } else {
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
                     record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
-                    record.getNotes(), partsJpa, templateJpa, record.getStatus(), record.getAircraftRegistration().getNumber());
+                    record.getNotes(), partsJpa, templateJpa, record.getStatus(),
+                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber());
             springRepo.save(jpaEntity);
         }
     }
