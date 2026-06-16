@@ -38,7 +38,7 @@ public class DeleteAircraftUseCase {
             throw new ResourceInUseException("Cannot delete aircraft because it is assigned to scheduled flights.");
         }
 
-        if (recordRepository.existsByAircraftRegistration(registration)) {
+        if (recordRepository.existsByAircraftRegistration(registration.getNumber())) {
             throw new ResourceInUseException("Cannot delete aircraft because it has maintenance records.");
         }
 
