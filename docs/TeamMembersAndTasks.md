@@ -89,6 +89,6 @@ Finally, keep in mind that each User Story is not isolated -- it must be integra
 | [US224 - Search aircraft by specific features](system-documentation/US224)                   |      x       |       x        |        x        |
 | [US225 - Import bulk airport data (CSV)](system-documentation/US225)                         |      x       |       x        |        x        |
 | [US226 - Track maintenance parts inventory](system-documentation/US226)                      |      x       |       x        |        x        |
-| [US227 - Fuel efficiency metrics](system-documentation/US227)                                |      x       |       x        |        x        |
-| [US228 - Export route network (GeoJSON, KML)](system-documentation/US228)                    |      x       |       x        |        x        |
+| [US227 - Fuel efficiency metrics](system-documentation/use-cases/BONUS/US227)              |      x       |       x        |        x        |
+| [US228 - Export route network (GeoJSON, KML)](system-documentation/use-cases/BONUS/US228)    |      x       |       x        |        x        |
 | [US229 - Generate flight utilization reports](system-documentation/US229)                    |      x       |       x        |        x        |

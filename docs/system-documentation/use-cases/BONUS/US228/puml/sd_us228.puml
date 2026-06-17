@@ -1,0 +1,53 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "RouteController" as Ctrl
+participant "ExportRouteNetworkUseCase" as UC
+participant "RouteRepository" as RouteRepo
+participant "AirportRepository" as AirportRepo
+participant "RouteNetworkSerializer" as Serializer
+participant "GeoJsonRouteNetworkSerializer" as GeoJsonSerializer
+participant "KmlRouteNetworkSerializer" as KmlSerializer
+
+BO -> Ctrl : GET /api/routes/export?format=format
+activate Ctrl
+
+Ctrl -> UC : execute(format)
+activate UC
+
+UC -> RouteRepo : findAllActive()
+activate RouteRepo
+RouteRepo --> UC : returns list of active routes
+deactivate RouteRepo
+
+UC -> AirportRepo : findByIataCode(code)
+activate AirportRepo
+AirportRepo --> UC : returns airport details (including coordinates)
+deactivate AirportRepo
+
+alt format == "geojson"
+    UC -> GeoJsonSerializer : supports("geojson")
+    activate GeoJsonSerializer
+    GeoJsonSerializer --> UC : true
+    deactivate GeoJsonSerializer
+    UC -> GeoJsonSerializer : serialize(routes, airports)
+    activate GeoJsonSerializer
+    GeoJsonSerializer --> UC : returns ExportedFile (GeoJSON)
+    deactivate GeoJsonSerializer
+else format == "kml"
+    UC -> KmlSerializer : supports("kml")
+    activate KmlSerializer
+    KmlSerializer --> UC : true
+    deactivate KmlSerializer
+    UC -> KmlSerializer : serialize(routes, airports)
+    activate KmlSerializer
+    KmlSerializer --> UC : returns ExportedFile (KML)
+    deactivate KmlSerializer
+end
+
+UC --> Ctrl : returns ExportedFile
+deactivate UC
+
+Ctrl --> BO : returns file download (200 OK)
+deactivate Ctrl
+@enduml
