@@ -24,9 +24,6 @@ public class UpdateMaintenancePartUseCase {
 
         maintenancePartRepository.save(part);
 
-        return new MaintenancePartResponse(
-                part.getPartNumber(),
-                part.getDescription()
-        );
+        return MaintenancePartResponse.from(part);
     }
 }
