@@ -2,9 +2,17 @@
 autonumber
 actor "Maintenance Supervisor" as Actor
 participant "System" as Sys
+
+== Create Part ==
 Actor -> Sys : createMaintenancePart(partNumber, name, description, stockQuantity, minimumThreshold, component)
 activate Sys
 Sys --> Actor : returns created MaintenancePart
+deactivate Sys
+
+== Search Parts & Stock Alerts ==
+Actor -> Sys : searchParts(partNumber?, name?, component?, lowStockOnly?)
+activate Sys
+Sys --> Actor : returns paginated list of MaintenanceParts
 deactivate Sys
 @enduml
 

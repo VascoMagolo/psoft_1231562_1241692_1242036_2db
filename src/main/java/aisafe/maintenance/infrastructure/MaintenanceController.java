@@ -2,6 +2,7 @@ package aisafe.maintenance.infrastructure;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
+import aisafe.maintenance.domain.MaintenanceComponent;
 
 import java.util.UUID;
 import aisafe.maintenance.application.dtos.*;
@@ -46,6 +47,7 @@ public class MaintenanceController {
     private final DeleteMaintenancePartUseCase deleteMaintenancePartUseCase;
     private final UpdateMaintenancePartUseCase updateMaintenancePartUseCase;
     private final UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
+    private final SearchMaintenancePartUseCase searchMaintenancePartUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -57,7 +59,8 @@ public class MaintenanceController {
             DeleteMaintenanceTemplateUseCase deleteMaintenanceTemplateUseCase,
             DeleteMaintenancePartUseCase deleteMaintenancePartUseCase,
             UpdateMaintenancePartUseCase updateMaintenancePartUseCase,
-            UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase) {
+            UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase,
+            SearchMaintenancePartUseCase searchMaintenancePartUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -69,6 +72,7 @@ public class MaintenanceController {
         this.deleteMaintenancePartUseCase = deleteMaintenancePartUseCase;
         this.updateMaintenancePartUseCase = updateMaintenancePartUseCase;
         this.updateMaintenanceTemplateUseCase = updateMaintenanceTemplateUseCase;
+        this.searchMaintenancePartUseCase = searchMaintenancePartUseCase;
     }
 
     /**
@@ -145,6 +149,39 @@ public class MaintenanceController {
             @Parameter(description = "Part number of the maintenance part") @PathVariable String partNumber,
             @Valid @RequestBody UpdateMaintenancePartRequest request) {
         return ResponseEntity.ok(updateMaintenancePartUseCase.execute(partNumber, request));
+    }
+
+    /**
+     * Searches for maintenance parts based on optional filters, including low-stock alerts.
+     * 
+     * @param partNumber   (optional) Filter by part number (partial match)
+     * @param name         (optional) Filter by name (partial match)
+     * @param component    (optional) Filter by component category
+     * @param lowStock     (optional) If true, only returns parts with stock below threshold
+     * @param pageable     Pagination information for the search results
+     * @param assembler    HATEOAS paged resources assembler
+     * @return a ResponseEntity containing a page of search results matching the criteria
+     */
+    // US226
+    @Operation(summary = "Search maintenance parts", description = "Search parts by part number, name, and/or component. Use ?lowStock=true for stock alerts. Requires Maintenance Supervisor role. (US226)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Search results returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/parts/search")
+    public ResponseEntity<PagedModel<EntityModel<MaintenancePartResponse>>> searchParts(
+            @Parameter(description = "Filter by part number (partial match)") @RequestParam(required = false) String partNumber,
+            @Parameter(description = "Filter by name (partial match)") @RequestParam(required = false) String name,
+            @Parameter(description = "Filter by component") @RequestParam(required = false) MaintenanceComponent component,
+            @Parameter(description = "Only show parts with stock below threshold") @RequestParam(defaultValue = "false") boolean lowStock,
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<MaintenancePartResponse> assembler) {
+        PaginatedResult<MaintenancePartResponse> result = searchMaintenancePartUseCase.execute(
+                partNumber, name, component, lowStock, pageable.getPageNumber(), pageable.getPageSize());
+        Page<MaintenancePartResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(page, p -> EntityModel.of(p,
+                linkTo(methodOn(MaintenanceController.class).updateMaintenancePart(p.partNumber(), null)).withRel("update"))));
     }
 
     /**

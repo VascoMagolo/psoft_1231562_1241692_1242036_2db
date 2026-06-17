@@ -1,9 +1,13 @@
 package aisafe.maintenance.infrastructure.persistence.jpa;
 
+import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -40,6 +44,20 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
     @Override
     public Optional<MaintenancePart> findByPartNumber(String partNumber) {
         return springRepo.findByPartNumber(partNumber).map(MaintenancePartMapper::toDomain);
+    }
+
+    @Override
+    public PaginatedResult<MaintenancePart> searchParts(String partNumber, String name, MaintenanceComponent component, Boolean lowStockOnly, int pageNumber, int pageSize) {
+        Page<MaintenancePartJpaEntity> page = springRepo.searchParts(
+                partNumber, name, component, lowStockOnly != null && lowStockOnly,
+                PageRequest.of(pageNumber, pageSize)
+        );
+
+        List<MaintenancePart> data = page.getContent().stream()
+                .map(MaintenancePartMapper::toDomain)
+                .collect(Collectors.toList());
+
+        return new PaginatedResult<>(data, page.getTotalElements());
     }
 
     @Override

@@ -71,6 +71,9 @@ class MaintenanceControllerTest {
     private UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
 
     @MockitoBean
+    private SearchMaintenancePartUseCase searchMaintenancePartUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -104,7 +107,7 @@ class MaintenanceControllerTest {
     void ensureUpdatePartReturns200() throws Exception {
         UpdateMaintenancePartRequest request = new UpdateMaintenancePartRequest("New description", 20, 10);
 
-        when(updateMaintenancePartUseCase.execute(any(), any())).thenReturn(new MaintenancePartResponse("P001", "New description"));
+        when(updateMaintenancePartUseCase.execute(any(), any())).thenReturn(new MaintenancePartResponse("P001", "Engine Filter", "New description", 20, 10, MaintenanceComponent.ENGINE));
 
         mockMvc.perform(patch("/api/maintenance/parts/P001")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -131,12 +134,24 @@ class MaintenanceControllerTest {
         CreateMaintenancePartRequest request = new CreateMaintenancePartRequest(
                 "P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
 
-        when(createMaintenancePartUseCase.execute(any())).thenReturn(new MaintenancePartResponse("P001", null));
+        when(createMaintenancePartUseCase.execute(any())).thenReturn(new MaintenancePartResponse("P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE));
 
         mockMvc.perform(post("/api/maintenance/parts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void ensureSearchPartsReturns200() throws Exception {
+        MaintenancePartResponse part = new MaintenancePartResponse("P001", "Engine Filter", "Desc", 10, 2, MaintenanceComponent.ENGINE);
+        when(searchMaintenancePartUseCase.execute(any(), any(), any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(part), 1));
+
+        mockMvc.perform(get("/api/maintenance/parts/search?name=Engine&lowStock=false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.maintenancePartResponseList[0].partNumber").value("P001"))
+                .andExpect(jsonPath("$._embedded.maintenancePartResponseList[0]._links.update").exists());
     }
 
     @Test
