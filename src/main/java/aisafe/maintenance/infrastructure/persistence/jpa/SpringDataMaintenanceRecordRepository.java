@@ -1,9 +1,11 @@
 package aisafe.maintenance.infrastructure.persistence.jpa;
 
+import aisafe.maintenance.domain.MaintenanceComponent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,4 +23,18 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
 
     @Query("SELECT SUM(m.expectedDuration) FROM MaintenanceRecordJpaEntity m")
     Long sumTotalExpectedDuration();
+
+    @Query("SELECT DISTINCT m FROM MaintenanceRecordJpaEntity m " +
+           "INNER JOIN m.components c " +
+           "WHERE (:registration IS NULL OR m.aircraftRegistration = :registration) " +
+           "AND (:from IS NULL OR m.startDate >= :from) " +
+           "AND (:to IS NULL OR m.startDate <= :to) " +
+           "AND (:component IS NULL OR c = :component)")
+    Page<MaintenanceRecordJpaEntity> search(
+            @Param("registration") String registration,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("component") MaintenanceComponent component,
+            Pageable pageable
+    );
 }

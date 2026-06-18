@@ -17,4 +17,12 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
     Optional<MaintenanceRecord> findByRecordId(UUID recordId);
     Long findVersionFor(UUID recordId);
     Long sumTotalMaintenanceHours();
+    PaginatedResult<MaintenanceRecord> search(
+            RegistrationNumber aircraftRegistration,
+            LocalDateTime from,
+            LocalDateTime to,
+            MaintenanceComponent component,
+            int pageNumber,
+            int pageSize
+    );
 }

@@ -4,6 +4,7 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
 import aisafe.maintenance.domain.MaintenanceComponent;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import aisafe.maintenance.application.dtos.*;
 import aisafe.shared.domain.PaginatedResult;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +50,7 @@ public class MaintenanceController {
     private final UpdateMaintenancePartUseCase updateMaintenancePartUseCase;
     private final UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
     private final SearchMaintenancePartUseCase searchMaintenancePartUseCase;
+    private final SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -60,7 +63,8 @@ public class MaintenanceController {
             DeleteMaintenancePartUseCase deleteMaintenancePartUseCase,
             UpdateMaintenancePartUseCase updateMaintenancePartUseCase,
             UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase,
-            SearchMaintenancePartUseCase searchMaintenancePartUseCase) {
+            SearchMaintenancePartUseCase searchMaintenancePartUseCase,
+            SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -73,6 +77,7 @@ public class MaintenanceController {
         this.updateMaintenancePartUseCase = updateMaintenancePartUseCase;
         this.updateMaintenanceTemplateUseCase = updateMaintenanceTemplateUseCase;
         this.searchMaintenancePartUseCase = searchMaintenancePartUseCase;
+        this.searchMaintenanceRecordsUseCase = searchMaintenanceRecordsUseCase;
     }
 
     /**
@@ -336,6 +341,28 @@ public class MaintenanceController {
             @Parameter(description = "Part number of the maintenance part") @PathVariable String partNumber) {
         deleteMaintenancePartUseCase.execute(partNumber);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Search maintenance records", description = "Returns a paginated list of maintenance records matching the given optional filters. (US218)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Records retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid filter value"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/records/search")
+    public ResponseEntity<PagedModel<EntityModel<MaintenanceRecordResponse>>> searchMaintenanceRecords(
+            @Parameter(description = "Aircraft registration number (e.g. CS-TKA)") @RequestParam(required = false) String registration,
+            @Parameter(description = "Start date lower bound (ISO 8601 datetime, e.g. 2026-01-01T00:00:00)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @Parameter(description = "Start date upper bound (ISO 8601 datetime, e.g. 2026-12-31T23:59:59)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @Parameter(description = "Maintenance component (ENGINE, AIRFRAME, AVIONICS, INTERIOR, EXTERIOR)") @RequestParam(required = false) MaintenanceComponent component,
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<MaintenanceRecordResponse> assembler) {
+        RegistrationNumber registrationNumber = registration != null ? new RegistrationNumber(registration) : null;
+        PaginatedResult<MaintenanceRecordResponse> result = searchMaintenanceRecordsUseCase.execute(
+                registrationNumber, from, to, component, pageable.getPageNumber(), pageable.getPageSize());
+        Page<MaintenanceRecordResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
     }
 
     /**
