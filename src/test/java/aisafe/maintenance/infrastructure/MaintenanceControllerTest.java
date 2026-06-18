@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -72,6 +73,9 @@ class MaintenanceControllerTest {
 
     @MockitoBean
     private SearchMaintenancePartUseCase searchMaintenancePartUseCase;
+
+    @MockitoBean
+    private SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase;
 
     @MockitoBean
     private JwtService jwtService;
@@ -211,5 +215,44 @@ class MaintenanceControllerTest {
 
         mockMvc.perform(get("/api/maintenance/records/aircraft/CS-TPA"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchRecordsReturns200WithNoFilters() throws Exception {
+        when(searchMaintenanceRecordsUseCase.execute(any(), any(), any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/search"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchRecordsReturns200WithAllFilters() throws Exception {
+        when(searchMaintenanceRecordsUseCase.execute(any(), any(), any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/search")
+                        .param("registration", "CS-TPA")
+                        .param("from", "2026-01-01T00:00:00")
+                        .param("to", "2026-12-31T23:59:59")
+                        .param("component", "ENGINE"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "MAINTENANCE_TECHNICIAN")
+    void ensureMaintenanceTechnicianCanSearch() throws Exception {
+        when(searchMaintenanceRecordsUseCase.execute(any(), any(), any(), any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/search"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureSearchRecordsReturns400ForInvalidComponent() throws Exception {
+        mockMvc.perform(get("/api/maintenance/records/search")
+                        .param("component", "INVALID_COMPONENT"))
+                .andExpect(status().isBadRequest());
     }
 }
