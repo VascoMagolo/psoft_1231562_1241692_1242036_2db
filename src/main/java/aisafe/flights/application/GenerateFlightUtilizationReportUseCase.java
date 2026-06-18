@@ -1,9 +1,11 @@
 package aisafe.flights.application;
 
-import aisafe.flights.application.dtos.RouteUtilizationResponse;
+import aisafe.flights.application.dtos.FlightUtilizationResponse;
 import aisafe.flights.domain.InvalidFlightDateRangeException;
+import aisafe.flights.domain.RouteUtilizationData;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;
+import aisafe.shared.domain.PaginatedResult;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,7 +20,7 @@ public class GenerateFlightUtilizationReportUseCase {
         this.repository = repository;
     }
 
-    public List<RouteUtilizationResponse> execute(OffsetDateTime startDate, OffsetDateTime endDate, Integer page, Integer size) {
+    public PaginatedResult<FlightUtilizationResponse> execute(OffsetDateTime startDate, OffsetDateTime endDate, Integer page, Integer size) {
         int pageNumber = page != null ? page : 0;
         int pageSize = size != null ? size : 20;
 
@@ -26,13 +28,17 @@ public class GenerateFlightUtilizationReportUseCase {
             throw new InvalidFlightDateRangeException("startDate cannot be after endDate");
         }
 
-        return repository.getFlightUtilizationReport(startDate, endDate, pageNumber, pageSize).stream()
-                .map(data -> new RouteUtilizationResponse(
+        PaginatedResult<RouteUtilizationData> result = repository.getFlightUtilizationReport(startDate, endDate, pageNumber, pageSize);
+        
+        List<FlightUtilizationResponse> mappedData = result.data().stream()
+                .map(data -> new FlightUtilizationResponse(
                         data.routeId(),
                         data.origin(),
                         data.destination(),
                         data.count()
                 ))
                 .collect(Collectors.toList());
+
+        return new PaginatedResult<>(mappedData, result.totalElements());
     }
 }

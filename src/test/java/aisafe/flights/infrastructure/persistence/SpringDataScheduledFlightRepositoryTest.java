@@ -86,7 +86,7 @@ class SpringDataScheduledFlightRepositoryTest {
 
     @Test
     void ensureFindFlightUtilizationReportsAggregatesCorrectly() {
-        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(null, null, PageRequest.of(0, 10));
+        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(null, null, PageRequest.of(0, 10)).getContent();
         
         assertEquals(2, reports.size());
         
@@ -108,7 +108,7 @@ class SpringDataScheduledFlightRepositoryTest {
         OffsetDateTime start = OffsetDateTime.now().minusDays(3); // Covers route1(1 flight) and route2(1 flight)
         OffsetDateTime end = OffsetDateTime.now();
         
-        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(start, end, PageRequest.of(0, 10));
+        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(start, end, PageRequest.of(0, 10)).getContent();
         
         assertEquals(2, reports.size());
         assertEquals(1L, reports.get(0).getFlightCount());

@@ -1,6 +1,6 @@
 package aisafe.flights.application.dtos;
 
-public record RouteUtilizationResponse(
+public record FlightUtilizationResponse(
     Long routeId,
     String origin,
     String destination,

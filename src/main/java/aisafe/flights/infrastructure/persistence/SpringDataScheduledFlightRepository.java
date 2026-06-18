@@ -1,5 +1,6 @@
 package aisafe.flights.infrastructure.persistence;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -65,5 +66,5 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "AND (cast(:endDate as timestamp) IS NULL OR f.arrivalDateTime <= :endDate) " +
            "GROUP BY f.route.id, f.route.originCode, f.route.destinationCode " +
            "ORDER BY flightCount DESC")
-    List<RouteUtilizationProjection> findFlightUtilizationReports(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate, Pageable pageable);
+    Page<RouteUtilizationProjection> findFlightUtilizationReports(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate, Pageable pageable);
 }

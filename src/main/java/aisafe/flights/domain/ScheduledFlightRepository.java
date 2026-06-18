@@ -4,6 +4,8 @@ import aisafe.airports.domain.IataCode;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.shared.domain.BaseRepository;
 
+import aisafe.shared.domain.PaginatedResult;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +20,5 @@ public interface ScheduledFlightRepository extends BaseRepository<ScheduledFligh
     List<ModelUtilizationData> findTopModelsByFlightHours(int limit);
     List<ModelUtilizationData> findTopModelsByAssignments(int limit);
     Double calculateTotalOperationalHoursByRegistration(RegistrationNumber registration);
-    List<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size);
+    PaginatedResult<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size);
 }
