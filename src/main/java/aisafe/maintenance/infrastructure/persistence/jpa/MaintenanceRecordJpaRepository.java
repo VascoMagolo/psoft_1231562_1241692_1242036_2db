@@ -134,6 +134,7 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         if (existing != null) {
             existing.setStatus(record.getStatus());
             existing.setNotes(record.getNotes());
+            existing.setCompletedAt(record.getCompletedAt());
             springRepo.save(existing);
         } else {
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
@@ -141,6 +142,7 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
                     record.getNotes(), partsJpa, templateJpa, record.getStatus(),
                     new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber(),
                     record.getCost());
+            jpaEntity.setCompletedAt(record.getCompletedAt());
             springRepo.save(jpaEntity);
         }
     }
@@ -161,5 +163,12 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         if (registrationNumbers.isEmpty()) return BigDecimal.ZERO;
         BigDecimal sum = springRepo.sumCostByRegistrations(registrationNumbers);
         return sum != null ? sum : BigDecimal.ZERO;
+    }
+
+    @Override
+    public MaintenanceTurnaroundData findAverageTurnaroundByRegistrations(String modelName, List<String> registrations) {
+        if (registrations.isEmpty()) return new MaintenanceTurnaroundData(modelName, 0.0);
+        Double avg = springRepo.findAverageTurnaroundHours(registrations);
+        return new MaintenanceTurnaroundData(modelName, avg != null ? avg : 0.0);
     }
 }

@@ -40,7 +40,7 @@ class DeleteMaintenanceRecordUseCaseTest {
         MaintenanceTemplate template = new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
                 List.of("ModelA"), List.of("Check oil"), 500, 90);
         return new MaintenanceRecord(UUID.randomUUID(), "Oil change", LocalDateTime.now(), 2, List.of(part), "notes", template,
-                MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-ABD"), BigDecimal.valueOf(1000));
+                MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-ABD"), BigDecimal.valueOf(1000), null);
     }
 
     @Test

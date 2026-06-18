@@ -11,6 +11,6 @@ public class MaintenanceRecordMapper {
                 entity.getParts().stream().map(MaintenancePartMapper::toDomain).toList(), entity.getNotes(),
                 MaintenanceTemplateMapper.toDomain(entity.getTemplate()),
                 entity.getStatus(), entity.getComponents(), new RegistrationNumber(entity.getAircraftRegistration()),
-                entity.getCost());
+                entity.getCost(), entity.getCompletedAt());
     }
 }

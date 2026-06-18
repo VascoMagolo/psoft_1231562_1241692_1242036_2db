@@ -189,12 +189,16 @@ public class Bootstrap implements ApplicationRunner {
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Simple inspection to the starter motor",
                     LocalDateTime.parse("2024-06-01T10:00:00"), 120, List.of(part), "No issues found during the inspection.",
                     template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), aircraft1.getRegistrationNumber(),
-                    java.math.BigDecimal.valueOf(1500.00)));
+                    java.math.BigDecimal.valueOf(1500.00), null));
             maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Detailed inspection to the starter motor",
                     LocalDateTime.parse("2024-06-10T14:00:00"), 240, List.of(part),
                     "Minor wear detected, replacement recommended within the next 6 months.", template,
                     MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), aircraft2.getRegistrationNumber(),
-                    java.math.BigDecimal.valueOf(2750.00)));
+                    java.math.BigDecimal.valueOf(2750.00), null));
+            maintenanceRecordRepository.save(new MaintenanceRecord(UUID.randomUUID(), "Completed starter motor overhaul",
+                    LocalDateTime.parse("2024-07-01T08:00:00"), 32, List.of(part), "Overhaul completed successfully.",
+                    template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE), aircraft1.getRegistrationNumber(),
+                    java.math.BigDecimal.valueOf(3200.00), LocalDateTime.parse("2024-07-02T16:00:00")));
         }
     }
 }

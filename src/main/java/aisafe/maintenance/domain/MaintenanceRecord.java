@@ -19,11 +19,12 @@ public class MaintenanceRecord {
     private Set<MaintenanceComponent> components;
     private RegistrationNumber aircraftRegistration;
     private BigDecimal cost;
+    private LocalDateTime completedAt;
 
     public MaintenanceRecord(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                              List<MaintenancePart> parts, String notes, MaintenanceTemplate template,
                              MaintenanceStatus status, Set<MaintenanceComponent> components,
-                             RegistrationNumber aircraftRegistration, BigDecimal cost) {
+                             RegistrationNumber aircraftRegistration, BigDecimal cost, LocalDateTime completedAt) {
         if (recordId == null) throw new MaintenanceInvalidFieldException("Record ID must not be null.");
         if (description == null || description.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Description must not be blank.");
         if (startDate == null) throw new MaintenanceInvalidFieldException("Start date must not be null.");
@@ -49,6 +50,7 @@ public class MaintenanceRecord {
         this.components = Set.copyOf(components);
         this.aircraftRegistration = aircraftRegistration;
         this.cost = cost;
+        this.completedAt = completedAt;
     }
 
     public UUID getRecordId() { return recordId; }
@@ -61,9 +63,15 @@ public class MaintenanceRecord {
     public MaintenanceStatus getStatus() { return status; }
     public Set<MaintenanceComponent> getComponents() { return components; }
     public RegistrationNumber getAircraftRegistration() { return aircraftRegistration; }
-
     public BigDecimal getCost() { return cost; }
+    public LocalDateTime getCompletedAt() { return completedAt; }
 
     public void setNotes(String notes) { this.notes = notes; }
-    public void setStatus(MaintenanceStatus status) { this.status = status; }
+
+    public void changeStatus(MaintenanceStatus status) {
+        this.status = status;
+        if (status == MaintenanceStatus.COMPLETED && this.completedAt == null) {
+            this.completedAt = LocalDateTime.now();
+        }
+    }
 }

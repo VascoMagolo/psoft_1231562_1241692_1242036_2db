@@ -35,6 +35,13 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
     @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration IN :registrations")
     BigDecimal sumCostByRegistrations(@Param("registrations") List<String> registrations);
 
+    @Query("SELECT AVG(TIMESTAMPDIFF(SECOND, m.startDate, m.completedAt)) / 3600.0 " +
+           "FROM MaintenanceRecordJpaEntity m " +
+           "WHERE m.aircraftRegistration IN :registrations " +
+           "AND m.status = 'COMPLETED' " +
+           "AND m.completedAt IS NOT NULL")
+    Double findAverageTurnaroundHours(@Param("registrations") List<String> registrations);
+
     @Query("SELECT DISTINCT m FROM MaintenanceRecordJpaEntity m " +
            "INNER JOIN m.components c " +
            "WHERE (:registration IS NULL OR m.aircraftRegistration = :registration) " +
