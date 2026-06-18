@@ -1,6 +1,7 @@
 package aisafe.flights.application;
 
 import aisafe.aircrafts.domain.Aircraft;
+import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
@@ -39,7 +40,7 @@ public class ScheduleFlightUseCase {
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(new RegistrationNumber(aircraftId))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraftId));
 
-        if (aircraft.getStatus() == aisafe.aircrafts.domain.AircraftStatus.UNDER_MAINTENANCE || aircraft.getStatus() == aisafe.aircrafts.domain.AircraftStatus.INACTIVE) {
+        if (aircraft.getStatus() == AircraftStatus.UNDER_MAINTENANCE || aircraft.getStatus() == AircraftStatus.INACTIVE) {
             throw new AircraftUnavailableException(aircraftId);
         }
         if (aircraft.getSeatCapacity() < route.getMinimumCapacity()) {

@@ -2,6 +2,7 @@ package aisafe.shared.infrastructure;
 
 import aisafe.aircrafts.domain.*;
 import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.Runway;
 import aisafe.maintenance.domain.*;
@@ -143,8 +144,8 @@ public class Bootstrap implements ApplicationRunner {
                 Aircraft managedAircraft1 = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-TKA")).orElseThrow();
                 Aircraft managedAircraft2 = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-TKB")).orElseThrow();
                 
-                Route managedRoute1 = routeRepository.findByOriginAndDestination(new aisafe.airports.domain.IataCode("LIS"), new aisafe.airports.domain.IataCode("OPO"), 0, 10).data().get(0);
-                Route managedRoute2 = routeRepository.findByOriginAndDestination(new aisafe.airports.domain.IataCode("LIS"), new aisafe.airports.domain.IataCode("MAD"), 0, 10).data().get(0);
+                Route managedRoute1 = routeRepository.findByOriginAndDestination(new IataCode("LIS"), new IataCode("OPO"), 0, 10).data().get(0);
+                Route managedRoute2 = routeRepository.findByOriginAndDestination(new IataCode("LIS"), new IataCode("MAD"), 0, 10).data().get(0);
                 
                 // Completed flight for aircraft 1
                 scheduledFlightRepository.save(new ScheduledFlight(

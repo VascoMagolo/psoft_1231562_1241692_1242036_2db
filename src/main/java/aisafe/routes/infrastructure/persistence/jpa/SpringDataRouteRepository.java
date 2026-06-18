@@ -34,7 +34,7 @@ public interface SpringDataRouteRepository extends JpaRepository<RouteJpaEntity,
         Integer getEstimatedFlightTime();
         Double getMinimumRange();
         Integer getMinimumCapacity();
-        aisafe.routes.domain.RouteStatus getStatus();
+        RouteStatus getStatus();
         Long getVersion();
     }
 }

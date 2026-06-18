@@ -1,6 +1,7 @@
 package aisafe.maintenance.application.dtos;
 
 import aisafe.maintenance.domain.MaintenanceComponent;
+import aisafe.maintenance.domain.MaintenancePart;
 
 /**
  * Response DTO for returning maintenance part information.
@@ -13,7 +14,7 @@ public record MaintenancePartResponse(
         Integer minimumThreshold,
         MaintenanceComponent component
 ) {
-    public static MaintenancePartResponse from(aisafe.maintenance.domain.MaintenancePart part) {
+    public static MaintenancePartResponse from(MaintenancePart part) {
         return new MaintenancePartResponse(
                 part.getPartNumber(),
                 part.getName(),
