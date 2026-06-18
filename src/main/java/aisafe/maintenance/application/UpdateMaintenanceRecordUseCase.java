@@ -41,7 +41,7 @@ public class UpdateMaintenanceRecordUseCase {
             throw new ConcurrencyException("Maintenance record version mismatch.");
         }
 
-        record.setStatus(request.status());
+        record.changeStatus(request.status());
         if (request.notes() != null && !request.notes().trim().isEmpty()) {
             record.setNotes(request.notes());
         }
@@ -57,7 +57,8 @@ public class UpdateMaintenanceRecordUseCase {
                 record.getTemplate().getName(),
                 record.getStatus().name(), record.getAircraftRegistration().getNumber(),
                 newVersion,
-                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet()),
+                record.getCost()
         );
     }
 }

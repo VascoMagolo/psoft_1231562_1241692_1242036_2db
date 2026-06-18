@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +46,7 @@ class CreateMaintenanceRecordUseCaseTest {
     @BeforeEach
     void setUp() {
         request = new CreateMaintenanceRecordRequest(
-                "Test maintenance", LocalDateTime.of(2023, 1, 1, 10, 0), 8, List.of("P001"), "Notes", "Template1", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE)
+                "Test maintenance", LocalDateTime.of(2023, 1, 1, 10, 0), 8, List.of("P001"), "Notes", "Template1", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE), BigDecimal.valueOf(500)
         );
         part = new MaintenancePart("P001", "Part1", "Desc1", 10, 2, MaintenanceComponent.ENGINE);
         template = new MaintenanceTemplate("Template1", MaintenanceType.INSPECTION, List.of("Model1"), List.of("Check1"), 100, 30);

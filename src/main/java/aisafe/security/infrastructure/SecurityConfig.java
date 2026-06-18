@@ -74,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         // WP #3A - Routes
+                        .requestMatchers(HttpMethod.GET, "/api/routes/export").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/flights").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/flights").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/network/total-distance").hasAnyRole("ATCC", "ADMIN")
@@ -92,7 +93,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,"/api/maintenance/parts/*").hasAnyRole("MAINTENANCE_TECHNICIAN", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/hours").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/search").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR", "ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/ongoing").hasAnyRole("MAINTENANCE_SUPERVISOR", "MAINTENANCE_TECHNICIAN", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/aircraft/*").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/cost/aircraft/*").hasAnyRole("ATCC", "BACKOFFICE_OPERATOR", "MAINTENANCE_SUPERVISOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/cost/model/*").hasAnyRole("ATCC", "BACKOFFICE_OPERATOR", "MAINTENANCE_SUPERVISOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/turnaround/model/*").hasAnyRole("MAINTENANCE_SUPERVISOR", "MAINTENANCE_TECHNICIAN", "ATCC", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

@@ -3,12 +3,12 @@ package aisafe.maintenance.infrastructure.persistence.jpa;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.*;
 import aisafe.shared.domain.PaginatedResult;
-import java.time.LocalDateTime;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -111,6 +111,16 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public PaginatedResult<MaintenanceRecord> findByStatus(MaintenanceStatus status, int pageNumber, int pageSize) {
+        Page<MaintenanceRecordJpaEntity> page = springRepo.findByStatusOrderByStartDateDesc(
+                status, PageRequest.of(pageNumber, pageSize));
+        List<MaintenanceRecord> data = page.stream()
+                .map(MaintenanceRecordMapper::toDomain)
+                .collect(Collectors.toList());
+        return new PaginatedResult<>(data, page.getTotalElements());
+    }
+
+    @Override
     public void save(MaintenanceRecord record) {
         List<MaintenancePartJpaEntity> partsJpa = record.getParts().stream()
                 .map(p -> partSpringRepo.findByPartNumber(p.getPartNumber())
@@ -124,12 +134,15 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         if (existing != null) {
             existing.setStatus(record.getStatus());
             existing.setNotes(record.getNotes());
+            existing.setCompletedAt(record.getCompletedAt());
             springRepo.save(existing);
         } else {
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
                     record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
                     record.getNotes(), partsJpa, templateJpa, record.getStatus(),
-                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber());
+                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber(),
+                    record.getCost());
+            jpaEntity.setCompletedAt(record.getCompletedAt());
             springRepo.save(jpaEntity);
         }
     }
@@ -137,5 +150,25 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     @Override
     public void delete(MaintenanceRecord record) {
         springRepo.findByRecordId(record.getRecordId()).ifPresent(springRepo::delete);
+    }
+
+    @Override
+    public BigDecimal sumCostByAircraftRegistration(RegistrationNumber registration) {
+        BigDecimal sum = springRepo.sumCostByAircraftRegistration(registration.getNumber());
+        return sum != null ? sum : BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal sumCostByRegistrations(List<String> registrationNumbers) {
+        if (registrationNumbers.isEmpty()) return BigDecimal.ZERO;
+        BigDecimal sum = springRepo.sumCostByRegistrations(registrationNumbers);
+        return sum != null ? sum : BigDecimal.ZERO;
+    }
+
+    @Override
+    public MaintenanceTurnaroundData findAverageTurnaroundByRegistrations(String modelName, List<String> registrations) {
+        if (registrations.isEmpty()) return new MaintenanceTurnaroundData(modelName, 0.0);
+        Double avg = springRepo.findAverageTurnaroundHours(registrations);
+        return new MaintenanceTurnaroundData(modelName, avg != null ? avg : 0.0);
     }
 }

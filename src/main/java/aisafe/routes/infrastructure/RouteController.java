@@ -4,6 +4,7 @@ import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.ActiveRouteResponse;
 import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
@@ -51,6 +52,7 @@ public class RouteController {
     private final RouteRepository routeRepository;
     private final ListActiveRoutesUseCase listActiveRoutes;
     private final SearchAlternativeRoutesUseCase searchAlternativeRoutes;
+    private final ExportRouteNetworkUseCase exportRouteNetwork;
 
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
@@ -62,7 +64,8 @@ public class RouteController {
                            DeleteRouteUseCase deleteRoute,
                            RouteRepository routeRepository,
                            ListActiveRoutesUseCase listActiveRoutes,
-                           SearchAlternativeRoutesUseCase searchAlternativeRoutes) {
+                           SearchAlternativeRoutesUseCase searchAlternativeRoutes,
+                           ExportRouteNetworkUseCase exportRouteNetwork) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -74,6 +77,7 @@ public class RouteController {
         this.routeRepository = routeRepository;
         this.listActiveRoutes = listActiveRoutes;
         this.searchAlternativeRoutes = searchAlternativeRoutes;
+        this.exportRouteNetwork = exportRouteNetwork;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
@@ -272,5 +276,22 @@ public class RouteController {
             @Parameter(description = "IATA code of the destination airport") @PathVariable String destination) {
         deleteRoute.execute(origin.toUpperCase(), destination.toUpperCase());
         return ResponseEntity.noContent().build();
+    }
+
+    // US228
+    @Operation(summary = "Export route network", description = "Exports the active route network in GeoJSON or KML format. (US228)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Export file generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid format requested"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportRouteNetwork(
+            @RequestParam(defaultValue = "geojson") String format) {
+        ExportedFile file = exportRouteNetwork.execute(format);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, file.contentType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
+                .body(file.content());
     }
 }

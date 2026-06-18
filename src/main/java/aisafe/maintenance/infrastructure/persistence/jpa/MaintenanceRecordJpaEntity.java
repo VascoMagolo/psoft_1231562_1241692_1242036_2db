@@ -5,6 +5,7 @@ import aisafe.maintenance.domain.MaintenanceStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -62,12 +63,19 @@ public class MaintenanceRecordJpaEntity {
     @Column(name = "aircraft_registration", nullable = false)
     private String aircraftRegistration;
 
+    @Column(name = "cost", nullable = false, precision = 15, scale = 2)
+    private BigDecimal cost;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     protected MaintenanceRecordJpaEntity() {}
 
     public MaintenanceRecordJpaEntity(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                                       String notes, List<MaintenancePartJpaEntity> parts,
                                       MaintenanceTemplateJpaEntity template, MaintenanceStatus status,
-                                      Set<MaintenanceComponent> components, String aircraftRegistration) {
+                                      Set<MaintenanceComponent> components, String aircraftRegistration,
+                                      BigDecimal cost) {
         this.recordId = recordId;
         this.description = description;
         this.startDate = startDate;
@@ -78,6 +86,7 @@ public class MaintenanceRecordJpaEntity {
         this.status = status;
         this.components = components;
         this.aircraftRegistration = aircraftRegistration;
+        this.cost = cost;
     }
 
     public Long getId() { return id; }
@@ -92,9 +101,12 @@ public class MaintenanceRecordJpaEntity {
     public MaintenanceStatus getStatus() { return status; }
     public Set<MaintenanceComponent> getComponents() { return components; }
     public String getAircraftRegistration() { return aircraftRegistration; }
+    public BigDecimal getCost() { return cost; }
+    public LocalDateTime getCompletedAt() { return completedAt; }
 
     public void setId(Long id) { this.id = id; }
     public void setVersion(Long version) { this.version = version; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(MaintenanceStatus status) { this.status = status; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 }
