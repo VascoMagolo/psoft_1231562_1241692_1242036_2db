@@ -65,6 +65,14 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public List<MaintenanceRecord> findCompletedByAircraft(RegistrationNumber registrationNumber) {
+        return springRepo.findByAircraftRegistrationAndStatusOrderByCompletedAtDesc(
+                registrationNumber.getNumber(), MaintenanceStatus.COMPLETED).stream()
+                .map(MaintenanceRecordMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize) {
         Page<MaintenanceRecordJpaEntity> page = springRepo.findByAircraftRegistration(
                 aircraftRegistration, PageRequest.of(pageNumber, pageSize));

@@ -114,4 +114,11 @@ class SpringDataScheduledFlightRepositoryTest {
         assertEquals(1L, reports.get(0).getFlightCount());
         assertEquals(1L, reports.get(1).getFlightCount());
     }
+
+    @Test
+    void ensureCalculateOperationalHoursSinceWorks() {
+        OffsetDateTime since = OffsetDateTime.now().minusDays(3);
+        Double hours = flightRepo.calculateOperationalHoursSince("CS-TPA", since);
+        assertEquals(2.0, hours, 0.001);
+    }
 }

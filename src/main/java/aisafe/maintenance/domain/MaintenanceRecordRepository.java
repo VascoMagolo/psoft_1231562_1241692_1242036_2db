@@ -15,6 +15,7 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
     boolean existsByPartsContaining(MaintenancePart part);
     boolean existsByTemplate(MaintenanceTemplate template);
     boolean existsByAircraftRegistration(RegistrationNumber registrationNumber);
+    List<MaintenanceRecord> findCompletedByAircraft(RegistrationNumber registrationNumber);
     PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize);
     Optional<MaintenanceRecord> findByRecordId(UUID recordId);
     Long findVersionFor(UUID recordId);
