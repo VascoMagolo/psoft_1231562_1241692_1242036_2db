@@ -447,8 +447,13 @@ public class MaintenanceController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/records/due")
-    public ResponseEntity<List<MaintenanceDueAircraftResponse>> getDueAircraft() {
-        return ResponseEntity.ok(viewMaintenanceDueAircraftUseCase.execute());
+    public ResponseEntity<PagedModel<EntityModel<MaintenanceDueAircraftResponse>>> getDueAircraft(
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<MaintenanceDueAircraftResponse> assembler) {
+        PaginatedResult<MaintenanceDueAircraftResponse> result = viewMaintenanceDueAircraftUseCase.execute(
+                pageable.getPageNumber(), pageable.getPageSize());
+        Page<MaintenanceDueAircraftResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
     }
 
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {

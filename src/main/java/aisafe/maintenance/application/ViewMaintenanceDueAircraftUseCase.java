@@ -9,6 +9,7 @@ import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
 import aisafe.shared.application.UseCase;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.*;
@@ -41,7 +42,7 @@ public class ViewMaintenanceDueAircraftUseCase {
         this.defaultDaysThreshold = defaultDaysThreshold;
     }
 
-    public List<MaintenanceDueAircraftResponse> execute() {
+    public PaginatedResult<MaintenanceDueAircraftResponse> execute(int pageNumber, int pageSize) {
         List<MaintenanceDueAircraftResponse> dueList = new ArrayList<>();
         List<Aircraft> allAircraft = aircraftRepository.findAll();
         List<MaintenanceTemplate> allTemplates = maintenanceTemplateRepository.findAll();
@@ -147,6 +148,13 @@ public class ViewMaintenanceDueAircraftUseCase {
                 }
             }
         }
-        return dueList;
+        int totalElements = dueList.size();
+        int start = pageNumber * pageSize;
+        if (start >= totalElements) {
+            return new PaginatedResult<>(List.of(), totalElements);
+        }
+        int end = Math.min(start + pageSize, totalElements);
+        List<MaintenanceDueAircraftResponse> paginatedData = dueList.subList(start, end);
+        return new PaginatedResult<>(paginatedData, totalElements);
     }
 }

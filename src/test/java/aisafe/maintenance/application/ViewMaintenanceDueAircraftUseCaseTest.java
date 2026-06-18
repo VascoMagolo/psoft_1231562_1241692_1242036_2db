@@ -4,6 +4,7 @@ import aisafe.aircrafts.domain.*;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.maintenance.application.dtos.MaintenanceDueAircraftResponse;
 import aisafe.maintenance.domain.*;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,8 +71,8 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(Collections.emptyList());
         when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(20.0);
 
-        List<MaintenanceDueAircraftResponse> result = useCase.execute();
-        assertTrue(result.isEmpty());
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertTrue(result.data().isEmpty());
     }
 
     @Test
@@ -82,10 +83,10 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         // Flight hours exceeds limit (120 >= 100)
         when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(120.0);
 
-        List<MaintenanceDueAircraftResponse> result = useCase.execute();
-        assertEquals(1, result.size());
-        assertEquals("CS-TKA", result.get(0).registrationNumber());
-        assertTrue(result.get(0).dueReason().contains("Exceeded flight hours limit"));
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertEquals(1, result.data().size());
+        assertEquals("CS-TKA", result.data().get(0).registrationNumber());
+        assertTrue(result.data().get(0).dueReason().contains("Exceeded flight hours limit"));
     }
 
     @Test
@@ -97,10 +98,10 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         // Flight hours is below limit (10.0 < 100)
         when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(10.0);
 
-        List<MaintenanceDueAircraftResponse> result = useCase.execute();
-        assertEquals(1, result.size());
-        assertEquals("CS-TKA", result.get(0).registrationNumber());
-        assertTrue(result.get(0).dueReason().contains("Exceeded elapsed days limit"));
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertEquals(1, result.data().size());
+        assertEquals("CS-TKA", result.data().get(0).registrationNumber());
+        assertTrue(result.data().get(0).dueReason().contains("Exceeded elapsed days limit"));
     }
 
     @Test
@@ -119,8 +120,8 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         // Flight hours since last completed was 10.0 (less than 100)
         when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(10.0);
 
-        List<MaintenanceDueAircraftResponse> result = useCase.execute();
-        assertTrue(result.isEmpty());
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertTrue(result.data().isEmpty());
     }
 
     @Test
@@ -134,9 +135,9 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         // Global threshold is 300 hrs, we return 350.0 hrs
         when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(350.0);
 
-        List<MaintenanceDueAircraftResponse> result = useCase.execute();
-        assertEquals(1, result.size());
-        assertEquals("CS-TKA", result.get(0).registrationNumber());
-        assertTrue(result.get(0).dueReason().contains("Exceeded default flight hours limit"));
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertEquals(1, result.data().size());
+        assertEquals("CS-TKA", result.data().get(0).registrationNumber());
+        assertTrue(result.data().get(0).dueReason().contains("Exceeded default flight hours limit"));
     }
 }
