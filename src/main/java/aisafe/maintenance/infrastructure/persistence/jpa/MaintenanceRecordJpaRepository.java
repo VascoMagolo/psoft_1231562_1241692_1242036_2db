@@ -111,6 +111,16 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
+    public PaginatedResult<MaintenanceRecord> findByStatus(MaintenanceStatus status, int pageNumber, int pageSize) {
+        Page<MaintenanceRecordJpaEntity> page = springRepo.findByStatusOrderByStartDateDesc(
+                status, PageRequest.of(pageNumber, pageSize));
+        List<MaintenanceRecord> data = page.stream()
+                .map(MaintenanceRecordMapper::toDomain)
+                .collect(Collectors.toList());
+        return new PaginatedResult<>(data, page.getTotalElements());
+    }
+
+    @Override
     public void save(MaintenanceRecord record) {
         List<MaintenancePartJpaEntity> partsJpa = record.getParts().stream()
                 .map(p -> partSpringRepo.findByPartNumber(p.getPartNumber())

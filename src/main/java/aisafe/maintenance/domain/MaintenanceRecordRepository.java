@@ -25,4 +25,5 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
             int pageNumber,
             int pageSize
     );
+    PaginatedResult<MaintenanceRecord> findByStatus(MaintenanceStatus status, int pageNumber, int pageSize);
 }

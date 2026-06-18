@@ -51,6 +51,7 @@ public class MaintenanceController {
     private final UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase;
     private final SearchMaintenancePartUseCase searchMaintenancePartUseCase;
     private final SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase;
+    private final ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -64,7 +65,8 @@ public class MaintenanceController {
             UpdateMaintenancePartUseCase updateMaintenancePartUseCase,
             UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase,
             SearchMaintenancePartUseCase searchMaintenancePartUseCase,
-            SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase) {
+            SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase,
+            ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -78,6 +80,7 @@ public class MaintenanceController {
         this.updateMaintenanceTemplateUseCase = updateMaintenanceTemplateUseCase;
         this.searchMaintenancePartUseCase = searchMaintenancePartUseCase;
         this.searchMaintenanceRecordsUseCase = searchMaintenanceRecordsUseCase;
+        this.viewOngoingMaintenanceUseCase = viewOngoingMaintenanceUseCase;
     }
 
     /**
@@ -361,6 +364,22 @@ public class MaintenanceController {
         RegistrationNumber registrationNumber = registration != null ? new RegistrationNumber(registration) : null;
         PaginatedResult<MaintenanceRecordResponse> result = searchMaintenanceRecordsUseCase.execute(
                 registrationNumber, from, to, component, pageable.getPageNumber(), pageable.getPageSize());
+        Page<MaintenanceRecordResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
+    }
+
+    @Operation(summary = "Get ongoing maintenance activities", description = "Returns a paginated list of all maintenance records currently in progress across the fleet, ordered by start date descending. (US219)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ongoing records retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/records/ongoing")
+    public ResponseEntity<PagedModel<EntityModel<MaintenanceRecordResponse>>> getOngoingMaintenance(
+            @PageableDefault(size = 20) Pageable pageable,
+            PagedResourcesAssembler<MaintenanceRecordResponse> assembler) {
+        PaginatedResult<MaintenanceRecordResponse> result = viewOngoingMaintenanceUseCase.execute(
+                pageable.getPageNumber(), pageable.getPageSize());
         Page<MaintenanceRecordResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
     }
