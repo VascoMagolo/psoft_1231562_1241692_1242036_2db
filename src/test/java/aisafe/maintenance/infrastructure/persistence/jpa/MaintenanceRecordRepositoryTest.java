@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,7 @@ class MaintenanceRecordRepositoryTest {
         UUID recordId = UUID.randomUUID();
         MaintenanceRecordJpaEntity record = new MaintenanceRecordJpaEntity(
                 recordId, "Oil change", LocalDateTime.now(), 4, "notes",
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA");
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100));
         recordRepository.save(record);
 
         var found = recordRepository.findByRecordId(recordId);
@@ -57,8 +58,8 @@ class MaintenanceRecordRepositoryTest {
 
     @Test
     void ensureSumTotalExpectedDurationWorks() {
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-A"));
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R2", LocalDateTime.now(), 10, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-B"));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-A", BigDecimal.valueOf(100)));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R2", LocalDateTime.now(), 10, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-B", BigDecimal.valueOf(200)));
 
         Long total = recordRepository.sumTotalExpectedDuration();
         assertEquals(15L, total);
@@ -66,7 +67,7 @@ class MaintenanceRecordRepositoryTest {
 
     @Test
     void ensureExistsByAircraftRegistrationWorks() {
-        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA"));
+        recordRepository.save(new MaintenanceRecordJpaEntity(UUID.randomUUID(), "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
 
         assertTrue(recordRepository.existsByAircraftRegistration("CS-TPA"));
         assertFalse(recordRepository.existsByAircraftRegistration("UNKNOWN"));

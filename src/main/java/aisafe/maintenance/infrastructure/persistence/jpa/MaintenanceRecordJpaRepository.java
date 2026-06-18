@@ -3,12 +3,12 @@ package aisafe.maintenance.infrastructure.persistence.jpa;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.*;
 import aisafe.shared.domain.PaginatedResult;
-import java.time.LocalDateTime;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -139,7 +139,8 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
                     record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
                     record.getNotes(), partsJpa, templateJpa, record.getStatus(),
-                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber());
+                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber(),
+                    record.getCost());
             springRepo.save(jpaEntity);
         }
     }
@@ -147,5 +148,18 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     @Override
     public void delete(MaintenanceRecord record) {
         springRepo.findByRecordId(record.getRecordId()).ifPresent(springRepo::delete);
+    }
+
+    @Override
+    public BigDecimal sumCostByAircraftRegistration(RegistrationNumber registration) {
+        BigDecimal sum = springRepo.sumCostByAircraftRegistration(registration.getNumber());
+        return sum != null ? sum : BigDecimal.ZERO;
+    }
+
+    @Override
+    public BigDecimal sumCostByRegistrations(List<String> registrationNumbers) {
+        if (registrationNumbers.isEmpty()) return BigDecimal.ZERO;
+        BigDecimal sum = springRepo.sumCostByRegistrations(registrationNumbers);
+        return sum != null ? sum : BigDecimal.ZERO;
     }
 }

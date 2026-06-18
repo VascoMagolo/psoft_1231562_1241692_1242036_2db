@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +28,12 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
     Long sumTotalExpectedDuration();
 
     Page<MaintenanceRecordJpaEntity> findByStatusOrderByStartDateDesc(MaintenanceStatus status, Pageable pageable);
+
+    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration = :registration")
+    BigDecimal sumCostByAircraftRegistration(@Param("registration") String registration);
+
+    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration IN :registrations")
+    BigDecimal sumCostByRegistrations(@Param("registrations") List<String> registrations);
 
     @Query("SELECT DISTINCT m FROM MaintenanceRecordJpaEntity m " +
            "INNER JOIN m.components c " +

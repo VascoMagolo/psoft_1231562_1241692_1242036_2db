@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -47,13 +48,13 @@ class SearchMaintenanceRecordsRepositoryTest {
 
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Engine check", date2026Jan, 4, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA"));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Airframe inspection", date2026Jun, 8, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME), "CS-TPA"));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME), "CS-TPA", BigDecimal.valueOf(200)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Avionics check", date2025Dec, 6, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS), "CS-LXA"));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS), "CS-LXA", BigDecimal.valueOf(150)));
     }
 
     @Test
@@ -99,7 +100,7 @@ class SearchMaintenanceRecordsRepositoryTest {
                 UUID.randomUUID(), "Multi-component check", date2026Jan, 3, null,
                 List.of(part), template, MaintenanceStatus.PLANNED,
                 Set.of(MaintenanceComponent.ENGINE, MaintenanceComponent.AVIONICS, MaintenanceComponent.AIRFRAME),
-                "CS-DUP"));
+                "CS-DUP", BigDecimal.valueOf(100)));
 
         Page<MaintenanceRecordJpaEntity> page = recordRepository.search("CS-DUP", null, null, null, PageRequest.of(0, 20));
         assertEquals(1, page.getTotalElements());

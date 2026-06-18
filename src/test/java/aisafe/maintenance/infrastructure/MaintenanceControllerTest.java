@@ -18,6 +18,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -81,6 +82,12 @@ class MaintenanceControllerTest {
     private ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase;
 
     @MockitoBean
+    private ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase;
+
+    @MockitoBean
+    private ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -94,7 +101,7 @@ class MaintenanceControllerTest {
         sampleRecordId = UUID.randomUUID();
         sampleRecordResponse = new MaintenanceRecordResponse(
                 sampleRecordId, "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L, Set.of("ENGINE"));
+                4, null, List.of("P001"), "Annual Check", "PLANNED", "CS-TPA", 0L, Set.of("ENGINE"), BigDecimal.valueOf(500));
     }
 
     @Test
@@ -165,7 +172,7 @@ class MaintenanceControllerTest {
     void ensureCreateRecordReturns201() throws Exception {
         CreateMaintenanceRecordRequest request = new CreateMaintenanceRecordRequest(
                 "Engine inspection", LocalDateTime.of(2026, 5, 23, 10, 0),
-                4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE));
+                4, List.of("P001"), null, "Annual Check", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE), BigDecimal.valueOf(500));
 
         when(createMaintenanceRecordUseCase.execute(any())).thenReturn(sampleRecordResponse);
 
@@ -275,6 +282,48 @@ class MaintenanceControllerTest {
                 .thenReturn(new PaginatedResult<>(List.of(), 0));
 
         mockMvc.perform(get("/api/maintenance/records/ongoing"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetCostByAircraftReturns200() throws Exception {
+        when(viewMaintenanceCostByAircraftUseCase.execute("CS-TPA"))
+                .thenReturn(new MaintenanceCostByAircraftResponse("CS-TPA", BigDecimal.valueOf(1500)));
+
+        mockMvc.perform(get("/api/maintenance/records/cost/aircraft/CS-TPA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aircraftRegistration").value("CS-TPA"))
+                .andExpect(jsonPath("$.totalCost").value(1500));
+    }
+
+    @Test
+    @WithMockUser(roles = "ATCC")
+    void ensureAtccCanGetCostByAircraft() throws Exception {
+        when(viewMaintenanceCostByAircraftUseCase.execute("CS-TPA"))
+                .thenReturn(new MaintenanceCostByAircraftResponse("CS-TPA", BigDecimal.valueOf(1500)));
+
+        mockMvc.perform(get("/api/maintenance/records/cost/aircraft/CS-TPA"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetCostByModelReturns200() throws Exception {
+        when(viewMaintenanceCostByModelUseCase.execute("A320"))
+                .thenReturn(new MaintenanceCostByModelResponse("A320", BigDecimal.valueOf(4250)));
+
+        mockMvc.perform(get("/api/maintenance/records/cost/model/A320"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.modelName").value("A320"))
+                .andExpect(jsonPath("$.totalCost").value(4250));
+    }
+
+    @Test
+    @WithMockUser(roles = "ATCC")
+    void ensureAtccCanGetCostByModel() throws Exception {
+        when(viewMaintenanceCostByModelUseCase.execute("A320"))
+                .thenReturn(new MaintenanceCostByModelResponse("A320", BigDecimal.valueOf(4250)));
+
+        mockMvc.perform(get("/api/maintenance/records/cost/model/A320"))
                 .andExpect(status().isOk());
     }
 }

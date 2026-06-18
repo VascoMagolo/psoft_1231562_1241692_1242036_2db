@@ -4,7 +4,9 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.shared.domain.BaseRepository;
 import aisafe.shared.domain.PaginatedResult;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,4 +28,6 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
             int pageSize
     );
     PaginatedResult<MaintenanceRecord> findByStatus(MaintenanceStatus status, int pageNumber, int pageSize);
+    BigDecimal sumCostByAircraftRegistration(RegistrationNumber registration);
+    BigDecimal sumCostByRegistrations(List<String> registrationNumbers);
 }

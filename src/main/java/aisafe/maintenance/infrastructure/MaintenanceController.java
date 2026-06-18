@@ -2,6 +2,8 @@ package aisafe.maintenance.infrastructure;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
+import aisafe.maintenance.application.dtos.MaintenanceCostByAircraftResponse;
+import aisafe.maintenance.application.dtos.MaintenanceCostByModelResponse;
 import aisafe.maintenance.domain.MaintenanceComponent;
 
 import java.time.LocalDateTime;
@@ -52,6 +54,8 @@ public class MaintenanceController {
     private final SearchMaintenancePartUseCase searchMaintenancePartUseCase;
     private final SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase;
     private final ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase;
+    private final ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase;
+    private final ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -66,7 +70,9 @@ public class MaintenanceController {
             UpdateMaintenanceTemplateUseCase updateMaintenanceTemplateUseCase,
             SearchMaintenancePartUseCase searchMaintenancePartUseCase,
             SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase,
-            ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase) {
+            ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase,
+            ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase,
+            ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -81,6 +87,8 @@ public class MaintenanceController {
         this.searchMaintenancePartUseCase = searchMaintenancePartUseCase;
         this.searchMaintenanceRecordsUseCase = searchMaintenanceRecordsUseCase;
         this.viewOngoingMaintenanceUseCase = viewOngoingMaintenanceUseCase;
+        this.viewMaintenanceCostByAircraftUseCase = viewMaintenanceCostByAircraftUseCase;
+        this.viewMaintenanceCostByModelUseCase = viewMaintenanceCostByModelUseCase;
     }
 
     /**
@@ -384,15 +392,32 @@ public class MaintenanceController {
         return ResponseEntity.ok(assembler.toModel(page, EntityModel::of));
     }
 
-    /**
-     * Helper method to convert a MaintenanceRecordResponse into an EntityModel with
-     * HATEOAS links for further actions related to the maintenance record.
-     * 
-     * @param response the MaintenanceRecordResponse to be converted into an
-     *                 EntityModel
-     * @return an EntityModel containing the MaintenanceRecordResponse and HATEOAS
-     *         links for related actions
-     */
+    @Operation(summary = "Get maintenance cost by aircraft", description = "Returns the total maintenance cost for a specific aircraft. (US220)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cost report returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft not found")
+    })
+    @GetMapping("/records/cost/aircraft/{registrationNumber}")
+    public ResponseEntity<MaintenanceCostByAircraftResponse> getCostByAircraft(
+            @Parameter(description = "Aircraft registration number (e.g. CS-TKA)") @PathVariable String registrationNumber) {
+        return ResponseEntity.ok(viewMaintenanceCostByAircraftUseCase.execute(registrationNumber));
+    }
+
+    @Operation(summary = "Get maintenance cost by aircraft model", description = "Returns the total maintenance cost aggregated across all aircraft of the given model. (US220)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cost report returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft model not found")
+    })
+    @GetMapping("/records/cost/model/{modelName}")
+    public ResponseEntity<MaintenanceCostByModelResponse> getCostByModel(
+            @Parameter(description = "Aircraft model name (e.g. A320)") @PathVariable String modelName) {
+        return ResponseEntity.ok(viewMaintenanceCostByModelUseCase.execute(modelName));
+    }
+
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {
         EntityModel<MaintenanceRecordResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(MaintenanceController.class)

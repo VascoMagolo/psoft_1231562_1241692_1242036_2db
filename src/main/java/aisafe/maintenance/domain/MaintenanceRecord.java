@@ -1,6 +1,7 @@
 package aisafe.maintenance.domain;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -17,10 +18,12 @@ public class MaintenanceRecord {
     private MaintenanceStatus status;
     private Set<MaintenanceComponent> components;
     private RegistrationNumber aircraftRegistration;
+    private BigDecimal cost;
 
     public MaintenanceRecord(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                              List<MaintenancePart> parts, String notes, MaintenanceTemplate template,
-                             MaintenanceStatus status, Set<MaintenanceComponent> components, RegistrationNumber aircraftRegistration) {
+                             MaintenanceStatus status, Set<MaintenanceComponent> components,
+                             RegistrationNumber aircraftRegistration, BigDecimal cost) {
         if (recordId == null) throw new MaintenanceInvalidFieldException("Record ID must not be null.");
         if (description == null || description.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Description must not be blank.");
         if (startDate == null) throw new MaintenanceInvalidFieldException("Start date must not be null.");
@@ -33,6 +36,8 @@ public class MaintenanceRecord {
         if (status == null) throw new MaintenanceInvalidFieldException("Maintenance status must not be null.");
         if (components == null) throw new MaintenanceInvalidFieldException("Maintenance components must not be null.");
         if (components.isEmpty()) throw new MaintenanceInvalidFieldException("Maintenance components must contain at least one entry.");
+        if (cost == null) throw new MaintenanceInvalidFieldException("Cost must not be null.");
+        if (cost.compareTo(BigDecimal.ZERO) < 0) throw new MaintenanceInvalidFieldException("Cost must not be negative.");
         this.recordId = recordId;
         this.description = description;
         this.startDate = startDate;
@@ -43,6 +48,7 @@ public class MaintenanceRecord {
         this.status = status;
         this.components = Set.copyOf(components);
         this.aircraftRegistration = aircraftRegistration;
+        this.cost = cost;
     }
 
     public UUID getRecordId() { return recordId; }
@@ -55,6 +61,8 @@ public class MaintenanceRecord {
     public MaintenanceStatus getStatus() { return status; }
     public Set<MaintenanceComponent> getComponents() { return components; }
     public RegistrationNumber getAircraftRegistration() { return aircraftRegistration; }
+
+    public BigDecimal getCost() { return cost; }
 
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(MaintenanceStatus status) { this.status = status; }
