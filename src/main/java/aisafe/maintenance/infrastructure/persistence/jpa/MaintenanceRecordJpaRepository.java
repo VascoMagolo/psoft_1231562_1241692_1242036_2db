@@ -3,6 +3,7 @@ package aisafe.maintenance.infrastructure.persistence.jpa;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.*;
 import aisafe.shared.domain.PaginatedResult;
+import java.time.LocalDateTime;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -94,6 +95,19 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     public Long sumTotalMaintenanceHours() {
         Long sum = springRepo.sumTotalExpectedDuration();
         return sum != null ? sum : 0L;
+    }
+
+    @Override
+    public PaginatedResult<MaintenanceRecord> search(RegistrationNumber aircraftRegistration, LocalDateTime from,
+                                                     LocalDateTime to, MaintenanceComponent component,
+                                                     int pageNumber, int pageSize) {
+        Page<MaintenanceRecordJpaEntity> page = springRepo.search(
+                aircraftRegistration != null ? aircraftRegistration.getNumber() : null,
+                from, to, component, PageRequest.of(pageNumber, pageSize));
+        List<MaintenanceRecord> data = page.stream()
+                .map(MaintenanceRecordMapper::toDomain)
+                .collect(Collectors.toList());
+        return new PaginatedResult<>(data, page.getTotalElements());
     }
 
     @Override

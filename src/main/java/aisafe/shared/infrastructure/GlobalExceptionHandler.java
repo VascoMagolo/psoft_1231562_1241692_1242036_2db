@@ -22,6 +22,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -104,6 +105,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePreconditionFailed(ConcurrencyException ex) {
         return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
                 .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    /** 400 Bad Request - query/path parameter cannot be converted to its target type (e.g. invalid enum value) */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(message));
     }
 
     /** 400 Bad Request - bean validation failure (@Valid on request bodies) */
