@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +44,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "Updated notes");
 
         MaintenanceRecord record = new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
         when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
@@ -81,7 +82,7 @@ class UpdateMaintenanceRecordUseCaseTest {
         UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
 
         MaintenanceRecord record = new MaintenanceRecord(
-                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"));
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000));
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
         when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(1L); // Database has version 1

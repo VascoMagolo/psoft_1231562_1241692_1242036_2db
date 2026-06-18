@@ -44,7 +44,8 @@ public class SearchMaintenanceRecordsUseCase {
                         r.getStatus().name(),
                         r.getAircraftRegistration().getNumber(),
                         repository.findVersionFor(r.getRecordId()),
-                        r.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
+                        r.getComponents().stream().map(Enum::name).collect(Collectors.toSet()),
+                        r.getCost()
                 ))
                 .collect(Collectors.toList());
 

@@ -57,7 +57,8 @@ public class UpdateMaintenanceRecordUseCase {
                 record.getTemplate().getName(),
                 record.getStatus().name(), record.getAircraftRegistration().getNumber(),
                 newVersion,
-                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet()),
+                record.getCost()
         );
     }
 }

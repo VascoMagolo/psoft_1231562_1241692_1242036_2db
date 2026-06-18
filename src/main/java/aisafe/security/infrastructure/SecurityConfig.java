@@ -95,6 +95,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/search").hasAnyRole("MAINTENANCE_TECHNICIAN", "MAINTENANCE_SUPERVISOR", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/ongoing").hasAnyRole("MAINTENANCE_SUPERVISOR", "MAINTENANCE_TECHNICIAN", "ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/maintenance/records/aircraft/*").hasAnyRole("ATCC", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/cost/aircraft/*").hasAnyRole("ATCC", "BACKOFFICE_OPERATOR", "MAINTENANCE_SUPERVISOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/maintenance/records/cost/model/*").hasAnyRole("ATCC", "BACKOFFICE_OPERATOR", "MAINTENANCE_SUPERVISOR", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

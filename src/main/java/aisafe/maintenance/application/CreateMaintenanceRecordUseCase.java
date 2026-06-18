@@ -37,7 +37,8 @@ public class CreateMaintenanceRecordUseCase {
 
         MaintenanceRecord record = new MaintenanceRecord(
                 UUID.randomUUID(), request.description(), request.startDate(), request.expectedDuration(),
-                parts, request.notes(), template, request.status(), request.components(), aircraft.getRegistrationNumber()
+                parts, request.notes(), template, request.status(), request.components(),
+                aircraft.getRegistrationNumber(), request.cost()
         );
 
         if (recordRepository.existsByStartDateAndTemplate(record.getStartDate(), record.getTemplate())) {
@@ -55,7 +56,8 @@ public class CreateMaintenanceRecordUseCase {
                 record.getTemplate().getName(),
                 record.getStatus().name(), request.registrationNumber(),
                 version,
-                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet()),
+                record.getCost()
         );
     }
 }

@@ -1,5 +1,6 @@
 package aisafe.maintenance.application.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -30,5 +31,6 @@ public record MaintenanceRecordResponse(
         String status,
         String aircraftRegistration,
         Long version,
-        Set<String> components
+        Set<String> components,
+        BigDecimal cost
 ) {}
