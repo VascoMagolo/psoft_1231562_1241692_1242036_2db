@@ -1,6 +1,7 @@
 package aisafe.maintenance.infrastructure.persistence.jpa;
 
 import aisafe.maintenance.domain.MaintenanceComponent;
+import aisafe.maintenance.domain.MaintenanceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +24,8 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
 
     @Query("SELECT SUM(m.expectedDuration) FROM MaintenanceRecordJpaEntity m")
     Long sumTotalExpectedDuration();
+
+    Page<MaintenanceRecordJpaEntity> findByStatusOrderByStartDateDesc(MaintenanceStatus status, Pageable pageable);
 
     @Query("SELECT DISTINCT m FROM MaintenanceRecordJpaEntity m " +
            "INNER JOIN m.components c " +

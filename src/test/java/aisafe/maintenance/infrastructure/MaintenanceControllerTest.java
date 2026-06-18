@@ -78,6 +78,9 @@ class MaintenanceControllerTest {
     private SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase;
 
     @MockitoBean
+    private ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -254,5 +257,24 @@ class MaintenanceControllerTest {
         mockMvc.perform(get("/api/maintenance/records/search")
                         .param("component", "INVALID_COMPONENT"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureGetOngoingMaintenanceReturns200() throws Exception {
+        when(viewOngoingMaintenanceUseCase.execute(anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/ongoing"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "MAINTENANCE_SUPERVISOR")
+    void ensureMaintenanceSupervisorCanViewOngoing() throws Exception {
+        when(viewOngoingMaintenanceUseCase.execute(anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/ongoing"))
+                .andExpect(status().isOk());
     }
 }
