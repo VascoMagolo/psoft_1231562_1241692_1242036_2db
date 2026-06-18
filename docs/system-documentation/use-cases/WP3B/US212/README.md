@@ -8,6 +8,9 @@
 
 - The request must include the aircraft ID, route ID, departure datetime, and arrival datetime.
 - The system must validate that the route's distance does not exceed the aircraft's maximum range.
+- The system must validate that the aircraft's seating capacity meets the route's minimum capacity requirement.
+- The system must validate that the aircraft's range meets the route's minimum range requirement.
+- The system must validate that the aircraft is not under maintenance or inactive.
 - The system must validate that the aircraft is available (no overlapping flights in the given timeframe).
 - On success, the system returns HTTP 201 with the created flight representation.
 
@@ -34,6 +37,9 @@
 | ---- | --------------------------------- | --------------- |
 | 2    | Route or Aircraft not found       | HTTP 404 Not Found |
 | 3    | Route distance > Aircraft range   | HTTP 400 Bad Request (Business Rule Violation) |
+| 3    | Aircraft range < Route minimum    | HTTP 400 Bad Request (Business Rule Violation) |
+| 3    | Seating capacity < Route minimum  | HTTP 400 Bad Request (Business Rule Violation) |
+| 3    | Aircraft is under maintenance/inactive | HTTP 409 Conflict (Aircraft Unavailable) |
 | 3    | Aircraft schedule overlaps        | HTTP 409 Conflict (Aircraft Unavailable) |
 
 ## Design Justification

@@ -32,7 +32,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any(), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<Route> result = searchRoutes.execute("OPO", "LIS", 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute("OPO", "LIS", 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOriginAndDestination(any(), any(), anyInt(), anyInt());
@@ -43,7 +43,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByOrigin(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<Route> result = searchRoutes.execute("OPO", null, 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute("OPO", null, 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOrigin(any(IataCode.class), anyInt(), anyInt());
@@ -54,7 +54,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByDestination(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<Route> result = searchRoutes.execute(null, "LIS", 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute(null, "LIS", 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByDestination(any(IataCode.class), anyInt(), anyInt());
@@ -65,7 +65,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findAll(anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<Route> result = searchRoutes.execute(null, null, 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute(null, null, 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findAll(anyInt(), anyInt());

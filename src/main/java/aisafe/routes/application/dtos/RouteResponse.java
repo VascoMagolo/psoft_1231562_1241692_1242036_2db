@@ -26,4 +26,16 @@ public record RouteResponse(
                 null
         );
     }
+
+    public static RouteResponse from(Route route, Long version) {
+        return new RouteResponse(
+                route.getOrigin().getCode(),
+                route.getDestination().getCode(),
+                route.getEstimatedFlightTime(),
+                route.getMinimumRange(),
+                route.getMinimumCapacity(),
+                route.getStatus(),
+                version
+        );
+    }
 }

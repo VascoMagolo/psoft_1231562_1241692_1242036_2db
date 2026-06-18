@@ -116,7 +116,7 @@ class RouteControllerTest {
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
         deactivated.setStatus(RouteStatus.INACTIVE);
-        when(deactivateRoute.execute(anyString(), anyString(), any())).thenReturn(deactivated);
+        when(deactivateRoute.execute(anyString(), anyString(), any(), any())).thenReturn(RouteResponse.from(deactivated, 0L));
 
         mockMvc.perform(patch("/api/routes/OPO/LIS/deactivate")
                         .header("If-Match", "0"))
@@ -127,7 +127,7 @@ class RouteControllerTest {
     @Test
     void ensureGetRoutesFromAirportReturns200() throws Exception {
         when(listRoutesFromAirport.execute(anyString(), anyInt(), anyInt()))
-                .thenReturn(new PaginatedResult<>(List.of(sampleRoute), 1L));
+                .thenReturn(new PaginatedResult<>(List.of(RouteResponse.from(sampleRoute, 0L)), 1L));
 
         mockMvc.perform(get("/api/routes/airport/OPO"))
                 .andExpect(status().isOk())
@@ -165,7 +165,7 @@ class RouteControllerTest {
     @Test
     void ensureUpdateRouteReturns200() throws Exception {
         UpdateRouteRequest request = new UpdateRouteRequest(50, 400.0, 200, true);
-        when(updateRoute.execute(anyString(), anyString(), any(), any())).thenReturn(sampleRoute);
+        when(updateRoute.execute(anyString(), anyString(), any(), any(), any())).thenReturn(RouteResponse.from(sampleRoute, 0L));
 
         mockMvc.perform(put("/api/routes/LIS/MAD")
                         .header("If-Match", "0")
@@ -177,7 +177,7 @@ class RouteControllerTest {
     @Test
     void ensureSearchRoutesReturns200() throws Exception {
         when(searchRoutes.execute(any(), any(), anyInt(), anyInt()))
-                .thenReturn(new PaginatedResult<>(List.of(sampleRoute), 1L));
+                .thenReturn(new PaginatedResult<>(List.of(RouteResponse.from(sampleRoute, 0L)), 1L));
 
         mockMvc.perform(get("/api/routes/search")
                         .param("origin", "LIS"))

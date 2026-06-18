@@ -4,9 +4,11 @@ import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.PaginatedResult;
+import java.util.List;
 
 /**
  * Use case responsible for listing all routes originating from a specific airport.
@@ -23,20 +25,25 @@ public class ListRoutesFromAirportUseCase {
     }
 
     /**
-     * Retrieves a paginated result of routes associated with the provided airport IATA code.
+     * Retrieves a paginated result of route responses associated with the provided airport IATA code.
      *
      * @param iataCode   the IATA code of the origin airport
      * @param pageNumber the zero-based page number
      * @param pageSize   the number of results per page
-     * @return a paginated result of routes originating from the specified airport
+     * @return a paginated result of route responses originating from the specified airport
      */
-    public PaginatedResult<Route> execute(String iataCode, int pageNumber, int pageSize) {
+    public PaginatedResult<RouteResponse> execute(String iataCode, int pageNumber, int pageSize) {
         String originCode = iataCode.trim().toUpperCase();
 
         if (!airportRepository.existsByIataCode(new IataCode(originCode))) {
             throw new AirportNotFoundException(originCode);
         }
 
-        return routeRepository.findByOrigin(new IataCode(originCode), pageNumber, pageSize);
+        PaginatedResult<Route> result = routeRepository.findByOrigin(new IataCode(originCode), pageNumber, pageSize);
+        List<RouteResponse> mapped = result.data().stream()
+                .map(r -> RouteResponse.from(r, routeRepository.findVersionFor(r.getOrigin(), r.getDestination())))
+                .toList();
+
+        return new PaginatedResult<>(mapped, result.totalElements());
     }
 }

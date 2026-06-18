@@ -2,6 +2,7 @@ package aisafe.routes.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteHistory;
@@ -10,7 +11,6 @@ import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.shared.domain.ConcurrencyException;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Objects;
 
@@ -35,9 +35,10 @@ public class UpdateRouteUseCase {
      * @param destination   the IATA code of the destination airport
      * @param request       the data to update
      * @param clientVersion the version for optimistic locking
-     * @return the updated route
+     * @param changedBy     the identifier of the user making the update
+     * @return the updated route response
      */
-    public Route execute(String origin, String destination, UpdateRouteRequest request, Long clientVersion) {
+    public RouteResponse execute(String origin, String destination, UpdateRouteRequest request, Long clientVersion, String changedBy) {
         Route route = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination))
                 .orElseThrow(() -> new RouteNotFoundException(origin + "-" + destination));
 
@@ -58,9 +59,10 @@ public class UpdateRouteUseCase {
             route.setStatus(request.active() ? RouteStatus.ACTIVE : RouteStatus.INACTIVE);
         }
 
-        String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         routeRepository.save(route);
         routeHistoryRepository.save(new RouteHistory(origin, destination, "Route details updated", changedBy));
-        return route;
+
+        Long updatedVersion = routeRepository.findVersionFor(new IataCode(origin), new IataCode(destination));
+        return RouteResponse.from(route, updatedVersion);
     }
 }

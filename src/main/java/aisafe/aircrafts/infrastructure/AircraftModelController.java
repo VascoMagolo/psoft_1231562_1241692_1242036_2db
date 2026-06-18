@@ -5,6 +5,7 @@ import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelRequest;
+import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
 import aisafe.shared.domain.PaginatedResult;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -159,15 +160,15 @@ public class AircraftModelController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @GetMapping("/top-utilized")
-    public ResponseEntity<CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>>> getTopUtilizedModels(
+    public ResponseEntity<CollectionModel<EntityModel<TopUtilizedModelResponse>>> getTopUtilizedModels(
             @Parameter(description = "Criteria for utilization ranking: 'HOURS' or 'ASSIGNMENTS'")
             @RequestParam(required = true) String criteria) {
 
-        List<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> items =
+        List<EntityModel<TopUtilizedModelResponse>> items =
                 getTopUtilizedModels.execute(criteria).stream()
                         .map(EntityModel::of)
                         .toList();
-        CollectionModel<EntityModel<aisafe.aircrafts.application.dtos.TopUtilizedModelResponse>> model =
+        CollectionModel<EntityModel<TopUtilizedModelResponse>> model =
                 CollectionModel.of(items,
                         linkTo(methodOn(AircraftModelController.class).getTopUtilizedModels(criteria)).withSelfRel());
         return ResponseEntity.ok(model);

@@ -2,6 +2,7 @@ package aisafe.routes.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteHistory;
 import aisafe.routes.domain.RouteHistoryRepository;
@@ -9,7 +10,6 @@ import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.shared.domain.ConcurrencyException;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Objects;
 
@@ -24,7 +24,7 @@ public class DeactivateRouteUseCase {
         this.routeHistoryRepository = routeHistoryRepository;
     }
 
-    public Route execute(String origin, String destination, Long clientVersion) {
+    public RouteResponse execute(String origin, String destination, Long clientVersion, String changedBy) {
         Route route = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination))
                 .orElseThrow(() -> new RouteNotFoundException(origin + "-" + destination));
 
@@ -35,10 +35,11 @@ public class DeactivateRouteUseCase {
             }
         }
 
-        String changedBy = SecurityContextHolder.getContext().getAuthentication().getName();
         route.setStatus(RouteStatus.INACTIVE);
         routeRepository.save(route);
         routeHistoryRepository.save(new RouteHistory(origin, destination, "Route deactivated", changedBy));
-        return route;
+        
+        Long updatedVersion = routeRepository.findVersionFor(new IataCode(origin), new IataCode(destination));
+        return RouteResponse.from(route, updatedVersion);
     }
 }

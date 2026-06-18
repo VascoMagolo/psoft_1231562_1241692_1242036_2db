@@ -1,6 +1,7 @@
 package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
+import aisafe.airports.domain.IataCode;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftRepository;
@@ -127,7 +128,7 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
-    public long countByRoute(aisafe.airports.domain.IataCode origin, aisafe.airports.domain.IataCode destination) {
+    public long countByRoute(IataCode origin, IataCode destination) {
         return springRepo.countByRoute(origin.getCode(), destination.getCode());
     }
 
@@ -139,8 +140,8 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     @Override
     public PaginatedResult<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size) {
         Page<RouteUtilizationProjection> resultPage = springRepo.findFlightUtilizationReports(startDate, endDate, PageRequest.of(page, size));
-        List<aisafe.flights.domain.RouteUtilizationData> data = resultPage.stream()
-                .map(p -> new aisafe.flights.domain.RouteUtilizationData(
+        List<RouteUtilizationData> data = resultPage.stream()
+                .map(p -> new RouteUtilizationData(
                         p.getRouteId(),
                         p.getOriginCode(),
                         p.getDestinationCode(),

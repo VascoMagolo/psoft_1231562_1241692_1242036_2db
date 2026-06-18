@@ -1675,16 +1675,9 @@
         },
         {
           "name": "Export Route KML/GeoJson",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"partNumber\": \"ENG-002\",\r\n    \"name\": \"Engine Oil Filter\",\r\n    \"description\": \"High-performance oil filter for jet engines\",\r\n    \"stockQuantity\": 9,\r\n    \"minimumThreshold\": 10,\r\n    \"component\": \"ENGINE\"\r\n}"
-            },
             "url": {
               "raw": "{{base_url}}/api/routes/export?format=kml",
               "host": [
@@ -1818,7 +1811,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"description\": \"Routine 100h engine inspection\",\r\n    \"startDate\": \"2026-06-01T09:00:00\",\r\n    \"expectedDuration\": 8,\r\n    \"parts\": [\"ENG-001\"],\r\n    \"notes\": \"Standard inspection as per maintenance schedule\",\r\n    \"template\": \"100h Engine Check\",\r\n    \"status\": \"PLANNED\",\r\n    \"registrationNumber\": \"{{aircraft_registration}}\"\r\n}",
+              "raw": "{\r\n    \"description\": \"Routine 100h engine inspection\",\r\n    \"startDate\": \"2026-06-01T09:00:00\",\r\n    \"expectedDuration\": 8,\r\n    \"parts\": [\"ENG-002\"],\r\n    \"notes\": \"Standard inspection as per maintenance schedule\",\r\n    \"template\": \"100h Engine Check\",\r\n    \"status\": \"PLANNED\",\r\n    \"registrationNumber\": \"{{aircraft_registration}}\",\r\n    \"components\": [\"ENGINE\"],\r\n    \"cost\": 1500.00\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1961,7 +1954,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"description\": \"Routine 100h engine inspection\",\r\n    \"startDate\": \"2026-06-01T09:00:00\",\r\n    \"expectedDuration\": 8,\r\n    \"parts\": [\"ENG-001\"],\r\n    \"notes\": \"Standard inspection as per maintenance schedule\",\r\n    \"template\": \"100h Engine Check\",\r\n    \"status\": \"PLANNED\",\r\n    \"registrationNumber\": \"{{aircraft_registration}}\"\r\n}",
+              "raw": "{\r\n    \"checklist\": [\"starterMotor inspection\", \"Check electrical connections\", \"Test starter sequence\"],\r\n    \"intervalFlightHours\": 320,\r\n    \"intervalDays\": 400\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2014,16 +2007,9 @@
         },
         {
           "name": "Search Maintenance Parts",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"100h Engine Check\",\r\n    \"templateType\": \"INSPECTION\",\r\n    \"applicableModels\": [\"Boeing 737 MAX\"],\r\n    \"checklist\": [\"Check oil levels\", \"Inspect fan blades\", \"Test fuel system\"],\r\n    \"intervalFlightHours\": 100,\r\n    \"intervalDays\": 30\r\n}"
-            },
             "url": {
               "raw": "{{base_url}}/api/maintenance/parts/search?lowStock=true",
               "host": [
