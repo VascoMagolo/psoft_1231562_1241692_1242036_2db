@@ -74,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/airports/*/details").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/airports/*").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         // WP #3A - Routes
+                        .requestMatchers(HttpMethod.GET, "/api/routes/export").hasAnyRole("BACKOFFICE_OPERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/flights").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/flights").hasAnyRole("ATCC", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/network/total-distance").hasAnyRole("ATCC", "ADMIN")

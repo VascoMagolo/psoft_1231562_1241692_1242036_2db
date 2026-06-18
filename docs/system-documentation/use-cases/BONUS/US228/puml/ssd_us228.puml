@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+BO -> Sys : exportRouteNetwork(format)
+activate Sys
+Sys --> BO : returns file content (GeoJSON or KML)
+deactivate Sys
+@enduml

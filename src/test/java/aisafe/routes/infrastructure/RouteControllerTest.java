@@ -73,6 +73,9 @@ class RouteControllerTest {
     private SearchAlternativeRoutesUseCase searchAlternativeRoutes;
 
     @MockitoBean
+    private ExportRouteNetworkUseCase exportRouteNetwork;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
