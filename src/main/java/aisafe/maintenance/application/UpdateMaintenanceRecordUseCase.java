@@ -41,7 +41,7 @@ public class UpdateMaintenanceRecordUseCase {
             throw new ConcurrencyException("Maintenance record version mismatch.");
         }
 
-        record.setStatus(request.status());
+        record.changeStatus(request.status());
         if (request.notes() != null && !request.notes().trim().isEmpty()) {
             record.setNotes(request.notes());
         }

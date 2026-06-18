@@ -38,7 +38,7 @@ public class CreateMaintenanceRecordUseCase {
         MaintenanceRecord record = new MaintenanceRecord(
                 UUID.randomUUID(), request.description(), request.startDate(), request.expectedDuration(),
                 parts, request.notes(), template, request.status(), request.components(),
-                aircraft.getRegistrationNumber(), request.cost()
+                aircraft.getRegistrationNumber(), request.cost(), null
         );
 
         if (recordRepository.existsByStartDateAndTemplate(record.getStartDate(), record.getTemplate())) {

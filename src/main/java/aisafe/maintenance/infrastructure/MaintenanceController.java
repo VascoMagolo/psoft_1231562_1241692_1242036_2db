@@ -2,6 +2,7 @@ package aisafe.maintenance.infrastructure;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.*;
+import aisafe.maintenance.application.dtos.AverageTurnaroundByModelResponse;
 import aisafe.maintenance.application.dtos.MaintenanceCostByAircraftResponse;
 import aisafe.maintenance.application.dtos.MaintenanceCostByModelResponse;
 import aisafe.maintenance.domain.MaintenanceComponent;
@@ -56,6 +57,7 @@ public class MaintenanceController {
     private final ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase;
     private final ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase;
     private final ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
+    private final ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -72,7 +74,8 @@ public class MaintenanceController {
             SearchMaintenanceRecordsUseCase searchMaintenanceRecordsUseCase,
             ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase,
             ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase,
-            ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase) {
+            ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase,
+            ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -89,6 +92,7 @@ public class MaintenanceController {
         this.viewOngoingMaintenanceUseCase = viewOngoingMaintenanceUseCase;
         this.viewMaintenanceCostByAircraftUseCase = viewMaintenanceCostByAircraftUseCase;
         this.viewMaintenanceCostByModelUseCase = viewMaintenanceCostByModelUseCase;
+        this.viewAverageTurnaroundUseCase = viewAverageTurnaroundUseCase;
     }
 
     /**
@@ -416,6 +420,20 @@ public class MaintenanceController {
     public ResponseEntity<MaintenanceCostByModelResponse> getCostByModel(
             @Parameter(description = "Aircraft model name (e.g. A320)") @PathVariable String modelName) {
         return ResponseEntity.ok(viewMaintenanceCostByModelUseCase.execute(modelName));
+    }
+
+    @Operation(summary = "Get average maintenance turnaround by aircraft model",
+               description = "Returns the average turnaround time in hours for completed maintenance records of the given aircraft model. (US221)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Turnaround report returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
+            @ApiResponse(responseCode = "404", description = "Aircraft model not found")
+    })
+    @GetMapping("/records/turnaround/model/{modelName}")
+    public ResponseEntity<AverageTurnaroundByModelResponse> getAverageTurnaroundByModel(
+            @Parameter(description = "Aircraft model name (e.g. Airbus A320neo)") @PathVariable String modelName) {
+        return ResponseEntity.ok(viewAverageTurnaroundUseCase.execute(modelName));
     }
 
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {

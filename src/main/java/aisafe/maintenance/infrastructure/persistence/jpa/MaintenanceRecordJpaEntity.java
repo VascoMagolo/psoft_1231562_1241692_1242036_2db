@@ -66,6 +66,9 @@ public class MaintenanceRecordJpaEntity {
     @Column(name = "cost", nullable = false, precision = 15, scale = 2)
     private BigDecimal cost;
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     protected MaintenanceRecordJpaEntity() {}
 
     public MaintenanceRecordJpaEntity(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
@@ -99,9 +102,11 @@ public class MaintenanceRecordJpaEntity {
     public Set<MaintenanceComponent> getComponents() { return components; }
     public String getAircraftRegistration() { return aircraftRegistration; }
     public BigDecimal getCost() { return cost; }
+    public LocalDateTime getCompletedAt() { return completedAt; }
 
     public void setId(Long id) { this.id = id; }
     public void setVersion(Long version) { this.version = version; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setStatus(MaintenanceStatus status) { this.status = status; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 }

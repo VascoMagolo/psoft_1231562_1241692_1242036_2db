@@ -30,4 +30,5 @@ public interface MaintenanceRecordRepository extends BaseRepository<MaintenanceR
     PaginatedResult<MaintenanceRecord> findByStatus(MaintenanceStatus status, int pageNumber, int pageSize);
     BigDecimal sumCostByAircraftRegistration(RegistrationNumber registration);
     BigDecimal sumCostByRegistrations(List<String> registrationNumbers);
+    MaintenanceTurnaroundData findAverageTurnaroundByRegistrations(String modelName, List<String> registrations);
 }

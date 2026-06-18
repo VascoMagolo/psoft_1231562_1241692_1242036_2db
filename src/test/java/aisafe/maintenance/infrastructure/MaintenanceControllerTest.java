@@ -88,6 +88,9 @@ class MaintenanceControllerTest {
     private ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
 
     @MockitoBean
+    private ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -325,5 +328,17 @@ class MaintenanceControllerTest {
 
         mockMvc.perform(get("/api/maintenance/records/cost/model/A320"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "MAINTENANCE_SUPERVISOR")
+    void ensureMaintenanceSupervisorCanViewAverageTurnaround() throws Exception {
+        when(viewAverageTurnaroundUseCase.execute("Airbus A320neo"))
+                .thenReturn(new AverageTurnaroundByModelResponse("Airbus A320neo", 32.0));
+
+        mockMvc.perform(get("/api/maintenance/records/turnaround/model/Airbus A320neo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.modelName").value("Airbus A320neo"))
+                .andExpect(jsonPath("$.averageHours").value(32.0));
     }
 }
