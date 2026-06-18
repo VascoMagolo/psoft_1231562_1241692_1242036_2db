@@ -4,10 +4,13 @@ import aisafe.routes.application.*;
 import aisafe.shared.application.ExportedFile;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.security.infrastructure.JwtAuthenticationFilter;
+import aisafe.security.infrastructure.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,7 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RouteController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+@AutoConfigureMockMvc
 class RouteControllerExportIntegrationTest {
 
     @Autowired
@@ -54,10 +58,12 @@ class RouteControllerExportIntegrationTest {
     private JwtService jwtService;
     @MockitoBean
     private UserRepository userRepository;
+    @MockitoBean
+    private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
 
     @Test
-    @WithMockUser(roles = "OPERATOR")
-    void ensureGeoJsonExportWorks() throws Exception {
+    @WithMockUser(roles = "BACKOFFICE_OPERATOR")
+    void ensureGeoJsonExportWorksForBackofficeOperator() throws Exception {
         byte[] content = "{\"type\":\"FeatureCollection\"}".getBytes();
         when(exportRouteNetwork.execute("geojson"))
                 .thenReturn(new ExportedFile(content, "application/geo+json", "routes.geojson"));
@@ -71,8 +77,16 @@ class RouteControllerExportIntegrationTest {
     }
 
     @Test
-    @WithMockUser(roles = "OPERATOR")
-    void ensureKmlExportWorks() throws Exception {
+    @WithMockUser(roles = "ATCC")
+    void ensureExportIsForbiddenForAtcc() throws Exception {
+        mockMvc.perform(get("/api/routes/export")
+                        .param("format", "geojson"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void ensureKmlExportWorksForAdmin() throws Exception {
         byte[] content = "<Placemark></Placemark>".getBytes();
         when(exportRouteNetwork.execute("kml"))
                 .thenReturn(new ExportedFile(content, "application/vnd.google-earth.kml+xml", "routes.kml"));

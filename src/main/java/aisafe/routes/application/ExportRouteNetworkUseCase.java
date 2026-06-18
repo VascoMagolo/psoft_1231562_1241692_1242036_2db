@@ -3,6 +3,7 @@ package aisafe.routes.application;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
+import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
@@ -36,7 +37,7 @@ public class ExportRouteNetworkUseCase {
 
         Map<String, Airport> airports = airportCodes.stream()
                 .map(code -> airportRepository.findByIataCode(code)
-                        .orElseThrow(() -> new IllegalStateException("Airport not found: " + code.getCode())))
+                        .orElseThrow(() -> new AirportNotFoundException(code.getCode())))
                 .collect(Collectors.toMap(a -> a.getIataCode().getCode(), a -> a));
 
         return serializer.serialize(activeRoutes, airports);

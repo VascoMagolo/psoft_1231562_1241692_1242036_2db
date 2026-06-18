@@ -45,7 +45,7 @@ public class GeoJsonRouteNetworkSerializer implements RouteNetworkSerializer {
             ObjectNode properties = feature.putObject("properties");
             properties.put("origin", route.getOrigin().getCode());
             properties.put("destination", route.getDestination().getCode());
-            properties.put("distanceKm", route.getMinimumRange()); // Example property
+            properties.put("requiredMinimumRange", route.getMinimumRange());
         }
 
         try {
