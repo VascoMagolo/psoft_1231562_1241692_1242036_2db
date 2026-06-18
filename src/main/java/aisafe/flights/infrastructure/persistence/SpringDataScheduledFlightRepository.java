@@ -32,6 +32,12 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
            "WHERE f.status = 'COMPLETED' AND f.aircraft.registrationNumber.number = :registration")
     Double calculateTotalOperationalHoursByRegistration(@Param("registration") String registration);
 
+    @Query("SELECT COALESCE(SUM(TIMESTAMPDIFF(SECOND, f.departureDateTime, f.arrivalDateTime)), 0) / 3600.0 " +
+           "FROM ScheduledFlightJpaEntity f " +
+           "WHERE f.status = 'COMPLETED' AND f.aircraft.registrationNumber.number = :registration " +
+           "AND f.departureDateTime >= :sinceDate")
+    Double calculateOperationalHoursSince(@Param("registration") String registration, @Param("sinceDate") OffsetDateTime sinceDate);
+
     @Query("SELECT f FROM ScheduledFlightJpaEntity f " +
            "WHERE f.aircraft.registrationNumber.number = :registration " +
            "AND f.status = 'COMPLETED' " +

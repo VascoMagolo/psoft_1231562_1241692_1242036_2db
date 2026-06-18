@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "Maintenance Supervisor" as Actor
+participant "System" as Sys
+Actor -> Sys : getDueAircraft()
+activate Sys
+Sys --> Actor : returns list of MaintenanceDueAircraftResponse
+deactivate Sys
+@enduml

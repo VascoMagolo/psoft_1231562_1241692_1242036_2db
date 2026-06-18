@@ -9,6 +9,7 @@ import aisafe.maintenance.domain.MaintenanceComponent;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
 import aisafe.maintenance.application.dtos.*;
 import aisafe.shared.domain.PaginatedResult;
 import aisafe.shared.infrastructure.ETagUtils;
@@ -58,6 +59,7 @@ public class MaintenanceController {
     private final ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase;
     private final ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
     private final ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase;
+    private final ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -75,7 +77,8 @@ public class MaintenanceController {
             ViewOngoingMaintenanceUseCase viewOngoingMaintenanceUseCase,
             ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase,
             ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase,
-            ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase) {
+            ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase,
+            ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -93,6 +96,7 @@ public class MaintenanceController {
         this.viewMaintenanceCostByAircraftUseCase = viewMaintenanceCostByAircraftUseCase;
         this.viewMaintenanceCostByModelUseCase = viewMaintenanceCostByModelUseCase;
         this.viewAverageTurnaroundUseCase = viewAverageTurnaroundUseCase;
+        this.viewMaintenanceDueAircraftUseCase = viewMaintenanceDueAircraftUseCase;
     }
 
     /**
@@ -434,6 +438,17 @@ public class MaintenanceController {
     public ResponseEntity<AverageTurnaroundByModelResponse> getAverageTurnaroundByModel(
             @Parameter(description = "Aircraft model name (e.g. Airbus A320neo)") @PathVariable String modelName) {
         return ResponseEntity.ok(viewAverageTurnaroundUseCase.execute(modelName));
+    }
+
+    @Operation(summary = "Get aircraft due for maintenance", description = "Returns a list of all aircraft that are currently due for maintenance based on flight hours or elapsed calendar days. (US222)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of due aircraft returned successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/records/due")
+    public ResponseEntity<List<MaintenanceDueAircraftResponse>> getDueAircraft() {
+        return ResponseEntity.ok(viewMaintenanceDueAircraftUseCase.execute());
     }
 
     private EntityModel<MaintenanceRecordResponse> toHateoasModel(MaintenanceRecordResponse response) {

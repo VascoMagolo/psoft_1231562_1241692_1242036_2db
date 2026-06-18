@@ -72,4 +72,23 @@ class MaintenanceRecordRepositoryTest {
         assertTrue(recordRepository.existsByAircraftRegistration("CS-TPA"));
         assertFalse(recordRepository.existsByAircraftRegistration("UNKNOWN"));
     }
+
+    @Test
+    void ensureFindByAircraftRegistrationAndStatusOrderByCompletedAtDescWorks() {
+        UUID id1 = UUID.randomUUID();
+        MaintenanceRecordJpaEntity record1 = new MaintenanceRecordJpaEntity(
+                id1, "R1", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100));
+        record1.setCompletedAt(LocalDateTime.now().minusDays(2));
+        recordRepository.save(record1);
+
+        UUID id2 = UUID.randomUUID();
+        MaintenanceRecordJpaEntity record2 = new MaintenanceRecordJpaEntity(
+                id2, "R2", LocalDateTime.now(), 5, null, List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100));
+        record2.setCompletedAt(LocalDateTime.now().minusDays(1));
+        recordRepository.save(record2);
+
+        var list = recordRepository.findByAircraftRegistrationAndStatusOrderByCompletedAtDesc("CS-TPA", MaintenanceStatus.COMPLETED);
+        assertEquals(2, list.size());
+        assertEquals(id2, list.get(0).getRecordId());
+    }
 }

@@ -138,6 +138,11 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
+    public Double calculateOperationalHoursSince(RegistrationNumber registration, OffsetDateTime sinceDate) {
+        return springRepo.calculateOperationalHoursSince(registration.getNumber(), sinceDate);
+    }
+
+    @Override
     public PaginatedResult<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size) {
         Page<RouteUtilizationProjection> resultPage = springRepo.findFlightUtilizationReports(startDate, endDate, PageRequest.of(page, size));
         List<RouteUtilizationData> data = resultPage.stream()

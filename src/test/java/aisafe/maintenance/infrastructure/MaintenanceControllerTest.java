@@ -91,6 +91,9 @@ class MaintenanceControllerTest {
     private ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase;
 
     @MockitoBean
+    private ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -340,5 +343,16 @@ class MaintenanceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.modelName").value("Airbus A320neo"))
                 .andExpect(jsonPath("$.averageHours").value(32.0));
+    }
+
+    @Test
+    void ensureGetDueAircraftReturns200() throws Exception {
+        when(viewMaintenanceDueAircraftUseCase.execute())
+                .thenReturn(List.of(new MaintenanceDueAircraftResponse("CS-TPA", "A320", "Hours limit exceeded", 120.0, 5L, "Annual Check")));
+
+        mockMvc.perform(get("/api/maintenance/records/due"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].registrationNumber").value("CS-TPA"))
+                .andExpect(jsonPath("$[0].dueReason").value("Hours limit exceeded"));
     }
 }

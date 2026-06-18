@@ -18,6 +18,7 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
     boolean existsByPartsContaining(MaintenancePartJpaEntity part);
     boolean existsByTemplate(MaintenanceTemplateJpaEntity template);
     boolean existsByAircraftRegistration(String aircraftRegistration);
+    List<MaintenanceRecordJpaEntity> findByAircraftRegistrationAndStatusOrderByCompletedAtDesc(String aircraftRegistration, MaintenanceStatus status);
     Page<MaintenanceRecordJpaEntity> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);
     Optional<MaintenanceRecordJpaEntity> findByRecordId(UUID recordId);
 

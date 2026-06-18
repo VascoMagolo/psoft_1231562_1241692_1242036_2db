@@ -1948,6 +1948,38 @@
           "response": []
         },
         {
+          "name": "Get Due Aircraft for Scheduled Maintenance [Maintenance Supervisor]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Is list\", () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/records/due",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "records",
+                "due"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Maintenance Template [Maintenance Technician]",
           "request": {
             "method": "PATCH",
