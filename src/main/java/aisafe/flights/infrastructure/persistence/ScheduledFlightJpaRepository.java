@@ -4,12 +4,14 @@ import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftRepository;
+import aisafe.flights.domain.RouteUtilizationData;
 import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.flights.domain.ModelUtilizationData;
 import aisafe.flights.domain.ScheduledFlight;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
 import aisafe.routes.infrastructure.persistence.jpa.SpringDataRouteRepository;
+import aisafe.shared.domain.PaginatedResult;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.RegistrationNumberJpaEmbeddable;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @Repository
@@ -131,5 +134,19 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     @Override
     public Double calculateTotalOperationalHoursByRegistration(RegistrationNumber registration) {
         return springRepo.calculateTotalOperationalHoursByRegistration(registration.getNumber());
+    }
+
+    @Override
+    public PaginatedResult<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size) {
+        Page<RouteUtilizationProjection> resultPage = springRepo.findFlightUtilizationReports(startDate, endDate, PageRequest.of(page, size));
+        List<aisafe.flights.domain.RouteUtilizationData> data = resultPage.stream()
+                .map(p -> new aisafe.flights.domain.RouteUtilizationData(
+                        p.getRouteId(),
+                        p.getOriginCode(),
+                        p.getDestinationCode(),
+                        p.getFlightCount()
+                ))
+                .collect(Collectors.toList());
+        return new PaginatedResult<>(data, resultPage.getTotalElements());
     }
 }

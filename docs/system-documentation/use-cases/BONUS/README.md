@@ -8,6 +8,7 @@ This package documents the bonus use cases implemented in the system.
 - `US224` - Search aircraft by specific features (Merged with `US104` search endpoint)
 - `US227` - Calculate fuel efficiency metrics per aircraft and per route (`GET /api/aircrafts/{registration}/fuel-efficiency`)
 - `US228` - Export route network data in standard aviation formats (GeoJSON, KML) (`GET /api/routes/export`)
+- `US229` - Generate flight utilization reports (`GET /api/flights/reports/utilization`)
 
 ## Notes
 

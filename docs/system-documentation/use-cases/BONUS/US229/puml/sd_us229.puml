@@ -1,0 +1,32 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "ReportController" as Ctrl
+participant "GenerateFlightUtilizationReportUseCase" as UC
+participant "ScheduledFlightRepository" as Repo
+participant "Database" as DB
+
+BO -> Ctrl : GET /api/reports/flight-utilization?startDate=...&endDate=...
+activate Ctrl
+
+Ctrl -> UC : execute(startDate, endDate, page, size)
+activate UC
+
+UC -> Repo : getFlightUtilizationReport(startDate, endDate, page, size)
+activate Repo
+
+Repo -> DB : SELECT COUNT(f), f.route \nWHERE status='COMPLETED' \nGROUP BY f.route \nORDER BY count DESC
+activate DB
+DB --> Repo : returns projections
+deactivate DB
+
+Repo --> UC : returns List<RouteUtilizationData>
+deactivate Repo
+
+UC -> UC : map to List<RouteUtilizationResponse>
+UC --> Ctrl : returns List<RouteUtilizationResponse>
+deactivate UC
+
+Ctrl --> BO : returns JSON payload (200 OK)
+deactivate Ctrl
+@enduml

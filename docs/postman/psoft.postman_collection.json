@@ -2046,6 +2046,45 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Flights",
+      "item": [
+        {
+          "name": "Flights Utilization Rate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/flights/reports/utilization?page=0&size=5&startDate=2026-01-01T00:00:00Z",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "flights",
+                "reports",
+                "utilization"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01T00:00:00Z"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {

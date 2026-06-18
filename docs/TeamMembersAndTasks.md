@@ -91,4 +91,4 @@ Finally, keep in mind that each User Story is not isolated -- it must be integra
 | [US226 - Track maintenance parts inventory](system-documentation/US226)                      |      x       |       x        |        x        |
 | [US227 - Fuel efficiency metrics](system-documentation/use-cases/BONUS/US227)              |      x       |       x        |        x        |
 | [US228 - Export route network (GeoJSON, KML)](system-documentation/use-cases/BONUS/US228)    |      x       |       x        |        x        |
-| [US229 - Generate flight utilization reports](system-documentation/US229)                    |      x       |       x        |        x        |
+| [US229 - Generate flight utilization reports](system-documentation/use-cases/BONUS/US229)    |      x       |       x        |        x        |

@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as BO
+participant "System" as Sys
+
+BO -> Sys : getFlightUtilization(startDate?, endDate?, page?, size?)
+activate Sys
+Sys --> BO : returns flight utilization report
+deactivate Sys
+@enduml
