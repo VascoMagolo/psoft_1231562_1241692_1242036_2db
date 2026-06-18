@@ -153,11 +153,39 @@ class ArchitectureTest {
 
     // --- TODO stubs: enable in the same PR that fixes the violation ---
 
-    // TODO #55: enable once routes use cases stop returning domain entities directly
-    // static final ArchRule use_cases_dont_return_domain_entities = ...
+    private static final ArchCondition<JavaClass> NOT_RETURN_DOMAIN_ENTITIES =
+        new ArchCondition<>("not return domain entities from their execute method") {
+            @Override
+            public void check(JavaClass clazz, ConditionEvents events) {
+                clazz.getMethods().stream()
+                    .filter(m -> "execute".equals(m.getName()) && m.getModifiers().contains(JavaModifier.PUBLIC))
+                    .forEach(m -> {
+                        JavaClass returnType = m.getRawReturnType();
+                        String name = returnType.getName();
+                        if (name.startsWith("aisafe.") && name.contains(".domain.")
+                                && !name.equals("aisafe.shared.domain.PaginatedResult")) {
+                            events.add(SimpleConditionEvent.violated(clazz,
+                                clazz.getName() + " returns domain type " + name));
+                        }
+                    });
+            }
+        };
 
-    // TODO #55: enable once SecurityContextHolder is removed from routes application layer
-    // static final ArchRule application_no_security_context_holder = ...
+    @ArchTest
+    static final ArchRule use_cases_dont_return_domain_entities =
+        classes()
+            .that().haveSimpleNameEndingWith("UseCase")
+            .and().areNotInterfaces()
+            .and().resideInAPackage("aisafe.*.application..")
+            .should(NOT_RETURN_DOMAIN_ENTITIES)
+            .because("use cases must return DTOs or primitives, never domain entities");
+
+    @ArchTest
+    static final ArchRule application_no_security_context_holder =
+        noClasses()
+            .that().resideInAPackage("aisafe.*.application..")
+            .should().dependOnClassesThat(equivalentTo(org.springframework.security.core.context.SecurityContextHolder.class))
+            .because("application layer must not access SecurityContextHolder directly; pass identity in via request DTOs or arguments");
 
     @ArchTest
     static final ArchRule application_no_infrastructure_dependency =

@@ -39,6 +39,15 @@ public class ScheduleFlightUseCase {
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(new RegistrationNumber(aircraftId))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraftId));
 
+        if (aircraft.getStatus() == aisafe.aircrafts.domain.AircraftStatus.UNDER_MAINTENANCE || aircraft.getStatus() == aisafe.aircrafts.domain.AircraftStatus.INACTIVE) {
+            throw new AircraftUnavailableException(aircraftId);
+        }
+        if (aircraft.getSeatCapacity() < route.getMinimumCapacity()) {
+            throw new AircraftIncompatibilityException("Aircraft capacity (" + aircraft.getSeatCapacity() + ") is less than the route minimum capacity (" + route.getMinimumCapacity() + ").");
+        }
+        if (aircraft.getRange() < route.getMinimumRange()) {
+            throw new AircraftIncompatibilityException("Aircraft range (" + aircraft.getRange() + ") is less than the route minimum range (" + route.getMinimumRange() + ").");
+        }
         if (routeDistanceService.calculateDistanceKm(route) > aircraft.getRange()) {
             throw new AircraftIncompatibilityException("Route distance exceeds aircraft maximum range.");
         }

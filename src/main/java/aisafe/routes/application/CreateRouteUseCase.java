@@ -39,11 +39,16 @@ public class CreateRouteUseCase {
         String originCode = request.originIataCode().trim().toUpperCase();
         String destinationCode = request.destinationIataCode().trim().toUpperCase();
 
-        if (!airportRepository.existsByIataCode(new IataCode(originCode))) {
-            throw new AirportNotFoundException(originCode);
+        aisafe.airports.domain.Airport originAirport = airportRepository.findByIataCode(new IataCode(originCode))
+                .orElseThrow(() -> new AirportNotFoundException(originCode));
+        if (originAirport.getStatus() != aisafe.airports.domain.AirportStatus.OPERATIONAL) {
+            throw new aisafe.routes.domain.InvalidRouteException("Origin airport is not operational: " + originCode);
         }
-        if (!airportRepository.existsByIataCode(new IataCode(destinationCode))) {
-            throw new AirportNotFoundException(destinationCode);
+
+        aisafe.airports.domain.Airport destinationAirport = airportRepository.findByIataCode(new IataCode(destinationCode))
+                .orElseThrow(() -> new AirportNotFoundException(destinationCode));
+        if (destinationAirport.getStatus() != aisafe.airports.domain.AirportStatus.OPERATIONAL) {
+            throw new aisafe.routes.domain.InvalidRouteException("Destination airport is not operational: " + destinationCode);
         }
         if (routeRepository.existsByOriginAndDestination(new IataCode(originCode), new IataCode(destinationCode))) {
             throw new DuplicateResourceException("Route already exists between origin and destination.");

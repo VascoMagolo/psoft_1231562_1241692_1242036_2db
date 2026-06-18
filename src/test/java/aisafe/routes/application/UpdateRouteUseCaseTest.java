@@ -1,20 +1,16 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.routes.domain.*;
 import aisafe.shared.domain.ConcurrencyException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,19 +29,6 @@ class UpdateRouteUseCaseTest {
     @InjectMocks
     private UpdateRouteUseCase updateRoute;
 
-    @BeforeEach
-    void setUpSecurityContext() {
-        var auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
-        var ctx = SecurityContextHolder.createEmptyContext();
-        ctx.setAuthentication(auth);
-        SecurityContextHolder.setContext(ctx);
-    }
-
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
     void ensureRouteIsUpdatedSuccessfully() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
@@ -53,9 +36,9 @@ class UpdateRouteUseCaseTest {
                 .thenReturn(Optional.of(route));
 
         UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, null);
-        Route result = updateRoute.execute("OPO", "LIS", request, null);
+        RouteResponse result = updateRoute.execute("OPO", "LIS", request, null, "testuser");
 
-        assertEquals(60, result.getEstimatedFlightTime());
+        assertEquals(60, result.estimatedFlightTime());
         verify(routeHistoryRepository).save(any(RouteHistory.class));
     }
 
@@ -66,7 +49,7 @@ class UpdateRouteUseCaseTest {
                 .thenReturn(Optional.of(route));
 
         assertThrows(ConcurrencyException.class, () ->
-                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(60, 400.0, 180, null), 1L));
+                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(60, 400.0, 180, null), 1L, "testuser"));
         verify(routeRepository, never()).save(any());
     }
 
@@ -76,7 +59,7 @@ class UpdateRouteUseCaseTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(RouteNotFoundException.class, () ->
-                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(45, 300.0, 150, null), null));
+                updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(45, 300.0, 150, null), null, "testuser"));
         verify(routeRepository, never()).save(any());
     }
 }

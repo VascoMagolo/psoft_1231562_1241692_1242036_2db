@@ -51,9 +51,13 @@ class ScheduleFlightUseCaseTest {
         Route route = mock(Route.class);
         when(route.getOrigin()).thenReturn(new IataCode("OPO"));
         when(route.getDestination()).thenReturn(new IataCode("LIS"));
+        when(route.getMinimumCapacity()).thenReturn(150);
+        when(route.getMinimumRange()).thenReturn(300.0);
         
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
+        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
@@ -65,5 +69,53 @@ class ScheduleFlightUseCaseTest {
         assertNotNull(result);
         assertEquals("CS-TPA", result.aircraftId());
         verify(scheduledFlightRepository).save(any(ScheduledFlight.class));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void ensureExceptionThrownWhenAircraftCapacityInsufficient() {
+        OffsetDateTime departure = OffsetDateTime.now().plusDays(1);
+        OffsetDateTime arrival = departure.plusHours(2);
+        ScheduleFlightRequest request = new ScheduleFlightRequest("CS-TPA", "OPO", "LIS", departure, arrival);
+
+        Route route = mock(Route.class);
+        when(route.getOrigin()).thenReturn(new IataCode("OPO"));
+        when(route.getDestination()).thenReturn(new IataCode("LIS"));
+        when(route.getMinimumCapacity()).thenReturn(300);
+        when(route.getMinimumRange()).thenReturn(300.0);
+        
+        Aircraft aircraft = mock(Aircraft.class);
+        when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
+        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getSeatCapacity()).thenReturn(200);
+        when(aircraft.getRange()).thenReturn(2000.0);
+
+        when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
+        when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
+
+        assertThrows(aisafe.flights.domain.AircraftIncompatibilityException.class, () -> useCase.execute(request));
+        verify(scheduledFlightRepository, never()).save(any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void ensureExceptionThrownWhenAircraftUnderMaintenance() {
+        OffsetDateTime departure = OffsetDateTime.now().plusDays(1);
+        OffsetDateTime arrival = departure.plusHours(2);
+        ScheduleFlightRequest request = new ScheduleFlightRequest("CS-TPA", "OPO", "LIS", departure, arrival);
+
+        Route route = mock(Route.class);
+        when(route.getOrigin()).thenReturn(new IataCode("OPO"));
+        when(route.getDestination()).thenReturn(new IataCode("LIS"));
+        
+        Aircraft aircraft = mock(Aircraft.class);
+        when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
+        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.UNDER_MAINTENANCE);
+
+        when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
+        when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
+
+        assertThrows(aisafe.flights.domain.AircraftUnavailableException.class, () -> useCase.execute(request));
+        verify(scheduledFlightRepository, never()).save(any());
     }
 }

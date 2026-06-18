@@ -37,7 +37,7 @@ class ListRoutesFromAirportUseCaseTest {
         when(routeRepository.findByOrigin(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(route), 1L));
 
-        PaginatedResult<Route> result = listRoutesFromAirport.execute("OPO", 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = listRoutesFromAirport.execute("OPO", 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOrigin(any(IataCode.class), anyInt(), anyInt());
