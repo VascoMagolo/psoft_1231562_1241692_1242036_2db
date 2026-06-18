@@ -18,4 +18,5 @@ public interface ScheduledFlightRepository extends BaseRepository<ScheduledFligh
     List<ModelUtilizationData> findTopModelsByFlightHours(int limit);
     List<ModelUtilizationData> findTopModelsByAssignments(int limit);
     Double calculateTotalOperationalHoursByRegistration(RegistrationNumber registration);
+    List<RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size);
 }

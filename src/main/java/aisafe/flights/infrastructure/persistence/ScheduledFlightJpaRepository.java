@@ -132,4 +132,16 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     public Double calculateTotalOperationalHoursByRegistration(RegistrationNumber registration) {
         return springRepo.calculateTotalOperationalHoursByRegistration(registration.getNumber());
     }
+
+    @Override
+    public List<aisafe.flights.domain.RouteUtilizationData> getFlightUtilizationReport(OffsetDateTime startDate, OffsetDateTime endDate, int page, int size) {
+        return springRepo.findFlightUtilizationReports(startDate, endDate, PageRequest.of(page, size)).stream()
+                .map(p -> new aisafe.flights.domain.RouteUtilizationData(
+                        p.getRouteId(),
+                        p.getOriginCode(),
+                        p.getDestinationCode(),
+                        p.getFlightCount()
+                ))
+                .collect(Collectors.toList());
+    }
 }
