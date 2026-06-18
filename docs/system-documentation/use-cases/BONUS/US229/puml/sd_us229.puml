@@ -23,7 +23,8 @@ deactivate DB
 Repo --> UC : returns List<RouteUtilizationData>
 deactivate Repo
 
-UC --> Ctrl : returns List<RouteUtilizationData>
+UC -> UC : map to List<RouteUtilizationResponse>
+UC --> Ctrl : returns List<RouteUtilizationResponse>
 deactivate UC
 
 Ctrl --> BO : returns JSON payload (200 OK)

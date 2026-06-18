@@ -27,5 +27,5 @@ The implementation provides an API endpoint that leverages a database-level aggr
 
 1.  **Endpoint**: `GET /api/reports/flight-utilization?startDate={startDate}&endDate={endDate}&page={page}&size={size}`
 2.  **Date Filtering**: Both `startDate` and `endDate` are optional. If provided, the system filters flights based on `departureDateTime >= startDate` and `arrivalDateTime <= endDate`.
-3.  **Aggregation**: A JPA projection `RouteUtilizationProjection` is used to directly map the result of the `COUNT` and `GROUP BY` SQL query into the necessary DTO format (`RouteUtilizationData`).
+3.  **Aggregation**: A JPA projection `RouteUtilizationProjection` is used to directly map the result of the `COUNT` and `GROUP BY` SQL query into the domain record `RouteUtilizationData`. The Use Case then maps this domain representation to the final `RouteUtilizationResponse` DTO for the controller.
 4.  **Pagination**: Pagination is supported natively by the Spring Data repository via `Pageable`.

@@ -1,5 +1,7 @@
 package aisafe.flights.application;
 
+import aisafe.flights.application.dtos.RouteUtilizationResponse;
+import aisafe.flights.domain.InvalidFlightDateRangeException;
 import aisafe.flights.domain.RouteUtilizationData;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,11 +34,12 @@ class GenerateFlightUtilizationReportUseCaseTest {
     void ensureReportIsGenerated() {
         OffsetDateTime start = OffsetDateTime.now().minusDays(10);
         OffsetDateTime end = OffsetDateTime.now();
-        List<RouteUtilizationData> expected = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        List<RouteUtilizationData> mockData = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        List<RouteUtilizationResponse> expected = List.of(new RouteUtilizationResponse(1L, "OPO", "LIS", 5L));
 
-        when(repository.getFlightUtilizationReport(start, end, 0, 20)).thenReturn(expected);
+        when(repository.getFlightUtilizationReport(start, end, 0, 20)).thenReturn(mockData);
 
-        List<RouteUtilizationData> result = useCase.execute(start, end, 0, 20);
+        List<RouteUtilizationResponse> result = useCase.execute(start, end, 0, 20);
 
         assertEquals(expected, result);
     }
@@ -46,6 +49,6 @@ class GenerateFlightUtilizationReportUseCaseTest {
         OffsetDateTime start = OffsetDateTime.now();
         OffsetDateTime end = start.minusDays(1);
 
-        assertThrows(IllegalArgumentException.class, () -> useCase.execute(start, end, 0, 20));
+        assertThrows(InvalidFlightDateRangeException.class, () -> useCase.execute(start, end, 0, 20));
     }
 }

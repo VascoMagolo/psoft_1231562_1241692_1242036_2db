@@ -1,7 +1,7 @@
 package aisafe.flights.infrastructure;
 
 import aisafe.flights.application.GenerateFlightUtilizationReportUseCase;
-import aisafe.flights.domain.RouteUtilizationData;
+import aisafe.flights.application.dtos.RouteUtilizationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,13 +34,13 @@ public class ReportController {
             @ApiResponse(responseCode = "400", description = "Invalid date range")
     })
     @GetMapping("/flight-utilization")
-    public ResponseEntity<List<RouteUtilizationData>> getFlightUtilization(
+    public ResponseEntity<List<RouteUtilizationResponse>> getFlightUtilization(
             @Parameter(description = "Start date (inclusive)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDate,
             @Parameter(description = "End date (inclusive)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDate,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") Integer page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") Integer size) {
 
-        List<RouteUtilizationData> report = generateFlightUtilizationReport.execute(startDate, endDate, page, size);
+        List<RouteUtilizationResponse> report = generateFlightUtilizationReport.execute(startDate, endDate, page, size);
         return ResponseEntity.ok(report);
     }
 }

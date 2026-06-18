@@ -1,7 +1,7 @@
 package aisafe.flights.infrastructure;
 
 import aisafe.flights.application.GenerateFlightUtilizationReportUseCase;
-import aisafe.flights.domain.RouteUtilizationData;
+import aisafe.flights.application.dtos.RouteUtilizationResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -38,7 +38,7 @@ class ReportControllerTest {
     @Test
     @WithMockUser(roles = "OPERATOR")
     void ensureCanGetFlightUtilizationReport() throws Exception {
-        RouteUtilizationData data = new RouteUtilizationData(1L, "OPO", "LIS", 15L);
+        RouteUtilizationResponse data = new RouteUtilizationResponse(1L, "OPO", "LIS", 15L);
         when(useCase.execute(any(), any(), eq(0), eq(20))).thenReturn(List.of(data));
 
         mockMvc.perform(get("/api/reports/flight-utilization")
