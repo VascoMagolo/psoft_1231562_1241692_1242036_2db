@@ -2,22 +2,20 @@ package aisafe.routes.infrastructure.serialization;
 
 import aisafe.airports.domain.Airport;
 import aisafe.routes.application.RouteNetworkSerializer;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
 @Component
-@RequiredArgsConstructor
 public class GeoJsonRouteNetworkSerializer implements RouteNetworkSerializer {
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public ExportedFile serialize(List<Route> routes, Map<String, Airport> airports) {

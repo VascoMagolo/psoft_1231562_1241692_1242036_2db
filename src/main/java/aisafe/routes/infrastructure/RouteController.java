@@ -4,7 +4,7 @@ import aisafe.routes.application.*;
 import aisafe.routes.application.dtos.ActiveRouteResponse;
 import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.routes.application.dtos.CreateRouteRequest;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;

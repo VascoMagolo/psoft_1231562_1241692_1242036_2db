@@ -2,7 +2,7 @@ package aisafe.routes.infrastructure.serialization;
 
 import aisafe.airports.domain.Airport;
 import aisafe.routes.application.RouteNetworkSerializer;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Kml;

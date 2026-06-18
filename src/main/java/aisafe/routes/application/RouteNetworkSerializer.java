@@ -1,7 +1,7 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.Airport;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 
 import java.util.List;

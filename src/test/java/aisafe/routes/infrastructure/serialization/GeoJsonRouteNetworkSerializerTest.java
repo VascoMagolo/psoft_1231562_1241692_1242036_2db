@@ -3,7 +3,7 @@ package aisafe.routes.infrastructure.serialization;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.Coordinates;
 import aisafe.airports.domain.IataCode;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 class GeoJsonRouteNetworkSerializerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final GeoJsonRouteNetworkSerializer serializer = new GeoJsonRouteNetworkSerializer(objectMapper);
+    private final GeoJsonRouteNetworkSerializer serializer = new GeoJsonRouteNetworkSerializer();
 
     @Test
     void ensureGeoJsonSerializationCorrectness() throws Exception {

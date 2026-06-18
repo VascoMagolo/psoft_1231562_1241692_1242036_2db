@@ -3,7 +3,7 @@ package aisafe.routes.infrastructure.serialization;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.Coordinates;
 import aisafe.airports.domain.IataCode;
-import aisafe.routes.application.dtos.ExportedFile;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import org.junit.jupiter.api.Test;
 
