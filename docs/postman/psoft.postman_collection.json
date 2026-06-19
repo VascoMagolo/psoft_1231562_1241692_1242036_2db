@@ -381,6 +381,17 @@
         },
         {
           "name": "Delete Aircraft Model [Backoffice Operator]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -914,7 +925,56 @@
           "response": []
         },
         {
+          "name": "View Fleet Status (US205) [ATCC]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Has totalAircraft\", () => pm.expect(body.totalAircraft).to.be.a('number'));",
+                  "pm.test(\"Has statusGroups with all statuses\", () => {",
+                  "    pm.expect(body.statusGroups).to.exist;",
+                  "    pm.expect(body.statusGroups.data).to.be.an('array');",
+                  "    pm.expect(body.statusGroups.data.length).to.eql(4);",
+                  "});",
+                  "pm.test(\"Has HATEOAS _links\", () => pm.expect(body._links).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/aircrafts/fleet-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "aircrafts",
+                "fleet-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Delete Aircraft [ATCC]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -1420,6 +1480,17 @@
         },
         {
           "name": "Delete Airport [Admin]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -1655,6 +1726,17 @@
         },
         {
           "name": "Delete Route [Admin]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -1675,6 +1757,17 @@
         },
         {
           "name": "Export Route KML/GeoJson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -1981,6 +2074,17 @@
         },
         {
           "name": "Update Maintenance Template [Maintenance Technician]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [],
@@ -2010,6 +2114,17 @@
         },
         {
           "name": "Update Maintenance Part [Maintenance Technician]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [],
@@ -2039,6 +2154,22 @@
         },
         {
           "name": "Search Maintenance Parts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns paginated response\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.page).to.exist;",
+                  "    pm.expect(body.page.totalElements).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -2070,6 +2201,17 @@
       "item": [
         {
           "name": "Flights Utilization Rate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],

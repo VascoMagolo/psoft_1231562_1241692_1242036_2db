@@ -1,9 +1,7 @@
 package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
-import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
-import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftInvalidFieldException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftStatus;
@@ -70,6 +68,9 @@ class AircraftControllerTest {
 
     @MockitoBean
     private CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
+
+    @MockitoBean
+    private ViewFleetStatusUseCase viewFleetStatus;
 
     @MockitoBean
     private JwtService jwtService;
@@ -182,5 +183,30 @@ class AircraftControllerTest {
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetFleetStatusReturns200() throws Exception {
+        FleetStatusGroupResponse availableGroup = new FleetStatusGroupResponse(
+                AircraftStatus.AVAILABLE,
+                new PaginatedResult<>(List.of(
+                        new FleetStatusAircraftResponse("CS-TPA", "A320", Manufacturer.AIRBUS)
+                ), 1));
+        FleetStatusGroupResponse maintenanceGroup = new FleetStatusGroupResponse(
+                AircraftStatus.UNDER_MAINTENANCE, new PaginatedResult<>(List.of(), 0));
+        FleetStatusGroupResponse inFlightGroup = new FleetStatusGroupResponse(
+                AircraftStatus.IN_FLIGHT, new PaginatedResult<>(List.of(), 0));
+        FleetStatusGroupResponse inactiveGroup = new FleetStatusGroupResponse(
+                AircraftStatus.INACTIVE, new PaginatedResult<>(List.of(), 0));
+
+        FleetStatusResponse fleetResponse = new FleetStatusResponse(1,
+                new PaginatedResult<>(List.of(availableGroup, maintenanceGroup, inFlightGroup, inactiveGroup), 4));
+
+        when(viewFleetStatus.execute()).thenReturn(fleetResponse);
+
+        mockMvc.perform(get("/api/aircrafts/fleet-status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalAircraft").value(1))
+                .andExpect(jsonPath("$.statusGroups.totalElements").value(4));
     }
 }
