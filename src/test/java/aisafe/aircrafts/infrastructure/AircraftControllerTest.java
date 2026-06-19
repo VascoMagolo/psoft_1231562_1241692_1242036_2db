@@ -78,6 +78,9 @@ class AircraftControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private ImportAircraftsUseCase importAircrafts;
+
     private ViewAircraftDetailsResponse sampleResponse;
 
     @BeforeEach
@@ -208,5 +211,21 @@ class AircraftControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalAircraft").value(1))
                 .andExpect(jsonPath("$.statusGroups.totalElements").value(4));
+    }
+
+    @Test
+    void ensureImportAircraftsReturns207WhenPartialSuccess() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<ViewAircraftDetailsResponse> result = new aisafe.shared.application.dtos.BulkImportResult<>();
+        result.addSuccess(sampleResponse);
+        result.addError(2, "data", "error");
+
+        when(importAircrafts.execute(any())).thenReturn(result);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+
+        mockMvc.perform(multipart("/api/aircrafts/import").file(file))
+                .andExpect(status().isMultiStatus())
+                .andExpect(jsonPath("$.successfulCount").value(1))
+                .andExpect(jsonPath("$.errorCount").value(1));
     }
 }

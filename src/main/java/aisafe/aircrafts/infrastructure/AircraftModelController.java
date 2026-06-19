@@ -49,6 +49,7 @@ public class AircraftModelController {
     private final GetTopUtilizedModelsUseCase getTopUtilizedModels;
     private final UpdateAircraftModelImageUseCase updateAircraftModelImage;
     private final GetAircraftModelImageUseCase getAircraftModelImage;
+    private final ImportAircraftModelsUseCase importAircraftModels;
 
     public AircraftModelController(RegisterAircraftModelUseCase registerAircraftModel,
                                    ListAircraftModelsUseCase listAircraftModels,
@@ -57,7 +58,8 @@ public class AircraftModelController {
                                    ViewAircraftModelDetailsUseCase viewAircraftModelDetails,
                                    GetTopUtilizedModelsUseCase getTopUtilizedModels,
                                    UpdateAircraftModelImageUseCase updateAircraftModelImage,
-                                   GetAircraftModelImageUseCase getAircraftModelImage) {
+                                   GetAircraftModelImageUseCase getAircraftModelImage,
+                                   ImportAircraftModelsUseCase importAircraftModels) {
         this.registerAircraftModel = registerAircraftModel;
         this.listAircraftModels = listAircraftModels;
         this.deleteAircraftModel = deleteAircraftModel;
@@ -66,6 +68,14 @@ public class AircraftModelController {
         this.getTopUtilizedModels = getTopUtilizedModels;
         this.updateAircraftModelImage = updateAircraftModelImage;
         this.getAircraftModelImage = getAircraftModelImage;
+        this.importAircraftModels = importAircraftModels;
+    }
+
+    @Operation(summary = "Bulk import aircraft models via CSV")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<java.util.Map<String, Object>> importModels(@RequestParam("file") MultipartFile file) {
+        aisafe.shared.application.dtos.BulkImportResult<AircraftModelResponse> result = importAircraftModels.execute(file);
+        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Register a new aircraft model (JSON, no image)")

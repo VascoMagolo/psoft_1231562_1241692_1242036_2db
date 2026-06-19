@@ -64,6 +64,9 @@ class AircraftModelControllerTest {
     private GetAircraftModelImageUseCase getAircraftModelImage;
 
     @MockitoBean
+    private ImportAircraftModelsUseCase importAircraftModels;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -249,5 +252,21 @@ class AircraftModelControllerTest {
     void ensureDeleteModelReturns204() throws Exception {
         mockMvc.perform(delete("/api/aircraftModels/A320"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureImportModelsReturns207WhenPartialSuccess() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<AircraftModelResponse> result = new aisafe.shared.application.dtos.BulkImportResult<>();
+        result.addSuccess(new AircraftModelResponse("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180));
+        result.addError(2, "data", "error");
+
+        when(importAircraftModels.execute(any())).thenReturn(result);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+
+        mockMvc.perform(multipart("/api/aircraftModels/import").file(file))
+                .andExpect(status().isMultiStatus())
+                .andExpect(jsonPath("$.successfulCount").value(1))
+                .andExpect(jsonPath("$.errorCount").value(1));
     }
 }
