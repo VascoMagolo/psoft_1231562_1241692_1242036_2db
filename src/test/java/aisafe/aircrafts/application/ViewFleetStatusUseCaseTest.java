@@ -26,7 +26,7 @@ class ViewFleetStatusUseCaseTest {
     private ViewFleetStatusUseCase viewFleetStatusUseCase;
 
     private Aircraft createAircraft(String registration, String modelName, AircraftStatus status) {
-        AircraftModel model = new AircraftModel(modelName, Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "img.jpg", 180);
+        AircraftModel model = new AircraftModel(modelName, Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
         return new Aircraft(status, LocalDate.of(2020, 1, 1), model, new RegistrationNumber(registration), 150, 5000.0, List.of());
     }
 
