@@ -14,7 +14,7 @@ public record AirportResponse(
         String country,
         String region,
         String timezone,
-        String imagePath,
+        int photoCount,
         String operationalHours,
         String status,
         CoordinatesRecord coordinates,
@@ -37,7 +37,7 @@ public record AirportResponse(
                 airport.getCountry(),
                 airport.getRegion(),
                 airport.getTimezone(),
-                airport.getImagePath(),
+                airport.getPhotos().size(),
                 airport.getOperationalHours(),
                 airport.getStatus().name(),
                 new CoordinatesRecord(

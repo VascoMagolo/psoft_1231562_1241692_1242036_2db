@@ -31,7 +31,7 @@ class RegisterAirportUseCaseTest {
                 iataCode, "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
                 38.77, -9.13,
                 List.of(new RegisterAirportRequest.RunwayRequest("03/21", 3000, "030/210")),
-                null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     @Test

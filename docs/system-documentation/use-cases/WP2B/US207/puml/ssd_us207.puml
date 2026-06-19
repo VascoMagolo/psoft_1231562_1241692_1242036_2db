@@ -3,8 +3,22 @@ autonumber
 actor "Backoffice Operator" as BO
 participant "System" as Sys
 
-BO -> Sys : registerAirport(iataCode, name, city, country, timezone, latitude, longitude, runways, imagePath, operationalHours, services, terminals, gates)
+BO -> Sys : registerAirport(iataCode, name, city, country, timezone, latitude, longitude,\n  runways, operationalHours?, services?, terminals?, gates?, photo?: File)
 activate Sys
-Sys --> BO : returns created Airport details (with facilities)
+note right of Sys
+  Accepts multipart/form-data with optional photo file.
+  JSON POST with image field returns 400.
+end note
+Sys --> BO : returns created Airport details\n(hasPhoto: true/false)
+deactivate Sys
+
+BO -> Sys : addAirportPhoto(iataCode, photo: File)
+activate Sys
+Sys --> BO : returns updated Airport details\n(photoCount: N)
+deactivate Sys
+
+BO -> Sys : getAirportPhoto(iataCode, index: int)
+activate Sys
+Sys --> BO : raw photo bytes with Content-Type header
 deactivate Sys
 @enduml

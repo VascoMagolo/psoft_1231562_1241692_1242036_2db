@@ -24,9 +24,13 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -48,6 +52,8 @@ public class AirportController {
     private final AirportStatisticsUseCase airportStatistics;
     private final ListAirportsByRegionUseCase listAirportsByRegion;
     private final DeleteAirportUseCase deleteAirport;
+    private final UploadAirportPhotoUseCase uploadAirportPhoto;
+    private final GetAirportPhotoUseCase getAirportPhoto;
 
     public AirportController(RegisterAirportUseCase registerAirport,
             AddAirportCertificationUseCase addCertification,
@@ -58,7 +64,9 @@ public class AirportController {
             ViewAirportRoutesUseCase viewAirportRoutes,
             AirportStatisticsUseCase airportStatistics,
             ListAirportsByRegionUseCase listAirportsByRegion,
-            DeleteAirportUseCase deleteAirport) {
+            DeleteAirportUseCase deleteAirport,
+            UploadAirportPhotoUseCase uploadAirportPhoto,
+            GetAirportPhotoUseCase getAirportPhoto) {
         this.registerAirport = registerAirport;
         this.addCertification = addCertification;
         this.viewAirportDetails = viewAirportDetails;
@@ -69,6 +77,8 @@ public class AirportController {
         this.airportStatistics = airportStatistics;
         this.listAirportsByRegion = listAirportsByRegion;
         this.deleteAirport = deleteAirport;
+        this.uploadAirportPhoto = uploadAirportPhoto;
+        this.getAirportPhoto = getAirportPhoto;
     }
 
     /**
@@ -105,10 +115,94 @@ public class AirportController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "409", description = "Airport with this IATA code already exists")
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityModel<AirportResponse>> registerAirport(
             @Valid @RequestBody RegisterAirportRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(registerAirport.execute(request)));
+    }
+
+    // US207
+    @Operation(summary = "Register a new airport with optional photo (multipart/form-data)", description = "Creates an airport with runways, optional facilities, and an optional photo file. Requires Backoffice Operator role. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Airport registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data or unsupported image MIME type"),
+            @ApiResponse(responseCode = "409", description = "Airport with this IATA code already exists")
+    })
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EntityModel<AirportResponse>> registerAirportWithPhoto(
+            @RequestParam String iataCode,
+            @RequestParam String name,
+            @RequestParam String city,
+            @RequestParam String country,
+            @RequestParam(required = false) String region,
+            @RequestParam String timezone,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam("runwayName") List<String> runwayNames,
+            @RequestParam("runwayLength") List<Integer> runwayLengths,
+            @RequestParam("runwayOrientation") List<String> runwayOrientations,
+            @RequestParam(required = false) String operationalHours,
+            @RequestParam(required = false) List<String> services,
+            @RequestParam(required = false) List<String> terminals,
+            @RequestParam(required = false) List<String> gates,
+            @RequestParam(value = "photo", required = false) MultipartFile photoFile) throws IOException {
+
+        if (photoFile != null && (photoFile.getContentType() == null
+                || !photoFile.getContentType().startsWith("image/")))
+            return ResponseEntity.badRequest().build();
+
+        if (runwayNames == null || runwayNames.isEmpty())
+            return ResponseEntity.badRequest().build();
+
+        List<RegisterAirportRequest.RunwayRequest> runways = IntStream
+                .range(0, runwayNames.size())
+                .mapToObj(i -> new RegisterAirportRequest.RunwayRequest(
+                        runwayNames.get(i), runwayLengths.get(i), runwayOrientations.get(i)))
+                .toList();
+
+        byte[] photoBytes = photoFile != null ? photoFile.getBytes() : null;
+        String contentType = photoFile != null ? photoFile.getContentType() : null;
+
+        RegisterAirportRequest request = new RegisterAirportRequest(
+                iataCode, name, city, country, region, timezone, latitude, longitude,
+                runways, photoBytes, contentType, operationalHours, services, terminals, gates);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(registerAirport.execute(request)));
+    }
+
+    // US207
+    @Operation(summary = "Add a photo to an airport", description = "Appends a new photo to the airport's photo list. Requires Backoffice Operator role. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photo added successfully"),
+            @ApiResponse(responseCode = "400", description = "Unsupported image MIME type"),
+            @ApiResponse(responseCode = "404", description = "Airport not found")
+    })
+    @PostMapping(value = "/{iataCode}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EntityModel<AirportResponse>> addPhoto(
+            @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @RequestParam("photo") MultipartFile photoFile) throws IOException {
+
+        if (photoFile.getContentType() == null || !photoFile.getContentType().startsWith("image/"))
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok(toModel(
+                uploadAirportPhoto.execute(iataCode.toUpperCase(), photoFile.getBytes(), photoFile.getContentType())));
+    }
+
+    // US207
+    @Operation(summary = "Get a photo of an airport by index", description = "Returns the stored photo bytes at the given 0-based index with the original Content-Type header. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photo returned"),
+            @ApiResponse(responseCode = "404", description = "Airport not found or no photo at the given index")
+    })
+    @GetMapping("/{iataCode}/photos/{index}")
+    public ResponseEntity<byte[]> getPhoto(
+            @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @Parameter(description = "0-based photo index") @PathVariable int index) {
+        AirportPhotoData data = getAirportPhoto.execute(iataCode.toUpperCase(), index);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(data.contentType()))
+                .body(data.bytes());
     }
 
     /**

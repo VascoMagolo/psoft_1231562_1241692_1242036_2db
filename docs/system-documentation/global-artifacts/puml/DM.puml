@@ -117,13 +117,17 @@ package "Airport Aggregate" <<Aggregate>> {
     - description : String
   }
 
+  class AirportPhoto <<ValueObject>> {
+    - bytes : byte[]
+    - contentType : String
+  }
+
   class Airport <<Entity>> <<Root>> {
     - name : String
     - city : String
     - country : String
     - region : String
     - timezone : String
-    - imagePath : String
     - operationalHours : String
     - status : AirportStatus
   }
@@ -137,6 +141,7 @@ package "Airport Aggregate" <<Aggregate>> {
 
   Airport *-- IataCode
   Airport *-- Coordinates
+  Airport *-- "*" AirportPhoto : photos
   Airport *-- "*" Runway
   Airport *-- "*" Contact
   Airport *-- "*" Terminal

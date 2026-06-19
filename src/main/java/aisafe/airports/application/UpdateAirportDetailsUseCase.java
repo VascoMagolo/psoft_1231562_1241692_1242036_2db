@@ -60,7 +60,7 @@ public class UpdateAirportDetailsUseCase {
         List<Gate> gates = request.gates() == null ? null :
                 request.gates().stream().map(Gate::new).toList();
 
-        airport.updateDetails(request.operationalHours(), contacts, request.imagePath(), services, terminals, gates);
+        airport.updateDetails(request.operationalHours(), contacts, null, services, terminals, gates);
 
         airportRepository.save(airport);
         Long newVersion = airportRepository.findVersionFor(code);
