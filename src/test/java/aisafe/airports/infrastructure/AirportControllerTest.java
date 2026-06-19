@@ -73,6 +73,7 @@ class AirportControllerTest {
     @MockitoBean
     private DeleteAirportUseCase deleteAirport;
 
+    @MockitoBean
     private UploadAirportPhotoUseCase uploadAirportPhoto;
 
     @MockitoBean
