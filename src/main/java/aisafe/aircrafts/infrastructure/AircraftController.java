@@ -4,7 +4,9 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.*;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
 import aisafe.shared.infrastructure.ETagUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -78,8 +80,8 @@ public class AircraftController {
     @Operation(summary = "Bulk import aircrafts via CSV")
     @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<java.util.Map<String, Object>> importAircrafts(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        aisafe.shared.application.dtos.BulkImportResult<ViewAircraftDetailsResponse> result = importAircrafts.execute(file);
-        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
+        BulkImportResult<ViewAircraftDetailsResponse> result = importAircrafts.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")

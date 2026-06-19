@@ -82,7 +82,7 @@ class RouteControllerTest {
     private UserRepository userRepository;
 
     @org.springframework.test.context.bean.override.mockito.MockitoBean
-    private aisafe.routes.application.ImportRoutesUseCase importRoutesUseCase;
+    private ImportRoutesUseCase importRoutesUseCase;
 
     private Route sampleRoute;
 

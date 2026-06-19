@@ -9,6 +9,7 @@ import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.ConcurrencyException;
 import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -343,7 +344,7 @@ class AirportControllerTest {
 
     @Test
     void ensureImportAirportsReturns201OnFullSuccess() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> result = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> result = new BulkImportResult<>();
         result.addSuccess("OPO");
         result.addSuccess("LIS");
 

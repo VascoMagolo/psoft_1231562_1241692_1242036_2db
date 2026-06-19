@@ -4,11 +4,12 @@ import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.AircraftModelImageData;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
 import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
-import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -74,7 +75,7 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureGetTopUtilizedModelsReturns200() throws Exception {
-        when(getTopUtilizedModels.execute("HOURS")).thenReturn(List.of(new aisafe.aircrafts.application.dtos.TopUtilizedModelResponse("A320", 5000L)));
+        when(getTopUtilizedModels.execute("HOURS")).thenReturn(List.of(new TopUtilizedModelResponse("A320", 5000L)));
 
         mockMvc.perform(get("/api/aircraftModels/top-utilized")
                         .param("criteria", "HOURS"))
@@ -256,7 +257,7 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureImportModelsReturns207WhenPartialSuccess() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<AircraftModelResponse> result = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<AircraftModelResponse> result = new BulkImportResult<>();
         result.addSuccess(new AircraftModelResponse("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180));
         result.addError(2, "data", "error");
 

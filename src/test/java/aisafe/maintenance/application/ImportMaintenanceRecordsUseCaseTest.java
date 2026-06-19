@@ -1,6 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
+import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.shared.application.dtos.BulkImportResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class ImportMaintenanceRecordsUseCaseTest {
 
         when(createMaintenanceRecordUseCase.execute(any(CreateMaintenanceRecordRequest.class))).thenReturn(null);
 
-        BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceRecordResponse> result = importUseCase.execute(file);
+        BulkImportResult<MaintenanceRecordResponse> result = importUseCase.execute(file);
 
         assertEquals(2, result.getSuccessfulImports().size());
         assertTrue(result.isFullySuccessful());
@@ -50,7 +51,7 @@ class ImportMaintenanceRecordsUseCaseTest {
 
         MockMultipartFile file = new MockMultipartFile("file", "records.csv", "text/csv", csvContent.getBytes());
 
-        BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceRecordResponse> result = importUseCase.execute(file);
+        BulkImportResult<MaintenanceRecordResponse> result = importUseCase.execute(file);
 
         assertEquals(0, result.getSuccessfulImports().size());
         assertFalse(result.isFullySuccessful());

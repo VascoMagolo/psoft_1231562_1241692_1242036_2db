@@ -1,9 +1,12 @@
 package aisafe.flights.infrastructure;
 
+import aisafe.flights.application.ImportFlightsUseCase;
 import aisafe.flights.application.ScheduleFlightUseCase;
 import aisafe.flights.application.ViewScheduledFlightsByAircraftUseCase;
 import aisafe.flights.application.dtos.FlightResponse;
 import aisafe.flights.application.dtos.ScheduleFlightRequest;
+import aisafe.shared.application.dtos.BulkImportResult;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,11 +29,11 @@ public class FlightController {
 
     private final ScheduleFlightUseCase scheduleFlight;
     private final ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft;
-    private final aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase;
+    private final ImportFlightsUseCase importFlightsUseCase;
 
     public FlightController(ScheduleFlightUseCase scheduleFlight,
                             ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft,
-                            aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase) {
+                            ImportFlightsUseCase importFlightsUseCase) {
         this.scheduleFlight = scheduleFlight;
         this.viewScheduledFlightsByAircraft = viewScheduledFlightsByAircraft;
         this.importFlightsUseCase = importFlightsUseCase;
@@ -81,7 +84,7 @@ public class FlightController {
     @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<java.util.Map<String, Object>> importFlights(
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        aisafe.shared.application.dtos.BulkImportResult<String> result = importFlightsUseCase.execute(file);
-        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
+        BulkImportResult<String> result = importFlightsUseCase.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 }

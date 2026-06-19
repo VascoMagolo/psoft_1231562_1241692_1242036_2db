@@ -9,7 +9,9 @@ import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelImageRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
+import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -74,8 +76,8 @@ public class AircraftModelController {
     @Operation(summary = "Bulk import aircraft models via CSV")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<java.util.Map<String, Object>> importModels(@RequestParam("file") MultipartFile file) {
-        aisafe.shared.application.dtos.BulkImportResult<AircraftModelResponse> result = importAircraftModels.execute(file);
-        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
+        BulkImportResult<AircraftModelResponse> result = importAircraftModels.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Register a new aircraft model (JSON, no image)")

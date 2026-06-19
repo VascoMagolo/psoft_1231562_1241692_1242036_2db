@@ -1,6 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.maintenance.application.dtos.CreateMaintenanceRecordRequest;
+import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenanceStatus;
 import aisafe.shared.application.dtos.BulkImportResult;
@@ -9,9 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,8 +27,8 @@ public class ImportMaintenanceRecordsUseCase {
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
     }
 
-    public BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceRecordResponse> execute(MultipartFile file) {
-        BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceRecordResponse> result = new BulkImportResult<>();
+    public BulkImportResult<MaintenanceRecordResponse> execute(MultipartFile file) {
+        BulkImportResult<MaintenanceRecordResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());
              CSVReader csvReader = new CSVReader(reader)) {
 

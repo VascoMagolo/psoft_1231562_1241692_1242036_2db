@@ -1,5 +1,6 @@
 package aisafe.flights.infrastructure;
 
+import aisafe.flights.application.ImportFlightsUseCase;
 import aisafe.flights.application.ScheduleFlightUseCase;
 import aisafe.flights.application.ViewScheduledFlightsByAircraftUseCase;
 import aisafe.flights.application.dtos.FlightResponse;
@@ -36,7 +37,7 @@ class FlightControllerTest {
     private ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft;
 
     @org.springframework.test.context.bean.override.mockito.MockitoBean
-    private aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase;
+    private ImportFlightsUseCase importFlightsUseCase;
 
     @MockitoBean
     private JwtService jwtService;

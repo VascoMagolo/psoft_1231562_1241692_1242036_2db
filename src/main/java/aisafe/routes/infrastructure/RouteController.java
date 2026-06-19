@@ -8,6 +8,8 @@ import aisafe.shared.application.ExportedFile;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
+import aisafe.shared.application.dtos.BulkImportResult;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
 import org.springframework.security.core.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -298,7 +300,7 @@ public class RouteController {
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
             Authentication authentication) {
         String username = authentication != null ? authentication.getName() : "BulkImport";
-        aisafe.shared.application.dtos.BulkImportResult<String> result = importRoutesUseCase.execute(file, username);
-        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
+        BulkImportResult<String> result = importRoutesUseCase.execute(file, username);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 }

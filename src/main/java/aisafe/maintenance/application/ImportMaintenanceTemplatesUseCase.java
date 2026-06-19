@@ -1,6 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.maintenance.application.dtos.CreateMaintenanceTemplateRequest;
+import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
 import aisafe.maintenance.domain.MaintenanceType;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
@@ -21,8 +22,8 @@ public class ImportMaintenanceTemplatesUseCase {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
     }
 
-    public BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceTemplateResponse> execute(MultipartFile file) {
-        BulkImportResult<aisafe.maintenance.application.dtos.MaintenanceTemplateResponse> result = new BulkImportResult<>();
+    public BulkImportResult<MaintenanceTemplateResponse> execute(MultipartFile file) {
+        BulkImportResult<MaintenanceTemplateResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());
              CSVReader csvReader = new CSVReader(reader)) {
 
