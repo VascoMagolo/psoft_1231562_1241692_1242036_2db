@@ -73,11 +73,13 @@ class AirportControllerTest {
     @MockitoBean
     private DeleteAirportUseCase deleteAirport;
 
-    @MockitoBean
     private UploadAirportPhotoUseCase uploadAirportPhoto;
 
     @MockitoBean
     private GetAirportPhotoUseCase getAirportPhoto;
+
+    @MockitoBean
+    private ImportAirportsUseCase importAirports;
 
     @MockitoBean
     private JwtService jwtService;
@@ -334,7 +336,24 @@ class AirportControllerTest {
 
     @Test
     void ensureDeleteAirportReturns204() throws Exception {
-        mockMvc.perform(delete("/api/airports/LIS"))
+        mockMvc.perform(delete("/api/airports/OPO"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureImportAirportsReturns201OnFullSuccess() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<String> result = new aisafe.shared.application.dtos.BulkImportResult<>();
+        result.addSuccess("OPO");
+        result.addSuccess("LIS");
+
+        when(importAirports.execute(any())).thenReturn(result);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "file", "airports.csv", "text/csv", "iataCode,name,city,country\nOPO,Porto,Porto,Portugal\nLIS,Lisbon,Lisbon,Portugal".getBytes());
+
+        mockMvc.perform(multipart("/api/airports/import").file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.successfulCount").value(2))
+                .andExpect(jsonPath("$.errorCount").value(0));
     }
 }
