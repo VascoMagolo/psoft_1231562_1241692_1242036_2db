@@ -71,7 +71,7 @@ public class ImportAirportsUseCase {
                     RegisterAirportRequest request = new RegisterAirportRequest(
                             iata, name, city, country, region, timezone, lat, lon,
                             List.of(new RegisterAirportRequest.RunwayRequest("01/19", 2000, "010/190")),
-                            null, null, List.of(), List.of(), List.of()
+                            null, null, null, List.of(), List.of(), List.of()
                     );
                     
                     // Attempt to register
