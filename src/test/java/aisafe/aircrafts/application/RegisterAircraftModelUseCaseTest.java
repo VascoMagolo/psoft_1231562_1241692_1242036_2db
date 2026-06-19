@@ -24,7 +24,7 @@ class RegisterAircraftModelUseCaseTest {
     private RegisterAircraftModelUseCase registerAircraftModel;
 
     private RegisterAircraftModelRequest buildRequest() {
-        return new RegisterAircraftModelRequest("A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, "a320.jpg");
+        return new RegisterAircraftModelRequest("A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, null, null);
     }
 
     @Test

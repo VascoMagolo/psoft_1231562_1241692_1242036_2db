@@ -42,7 +42,7 @@ class CreateMaintenanceTemplateUseCaseTest {
 
     @Test
     void ensureTemplateIsCreatedSuccessfully() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(maintenanceTemplateRepository.existsByName(anyString())).thenReturn(false);
 
@@ -55,7 +55,7 @@ class CreateMaintenanceTemplateUseCaseTest {
 
     @Test
     void ensureExceptionWhenTemplateNameAlreadyExists() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
         when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(maintenanceTemplateRepository.existsByName(anyString())).thenReturn(true);
 

@@ -82,11 +82,11 @@ public class Bootstrap implements ApplicationRunner {
         // bootstrap for aircraft package
         if (aircraftModelRepository.count() == 0) {
             aircraftModelRepository.save(new AircraftModel("Airbus A320neo", Manufacturer.AIRBUS, 24210.0, 6570.0,
-                    828.0, "images/a320neo.png", 240));
+                    828.0, null, 240));
             aircraftModelRepository.save(new AircraftModel("Boeing 737 MAX", Manufacturer.BOEING, 25941.0, 6570.0,
-                    839.0, "images/b737max.png", 300));
+                    839.0, null, 300));
             aircraftModelRepository.save(new AircraftModel("Embraer E195-E2", Manufacturer.EMBRAER, 13000.0, 4260.0,
-                    829.0, "images/e195e2.png", 146));
+                    829.0, null, 146));
         }
         if (aircraftRepository.count() == 0) {
             AircraftModel a320neo = aircraftModelRepository.findByModelName("Airbus A320neo").orElseThrow();

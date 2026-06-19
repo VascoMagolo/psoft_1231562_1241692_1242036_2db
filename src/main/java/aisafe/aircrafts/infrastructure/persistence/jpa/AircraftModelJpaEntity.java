@@ -34,7 +34,8 @@ public class AircraftModelJpaEntity {
     @Column(nullable = false)
     private Integer maximumSeatingCapacity;
 
-    private String imagePath;
+    @Embedded
+    private AircraftModelImageJpaEmbeddable image;
 
     public AircraftModelJpaEntity() {}
 }

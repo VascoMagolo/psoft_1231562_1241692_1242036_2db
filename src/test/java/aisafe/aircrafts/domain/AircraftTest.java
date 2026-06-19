@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AircraftTest {
 
     private AircraftModel buildModel() {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
     }
 
     @Test

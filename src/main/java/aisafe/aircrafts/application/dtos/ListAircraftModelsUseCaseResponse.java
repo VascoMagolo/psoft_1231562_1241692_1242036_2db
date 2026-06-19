@@ -13,7 +13,7 @@ public record ListAircraftModelsUseCaseResponse(
         Double fuelCapacity,
         Double maxRange,
         Double cruisingSpeed,
-        String imagePath,
+        boolean hasImage,
         Integer maximumSeatingCapacity
 ) {
     public static ListAircraftModelsUseCaseResponse from(AircraftModel model) {
@@ -23,7 +23,7 @@ public record ListAircraftModelsUseCaseResponse(
                 model.getFuelCapacity(),
                 model.getMaxRange(),
                 model.getCruisingSpeed(),
-                model.getImagePath(),
+                model.getImage() != null,
                 model.getMaximumSeatingCapacity()
         );
     }

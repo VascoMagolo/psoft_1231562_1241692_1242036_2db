@@ -28,12 +28,12 @@ class UpdateAircraftModelUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
     }
 
     @Test
     void ensureModelIsUpdatedSuccessfully() {
-        UpdateAircraftModelRequest request = new UpdateAircraftModelRequest(850.0, 28000.0, 7000.0, 200, "a320_new.jpg");
+        UpdateAircraftModelRequest request = new UpdateAircraftModelRequest(850.0, 28000.0, 7000.0, 200);
 
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(aircraftModel));
 
@@ -47,7 +47,7 @@ class UpdateAircraftModelUseCaseTest {
 
     @Test
     void ensureExceptionWhenModelNotFound() {
-        UpdateAircraftModelRequest request = new UpdateAircraftModelRequest(850.0, 28000.0, 7000.0, 200, "a320_new.jpg");
+        UpdateAircraftModelRequest request = new UpdateAircraftModelRequest(850.0, 28000.0, 7000.0, 200);
 
         when(aircraftModelRepository.findByModelName("NON-EXISTENT")).thenReturn(Optional.empty());
 

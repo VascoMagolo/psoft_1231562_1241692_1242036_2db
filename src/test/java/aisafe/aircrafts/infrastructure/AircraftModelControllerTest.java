@@ -1,8 +1,11 @@
 package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
+import aisafe.aircrafts.application.dtos.AircraftModelImageData;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
+import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
+import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,6 +25,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -53,6 +58,12 @@ class AircraftModelControllerTest {
     private GetTopUtilizedModelsUseCase getTopUtilizedModels;
 
     @MockitoBean
+    private UpdateAircraftModelImageUseCase updateAircraftModelImage;
+
+    @MockitoBean
+    private GetAircraftModelImageUseCase getAircraftModelImage;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -81,10 +92,10 @@ class AircraftModelControllerTest {
     @Test
     void ensureRegisterModelReturns201() throws Exception {
         RegisterAircraftModelRequest request = new RegisterAircraftModelRequest(
-                "A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, "a320.jpg");
+                "A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, null, null);
 
         AircraftModelResponse response = new AircraftModelResponse(
-                 "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180);
 
         when(registerAircraftModel.execute(any())).thenReturn(response);
 
@@ -99,12 +110,105 @@ class AircraftModelControllerTest {
     @Test
     void ensureRegisterModelWithBlankNameReturns400() throws Exception {
         RegisterAircraftModelRequest request = new RegisterAircraftModelRequest(
-                "", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, "a320.jpg");
+                "", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, null, null);
 
         mockMvc.perform(post("/api/aircraftModels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureRegisterModelWithImageInJsonReturns400() throws Exception {
+        String json = "{\"modelName\":\"A320\",\"manufacturer\":\"AIRBUS\",\"maxRange\":6150.0," +
+                "\"fuelCapacity\":26730.0,\"cruisingSpeed\":833.0,\"maximumSeatingCapacity\":180," +
+                "\"image\":\"AQID\"}";
+
+        mockMvc.perform(post("/api/aircraftModels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureCreateModelWithImageReturns201() throws Exception {
+        AircraftModelResponse response = new AircraftModelResponse(
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, true, 180);
+
+        when(registerAircraftModel.execute(any())).thenReturn(response);
+
+        MockMultipartFile image = new MockMultipartFile("image", "a320.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels")
+                        .file(image)
+                        .param("modelName", "A320")
+                        .param("manufacturer", "AIRBUS")
+                        .param("maxRange", "6150.0")
+                        .param("fuelCapacity", "26730.0")
+                        .param("cruisingSpeed", "833.0")
+                        .param("maximumSeatingCapacity", "180"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.hasImage").value(true));
+    }
+
+    @Test
+    void ensureCreateModelWithNonImageFileReturns400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("image", "doc.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels")
+                        .file(file)
+                        .param("modelName", "A320")
+                        .param("manufacturer", "AIRBUS")
+                        .param("maxRange", "6150.0")
+                        .param("fuelCapacity", "26730.0")
+                        .param("cruisingSpeed", "833.0")
+                        .param("maximumSeatingCapacity", "180"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureUpdateImageReturns200() throws Exception {
+        AircraftModelResponse response = new AircraftModelResponse(
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, true, 180);
+
+        when(updateAircraftModelImage.execute(any())).thenReturn(response);
+
+        MockMultipartFile image = new MockMultipartFile("image", "a320.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels/A320/image")
+                        .file(image)
+                        .with(request -> { request.setMethod("PATCH"); return request; }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasImage").value(true));
+    }
+
+    @Test
+    void ensureUpdateImageWithNonImageFileReturns400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("image", "doc.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels/A320/image")
+                        .file(file)
+                        .with(request -> { request.setMethod("PATCH"); return request; }))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureGetImageReturns200() throws Exception {
+        when(getAircraftModelImage.execute("A320"))
+                .thenReturn(new AircraftModelImageData(new byte[]{1, 2, 3}, "image/jpeg"));
+
+        mockMvc.perform(get("/api/aircraftModels/A320/image"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/jpeg"));
+    }
+
+    @Test
+    void ensureGetImageReturns404WhenNoImage() throws Exception {
+        when(getAircraftModelImage.execute("A320"))
+                .thenThrow(new AircraftModelImageNotFoundException("Aircraft model 'A320' has no image."));
+
+        mockMvc.perform(get("/api/aircraftModels/A320/image"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -118,7 +222,7 @@ class AircraftModelControllerTest {
     @Test
     void ensureGetModelDetailsReturns200() throws Exception {
         AircraftModelResponse response = new AircraftModelResponse(
-                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180);
 
         when(viewAircraftModelDetails.execute("A320")).thenReturn(response);
 
@@ -130,7 +234,7 @@ class AircraftModelControllerTest {
     @Test
     void ensureUpdateModelReturns200() throws Exception {
         AircraftModelResponse response = new AircraftModelResponse(
-                "A320", Manufacturer.AIRBUS, 28000.0, 7000.0, 850.0, "a320_new.jpg", 200);
+                "A320", Manufacturer.AIRBUS, 28000.0, 7000.0, 850.0, false, 200);
 
         when(updateAircraftModel.execute(any(), any())).thenReturn(response);
 

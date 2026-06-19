@@ -38,7 +38,7 @@ class UpdateAircraftUseCaseTest {
     @BeforeEach
     void setUp() {
         registrationNumber = new RegistrationNumber("CS-TPA");
-        model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
         aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, 5000.0, List.of());
     }
 

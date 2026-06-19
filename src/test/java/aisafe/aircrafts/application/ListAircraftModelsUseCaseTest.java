@@ -30,7 +30,7 @@ class ListAircraftModelsUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
     }
 
     @Test
@@ -48,7 +48,7 @@ class ListAircraftModelsUseCaseTest {
         assertEquals(26730.0, response.fuelCapacity());
         assertEquals(6150.0, response.maxRange());
         assertEquals(833.0, response.cruisingSpeed());
-        assertEquals("a320.jpg", response.imagePath());
+        assertFalse(response.hasImage());
         assertEquals(180, response.maximumSeatingCapacity());
     }
 

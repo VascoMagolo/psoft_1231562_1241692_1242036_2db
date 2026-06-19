@@ -56,7 +56,10 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - maxRange : Double
     - cruisingSpeed : Double
     - maximumSeatingCapacity : Integer
-    - imagePath : String
+  }
+  class AircraftModelImage <<ValueObject>> {
+    - bytes : byte[]
+    - contentType : String
   }
   class RegistrationNumber <<ValueObject>> {
     - number : String
@@ -64,6 +67,7 @@ package "Aircraft Aggregate" <<Aggregate>> {
   Aircraft --> AircraftStatus : current status
   RegistrationNumber "1"-->"1" Aircraft
   Manufacturer *-->"1" AircraftModel
+  AircraftModel *-- "0..1" AircraftModelImage : image
 }
 
 package "Airport Aggregate" <<Aggregate>> {

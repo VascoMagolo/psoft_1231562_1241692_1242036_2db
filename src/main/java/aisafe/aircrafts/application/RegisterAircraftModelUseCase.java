@@ -3,7 +3,9 @@ package aisafe.aircrafts.application;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
-import aisafe.aircrafts.domain.*;
+import aisafe.aircrafts.domain.AircraftModel;
+import aisafe.aircrafts.domain.AircraftModelImage;
+import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.shared.domain.DuplicateResourceException;
 
 /**
@@ -29,26 +31,22 @@ public class RegisterAircraftModelUseCase {
             throw new DuplicateResourceException("An aircraft model with name '" + request.modelName() + "' already exists.");
         }
 
+        AircraftModelImage image = request.image() != null
+                ? new AircraftModelImage(request.image(), request.imageContentType())
+                : null;
+
         AircraftModel newModel = new AircraftModel(
                 request.modelName(),
                 request.manufacturer(),
                 request.fuelCapacity(),
                 request.maxRange(),
                 request.cruisingSpeed(),
-                request.imagePath(),
+                image,
                 request.maximumSeatingCapacity()
         );
 
         repository.save(newModel);
 
-        return new AircraftModelResponse(
-                newModel.getModelName(),
-                newModel.getManufacturer(),
-                newModel.getFuelCapacity(),
-                newModel.getMaxRange(),
-                newModel.getCruisingSpeed(),
-                newModel.getImagePath(),
-                newModel.getMaximumSeatingCapacity()
-        );
+        return AircraftModelResponse.from(newModel);
     }
 }

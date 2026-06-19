@@ -27,7 +27,7 @@ class ViewAircraftModelDetailsUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
     }
 
     @Test

@@ -11,17 +11,17 @@ public record AircraftModelResponse(
         Double fuelCapacity,
         Double maxRange,
         Double cruisingSpeed,
-        String imagePath,
+        boolean hasImage,
         Integer maximumSeatingCapacity
 ) {
     public static AircraftModelResponse from(AircraftModel model) {
         return new AircraftModelResponse(
                 model.getModelName(),
-                model.getManufacturer() ,
+                model.getManufacturer(),
                 model.getFuelCapacity(),
                 model.getMaxRange(),
                 model.getCruisingSpeed(),
-                model.getImagePath(),
+                model.getImage() != null,
                 model.getMaximumSeatingCapacity()
         );
     }
