@@ -1,0 +1,22 @@
+﻿@startuml
+skinparam handwritten true
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam defaultFontName FG Virgil
+skinparam shadowing false
+
+title Sequence Diagram - ImportAircraftsUseCase
+
+actor "User" as user
+participant "Controller" as ctrl
+participant "UseCase" as uc
+
+user -> ctrl: import CSV file
+activate ctrl
+ctrl -> uc: execute(file)
+activate uc
+uc --> ctrl: BulkImportResult
+deactivate uc
+ctrl --> user: 201 or 207 response
+deactivate ctrl
+@enduml
