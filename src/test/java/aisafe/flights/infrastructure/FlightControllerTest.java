@@ -35,6 +35,9 @@ class FlightControllerTest {
     @MockitoBean
     private ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase;
+
     @MockitoBean
     private JwtService jwtService;
 
@@ -62,3 +65,4 @@ class FlightControllerTest {
                 .andExpect(jsonPath("$._embedded.flightResponseList[0].aircraftId").value("CS-TPA"));
     }
 }
+

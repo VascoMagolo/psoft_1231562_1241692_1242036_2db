@@ -51,6 +51,7 @@ public class RouteController {
     private final ListActiveRoutesUseCase listActiveRoutes;
     private final SearchAlternativeRoutesUseCase searchAlternativeRoutes;
     private final ExportRouteNetworkUseCase exportRouteNetwork;
+    private final ImportRoutesUseCase importRoutesUseCase;
 
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
@@ -62,7 +63,8 @@ public class RouteController {
                            DeleteRouteUseCase deleteRoute,
                            ListActiveRoutesUseCase listActiveRoutes,
                            SearchAlternativeRoutesUseCase searchAlternativeRoutes,
-                           ExportRouteNetworkUseCase exportRouteNetwork) {
+                           ExportRouteNetworkUseCase exportRouteNetwork,
+                           ImportRoutesUseCase importRoutesUseCase) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
@@ -74,6 +76,7 @@ public class RouteController {
         this.listActiveRoutes = listActiveRoutes;
         this.searchAlternativeRoutes = searchAlternativeRoutes;
         this.exportRouteNetwork = exportRouteNetwork;
+        this.importRoutesUseCase = importRoutesUseCase;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
@@ -282,5 +285,20 @@ public class RouteController {
                 .header(HttpHeaders.CONTENT_TYPE, file.contentType())
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
                 .body(file.content());
+    }
+
+    @Operation(summary = "Import routes", description = "Bulk import routes from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All routes imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Partial success or all failed"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<java.util.Map<String, Object>> importRoutes(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : "BulkImport";
+        aisafe.shared.application.dtos.BulkImportResult<String> result = importRoutesUseCase.execute(file, username);
+        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
     }
 }
