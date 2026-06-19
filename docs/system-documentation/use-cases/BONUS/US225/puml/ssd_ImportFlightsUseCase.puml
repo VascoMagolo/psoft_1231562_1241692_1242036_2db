@@ -1,17 +1,14 @@
-﻿@startuml
-skinparam handwritten true
+@startuml
+autonumber
 skinparam monochrome true
 skinparam packageStyle rect
-skinparam defaultFontName FG Virgil
 skinparam shadowing false
 
-title System Sequence Diagram - ImportFlightsUseCase
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
 
-actor "User" as user
-participant "System" as sys
-
-user -> sys: import CSV file
-activate sys
-sys --> user: response (201 Created or 207 Multi-Status)
-deactivate sys
+Actor -> Sys : POST /api/flights/import (multipart/form-data)\n(file: CSV)
+activate Sys
+Sys --> Actor : 201 Created (All successful) / 207 Multi-Status (Partial success)
+deactivate Sys
 @enduml
