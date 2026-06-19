@@ -28,7 +28,7 @@ public class UpdateAircraftModelUseCase {
                 request.maxRange(),
                 request.cruisingSpeed(),
                 request.maximumSeatingCapacity(),
-                request.imagePath()
+                null
         );
         
         aircraftModelRepository.save(model);

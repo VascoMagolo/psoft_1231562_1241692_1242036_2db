@@ -1,9 +1,5 @@
 package aisafe.aircrafts.domain;
 
-/**
- * Represents an aircraft model template. (Pure Domain Model)
- * It stores the manufacturer data and capacity limits used when registering individual aircraft.
- */
 public class AircraftModel {
 
     private final String modelName;
@@ -12,9 +8,9 @@ public class AircraftModel {
     private Double maxRange;
     private Double cruisingSpeed;
     private Integer maximumSeatingCapacity;
-    private String imagePath;
+    private AircraftModelImage image;
 
-    public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, String imagePath, Integer maximumSeatingCapacity) {
+    public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, AircraftModelImage image, Integer maximumSeatingCapacity) {
         if (modelName == null || modelName.isBlank()) throw new AircraftInvalidFieldException("modelName must not be blank");
         if (manufacturer == null) throw new AircraftInvalidFieldException("manufacturer must not be null");
         if (fuelCapacity == null) throw new AircraftInvalidFieldException("fuelCapacity must not be null");
@@ -32,7 +28,7 @@ public class AircraftModel {
         this.fuelCapacity = fuelCapacity;
         this.maxRange = maxRange;
         this.cruisingSpeed = cruisingSpeed;
-        this.imagePath = imagePath;
+        this.image = image;
         this.maximumSeatingCapacity = maximumSeatingCapacity;
     }
 
@@ -42,14 +38,14 @@ public class AircraftModel {
     public Double getMaxRange() { return maxRange; }
     public Double getCruisingSpeed() { return cruisingSpeed; }
     public Integer getMaximumSeatingCapacity() { return maximumSeatingCapacity; }
-    public String getImagePath() { return imagePath; }
+    public AircraftModelImage getImage() { return image; }
 
-    public void updateDetails(Double fuelCapacity, Double maxRange, Double cruisingSpeed, Integer maximumSeatingCapacity, String imagePath) {
+    public void updateDetails(Double fuelCapacity, Double maxRange, Double cruisingSpeed, Integer maximumSeatingCapacity, AircraftModelImage image) {
         if (fuelCapacity != null) this.fuelCapacity = fuelCapacity;
         if (maxRange != null) this.maxRange = maxRange;
         if (cruisingSpeed != null) this.cruisingSpeed = cruisingSpeed;
         if (maximumSeatingCapacity != null) this.maximumSeatingCapacity = maximumSeatingCapacity;
-        if (imagePath != null) this.imagePath = imagePath;
+        if (image != null) this.image = image;
 
         validateFields(this.fuelCapacity, this.maxRange, this.cruisingSpeed, this.maximumSeatingCapacity);
     }

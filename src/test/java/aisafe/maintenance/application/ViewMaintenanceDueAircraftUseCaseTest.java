@@ -56,7 +56,7 @@ class ViewMaintenanceDueAircraftUseCaseTest {
                 365L
         );
 
-        model = new AircraftModel("B737", Manufacturer.BOEING, 20000.0, 5000.0, 800.0, "img.png", 180);
+        model = new AircraftModel("B737", Manufacturer.BOEING, 20000.0, 5000.0, 800.0, null, 180);
         aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.now().minusDays(40), model, new RegistrationNumber("CS-TKA"), 180, 5000.0, List.of("WiFi"));
         template = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("B737"), List.of("Check"), 100, 30);
     }

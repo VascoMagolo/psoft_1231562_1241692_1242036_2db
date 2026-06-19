@@ -41,7 +41,7 @@ class ViewMaintenanceCostByModelUseCaseTest {
 
     @Test
     void ensureCostIsAggregatedAcrossAllAircraftOfModel() {
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 1000.0, 5000.0, 800.0, "img.jpg", 180);
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 1000.0, 5000.0, 800.0, null, 180);
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(aircraftRepository.findAll()).thenReturn(List.of(
                 buildAircraft("CS-TPA", model),
@@ -58,7 +58,7 @@ class ViewMaintenanceCostByModelUseCaseTest {
 
     @Test
     void ensureZeroCostWhenNoAircraftOfModelExist() {
-        AircraftModel otherModel = new AircraftModel("B737", Manufacturer.BOEING, 800.0, 4000.0, 700.0, "img.jpg", 160);
+        AircraftModel otherModel = new AircraftModel("B737", Manufacturer.BOEING, 800.0, 4000.0, 700.0, null, 160);
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
         when(aircraftRepository.findAll()).thenReturn(List.of(buildAircraft("CS-TPA", otherModel)));
 

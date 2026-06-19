@@ -1,5 +1,6 @@
 package aisafe.shared.infrastructure;
 
+import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.InvalidRegistrationNumberException;
@@ -52,6 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             AircraftNotFoundException.class,
             AircraftModelNotFoundException.class,
+            AircraftModelImageNotFoundException.class,
             AirportNotFoundException.class,
             RouteNotFoundException.class,
             MaintenanceRecordNotFoundException.class,

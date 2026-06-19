@@ -36,7 +36,7 @@ class RegisterAircraftUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
         request = new RegisterAircraftRequest("CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "AVAILABLE", List.of());
     }
 
