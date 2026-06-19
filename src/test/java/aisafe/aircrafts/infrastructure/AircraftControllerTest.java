@@ -2,12 +2,10 @@ package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
 import aisafe.aircrafts.application.dtos.*;
-import aisafe.aircrafts.domain.AircraftInvalidFieldException;
-import aisafe.aircrafts.domain.AircraftNotFoundException;
-import aisafe.aircrafts.domain.AircraftStatus;
-import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.aircrafts.domain.*;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
+import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.PaginatedResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -78,6 +76,9 @@ class AircraftControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private ImportAircraftsUseCase importAircrafts;
+
     private ViewAircraftDetailsResponse sampleResponse;
 
     @BeforeEach
@@ -90,7 +91,7 @@ class AircraftControllerTest {
     @Test
     void ensureGetFuelEfficiencyReturns200() throws Exception {
         when(calculateFuelEfficiency.execute(any(), any(), any())).thenReturn(
-                new aisafe.aircrafts.application.dtos.FuelEfficiencyResponse("CS-TPA", 5.346, "OPO", "LIS", 2673.0)
+                new FuelEfficiencyResponse("CS-TPA", 5.346, "OPO", "LIS", 2673.0)
         );
 
         mockMvc.perform(get("/api/aircrafts/CS-TPA/fuel-efficiency")
@@ -103,7 +104,7 @@ class AircraftControllerTest {
     @Test
     void ensureGetAircraftUtilizationReturns200() throws Exception {
         when(getAircraftUtilization.execute(any(), any(), any())).thenReturn(List.of(
-                new aisafe.aircrafts.application.dtos.UtilizationDataPointResponse(LocalDate.of(2023, 1, 1), 2.5, 10.4)
+                new UtilizationDataPointResponse(LocalDate.of(2023, 1, 1), 2.5, 10.4)
         ));
 
         mockMvc.perform(get("/api/aircrafts/CS-TPA/utilization")
@@ -145,7 +146,7 @@ class AircraftControllerTest {
         UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, null, null, null, null);
 
         when(updateAircraftUseCase.execute(any(), any(), any()))
-                .thenThrow(new ObjectOptimisticLockingFailureException(aisafe.aircrafts.domain.Aircraft.class, "CS-TPA"));
+                .thenThrow(new ObjectOptimisticLockingFailureException(Aircraft.class, "CS-TPA"));
 
         mockMvc.perform(patch("/api/aircrafts/CS-TPA")
                         .header("If-Match", "0")
@@ -208,5 +209,21 @@ class AircraftControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalAircraft").value(1))
                 .andExpect(jsonPath("$.statusGroups.totalElements").value(4));
+    }
+
+    @Test
+    void ensureImportAircraftsReturns207WhenPartialSuccess() throws Exception {
+        BulkImportResult<ViewAircraftDetailsResponse> result = new BulkImportResult<>();
+        result.addSuccess(sampleResponse);
+        result.addError(2, "data", "error");
+
+        when(importAircrafts.execute(any())).thenReturn(result);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+
+        mockMvc.perform(multipart("/api/aircrafts/import").file(file))
+                .andExpect(status().isMultiStatus())
+                .andExpect(jsonPath("$.successfulCount").value(1))
+                .andExpect(jsonPath("$.errorCount").value(1));
     }
 }

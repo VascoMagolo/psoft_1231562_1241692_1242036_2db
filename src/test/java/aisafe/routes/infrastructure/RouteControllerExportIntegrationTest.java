@@ -1,6 +1,7 @@
 package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
+import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.application.ExportedFile;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,6 +31,10 @@ class RouteControllerExportIntegrationTest {
     @MockitoBean
     private ExportRouteNetworkUseCase exportRouteNetwork;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private ImportRoutesUseCase importRoutesUseCase;
+
+
     @MockitoBean
     private CreateRouteUseCase createRoute;
     @MockitoBean
@@ -48,7 +52,7 @@ class RouteControllerExportIntegrationTest {
     @MockitoBean
     private DeleteRouteUseCase deleteRoute;
     @MockitoBean
-    private aisafe.routes.domain.RouteRepository routeRepository;
+    private RouteRepository routeRepository;
     @MockitoBean
     private ListActiveRoutesUseCase listActiveRoutes;
     @MockitoBean
@@ -99,3 +103,4 @@ class RouteControllerExportIntegrationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Placemark")));
     }
 }
+

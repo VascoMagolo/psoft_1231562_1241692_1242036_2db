@@ -1,0 +1,49 @@
+@startuml
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as Actor
+participant "Controller" as Ctrl
+participant "ImportMaintenanceRecordsUseCase" as UC
+participant "CSVReader" as Reader
+participant "CreateMaintenanceRecordUseCase" as InnerUC
+participant "BulkImportResponseBuilder" as Builder
+
+Actor -> Ctrl : POST /api/maintenance/records/import\nContent-Type: multipart/form-data\n(file)
+activate Ctrl
+
+Ctrl -> UC : execute(file)
+activate UC
+
+UC -> Reader ** : new(InputStreamReader)
+loop for each row in CSV
+    UC -> Reader : readNext()
+    activate Reader
+    Reader --> UC : String[]
+    deactivate Reader
+    
+    alt row is valid
+        UC -> InnerUC : execute(requestDto)
+        activate InnerUC
+        InnerUC --> UC : responseDto
+        deactivate InnerUC
+        UC -> UC : add success result
+    else error
+        UC -> UC : add error result (row index, error message)
+    end
+end
+
+UC --> Ctrl : BulkImportResult
+deactivate UC
+
+Ctrl -> Builder : buildResponse(result)
+activate Builder
+Builder --> Ctrl : ResponseEntity (201 or 207)
+deactivate Builder
+
+Ctrl --> Actor : ResponseEntity
+deactivate Ctrl
+
+@enduml

@@ -94,6 +94,12 @@ class MaintenanceControllerTest {
     private ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase;
 
     @MockitoBean
+    private ImportMaintenanceTemplatesUseCase importMaintenanceTemplatesUseCase;
+
+    @MockitoBean
+    private ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean

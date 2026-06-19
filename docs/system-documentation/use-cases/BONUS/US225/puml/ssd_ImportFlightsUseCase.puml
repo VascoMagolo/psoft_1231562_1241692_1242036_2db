@@ -1,0 +1,14 @@
+@startuml
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
+
+Actor -> Sys : POST /api/flights/import (multipart/form-data)\n(file: CSV)
+activate Sys
+Sys --> Actor : 201 Created (All successful) / 207 Multi-Status (Partial success)
+deactivate Sys
+@enduml

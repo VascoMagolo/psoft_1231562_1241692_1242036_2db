@@ -13,6 +13,8 @@ import java.util.List;
 import aisafe.maintenance.application.dtos.*;
 import aisafe.shared.domain.PaginatedResult;
 import aisafe.shared.infrastructure.ETagUtils;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
+import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,6 +62,8 @@ public class MaintenanceController {
     private final ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase;
     private final ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase;
     private final ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase;
+    private final ImportMaintenanceTemplatesUseCase importMaintenanceTemplatesUseCase;
+    private final ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -78,7 +82,9 @@ public class MaintenanceController {
             ViewMaintenanceCostByAircraftUseCase viewMaintenanceCostByAircraftUseCase,
             ViewMaintenanceCostByModelUseCase viewMaintenanceCostByModelUseCase,
             ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase,
-            ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase) {
+            ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase,
+            ImportMaintenanceTemplatesUseCase importMaintenanceTemplatesUseCase,
+            ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -97,6 +103,8 @@ public class MaintenanceController {
         this.viewMaintenanceCostByModelUseCase = viewMaintenanceCostByModelUseCase;
         this.viewAverageTurnaroundUseCase = viewAverageTurnaroundUseCase;
         this.viewMaintenanceDueAircraftUseCase = viewMaintenanceDueAircraftUseCase;
+        this.importMaintenanceTemplatesUseCase = importMaintenanceTemplatesUseCase;
+        this.importMaintenanceRecordsUseCase = importMaintenanceRecordsUseCase;
     }
 
     /**
@@ -461,5 +469,31 @@ public class MaintenanceController {
         model.add(linkTo(methodOn(MaintenanceController.class)
                 .updateRecordStatusAndNotes(response.id(), null, null)).withRel("update-record"));
         return model;
+    }
+
+    @Operation(summary = "Import maintenance templates", description = "Bulk imports maintenance templates from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All templates imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Multi-Status: some templates imported successfully, some failed"),
+            @ApiResponse(responseCode = "400", description = "All templates failed to import")
+    })
+    @PostMapping(value = "/templates/import", consumes = "multipart/form-data")
+    public ResponseEntity<?> importMaintenanceTemplates(
+            @Parameter(description = "CSV file containing maintenance templates") @RequestParam("file") MultipartFile file) {
+        var result = importMaintenanceTemplatesUseCase.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
+    }
+
+    @Operation(summary = "Import maintenance records", description = "Bulk imports maintenance records from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All records imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Multi-Status: some records imported successfully, some failed"),
+            @ApiResponse(responseCode = "400", description = "All records failed to import")
+    })
+    @PostMapping(value = "/records/import", consumes = "multipart/form-data")
+    public ResponseEntity<?> importMaintenanceRecords(
+            @Parameter(description = "CSV file containing maintenance records") @RequestParam("file") MultipartFile file) {
+        var result = importMaintenanceRecordsUseCase.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 }

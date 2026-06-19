@@ -27,10 +27,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
+import aisafe.shared.application.dtos.BulkImportResult;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -54,6 +57,7 @@ public class AirportController {
     private final DeleteAirportUseCase deleteAirport;
     private final UploadAirportPhotoUseCase uploadAirportPhoto;
     private final GetAirportPhotoUseCase getAirportPhoto;
+    private final ImportAirportsUseCase importAirports;
 
     public AirportController(RegisterAirportUseCase registerAirport,
             AddAirportCertificationUseCase addCertification,
@@ -66,7 +70,8 @@ public class AirportController {
             ListAirportsByRegionUseCase listAirportsByRegion,
             DeleteAirportUseCase deleteAirport,
             UploadAirportPhotoUseCase uploadAirportPhoto,
-            GetAirportPhotoUseCase getAirportPhoto) {
+            GetAirportPhotoUseCase getAirportPhoto,
+            ImportAirportsUseCase importAirports) {
         this.registerAirport = registerAirport;
         this.addCertification = addCertification;
         this.viewAirportDetails = viewAirportDetails;
@@ -79,6 +84,7 @@ public class AirportController {
         this.deleteAirport = deleteAirport;
         this.uploadAirportPhoto = uploadAirportPhoto;
         this.getAirportPhoto = getAirportPhoto;
+        this.importAirports = importAirports;
     }
 
     /**
@@ -421,6 +427,14 @@ public class AirportController {
         return ResponseEntity.ok(CollectionModel.of(
                 listAirportsByRegion.execute(by),
                 linkTo(methodOn(AirportController.class).getAirportsGrouped(by)).withSelfRel()));
+    }
+
+    @Operation(summary = "Import bulk airports via CSV", description = "Parses a CSV file and registers multiple airports in batch. Returns HTTP 201 on full success or 207 Multi-Status for partial success.")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> importAirports(
+            @RequestPart("file") MultipartFile file) {
+        BulkImportResult<String> result = importAirports.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Delete an airport", description = "Permanently removes an airport by IATA code. Requires Admin role.")

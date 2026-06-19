@@ -81,6 +81,9 @@ class RouteControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private ImportRoutesUseCase importRoutesUseCase;
+
     private Route sampleRoute;
 
     @BeforeEach
@@ -191,3 +194,4 @@ class RouteControllerTest {
                 .andExpect(status().isNoContent());
     }
 }
+
