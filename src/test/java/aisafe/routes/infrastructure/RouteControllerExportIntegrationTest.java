@@ -31,6 +31,10 @@ class RouteControllerExportIntegrationTest {
     @MockitoBean
     private ExportRouteNetworkUseCase exportRouteNetwork;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private aisafe.routes.application.ImportRoutesUseCase importRoutesUseCase;
+
+
     @MockitoBean
     private CreateRouteUseCase createRoute;
     @MockitoBean
@@ -99,3 +103,4 @@ class RouteControllerExportIntegrationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Placemark")));
     }
 }
+

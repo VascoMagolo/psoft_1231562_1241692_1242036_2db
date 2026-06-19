@@ -26,11 +26,14 @@ public class FlightController {
 
     private final ScheduleFlightUseCase scheduleFlight;
     private final ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft;
+    private final aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase;
 
     public FlightController(ScheduleFlightUseCase scheduleFlight,
-                            ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft) {
+                            ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft,
+                            aisafe.flights.application.ImportFlightsUseCase importFlightsUseCase) {
         this.scheduleFlight = scheduleFlight;
         this.viewScheduledFlightsByAircraft = viewScheduledFlightsByAircraft;
+        this.importFlightsUseCase = importFlightsUseCase;
     }
 
     private EntityModel<FlightResponse> toModel(FlightResponse flight) {
@@ -67,5 +70,18 @@ public class FlightController {
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(flights,
                 linkTo(methodOn(FlightController.class).getScheduledFlightsByAircraft(aircraftId)).withSelfRel()));
+    }
+
+    @Operation(summary = "Import flights", description = "Bulk import scheduled flights from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All flights imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Partial success or all failed"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<java.util.Map<String, Object>> importFlights(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        aisafe.shared.application.dtos.BulkImportResult<String> result = importFlightsUseCase.execute(file);
+        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
     }
 }
