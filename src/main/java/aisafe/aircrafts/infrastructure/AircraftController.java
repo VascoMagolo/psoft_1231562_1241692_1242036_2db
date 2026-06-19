@@ -49,6 +49,7 @@ public class AircraftController {
     private final CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours;
     private final GetAircraftUtilizationUseCase getAircraftUtilization;
     private final CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
+    private final ViewFleetStatusUseCase viewFleetStatus;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
@@ -56,7 +57,8 @@ public class AircraftController {
                               ViewCompatibleRoutesUseCase viewCompatibleRoutes,
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
                               GetAircraftUtilizationUseCase getAircraftUtilization,
-                              CalculateFuelEfficiencyUseCase calculateFuelEfficiency) {
+                              CalculateFuelEfficiencyUseCase calculateFuelEfficiency,
+                              ViewFleetStatusUseCase viewFleetStatus) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -67,6 +69,7 @@ public class AircraftController {
         this.calculateAircraftOperationalHours = calculateAircraftOperationalHours;
         this.getAircraftUtilization = getAircraftUtilization;
         this.calculateFuelEfficiency = calculateFuelEfficiency;
+        this.viewFleetStatus = viewFleetStatus;
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
@@ -87,7 +90,7 @@ public class AircraftController {
                 .body(toHateoasModel(createdAircraft, new RegistrationNumber(request.registrationNumber())));
     }
 
-    @Operation(summary = "Get all aircrafts with pagination", description = "Retrieves a paginated list of all aircrafts in the fleet along with their real-time availability status. (US205)")
+    @Operation(summary = "Get all aircrafts with pagination", description = "Retrieves a paginated list of all aircrafts in the fleet.")
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<ListAircraftsUseCaseResponse>>> getAllAircraft(
             @PageableDefault(size = 20) Pageable pageable,
@@ -129,7 +132,7 @@ public class AircraftController {
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
-    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model name, current status, year of manufacturing, or specific feature with pagination support. Supports ATCC real-time status viewing. (US104, US205)")
+    @Operation(summary = "Search and filter aircrafts", description = "Advanced search that filters aircraft profiles dynamically by model name, current status, year of manufacturing, or specific feature with pagination support. (US104, US224)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Search results returned successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -285,6 +288,21 @@ public class AircraftController {
         return ResponseEntity.ok(EntityModel.of(response,
                 linkTo(methodOn(AircraftController.class).getFuelEfficiency(registrationStr, origin, destination)).withSelfRel(),
                 linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft")));
+    }
+
+    @Operation(summary = "View fleet status overview", description = "Returns all aircraft grouped by their current operational status (AVAILABLE, UNDER_MAINTENANCE, IN_FLIGHT, INACTIVE). Provides a real-time fleet-wide availability snapshot. (US205)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fleet status overview returned successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @GetMapping("/fleet-status")
+    public ResponseEntity<EntityModel<FleetStatusResponse>> getFleetStatus() {
+        FleetStatusResponse response = viewFleetStatus.execute();
+        EntityModel<FleetStatusResponse> model = EntityModel.of(response,
+                linkTo(methodOn(AircraftController.class).getFleetStatus()).withSelfRel(),
+                linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged(), null)).withRel("all-aircrafts"));
+        return ResponseEntity.ok(model);
     }
 
     private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {
