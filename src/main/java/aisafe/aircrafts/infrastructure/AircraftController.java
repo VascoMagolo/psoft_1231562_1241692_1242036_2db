@@ -50,6 +50,7 @@ public class AircraftController {
     private final GetAircraftUtilizationUseCase getAircraftUtilization;
     private final CalculateFuelEfficiencyUseCase calculateFuelEfficiency;
     private final ViewFleetStatusUseCase viewFleetStatus;
+    private final ImportAircraftsUseCase importAircrafts;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
@@ -58,7 +59,8 @@ public class AircraftController {
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
                               GetAircraftUtilizationUseCase getAircraftUtilization,
                               CalculateFuelEfficiencyUseCase calculateFuelEfficiency,
-                              ViewFleetStatusUseCase viewFleetStatus) {
+                              ViewFleetStatusUseCase viewFleetStatus,
+                              ImportAircraftsUseCase importAircrafts) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -70,6 +72,14 @@ public class AircraftController {
         this.getAircraftUtilization = getAircraftUtilization;
         this.calculateFuelEfficiency = calculateFuelEfficiency;
         this.viewFleetStatus = viewFleetStatus;
+        this.importAircrafts = importAircrafts;
+    }
+
+    @Operation(summary = "Bulk import aircrafts via CSV")
+    @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<java.util.Map<String, Object>> importAircrafts(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        aisafe.shared.application.dtos.BulkImportResult<ViewAircraftDetailsResponse> result = importAircrafts.execute(file);
+        return aisafe.shared.infrastructure.BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Register a new aircraft", description = "Creates a new aircraft profile configuration in the system. Requires Fleet Manager role. (US102)")
