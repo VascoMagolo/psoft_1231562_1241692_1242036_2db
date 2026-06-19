@@ -4,15 +4,15 @@ import aisafe.maintenance.application.dtos.CreateMaintenanceTemplateRequest;
 import aisafe.maintenance.domain.MaintenanceType;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
+import aisafe.shared.application.UseCase;
 
-@Service
+@UseCase
 public class ImportMaintenanceTemplatesUseCase {
 
     private final CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase;

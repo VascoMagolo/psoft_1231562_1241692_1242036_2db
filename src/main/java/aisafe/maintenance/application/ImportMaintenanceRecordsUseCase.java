@@ -5,7 +5,6 @@ import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenanceStatus;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
@@ -18,8 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import aisafe.shared.application.UseCase;
 
-@Service
+@UseCase
 public class ImportMaintenanceRecordsUseCase {
 
     private final CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase;
