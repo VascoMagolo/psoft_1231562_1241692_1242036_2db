@@ -5,6 +5,7 @@ import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.InvalidRegistrationNumberException;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.airports.domain.AirportPhotoNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
@@ -55,6 +56,7 @@ public class GlobalExceptionHandler {
             AircraftModelNotFoundException.class,
             AircraftModelImageNotFoundException.class,
             AirportNotFoundException.class,
+            AirportPhotoNotFoundException.class,
             RouteNotFoundException.class,
             MaintenanceRecordNotFoundException.class,
             MaintenancePartNotFoundException.class,

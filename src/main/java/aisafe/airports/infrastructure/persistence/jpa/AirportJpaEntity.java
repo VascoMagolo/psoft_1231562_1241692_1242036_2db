@@ -38,7 +38,12 @@ public class AirportJpaEntity {
     @Column(nullable = false)
     private String timezone;
 
-    private String imagePath;
+    @ElementCollection
+    @CollectionTable(name = "airport_photos", joinColumns = @JoinColumn(name = "airport_id"))
+    @OrderColumn(name = "photo_index")
+    @BatchSize(size = 25)
+    private List<AirportPhotoJpaEmbeddable> photos = new ArrayList<>();
+
     private String operationalHours;
 
     @Column(nullable = false)

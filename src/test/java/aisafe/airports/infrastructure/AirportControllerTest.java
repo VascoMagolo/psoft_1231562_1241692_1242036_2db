@@ -2,6 +2,8 @@ package aisafe.airports.infrastructure;
 
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
+import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.airports.domain.AirportPhotoNotFoundException;
 import aisafe.airports.domain.AirportStatus;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.RouteStatus;
@@ -18,6 +20,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -71,6 +74,12 @@ class AirportControllerTest {
     private DeleteAirportUseCase deleteAirport;
 
     @MockitoBean
+    private UploadAirportPhotoUseCase uploadAirportPhoto;
+
+    @MockitoBean
+    private GetAirportPhotoUseCase getAirportPhoto;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
@@ -82,7 +91,7 @@ class AirportControllerTest {
     void setUp() {
         sampleAirportResponse = new AirportResponse(
                 "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe",
-                "Europe/Lisbon", null, null, "OPERATIONAL",
+                "Europe/Lisbon", 0, null, "OPERATIONAL",
                 new AirportResponse.CoordinatesRecord(38.77, -9.13),
                 List.of(new AirportResponse.RunwayRecord("03/21", 3000, "030/210")),
                 List.of(), List.of(), List.of(), List.of(), 0L);
@@ -94,7 +103,7 @@ class AirportControllerTest {
                 "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
                 38.77, -9.13,
                 List.of(new RegisterAirportRequest.RunwayRequest("03/21", 3000, "030/210")),
-                null, null, null, null, null);
+                null, null, null, null, null, null);
 
         when(registerAirport.execute(any())).thenReturn(sampleAirportResponse);
 
@@ -112,12 +121,75 @@ class AirportControllerTest {
                 "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
                 38.77, -9.13,
                 List.of(),
-                null, null, null, null, null);
+                null, null, null, null, null, null);
 
         mockMvc.perform(post("/api/airports")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureRegisterAirportWithImageFieldInJsonReturns400() throws Exception {
+        RegisterAirportRequest request = new RegisterAirportRequest(
+                "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
+                38.77, -9.13,
+                List.of(new RegisterAirportRequest.RunwayRequest("03/21", 3000, "030/210")),
+                new byte[]{1, 2, 3}, "image/jpeg", null, null, null, null);
+
+        mockMvc.perform(post("/api/airports")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureAddPhotoReturns200() throws Exception {
+        when(uploadAirportPhoto.execute(anyString(), any(), anyString())).thenReturn(sampleAirportResponse);
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "lis.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports/LIS/photos")
+                        .file(photo))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.iataCode").value("LIS"));
+    }
+
+    @Test
+    void ensureAddPhotoWithNonImageFileReturns400() throws Exception {
+        MockMultipartFile photo = new MockMultipartFile("photo", "file.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports/LIS/photos")
+                        .file(photo))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureGetPhotoByIndexReturns200() throws Exception {
+        when(getAirportPhoto.execute(anyString(), anyInt()))
+                .thenReturn(new AirportPhotoData(new byte[]{1, 2, 3}, "image/jpeg"));
+
+        mockMvc.perform(get("/api/airports/LIS/photos/0"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "image/jpeg"));
+    }
+
+    @Test
+    void ensureGetPhotoReturns404WhenNoPhotoAtIndex() throws Exception {
+        when(getAirportPhoto.execute(anyString(), anyInt()))
+                .thenThrow(new AirportPhotoNotFoundException("LIS"));
+
+        mockMvc.perform(get("/api/airports/LIS/photos/0"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void ensureGetPhotoReturns404WhenAirportNotFound() throws Exception {
+        when(getAirportPhoto.execute(anyString(), anyInt()))
+                .thenThrow(new AirportNotFoundException("LIS"));
+
+        mockMvc.perform(get("/api/airports/LIS/photos/0"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -171,7 +243,7 @@ class AirportControllerTest {
     @Test
     void ensureUpdateAirportDetailsReturns200() throws Exception {
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         when(updateAirportDetails.execute(anyString(), any(), anyLong())).thenReturn(sampleAirportResponse);
 
@@ -186,7 +258,7 @@ class AirportControllerTest {
     @Test
     void ensureUpdateAirportDetailsReturns400WhenIfMatchMissing() throws Exception {
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         mockMvc.perform(patch("/api/airports/LIS/details")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +269,7 @@ class AirportControllerTest {
     @Test
     void ensureUpdateAirportDetailsReturns412OnVersionMismatch() throws Exception {
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         when(updateAirportDetails.execute(anyString(), any(), anyLong()))
                 .thenThrow(new ConcurrencyException("Airport version mismatch. Please fetch the latest version and retry."));

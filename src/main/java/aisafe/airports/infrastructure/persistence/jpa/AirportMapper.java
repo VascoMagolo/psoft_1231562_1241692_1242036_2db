@@ -42,8 +42,13 @@ public class AirportMapper {
                 .map(Gate::new)
                 .collect(Collectors.toList());
 
+        List<AirportPhoto> photos = entity.getPhotos().stream()
+                .filter(e -> e.getBytes() != null)
+                .map(e -> new AirportPhoto(e.getBytes(), e.getContentType()))
+                .collect(Collectors.toList());
+
         airport.changeStatus(AirportStatus.valueOf(entity.getStatus()));
-        airport.updateDetails(entity.getOperationalHours(), contacts, entity.getImagePath(), services, terminals, gates);
+        airport.updateDetails(entity.getOperationalHours(), contacts, photos, services, terminals, gates);
 
         return airport;
     }
@@ -61,8 +66,16 @@ public class AirportMapper {
         entity.setLatitude(domain.getCoordinates().getLatitude());
         entity.setLongitude(domain.getCoordinates().getLongitude());
         entity.setStatus(domain.getStatus().name());
-        entity.setImagePath(domain.getImagePath());
         entity.setOperationalHours(domain.getOperationalHours());
+
+        entity.setPhotos(domain.getPhotos().stream()
+                .map(p -> {
+                    AirportPhotoJpaEmbeddable e = new AirportPhotoJpaEmbeddable();
+                    e.setBytes(p.getBytes());
+                    e.setContentType(p.getContentType());
+                    return e;
+                })
+                .collect(Collectors.toList()));
 
         entity.setRunways(domain.getRunways().stream()
                 .map(r -> new RunwayEmbeddable(r.getName(), r.getLength(), r.getOrientation()))

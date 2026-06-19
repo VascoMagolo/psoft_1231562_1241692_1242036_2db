@@ -44,7 +44,7 @@ class UpdateAirportDetailsUseCaseTest {
         when(airportRepository.findVersionFor(code)).thenReturn(0L);
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         AirportResponse result = updateAirportDetails.execute("LIS", request, 0L);
 
@@ -57,7 +57,7 @@ class UpdateAirportDetailsUseCaseTest {
         when(airportRepository.findByIataCode(new IataCode("XXX"))).thenReturn(Optional.empty());
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         assertThrows(AirportNotFoundException.class, () -> updateAirportDetails.execute("XXX", request, 0L));
         verify(airportRepository, never()).save(any());
@@ -71,7 +71,7 @@ class UpdateAirportDetailsUseCaseTest {
         when(airportRepository.findVersionFor(code)).thenReturn(3L);
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
-                "06:00-23:00", null, null, null, null, null);
+                "06:00-23:00", null, null, null, null);
 
         assertThrows(ConcurrencyException.class, () -> updateAirportDetails.execute("LIS", request, 0L));
         verify(airportRepository, never()).save(any());
