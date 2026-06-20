@@ -1,4 +1,4 @@
-# US108 - Update Aircraft Model Details
+# US201 - Update Aircraft Model Details
 
 ## User Story
 
@@ -7,7 +7,7 @@
 ## Acceptance Criteria
 
 - The request must specify the model by its `modelName` in the URL.
-- Optional fields for update include `maxRange`, `fuelCapacity`, `cruisingSpeed`, `maximumSeatingCapacity`, and `imagePath`.
+- Optional fields for update include `maxRange`, `fuelCapacity`, `cruisingSpeed`, and `maximumSeatingCapacity`.
 - Numeric fields must be positive if provided.
 - On success, the system returns HTTP 200 with the updated `AircraftModelResponse`.
 

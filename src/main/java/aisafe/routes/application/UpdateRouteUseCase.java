@@ -56,11 +56,11 @@ public class UpdateRouteUseCase {
         );
 
         if (request.active() != null) {
-            route.setStatus(request.active() ? RouteStatus.ACTIVE : RouteStatus.INACTIVE);
+            route.changeStatus(request.active() ? RouteStatus.ACTIVE : RouteStatus.INACTIVE);
         }
 
         routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(origin, destination, "Route details updated", changedBy));
+        routeHistoryRepository.save(new RouteHistory(new IataCode(origin), new IataCode(destination), "Route details updated", changedBy));
 
         Long updatedVersion = routeRepository.findVersionFor(new IataCode(origin), new IataCode(destination));
         return RouteResponse.from(route, updatedVersion);

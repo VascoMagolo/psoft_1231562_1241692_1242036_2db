@@ -66,7 +66,7 @@ public class CreateRouteUseCase {
         );
 
         routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(originCode, destinationCode, "Route created", request.createdBy()));
+        routeHistoryRepository.save(new RouteHistory(new IataCode(originCode), new IataCode(destinationCode), "Route created", request.createdBy()));
         return RouteResponse.from(route);
     }
 }

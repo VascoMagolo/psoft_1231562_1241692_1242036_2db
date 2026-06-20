@@ -42,16 +42,16 @@ class MaintenanceCostRepositoryTest {
 
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA",
-                BigDecimal.valueOf(1000)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(1000)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Airframe check", LocalDateTime.now(), 8, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME), "CS-TPA",
-                BigDecimal.valueOf(500)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(500)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Avionics check", LocalDateTime.now(), 6, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS), "CS-LXA",
-                BigDecimal.valueOf(750)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS),
+                new RegistrationNumberJpaEmbeddable("CS-LXA"), BigDecimal.valueOf(750)));
     }
 
     @Test

@@ -36,8 +36,8 @@ public class ViewRouteHistoryUseCase {
         return historyRepository.findAllByRoute(origin, destination)
                 .stream()
                 .map(h -> new RouteHistoryResponse(
-                        h.getOriginCode(),
-                        h.getDestinationCode(),
+                        h.getOriginCode().getCode(),
+                        h.getDestinationCode().getCode(),
                         h.getChangeDescription(),
                         h.getChangedAt(),
                         h.getChangedBy()

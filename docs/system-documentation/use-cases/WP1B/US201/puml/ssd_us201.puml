@@ -8,7 +8,7 @@ actor "Backoffice Operator" as BO
 participant "System" as Sys
 
 activate BO
-BO -> Sys : updateAircraftModel(modelName, cruisingSpeed?, fuelCapacity?, maxRange?, maximumSeatingCapacity?, imagePath?)
+BO -> Sys : updateAircraftModel(modelName, cruisingSpeed?, fuelCapacity?, maxRange?, maximumSeatingCapacity?)
 activate Sys
 Sys --> BO : 200 OK (AircraftModelResponse)
 deactivate Sys

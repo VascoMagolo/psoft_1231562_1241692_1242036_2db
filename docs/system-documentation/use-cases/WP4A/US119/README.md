@@ -9,7 +9,7 @@
 - The path identifies the record by ID.
 - The request body requires a `status` value and may include `notes`.
 - The request must include the current resource version in the `If-Match` header.
-- A version mismatch returns HTTP 409.
+- A version mismatch returns HTTP 412.
 - On success the system returns HTTP 200 with `MaintenanceRecordResponse` and HATEOAS links.
 
 ## Pre-conditions
@@ -36,7 +36,7 @@
 | ---- | --------------------------------------- | --------------- |
 | 2    | `If-Match` header is missing or invalid | HTTP 400        |
 | 3    | Maintenance record not found            | HTTP 404        |
-| 3    | Version mismatch                        | HTTP 409        |
+| 3    | Version mismatch                        | HTTP 412        |
 | 2    | Status is null                          | HTTP 400        |
 
 ## Design Justification

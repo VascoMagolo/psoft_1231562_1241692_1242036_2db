@@ -1,0 +1,45 @@
+@startuml use_case_diagram
+left to right direction
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "MAINTENANCE_TECHNICIAN" as TECH
+actor "MAINTENANCE_SUPERVISOR" as SUPER
+actor "ATCC" as ATCC
+actor "Admin" as ADMIN
+
+package "Maintenance Subsystem (WP4A)" {
+    usecase "Create Maintenance Template\n(US115b)" as UC_CreateTemplate
+    usecase "Register Maintenance Part\n(US226)" as UC_CreatePart
+    usecase "Create Maintenance Record\n(US115a)" as UC_CreateRecord
+    usecase "Update Record Status / Notes\n(US119)" as UC_UpdateRecord
+    usecase "View Records for Aircraft\n(US116)" as UC_ViewRecords
+    usecase "View Total Maintenance Hours\n(US117)" as UC_Totals
+    usecase "Alert Due for Maintenance\n(US222)" as UC_DueAlert
+    usecase "Track Parts Inventory\n(US226)" as UC_PartsSearch
+}
+
+TECH --> UC_CreateTemplate
+TECH --> UC_CreatePart
+TECH --> UC_CreateRecord
+TECH --> UC_UpdateRecord
+ATCC --> UC_ViewRecords
+ATCC --> UC_Totals
+ATCC --> UC_DueAlert
+TECH --> UC_PartsSearch
+SUPER --> UC_PartsSearch
+ADMIN --> UC_CreateTemplate
+ADMIN --> UC_CreatePart
+ADMIN --> UC_CreateRecord
+ADMIN --> UC_UpdateRecord
+ADMIN --> UC_ViewRecords
+ADMIN --> UC_Totals
+ADMIN --> UC_DueAlert
+
+note right of UC_UpdateRecord
+  Enforces optimistic locking via If-Match / ETag.
+  Version mismatch returns HTTP 412.
+end note
+
+@enduml

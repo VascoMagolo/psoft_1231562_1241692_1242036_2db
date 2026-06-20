@@ -20,7 +20,7 @@ class MaintenanceRecordTest {
 
     private MaintenanceTemplate buildTemplate() {
         return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION,
-                List.of("A320"), List.of("Check engine"), 500, 365);
+                List.of(new ModelName("A320")), List.of("Check engine"), 500, 365);
     }
 
     @Test

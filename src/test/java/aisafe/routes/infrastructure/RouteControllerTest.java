@@ -118,7 +118,7 @@ class RouteControllerTest {
     @Test
     void ensureDeactivateRouteReturns200() throws Exception {
         Route deactivated = new Route("OPO", "LIS", 45, 300.0, 150);
-        deactivated.setStatus(RouteStatus.INACTIVE);
+        deactivated.changeStatus(RouteStatus.INACTIVE);
         when(deactivateRoute.execute(anyString(), anyString(), any(), any())).thenReturn(RouteResponse.from(deactivated, 0L));
 
         mockMvc.perform(patch("/api/routes/OPO/LIS/deactivate")
@@ -179,7 +179,7 @@ class RouteControllerTest {
 
     @Test
     void ensureSearchRoutesReturns200() throws Exception {
-        when(searchRoutes.execute(any(), any(), anyInt(), anyInt()))
+        when(searchRoutes.execute(any()))
                 .thenReturn(new PaginatedResult<>(List.of(RouteResponse.from(sampleRoute, 0L)), 1L));
 
         mockMvc.perform(get("/api/routes/search")

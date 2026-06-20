@@ -43,13 +43,14 @@ public class MaintenanceTemplateJpaRepository implements MaintenanceTemplateRepo
     }
 
     @Override
-    public void save(MaintenanceTemplate template) {
+    public MaintenanceTemplate save(MaintenanceTemplate template) {
         MaintenanceTemplateJpaEntity existing = springRepo.findByName(template.getName()).orElse(null);
         MaintenanceTemplateJpaEntity jpaEntity = MaintenanceTemplateMapper.toJpa(template);
         if (existing != null) {
             jpaEntity.setId(existing.getId());
         }
         springRepo.save(jpaEntity);
+        return template;
     }
 
     @Override

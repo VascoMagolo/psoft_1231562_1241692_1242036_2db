@@ -7,7 +7,6 @@ import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
  */
 
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class ViewCompatibleRoutesUseCase {
     private final RouteRepository routeRepository;
     private final AircraftRepository aircraftRepository;

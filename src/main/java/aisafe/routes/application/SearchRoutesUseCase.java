@@ -3,6 +3,7 @@ package aisafe.routes.application;
 import aisafe.shared.application.UseCase;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.SearchRoutesRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.PaginatedResult;
@@ -29,7 +30,11 @@ public class SearchRoutesUseCase {
      * @param pageSize    the number of results per page
      * @return a paginated result of route responses matching the search criteria
      */
-    public PaginatedResult<RouteResponse> execute(String origin, String destination, int pageNumber, int pageSize) {
+    public PaginatedResult<RouteResponse> execute(SearchRoutesRequest request) {
+        String origin = request.origin();
+        String destination = request.destination();
+        int pageNumber = request.pageNumber();
+        int pageSize = request.pageSize();
         PaginatedResult<Route> result;
         if (origin != null && destination != null) {
             result = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination), pageNumber, pageSize);

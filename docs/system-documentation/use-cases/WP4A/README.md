@@ -1,4 +1,4 @@
-# WP4 - Maintenance Management
+# WP4A - Maintenance Records (Core)
 
 This package documents the maintenance use cases currently implemented in `src/main/java/aisafe/maintenance`.
 
@@ -18,3 +18,5 @@ This package documents the maintenance use cases currently implemented in `src/m
 - `CreateMaintenanceTemplateRequest` resolves aircraft model names to entities inside the use case.
 - `CreateMaintenanceRecordRequest` uses part numbers, template names, and aircraft registration numbers as simple strings.
 - `US222` is fully implemented to dynamically alert when aircraft are due for scheduled maintenance based on flight hours or elapsed calendar days.
+- `US118` (delete maintenance record) is descoped and not implemented.
+- `US222` and `US226` are Phase 2 features; see `WP4B` for the full Phase 2 analytics package.

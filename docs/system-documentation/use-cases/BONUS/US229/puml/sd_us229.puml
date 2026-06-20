@@ -1,12 +1,12 @@
 @startuml
 autonumber
 actor "Backoffice Operator" as BO
-participant "ReportController" as Ctrl
+participant "FlightUtilizationController" as Ctrl
 participant "GenerateFlightUtilizationReportUseCase" as UC
 participant "ScheduledFlightRepository" as Repo
 participant "Database" as DB
 
-BO -> Ctrl : GET /api/reports/flight-utilization?startDate=...&endDate=...
+BO -> Ctrl : GET /api/flights/reports/utilization?startDate=...&endDate=...
 activate Ctrl
 
 Ctrl -> UC : execute(startDate, endDate, page, size)

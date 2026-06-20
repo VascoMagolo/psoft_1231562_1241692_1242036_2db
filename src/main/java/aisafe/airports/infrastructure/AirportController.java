@@ -52,7 +52,7 @@ public class AirportController {
     private final UpdateAirportStatusUseCase updateAirportStatus;
     private final UpdateAirportDetailsUseCase updateAirportDetails;
     private final ViewAirportRoutesUseCase viewAirportRoutes;
-    private final AirportStatisticsUseCase airportStatistics;
+    private final GetAirportStatisticsUseCase airportStatistics;
     private final ListAirportsByRegionUseCase listAirportsByRegion;
     private final DeleteAirportUseCase deleteAirport;
     private final UploadAirportPhotoUseCase uploadAirportPhoto;
@@ -66,7 +66,7 @@ public class AirportController {
             UpdateAirportStatusUseCase updateAirportStatus,
             UpdateAirportDetailsUseCase updateAirportDetails,
             ViewAirportRoutesUseCase viewAirportRoutes,
-            AirportStatisticsUseCase airportStatistics,
+            GetAirportStatisticsUseCase airportStatistics,
             ListAirportsByRegionUseCase listAirportsByRegion,
             DeleteAirportUseCase deleteAirport,
             UploadAirportPhotoUseCase uploadAirportPhoto,
@@ -286,7 +286,7 @@ public class AirportController {
             @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<AirportResponse> assembler) {
-        PaginatedResult<AirportResponse> result = searchAirport.execute(name, city, country, pageable.getPageNumber(), pageable.getPageSize());
+        PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest(name, city, country, pageable.getPageNumber(), pageable.getPageSize()));
         Page<AirportResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(page, this::toModel));
     }

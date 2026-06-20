@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.GetAircraftUtilizationRequest;
 import aisafe.aircrafts.application.dtos.UtilizationDataPointResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
@@ -28,7 +29,10 @@ public class GetAircraftUtilizationUseCase {
         this.scheduledFlightRepository = scheduledFlightRepository;
     }
 
-    public List<UtilizationDataPointResponse> execute(String registration, LocalDate startDate, LocalDate endDate) {
+    public List<UtilizationDataPointResponse> execute(GetAircraftUtilizationRequest request) {
+        String registration = request.registration();
+        LocalDate startDate = request.startDate();
+        LocalDate endDate = request.endDate();
         if (!aircraftRepository.existsByRegistrationNumber(new RegistrationNumber(registration))) {
             throw new AircraftNotFoundException("Aircraft not found.");
         }

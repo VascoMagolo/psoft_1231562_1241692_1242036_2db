@@ -36,7 +36,7 @@ class DeleteAircraftModelUseCaseTest {
     @Test
     void ensureModelIsDeletedSuccessfully() {
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(aircraftModel));
-        when(aircraftRepository.anyAircraftExistsForModel("A320")).thenReturn(false);
+        when(aircraftRepository.existsByModelName("A320")).thenReturn(false);
 
         assertDoesNotThrow(() -> deleteAircraftModelUseCase.execute("A320"));
         verify(aircraftModelRepository, times(1)).delete(aircraftModel);
@@ -53,7 +53,7 @@ class DeleteAircraftModelUseCaseTest {
     @Test
     void ensureExceptionWhenModelIsInUse() {
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(aircraftModel));
-        when(aircraftRepository.anyAircraftExistsForModel("A320")).thenReturn(true);
+        when(aircraftRepository.existsByModelName("A320")).thenReturn(true);
 
         assertThrows(ResourceInUseException.class, () -> deleteAircraftModelUseCase.execute("A320"));
         verify(aircraftModelRepository, never()).delete(any());

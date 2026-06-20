@@ -5,6 +5,7 @@ import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.airports.domain.IataCode;
+import aisafe.shared.application.RouteDistanceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -2,9 +2,9 @@
 autonumber
 actor "Backoffice Operator" as Actor
 participant "System" as Sys
-Actor -> Sys : registerAircraftModel(modelName, manufacturer, maxRange, fuelCapacity, cruisingSpeed, maximumSeatingCapacity, imagePath)
+Actor -> Sys : registerAircraftModel(modelName, manufacturer, maxRange, fuelCapacity, cruisingSpeed, maximumSeatingCapacity)
 activate Sys
-Sys --> Actor : returns created AircraftModelResponse
+Sys --> Actor : returns created AircraftModelResponse (with hasImage)
 deactivate Sys
 @enduml
 

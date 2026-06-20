@@ -7,7 +7,7 @@ participant "AirportRepository" as AirRepo
 participant "RouteRepository" as RouteRepo
 database "Database" as DB
 
-Actor -> Ctrl : POST /api/routes\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity }
+Actor -> Ctrl : POST /api/routes\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, createdBy }
 activate Ctrl
 
 note right of Ctrl
@@ -17,6 +17,7 @@ note right of Ctrl
   - estimatedFlightTime: > 0
   - minimumRange: > 0.0
   - minimumCapacity: > 0
+  - createdBy: not blank
   - origin != destination (domain rule)
 end note
 
@@ -58,7 +59,7 @@ else both airports exist
     UC --> Ctrl : throws DuplicateResourceException
     Ctrl --> Actor : 409 Conflict\n{ message: "A route between these airports already exists." }
   else route does not exist
-    UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity))
+    UC -> RouteRepo : save(new Route(originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange, minimumCapacity, createdBy))
     activate RouteRepo
     RouteRepo -> DB : INSERT INTO route
     activate DB

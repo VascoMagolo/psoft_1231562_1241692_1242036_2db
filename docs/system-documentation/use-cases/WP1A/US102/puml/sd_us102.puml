@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as BO
+actor "ATCC" as BO
 participant "AircraftController" as Ctrl
 participant "RegisterAircraftUseCase" as UC
 participant "AircraftModelRepository" as ModelRepo

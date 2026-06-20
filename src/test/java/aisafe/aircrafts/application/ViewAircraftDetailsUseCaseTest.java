@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsRequest;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
 import aisafe.aircrafts.domain.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class ViewAircraftDetailsUseCaseTest {
     void ensureAircraftDetailsAreReturnedSuccessfully() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
 
-        ViewAircraftDetailsResponse response = viewAircraftDetailsUseCase.execute(registrationNumber);
+        ViewAircraftDetailsResponse response = viewAircraftDetailsUseCase.execute(new ViewAircraftDetailsRequest(registrationNumber));
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.registrationNumber());
@@ -51,6 +52,6 @@ class ViewAircraftDetailsUseCaseTest {
     void ensureExceptionWhenAircraftNotFound() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.empty());
 
-        assertThrows(AircraftNotFoundException.class, () -> viewAircraftDetailsUseCase.execute(registrationNumber));
+        assertThrows(AircraftNotFoundException.class, () -> viewAircraftDetailsUseCase.execute(new ViewAircraftDetailsRequest(registrationNumber)));
     }
 }

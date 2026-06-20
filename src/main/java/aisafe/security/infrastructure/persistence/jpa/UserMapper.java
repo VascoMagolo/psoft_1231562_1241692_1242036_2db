@@ -4,9 +4,7 @@ import aisafe.security.domain.User;
 
 public class UserMapper {
     public static User toDomain(UserJpaEntity entity) {
-        User user = new User(entity.getUsername(), entity.getPasswordHash(), entity.getRole());
-        user.setUserID(entity.getUserID());
-        return user;
+        return User.reconstitute(entity.getUserID(), entity.getUsername(), entity.getPasswordHash(), entity.getRole());
     }
 
     public static UserJpaEntity toJpa(User user) {

@@ -28,16 +28,15 @@ class AirportJpaRepositoryTest {
 
     private AirportJpaEntity buildAirport(String iataCode, String country, String region) {
         AirportJpaEntity e = new AirportJpaEntity();
-        e.setIataCode(iataCode);
+        e.setIataCode(new IataCodeJpaEmbeddable(iataCode));
         e.setName(iataCode + " Airport");
         e.setCity("City");
         e.setCountry(country);
         e.setRegion(region);
         e.setTimezone("UTC");
         e.setStatus("OPERATIONAL");
-        e.setLatitude(0.0);
-        e.setLongitude(0.0);
-        e.getRunways().add(new RunwayEmbeddable("01/19", 2500, "010/190"));
+        e.setCoordinates(new CoordinatesJpaEmbeddable(0.0, 0.0));
+        e.getRunways().add(new RunwayJpaEmbeddable("01/19", 2500, "010/190"));
         return e;
     }
 

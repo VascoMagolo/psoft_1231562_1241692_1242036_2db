@@ -2,13 +2,13 @@ package aisafe.airports.infrastructure.persistence.jpa;
 
 import aisafe.aircrafts.domain.ModelName;
 import aisafe.airports.domain.AircraftCertification;
-import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.IataCode;
 
 public class AircraftCertificationMapper {
 
     public static AircraftCertification toDomain(AircraftCertificationJpaEntity entity) {
         if (entity == null) return null;
-        Airport airport = AirportMapper.toDomain(entity.getAirport());
-        return new AircraftCertification(airport, new ModelName(entity.getAircraftModelName()));
+        IataCode airportCode = new IataCode(entity.getAirport().getIataCode().getCode());
+        return new AircraftCertification(airportCode, new ModelName(entity.getAircraftModelName()));
     }
 }

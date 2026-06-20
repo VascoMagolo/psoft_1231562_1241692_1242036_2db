@@ -27,7 +27,7 @@ class ImportAircraftModelsUseCaseTest {
     private ImportAircraftModelsUseCase useCase;
 
     @Test
-    void shouldImportValidAircraftModelsSuccessfully() {
+    void ensureImportValidAircraftModelsSuccessfully() {
         String csvData = "modelName,manufacturer,maximumTakeoffWeight,maximumPayloadCapacity,cruiseSpeed,maximumSeatCapacity\n" +
                 "Boeing 737,BOEING,1000.0,2000.0,500.0,150";
         MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));
@@ -43,7 +43,7 @@ class ImportAircraftModelsUseCaseTest {
     }
 
     @Test
-    void shouldRecordErrorWhenRowIsInvalid() {
+    void ensureRecordErrorWhenRowIsInvalid() {
         String csvData = "modelName,manufacturer,maximumTakeoffWeight,maximumPayloadCapacity,cruiseSpeed,maximumSeatCapacity\n" +
                 "Boeing 737,INVALID_MANUF,1000.0,2000.0,500.0,150";
         MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));

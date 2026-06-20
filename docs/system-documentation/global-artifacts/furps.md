@@ -38,6 +38,7 @@ Key domain constraints derived from client clarifications:
 - **Input validation** must be enforced at all API endpoints. Specific rules include: IATA airport codes must follow the 3-letter format; aircraft registration numbers must follow the standard format; date ranges and numeric values (capacity, range, etc.) must be within valid bounds. (sections 5, 8)
 - **Concurrent access** must be handled correctly. Critical scenarios include: updating aircraft status, modifying route information, and creating maintenance records. (sections 4.6, 8)
 - **Optimistic locking** must be used where applicable (e.g., aircraft status updates) to prevent lost updates under concurrent requests. Validation must be enforced at the application layer using resource versioning. (section 5)
+- **Cross-aggregate domain relationships** impose referential constraints: aircraft-to-route compatibility requires the aircraft's range to meet the route's minimum range; aircraft under maintenance are unavailable for flight assignment; routes require both origin and destination airports to exist and be operational at the time of creation. (section 9)
 - **Role-based access control** must be enforced for all endpoints. Roles: Admin, Backoffice Operator, ATCC, Maintenance Technician, Maintenance Supervisor. (section 8)
 - All authenticated requests must use **JWT**. (sections 3.6, 4.6)
 
@@ -53,6 +54,7 @@ Key domain constraints derived from client clarifications:
 ## Supportability
 
 - **Automated tests** must be provided: unit tests and a Postman collection with test scripts covering all use cases. (sections 3.6, 4.6, 5)
+- **Architectural conformance** is enforced automatically via ArchUnit tests under `src/test/java/aisafe/architecture/`. These tests verify layering rules (no domain imports from infrastructure), naming conventions, and structural invariants. CI fails on any violation.
 - The alternative route search (US216) must be designed so that algorithms can be added or replaced without changing the surrounding logic. ([source](../../../client-questions/routes/us216-alternative-routes.md))
 - Use of third-party libraries is permitted but must be **justified**. (section 7)
 - Regular **Git commits** with meaningful messages are mandatory; lack of regular progress negatively impacts the grade. (section 8)

@@ -32,13 +32,13 @@ public class AirportJpaRepository implements AirportRepository {
 
     @Override
     public Optional<Airport> findByIataCode(IataCode code) {
-        return springRepo.findByIataCode(code.getCode())
+        return springRepo.findByIataCode(new IataCodeJpaEmbeddable(code.getCode()))
                 .map(AirportMapper::toDomain);
     }
 
     @Override
     public boolean existsByIataCode(IataCode code) {
-        return springRepo.existsByIataCode(code.getCode());
+        return springRepo.existsByIataCode(new IataCodeJpaEmbeddable(code.getCode()));
     }
 
     @Override
@@ -83,14 +83,14 @@ public class AirportJpaRepository implements AirportRepository {
 
     @Override
     public Long findVersionFor(IataCode code) {
-        return springRepo.findByIataCode(code.getCode())
+        return springRepo.findByIataCode(new IataCodeJpaEmbeddable(code.getCode()))
                 .map(AirportJpaEntity::getVersion)
                 .orElse(0L);
     }
 
     @Override
-    public void save(Airport airport) {
-        AirportJpaEntity existing = springRepo.findByIataCode(airport.getIataCode().getCode()).orElse(null);
+    public Airport save(Airport airport) {
+        AirportJpaEntity existing = springRepo.findByIataCode(new IataCodeJpaEmbeddable(airport.getIataCode().getCode())).orElse(null);
         AirportJpaEntity jpaData = AirportMapper.toJpa(airport);
 
         if (existing != null) {
@@ -99,11 +99,12 @@ public class AirportJpaRepository implements AirportRepository {
         }
 
         springRepo.save(jpaData);
+        return airport;
     }
 
     @Override
     public void delete(Airport airport) {
-        AirportJpaEntity jpaEntity = springRepo.findByIataCode(airport.getIataCode().getCode())
+        AirportJpaEntity jpaEntity = springRepo.findByIataCode(new IataCodeJpaEmbeddable(airport.getIataCode().getCode()))
                 .orElseThrow(() -> new AirportNotFoundException(airport.getIataCode().getCode()));
         springRepo.delete(jpaEntity);
     }

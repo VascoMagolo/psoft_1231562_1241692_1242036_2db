@@ -109,8 +109,7 @@ public class AircraftController {
             PagedResourcesAssembler<ListAircraftsUseCaseResponse> assembler) {
 
         PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraft.execute(
-                pageable.getPageNumber(),
-                pageable.getPageSize()
+                new ListAircraftRequest(pageable.getPageNumber(), pageable.getPageSize())
         );
 
         Page<ListAircraftsUseCaseResponse> aircraftPage = new PageImpl<>(
@@ -140,7 +139,7 @@ public class AircraftController {
             @PathVariable String registrationStr) {
 
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
-        ViewAircraftDetailsResponse aircraft = viewAircraftDetails.execute(registration);
+        ViewAircraftDetailsResponse aircraft = viewAircraftDetails.execute(new ViewAircraftDetailsRequest(registration));
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
@@ -254,7 +253,7 @@ public class AircraftController {
             @PathVariable String registrationStr) {
 
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
-        AircraftOperationalHoursResponse response = calculateAircraftOperationalHours.execute(registration);
+        AircraftOperationalHoursResponse response = calculateAircraftOperationalHours.execute(new CalculateAircraftOperationalHoursRequest(registration));
         return ResponseEntity.ok(EntityModel.of(response,
                 linkTo(methodOn(AircraftController.class).getOperationalHours(registrationStr)).withSelfRel(),
                 linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft")));
@@ -273,7 +272,7 @@ public class AircraftController {
             @Parameter(description = "Start date (YYYY-MM-DD)") @RequestParam java.time.LocalDate startDate,
             @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam java.time.LocalDate endDate) {
 
-        List<EntityModel<UtilizationDataPointResponse>> items = getAircraftUtilization.execute(registrationStr, startDate, endDate).stream()
+        List<EntityModel<UtilizationDataPointResponse>> items = getAircraftUtilization.execute(new GetAircraftUtilizationRequest(registrationStr, startDate, endDate)).stream()
                 .map(EntityModel::of)
                 .toList();
         CollectionModel<EntityModel<UtilizationDataPointResponse>> model = CollectionModel.of(items,
@@ -296,7 +295,7 @@ public class AircraftController {
             @Parameter(description = "Optional origin IATA code to calculate specific fuel needs") @RequestParam(required = false) String origin,
             @Parameter(description = "Optional destination IATA code to calculate specific fuel needs") @RequestParam(required = false) String destination) {
 
-        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(registrationStr, origin, destination);
+        FuelEfficiencyResponse response = calculateFuelEfficiency.execute(new CalculateFuelEfficiencyRequest(registrationStr, origin, destination));
         return ResponseEntity.ok(EntityModel.of(response,
                 linkTo(methodOn(AircraftController.class).getFuelEfficiency(registrationStr, origin, destination)).withSelfRel(),
                 linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registrationStr)).withRel("aircraft")));

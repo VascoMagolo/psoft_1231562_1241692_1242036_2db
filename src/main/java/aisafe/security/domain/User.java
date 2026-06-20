@@ -20,7 +20,6 @@ public class User implements UserDetails {
     private String passwordHash;
 
     @Getter
-    @Setter
     private Role role;
 
     protected User() {}
@@ -35,7 +34,13 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public void setUserID(UUID userID) { this.userID = userID; }
+    public void assignRole(Role role) { this.role = role; }
+
+    public static User reconstitute(UUID userID, String username, String passwordHash, Role role) {
+        User user = new User(username, passwordHash, role);
+        user.userID = userID;
+        return user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

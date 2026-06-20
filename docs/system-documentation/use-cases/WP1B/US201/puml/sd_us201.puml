@@ -11,7 +11,7 @@ participant "AircraftModelRepository" as Repo
 participant "AircraftModel" as Model
 database "Database" as DB
 
-BO -> Ctrl : PATCH /api/aircraftModels/{modelName}\n{ cruisingSpeed?, fuelCapacity?,\n  maxRange?, maximumSeatingCapacity?,\n  imagePath? }
+BO -> Ctrl : PATCH /api/aircraftModels/{modelName}\n{ cruisingSpeed?, fuelCapacity?,\n  maxRange?, maximumSeatingCapacity? }
 activate Ctrl
 
 note right of Ctrl
@@ -20,7 +20,6 @@ note right of Ctrl
   - fuelCapacity: optional
   - maxRange: optional
   - maximumSeatingCapacity: optional
-  - imagePath: optional
 end note
 
 Ctrl -> UC : execute(modelName, request: UpdateAircraftModelRequest)
@@ -50,7 +49,7 @@ else model found
     deactivate DB
     Repo --> UC : savedModel
     deactivate Repo
-    UC --> Ctrl : AircraftModelResponse\n{ modelName, manufacturer, fuelCapacity,\n  maxRange, cruisingSpeed, imagePath,\n  maximumSeatingCapacity }
+    UC --> Ctrl : AircraftModelResponse\n{ modelName, manufacturer, fuelCapacity,\n  maxRange, cruisingSpeed, hasImage,\n  maximumSeatingCapacity }
     deactivate UC
     Ctrl --> BO : 200 OK\nEntityModel<AircraftModelResponse> with _links
 end

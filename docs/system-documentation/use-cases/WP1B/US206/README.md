@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Backoffice Operator, I want to calculate the total operational hours for an aircraft based on its flight history to schedule maintenance appropriately.
+> As an ATCC, I want to calculate the total operational hours for an aircraft based on its flight history to schedule maintenance appropriately.
 
 ## Acceptance Criteria
 
@@ -15,7 +15,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Backoffice Operator.
+- The actor is authenticated as an ATCC.
 
 ## Post-conditions
 

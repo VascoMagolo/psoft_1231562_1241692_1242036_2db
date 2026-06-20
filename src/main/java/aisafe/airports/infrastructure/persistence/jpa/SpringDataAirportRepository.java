@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface SpringDataAirportRepository extends JpaRepository<AirportJpaEntity, Long> {
 
-    Optional<AirportJpaEntity> findByIataCode(String iataCode);
+    Optional<AirportJpaEntity> findByIataCode(IataCodeJpaEmbeddable iataCode);
 
-    boolean existsByIataCode(String iataCode);
+    boolean existsByIataCode(IataCodeJpaEmbeddable iataCode);
 
     @Query("SELECT a FROM AirportJpaEntity a WHERE " +
            "(:name IS NULL OR LOWER(a.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
@@ -33,11 +33,11 @@ public interface SpringDataAirportRepository extends JpaRepository<AirportJpaEnt
             """, nativeQuery = true)
     List<AirportStatisticsRow> findStatistics();
 
-    @Query("SELECT a.iataCode AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
+    @Query("SELECT a.iataCode.code AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
            "FROM AirportJpaEntity a ORDER BY COALESCE(a.region, 'Unknown') ASC")
     List<AirportGroupingProjection> findAllGroupingByRegion();
 
-    @Query("SELECT a.iataCode AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
+    @Query("SELECT a.iataCode.code AS iataCode, a.name AS name, a.region AS region, a.country AS country " +
            "FROM AirportJpaEntity a ORDER BY a.country ASC")
     List<AirportGroupingProjection> findAllGroupingByCountry();
 

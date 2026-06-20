@@ -7,7 +7,7 @@ participant "Airport" as Entity
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : PATCH /api/airports/{iataCode}/details\n{ operationalHours?, imagePath?,\n  contacts?: [{ type, value, description }],\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+BO -> Ctrl : PATCH /api/airports/{iataCode}/details\nIf-Match: <version>\n{ operationalHours?,\n  contacts?: [{ type, value, description }],\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
 activate Ctrl
 
 note right of Ctrl
@@ -16,7 +16,7 @@ note right of Ctrl
   - only non-null fields are applied
 end note
 
-Ctrl -> UC : execute(iataCode: String,\n  request: UpdateAirportDetailsRequest)
+Ctrl -> UC : execute(iataCode: String,\n  request: UpdateAirportDetailsRequest,\n  version: Long)
 activate UC
 
 UC -> Repo : findByIataCodeCode(iataCode)
@@ -28,7 +28,7 @@ deactivate DB
 Repo --> UC : Airport
 deactivate Repo
 
-UC -> Entity : updateDetails(operationalHours, contacts,\n  imagePath, services, terminals, gates)
+UC -> Entity : updateDetails(operationalHours, contacts,\n  services, terminals, gates)
 activate Entity
 note right of Entity : Only non-null fields\nare updated on the entity
 Entity --> UC

@@ -64,7 +64,7 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
-    public boolean anyAircraftExistsForModel(String modelName) {
+    public boolean existsByModelName(String modelName) {
         return springRepo.existsByModelModelName(modelName);
     }
 
@@ -76,7 +76,7 @@ public class AircraftJpaRepository implements AircraftRepository {
     }
 
     @Override
-    public void save(Aircraft aircraft) {
+    public Aircraft save(Aircraft aircraft) {
         AircraftJpaEntity existingEntity = springRepo.findByRegistrationNumber(
                 new RegistrationNumberJpaEmbeddable(aircraft.getRegistrationNumber().getNumber()))
                 .orElse(null);
@@ -93,6 +93,7 @@ public class AircraftJpaRepository implements AircraftRepository {
         }
 
         springRepo.save(newJpaData);
+        return aircraft;
     }
 
     @Override

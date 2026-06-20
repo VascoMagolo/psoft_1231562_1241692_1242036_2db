@@ -142,6 +142,51 @@ class ArchitectureTest {
             .should().beAssignableTo(DomainException.class)
             .because("domain exceptions must extend DomainException for correct HTTP mapping");
 
+    @ArchTest
+    static final ArchRule domain_exceptions_reside_in_domain =
+        classes()
+            .that().haveSimpleNameEndingWith("Exception")
+            .and().areAssignableTo(DomainException.class)
+            .and().doNotHaveSimpleName("DomainException")
+            .should().resideInAPackage("aisafe.*.domain..")
+            .because("domain exceptions must reside in the domain layer, not application");
+
+    @ArchTest
+    static final ArchRule jpa_adapters_in_jpa_subdirectory =
+        classes()
+            .that().resideInAPackage("aisafe.*.infrastructure.persistence..")
+            .and().areAnnotatedWith(Repository.class)
+            .should().resideInAPackage("aisafe.*.infrastructure.persistence.jpa..")
+            .because("JPA adapters must be under persistence/jpa/ per convention");
+
+    private static final ArchCondition<JavaClass> NOT_HAVE_PUBLIC_SETTERS =
+        new ArchCondition<>("not have public setter methods") {
+            @Override
+            public void check(JavaClass clazz, ConditionEvents events) {
+                clazz.getMethods().stream()
+                    .filter(m -> m.getName().startsWith("set")
+                        && m.getModifiers().contains(JavaModifier.PUBLIC))
+                    .forEach(m -> events.add(SimpleConditionEvent.violated(clazz,
+                        clazz.getName() + " has public setter " + m.getName())));
+            }
+        };
+
+    @ArchTest
+    static final ArchRule no_public_setters_on_domain_classes =
+        classes()
+            .that().resideInAPackage("aisafe.*.domain..")
+            .and().areNotInterfaces()
+            .and().areNotEnums()
+            .and().doNotHaveSimpleName("DomainException")
+            .and(not(new com.tngtech.archunit.base.DescribedPredicate<JavaClass>("extend DomainException") {
+                @Override
+                public boolean test(JavaClass input) {
+                    return input.isAssignableTo(DomainException.class);
+                }
+            }))
+            .should(NOT_HAVE_PUBLIC_SETTERS)
+            .because("aggregate roots and domain entities must not expose public setters");
+
     // --- Controller placement ---
 
     @ArchTest

@@ -7,7 +7,6 @@ import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.shared.domain.PaginatedResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
  * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
  */
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class SearchAircraftUseCase {
 
     private final AircraftRepository repository;

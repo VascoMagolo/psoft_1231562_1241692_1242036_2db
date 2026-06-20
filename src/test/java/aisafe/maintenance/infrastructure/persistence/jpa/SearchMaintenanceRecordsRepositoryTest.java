@@ -48,13 +48,16 @@ class SearchMaintenanceRecordsRepositoryTest {
 
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Engine check", date2026Jan, 4, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(100)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Airframe inspection", date2026Jun, 8, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME), "CS-TPA", BigDecimal.valueOf(200)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(200)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Avionics check", date2025Dec, 6, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS), "CS-LXA", BigDecimal.valueOf(150)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AVIONICS),
+                new RegistrationNumberJpaEmbeddable("CS-LXA"), BigDecimal.valueOf(150)));
     }
 
     @Test
@@ -81,7 +84,7 @@ class SearchMaintenanceRecordsRepositoryTest {
     void ensureSearchByComponentFilters() {
         Page<MaintenanceRecordJpaEntity> page = recordRepository.search(null, null, null, MaintenanceComponent.ENGINE, PageRequest.of(0, 20));
         assertEquals(1, page.getTotalElements());
-        assertEquals("CS-TPA", page.getContent().get(0).getAircraftRegistration());
+        assertEquals("CS-TPA", page.getContent().get(0).getAircraftRegistration().getNumber());
     }
 
     @Test
@@ -100,7 +103,7 @@ class SearchMaintenanceRecordsRepositoryTest {
                 UUID.randomUUID(), "Multi-component check", date2026Jan, 3, null,
                 List.of(part), template, MaintenanceStatus.PLANNED,
                 Set.of(MaintenanceComponent.ENGINE, MaintenanceComponent.AVIONICS, MaintenanceComponent.AIRFRAME),
-                "CS-DUP", BigDecimal.valueOf(100)));
+                new RegistrationNumberJpaEmbeddable("CS-DUP"), BigDecimal.valueOf(100)));
 
         Page<MaintenanceRecordJpaEntity> page = recordRepository.search("CS-DUP", null, null, null, PageRequest.of(0, 20));
         assertEquals(1, page.getTotalElements());

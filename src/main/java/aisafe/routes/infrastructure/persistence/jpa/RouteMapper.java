@@ -6,13 +6,13 @@ public class RouteMapper {
 
     public static Route toDomain(RouteJpaEntity entity) {
         Route route = new Route(
-                entity.getOriginCode(),
-                entity.getDestinationCode(),
+                entity.getOriginCode().getCode(),
+                entity.getDestinationCode().getCode(),
                 entity.getEstimatedFlightTime(),
                 entity.getMinimumRange(),
                 entity.getMinimumCapacity()
         );
-        route.setStatus(entity.getStatus());
+        route.changeStatus(entity.getStatus());
         return route;
     }
 

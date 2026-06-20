@@ -50,8 +50,11 @@ package "Aircraft Aggregate" <<Aggregate>> {
     - model : AircraftModel
   }
 
+  class ModelName <<ValueObject>> {
+    - name : String
+  }
   class AircraftModel <<Entity>> {
-    - modelName : String
+    - modelName : ModelName
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
@@ -67,6 +70,7 @@ package "Aircraft Aggregate" <<Aggregate>> {
   Aircraft --> AircraftStatus : current status
   RegistrationNumber "1"-->"1" Aircraft
   Manufacturer *-->"1" AircraftModel
+  AircraftModel *-- ModelName
   AircraftModel *-- "0..1" AircraftModelImage : image
 }
 
@@ -149,19 +153,11 @@ package "Airport Aggregate" <<Aggregate>> {
   Airport *-- "*" Service
 }
 
-package "Flight Aggregate" <<Aggregate>> {
+package "Routes Context" <<Aggregate>> {
   enum RouteStatus <<Enum>> {
     ACTIVE
     INACTIVE
     SUSPENDED
-  }
-
-  enum FlightStatus <<Enum>> {
-    SCHEDULED
-    DELAYED
-    IN_FLIGHT
-    COMPLETED
-    CANCELED
   }
 
   class Route <<Entity>> <<Root>> {
@@ -179,17 +175,30 @@ package "Flight Aggregate" <<Aggregate>> {
     - changedBy : String
   }
 
+  Route *-- IataCode : origin
+  Route *-- IataCode : destination
+  Route "1" *-- "*" RouteHistory : history
+  Route --> RouteStatus : current status
+}
+
+package "Flights Context" <<Aggregate>> {
+  enum FlightStatus <<Enum>> {
+    SCHEDULED
+    DELAYED
+    IN_FLIGHT
+    COMPLETED
+    CANCELED
+  }
+
   class ScheduledFlight <<Entity>> <<Root>> {
     - id : Long
     - departureDateTime : DateTime
     - arrivalDateTime : DateTime
     - status : FlightStatus
+    - originCode : IataCode
+    - destinationCode : IataCode
   }
 
-  Route *-- IataCode : origin
-  Route *-- IataCode : destination
-  Route "1" *-- "*" RouteHistory : history
-  Route --> RouteStatus : current status
   ScheduledFlight --> FlightStatus : current status
 }
 
@@ -259,8 +268,7 @@ Airport "1" <-up- "*" AircraftCertification : certified at
 Route --> Airport : origin (by IataCode)
 Route --> Airport : destination (by IataCode)
 
-ScheduledFlight "1" --> "1" Route : follows
-ScheduledFlight "1" --> "1" Aircraft : uses
+ScheduledFlight "*" --> "1" Aircraft : uses (by RegistrationNumber)
 
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to (by Name)
 MaintenanceRecord "1" --> "*" MaintenancePart : needs

@@ -90,7 +90,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureGetFuelEfficiencyReturns200() throws Exception {
-        when(calculateFuelEfficiency.execute(any(), any(), any())).thenReturn(
+        when(calculateFuelEfficiency.execute(any())).thenReturn(
                 new FuelEfficiencyResponse("CS-TPA", 5.346, "OPO", "LIS", 2673.0)
         );
 
@@ -103,7 +103,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureGetAircraftUtilizationReturns200() throws Exception {
-        when(getAircraftUtilization.execute(any(), any(), any())).thenReturn(List.of(
+        when(getAircraftUtilization.execute(any())).thenReturn(List.of(
                 new UtilizationDataPointResponse(LocalDate.of(2023, 1, 1), 2.5, 10.4)
         ));
 

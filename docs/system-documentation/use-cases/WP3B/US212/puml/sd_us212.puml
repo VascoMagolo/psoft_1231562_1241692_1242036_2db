@@ -9,13 +9,13 @@ participant "FlightRepository" as FlightRepo
 participant "Flight" as Entity
 database "Database" as DB
 
-BO -> Ctrl : POST /api/flights\n(aircraftId, routeId, departureDateTime, arrivalDateTime)
+BO -> Ctrl : POST /api/flights\n(aircraftId, originIataCode, destinationIataCode,\ndepartureDateTime, arrivalDateTime)
 activate Ctrl
 
-Ctrl -> UC : execute(aircraftId, routeId, departureDateTime, arrivalDateTime)
+Ctrl -> UC : execute(aircraftId, originIataCode, destinationIataCode,\ndepartureDateTime, arrivalDateTime)
 activate UC
 
-UC -> RouteRepo : findById(routeId)
+UC -> RouteRepo : findByOriginAndDestination(originIataCode, destinationIataCode)
 activate RouteRepo
 RouteRepo --> UC : returns route details
 deactivate RouteRepo
@@ -37,7 +37,7 @@ deactivate Entity
 
 UC -> FlightRepo : save(flight)
 activate FlightRepo
-FlightRepo -> DB : INSERT INTO flight (route_id, aircraft_id, departure, arrival)
+FlightRepo -> DB : INSERT INTO flight (origin, destination, aircraft_id, departure, arrival)
 activate DB
 DB --> FlightRepo : returns success
 deactivate DB

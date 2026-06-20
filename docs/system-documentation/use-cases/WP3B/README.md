@@ -1,4 +1,4 @@
-# WP3 - Flight & Network Management
+# WP3B - Flight & Network Management
 
 This package documents the flight scheduling and network calculation use cases currently implemented in `src/main/java/aisafe/flights` and `src/main/java/aisafe/routes`.
 

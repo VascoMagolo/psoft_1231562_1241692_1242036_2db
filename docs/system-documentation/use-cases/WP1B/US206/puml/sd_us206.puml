@@ -35,9 +35,9 @@ else aircraft found
     FlightRepo --> UC : Double
     deactivate FlightRepo
 
-    UC --> Ctrl : Double (hours)
+    UC --> Ctrl : AircraftOperationalHoursResponse\n{ registrationNumber, totalOperationalHours }
     deactivate UC
-    Ctrl --> BO : 200 OK\nDouble
+    Ctrl --> BO : 200 OK\nEntityModel<AircraftOperationalHoursResponse>
 end
 
 deactivate Ctrl

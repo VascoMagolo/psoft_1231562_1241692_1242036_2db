@@ -66,7 +66,7 @@ class AirportControllerTest {
     private ViewAirportRoutesUseCase viewAirportRoutes;
 
     @MockitoBean
-    private AirportStatisticsUseCase airportStatistics;
+    private GetAirportStatisticsUseCase airportStatistics;
 
     @MockitoBean
     private ListAirportsByRegionUseCase listAirportsByRegion;
@@ -301,7 +301,7 @@ class AirportControllerTest {
 
     @Test
     void ensureSearchAirportsReturns200() throws Exception {
-        when(searchAirport.execute(any(), any(), any(), anyInt(), anyInt()))
+        when(searchAirport.execute(any()))
                 .thenReturn(new PaginatedResult<>(List.of(sampleAirportResponse), 1));
 
         mockMvc.perform(get("/api/airports/search")

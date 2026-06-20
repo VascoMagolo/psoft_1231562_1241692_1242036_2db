@@ -61,13 +61,14 @@ public class MaintenancePartJpaRepository implements MaintenancePartRepository {
     }
 
     @Override
-    public void save(MaintenancePart part) {
+    public MaintenancePart save(MaintenancePart part) {
         MaintenancePartJpaEntity existing = springRepo.findByPartNumber(part.getPartNumber()).orElse(null);
         MaintenancePartJpaEntity jpaEntity = MaintenancePartMapper.toJpa(part);
         if (existing != null) {
             jpaEntity.setId(existing.getId());
         }
         springRepo.save(jpaEntity);
+        return part;
     }
 
     @Override

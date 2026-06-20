@@ -23,8 +23,9 @@ public class UserJpaRepository implements UserRepository {
     }
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         springRepo.save(UserMapper.toJpa(user));
+        return user;
     }
 
     @Override

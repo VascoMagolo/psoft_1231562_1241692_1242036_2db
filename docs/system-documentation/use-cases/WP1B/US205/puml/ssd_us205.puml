@@ -1,0 +1,17 @@
+@startuml ssd_us205
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator / ATCC" as Actor
+participant "System" as Sys
+
+activate Actor
+Actor -> Sys : getFleetStatus()
+activate Sys
+Sys --> Actor : 200 OK (FleetStatusResponse)
+deactivate Sys
+deactivate Actor
+
+@enduml

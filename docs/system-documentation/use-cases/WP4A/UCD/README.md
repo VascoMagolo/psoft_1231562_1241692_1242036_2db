@@ -4,7 +4,7 @@ Este ficheiro contém o diagrama de casos de uso para o sub-bloco WP4A (manuten�
 
 Ficheiros:
 
-- `usecase_wp4a.puml` - diagrama PlantUML com atores e principais use cases:
+- `use_case_diagram.puml` - diagrama PlantUML com atores e principais use cases:
   - Create Maintenance Template (criar templates aplicáveis a modelos de aeronave)
   - Register Maintenance Part (registar peças de manutenção)
   - Create Maintenance Record (criar registos de manutenção)
@@ -34,7 +34,7 @@ bash ./generate-svg.sh
 Se preferir gerar apenas este ficheiro com PlantUML localmente e tiver plantuml.jar:
 
 ```bash
-java -jar plantuml.jar usecase_wp4a.puml
+java -jar plantuml.jar use_case_diagram.puml
 ```
 
 Path neste repositório:

@@ -13,7 +13,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Technician.
+- The actor is authenticated as a Maintenance Technician or Admin.
 - The target aircraft exists.
 
 ## Post-conditions

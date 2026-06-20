@@ -58,7 +58,7 @@ class ViewMaintenanceDueAircraftUseCaseTest {
 
         model = new AircraftModel("B737", Manufacturer.BOEING, 20000.0, 5000.0, 800.0, null, 180);
         aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.now().minusDays(40), model, new RegistrationNumber("CS-TKA"), 180, 5000.0, List.of("WiFi"));
-        template = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("B737"), List.of("Check"), 100, 30);
+        template = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("B737")), List.of("Check"), 100, 30);
     }
 
     @Test
@@ -127,7 +127,7 @@ class ViewMaintenanceDueAircraftUseCaseTest {
     @Test
     void ensureFallbackToGlobalThresholdsWhenNoTemplatesApply() {
         // Template is for A320, so does not apply to our B737 aircraft
-        MaintenanceTemplate diffTemplate = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check"), 100, 30);
+        MaintenanceTemplate diffTemplate = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check"), 100, 30);
 
         when(aircraftRepository.findAll()).thenReturn(List.of(aircraft));
         when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(diffTemplate));

@@ -2,6 +2,7 @@ package aisafe.maintenance.application;
 
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.maintenance.application.dtos.MaintenanceDueAircraftResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
@@ -53,7 +54,7 @@ public class ViewMaintenanceDueAircraftUseCase {
 
             // Find templates applicable to this model
             List<MaintenanceTemplate> applicableTemplates = allTemplates.stream()
-                    .filter(t -> t.getApplicableModelNames().contains(modelName))
+                    .filter(t -> t.getApplicableModelNames().contains(new ModelName(modelName)))
                     .toList();
 
             List<MaintenanceRecord> completedRecords = maintenanceRecordRepository.findCompletedByAircraft(aircraft.getRegistrationNumber());

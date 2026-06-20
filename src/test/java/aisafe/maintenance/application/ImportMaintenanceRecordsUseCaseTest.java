@@ -28,7 +28,7 @@ class ImportMaintenanceRecordsUseCaseTest {
     }
 
     @Test
-    void execute_SuccessfulImport() throws Exception {
+    void ensureSuccessfulImport() throws Exception {
         String csvContent = "aircraftRegistration,templateName,date,status,components,parts\n" +
                 "CS-TKA,Engine Check,2023-10-01T10:00:00,PLANNED,ENGINE,\"Engine Part A,Engine Part B\"\n" +
                 "CS-TKB,Landing Gear,2023-11-01T10:00:00,COMPLETED,AIRFRAME,Gear Part A";
@@ -45,7 +45,7 @@ class ImportMaintenanceRecordsUseCaseTest {
     }
 
     @Test
-    void execute_InvalidDate_RecordsError() throws Exception {
+    void ensureInvalidDateRecordsError() throws Exception {
         String csvContent = "aircraftRegistration,templateName,date,status,components,parts\n" +
                 "CS-TKA,Engine Check,invalid-date,PLANNED,ENGINE,Engine Part A";
 

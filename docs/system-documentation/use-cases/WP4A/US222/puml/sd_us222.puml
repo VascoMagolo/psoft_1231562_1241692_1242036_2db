@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Maintenance Supervisor" as MS
+actor "ATCC" as MS
 participant "MaintenanceController" as Ctrl
 participant "ViewMaintenanceDueAircraftUseCase" as UC
 participant "AircraftRepository" as AircraftRepo
@@ -68,6 +68,6 @@ end
 
 UC --> Ctrl : List<MaintenanceDueAircraftResponse>
 deactivate UC
-Ctrl --> MS : 200 OK\nCollectionModel<MaintenanceDueAircraftResponse> with _links
+Ctrl --> MS : 200 OK\nPagedModel<EntityModel<MaintenanceDueAircraftResponse>> with _links
 deactivate Ctrl
 @enduml

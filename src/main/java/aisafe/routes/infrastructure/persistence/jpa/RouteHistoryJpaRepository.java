@@ -23,12 +23,13 @@ public class RouteHistoryJpaRepository implements RouteHistoryRepository {
     }
 
     @Override
-    public void save(RouteHistory history) {
-        RouteJpaEntity routeJpa = routeSpringRepo.findByOriginCodeAndDestinationCode(
-                        history.getOriginCode(), history.getDestinationCode())
+    public RouteHistory save(RouteHistory history) {
+        RouteJpaEntity routeJpa = routeSpringRepo.findByOriginCode_CodeAndDestinationCode_Code(
+                        history.getOriginCode().getCode(), history.getDestinationCode().getCode())
                 .orElseThrow(() -> new RouteNotFoundException(
-                        history.getOriginCode() + "-" + history.getDestinationCode()));
+                        history.getOriginCode().getCode() + "-" + history.getDestinationCode().getCode()));
         springRepo.save(RouteHistoryMapper.toJpa(history, routeJpa));
+        return history;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class RouteHistoryJpaRepository implements RouteHistoryRepository {
 
     @Override
     public void delete(RouteHistory history) {
-        springRepo.findAllByRoute(history.getOriginCode(), history.getDestinationCode()).stream()
+        springRepo.findAllByRoute(history.getOriginCode().getCode(), history.getDestinationCode().getCode()).stream()
                 .filter(e -> e.getChangedAt().equals(history.getChangedAt())
                         && e.getChangedBy().equals(history.getChangedBy()))
                 .findFirst()

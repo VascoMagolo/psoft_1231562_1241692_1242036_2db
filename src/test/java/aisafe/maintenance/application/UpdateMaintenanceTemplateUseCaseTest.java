@@ -2,6 +2,7 @@ package aisafe.maintenance.application;
 
 import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceTemplateRequest;
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
@@ -32,7 +33,7 @@ class UpdateMaintenanceTemplateUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        template = new MaintenanceTemplate("100H Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 100, 30);
+        template = new MaintenanceTemplate("100H Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check engine"), 100, 30);
     }
 
     @Test

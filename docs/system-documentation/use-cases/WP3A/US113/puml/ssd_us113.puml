@@ -4,7 +4,7 @@ actor "ATCC" as Actor
 participant "System" as Sys
 
 alt View route details
-    Actor -> Sys : getRouteDetails(routeId)
+    Actor -> Sys : getRouteDetails(origin, destination)
     activate Sys
     Sys --> Actor : returns Route details
     deactivate Sys

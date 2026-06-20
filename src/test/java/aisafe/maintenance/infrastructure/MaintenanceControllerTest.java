@@ -352,6 +352,29 @@ class MaintenanceControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "MAINTENANCE_TECHNICIAN")
+    void ensureMaintenanceTechnicianCanViewRecordsByAircraft() throws Exception {
+        when(viewAllMaintenanceRecordsUseCase.execute(any(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(), 0));
+
+        mockMvc.perform(get("/api/maintenance/records/aircraft/CS-TPA"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "MAINTENANCE_SUPERVISOR")
+    void ensureMaintenanceSupervisorCanCreatePart() throws Exception {
+        when(createMaintenancePartUseCase.execute(any()))
+                .thenReturn(new MaintenancePartResponse("ST-2001", "Starter Motor", "Starter Motor description", 5, 1, MaintenanceComponent.ENGINE));
+
+        mockMvc.perform(post("/api/maintenance/parts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new CreateMaintenancePartRequest("ST-2001", "Starter Motor", "Starter Motor description", 5, 1, MaintenanceComponent.ENGINE))))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
     void ensureGetDueAircraftReturns200() throws Exception {
         when(viewMaintenanceDueAircraftUseCase.execute(anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(new MaintenanceDueAircraftResponse("CS-TPA", "A320", "Hours limit exceeded", 120.0, 5L, "Annual Check")), 1));

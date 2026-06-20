@@ -1,5 +1,6 @@
 package aisafe.maintenance.application;
 
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.application.dtos.UpdateMaintenanceRecordsRequest;
@@ -36,7 +37,7 @@ class UpdateMaintenanceRecordUseCaseTest {
     }
 
     private MaintenanceTemplate buildTemplate() {
-        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check engine"), 500, 365);
+        return new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check engine"), 500, 365);
     }
 
     @Test
@@ -48,7 +49,7 @@ class UpdateMaintenanceRecordUseCaseTest {
 
         when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
         when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
-        doNothing().when(recordRepository).save(any());
+        when(recordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         UUID recordId = record.getRecordId();
         MaintenanceRecordResponse response = updateMaintenanceRecord.execute(recordId, request, 0L);

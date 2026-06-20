@@ -4,13 +4,16 @@ import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.shared.application.dtos.BulkImportResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ImportRoutesUseCaseTest {
 
     private CreateRouteUseCase createRouteUseCase;
@@ -23,7 +26,7 @@ class ImportRoutesUseCaseTest {
     }
 
     @Test
-    void shouldImportValidRoutes() throws Exception {
+    void ensureImportValidRoutes() throws Exception {
         String csvContent = "originIataCode,destinationIataCode,estimatedFlightTime,minimumRange,minimumCapacity\n" +
                             "LIS,OPO,60,300,100\n" +
                             "LIS,MAD,90,500,150";
@@ -37,7 +40,7 @@ class ImportRoutesUseCaseTest {
     }
 
     @Test
-    void shouldHandleMissingColumns() throws Exception {
+    void ensureHandleMissingColumns() throws Exception {
         String csvContent = "originIataCode,estimatedFlightTime,minimumRange,minimumCapacity\n" +
                             "LIS,60,300,100";
         MockMultipartFile file = new MockMultipartFile("file", "routes.csv", "text/csv", csvContent.getBytes());

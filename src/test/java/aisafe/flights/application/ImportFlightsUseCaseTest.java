@@ -22,7 +22,7 @@ class ImportFlightsUseCaseTest {
     }
 
     @Test
-    void shouldImportValidFlights() throws Exception {
+    void ensureImportValidFlights() throws Exception {
         String csvContent = "flightNumber,routeOrigin,routeDestination,aircraftRegistration,departureDate,arrivalDate,status\n" +
                             "TP100,LIS,OPO,CS-TVA,2026-06-19T10:00:00Z,2026-06-19T11:00:00Z,SCHEDULED";
         MockMultipartFile file = new MockMultipartFile("file", "flights.csv", "text/csv", csvContent.getBytes());

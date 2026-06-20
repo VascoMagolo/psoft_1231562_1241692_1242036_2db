@@ -22,10 +22,13 @@ AISafe exposes a REST API (Spring Boot) for managing aircraft, airports, flight 
 | WP    | Domain                                            | Owner           |
 | ----- | ------------------------------------------------- | --------------- |
 | WP#1A | Aircraft Models & Aircraft                        | Vasco Magolo    |
+| WP#1B | Aircraft Analytics & Fleet Status                 | Vasco Magolo    |
 | WP#2A | Airports (core)                                   | Diogo Nogueira  |
 | WP#2B | Airports (extended - facilities, stats, grouping) | Diogo Nogueira  |
 | WP#3A | Flight Routes                                     | Pedro Guilherme |
-| WP#4A | Maintenance Records                               | Shared          |
+| WP#3B | Flight Scheduling & Network                       | Pedro Guilherme |
+| WP#4A | Maintenance Records & Templates                   | Shared          |
+| WP#4B | Maintenance Analytics & Reporting                 | Shared          |
 
 ---
 

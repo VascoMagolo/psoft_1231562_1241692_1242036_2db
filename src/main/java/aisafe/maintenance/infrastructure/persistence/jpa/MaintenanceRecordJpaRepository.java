@@ -61,21 +61,21 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
 
     @Override
     public boolean existsByAircraftRegistration(RegistrationNumber registrationNumber) {
-        return springRepo.existsByAircraftRegistration(registrationNumber.getNumber());
+        return springRepo.existsByAircraftRegistration_Number(registrationNumber.getNumber());
     }
 
     @Override
     public List<MaintenanceRecord> findCompletedByAircraft(RegistrationNumber registrationNumber) {
-        return springRepo.findByAircraftRegistrationAndStatusOrderByCompletedAtDesc(
+        return springRepo.findByAircraftRegistration_NumberAndStatusOrderByCompletedAtDesc(
                 registrationNumber.getNumber(), MaintenanceStatus.COMPLETED).stream()
                 .map(MaintenanceRecordMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public PaginatedResult<MaintenanceRecord> findByAircraftRegistration(String aircraftRegistration, int pageNumber, int pageSize) {
-        Page<MaintenanceRecordJpaEntity> page = springRepo.findByAircraftRegistration(
-                aircraftRegistration, PageRequest.of(pageNumber, pageSize));
+    public PaginatedResult<MaintenanceRecord> findByAircraftRegistration(RegistrationNumber aircraftRegistration, int pageNumber, int pageSize) {
+        Page<MaintenanceRecordJpaEntity> page = springRepo.findByAircraftRegistration_Number(
+                aircraftRegistration.getNumber(), PageRequest.of(pageNumber, pageSize));
         List<MaintenanceRecord> data = page.stream()
                 .map(MaintenanceRecordMapper::toDomain)
                 .collect(Collectors.toList());
@@ -129,7 +129,7 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     }
 
     @Override
-    public void save(MaintenanceRecord record) {
+    public MaintenanceRecord save(MaintenanceRecord record) {
         List<MaintenancePartJpaEntity> partsJpa = record.getParts().stream()
                 .map(p -> partSpringRepo.findByPartNumber(p.getPartNumber())
                         .orElseThrow(() -> new MaintenancePartNotFoundException("Part not found: " + p.getPartNumber())))
@@ -148,11 +148,12 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
             MaintenanceRecordJpaEntity jpaEntity = new MaintenanceRecordJpaEntity(
                     record.getRecordId(), record.getDescription(), record.getStartDate(), record.getExpectedDuration(),
                     record.getNotes(), partsJpa, templateJpa, record.getStatus(),
-                    new HashSet<>(record.getComponents()), record.getAircraftRegistration().getNumber(),
+                    new HashSet<>(record.getComponents()), new RegistrationNumberJpaEmbeddable(record.getAircraftRegistration().getNumber()),
                     record.getCost());
             jpaEntity.setCompletedAt(record.getCompletedAt());
             springRepo.save(jpaEntity);
         }
+        return record;
     }
 
     @Override

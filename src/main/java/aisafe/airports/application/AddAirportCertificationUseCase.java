@@ -38,11 +38,11 @@ public class AddAirportCertificationUseCase {
             throw new AircraftModelNotFoundException("Aircraft model with name '" + modelName.getName() + "' not found.");
         }
 
-        if (certificationRepository.existsByAirportAndAircraftModelName(airport, modelName)) {
+        if (certificationRepository.existsByAirportCodeAndAircraftModelName(airport.getIataCode(), modelName)) {
             throw new DuplicateResourceException("Aircraft model '" + modelName.getName() + "' is already certified for airport " + iataCodeStr + ".");
         }
 
-        AircraftCertification certification = new AircraftCertification(airport, modelName);
+        AircraftCertification certification = new AircraftCertification(airport.getIataCode(), modelName);
         certificationRepository.save(certification);
 
         return AircraftCertificationResponse.from(certification);

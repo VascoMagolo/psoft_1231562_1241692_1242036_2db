@@ -7,6 +7,6 @@ import java.util.Optional;
  */
 public interface UserRepository {
     long count();
-    void save(User user);
+    User save(User user);
     Optional<User> findByUsername(String username);
 }

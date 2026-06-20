@@ -7,7 +7,7 @@ skinparam shadowing false
 actor "Backoffice Operator" as Actor
 participant "System" as Sys
 
-Actor -> Sys : POST /api/aircraft-models/import (multipart/form-data)\n(file: CSV)
+Actor -> Sys : POST /api/aircraftModels/import (multipart/form-data)\n(file: CSV)
 activate Sys
 Sys --> Actor : 201 Created (All successful) / 207 Multi-Status (Partial success)
 deactivate Sys

@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.GetAircraftUtilizationRequest;
 import aisafe.aircrafts.application.dtos.UtilizationDataPointResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
@@ -17,7 +18,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class GetAircraftUtilizationUseCaseTest {
@@ -34,29 +34,29 @@ class GetAircraftUtilizationUseCaseTest {
     }
 
     @Test
-    void execute_WhenAircraftDoesNotExist_ThrowsException() {
+    void ensureThrowsExceptionWhenAircraftDoesNotExist() {
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
 
-        assertThrows(AircraftNotFoundException.class, () -> 
-                useCase.execute("XX-XXX", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 2))
+        assertThrows(AircraftNotFoundException.class, () ->
+                useCase.execute(new GetAircraftUtilizationRequest("XX-XXX", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 2)))
         );
     }
 
     @Test
-    void execute_WhenValidRange_ReturnsDataPoints() {
+    void ensureReturnsDataPointsForValidRange() {
         when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
-        
+
         LocalDate start = LocalDate.of(2023, 1, 1);
         LocalDate end = LocalDate.of(2023, 1, 2);
-        
+
         ScheduledFlight flight = Mockito.mock(ScheduledFlight.class);
         when(flight.getDepartureDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         when(flight.getArrivalDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC));
-        
+
         when(scheduledFlightRepository.findFlightsForUtilization(any(RegistrationNumber.class), any(OffsetDateTime.class), any(OffsetDateTime.class)))
                 .thenReturn(List.of(flight));
 
-        List<UtilizationDataPointResponse> result = useCase.execute("XX-XXX", start, end);
+        List<UtilizationDataPointResponse> result = useCase.execute(new GetAircraftUtilizationRequest("XX-XXX", start, end));
 
         assertEquals(2, result.size());
         assertEquals(start, result.get(0).date());

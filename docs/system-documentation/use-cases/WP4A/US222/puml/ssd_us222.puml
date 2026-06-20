@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Maintenance Supervisor" as Actor
+actor "ATCC" as Actor
 participant "System" as Sys
 Actor -> Sys : getDueAircraft()
 activate Sys
