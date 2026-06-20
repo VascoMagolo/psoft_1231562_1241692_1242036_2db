@@ -1,18 +1,18 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
+import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.RouteHistory;
 
 public class RouteHistoryMapper {
 
     public static RouteHistory toDomain(RouteHistoryJpaEntity entity) {
-        RouteHistory history = new RouteHistory(
-                entity.getRoute().getOriginCode(),
-                entity.getRoute().getDestinationCode(),
+        return new RouteHistory(
+                new IataCode(entity.getRoute().getOriginCode().getCode()),
+                new IataCode(entity.getRoute().getDestinationCode().getCode()),
                 entity.getChangeDescription(),
+                entity.getChangedAt(),
                 entity.getChangedBy()
         );
-        history.setChangedAt(entity.getChangedAt());
-        return history;
     }
 
     public static RouteHistoryJpaEntity toJpa(RouteHistory history, RouteJpaEntity route) {

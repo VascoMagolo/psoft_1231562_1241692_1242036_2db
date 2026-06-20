@@ -49,7 +49,7 @@ class CreateMaintenanceRecordUseCaseTest {
                 "Test maintenance", LocalDateTime.of(2023, 1, 1, 10, 0), 8, List.of("P001"), "Notes", "Template1", MaintenanceStatus.PLANNED, "CS-TPA", Set.of(MaintenanceComponent.ENGINE), BigDecimal.valueOf(500)
         );
         part = new MaintenancePart("P001", "Part1", "Desc1", 10, 2, MaintenanceComponent.ENGINE);
-        template = new MaintenanceTemplate("Template1", MaintenanceType.INSPECTION, List.of("Model1"), List.of("Check1"), 100, 30);
+        template = new MaintenanceTemplate("Template1", MaintenanceType.INSPECTION, List.of(new ModelName("Model1")), List.of("Check1"), 100, 30);
         AircraftModel model = new AircraftModel("Model1", Manufacturer.AIRBUS, 1000.0, 5000.0, 800.0, null, 180);
         aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2023, 1, 1), model, new RegistrationNumber("CS-TPA"), 150, 4000.0, List.of());
     }

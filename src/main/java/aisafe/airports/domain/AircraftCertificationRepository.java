@@ -6,6 +6,6 @@ import aisafe.shared.domain.BaseRepository;
 import java.util.List;
 
 public interface AircraftCertificationRepository extends BaseRepository<AircraftCertification> {
-    List<AircraftCertification> findByAirport(Airport airport);
-    boolean existsByAirportAndAircraftModelName(Airport airport, ModelName aircraftModelName);
+    List<AircraftCertification> findByAirportCode(IataCode airportCode);
+    boolean existsByAirportCodeAndAircraftModelName(IataCode airportCode, ModelName aircraftModelName);
 }

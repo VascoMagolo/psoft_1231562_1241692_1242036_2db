@@ -18,8 +18,8 @@ public record FlightResponse(
         return new FlightResponse(
                 flight.getId(),
                 flight.getAircraftRegistrationNumber().getNumber(),
-                flight.getRoute().getOrigin().getCode(),
-                flight.getRoute().getDestination().getCode(),
+                flight.getOriginCode().getCode(),
+                flight.getDestinationCode().getCode(),
                 flight.getDepartureDateTime(),
                 flight.getArrivalDateTime(),
                 flight.getStatus()

@@ -1,24 +1,22 @@
 package aisafe.flights.domain;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.domain.Route;
-import aisafe.shared.domain.DomainException;
+import aisafe.airports.domain.IataCode;
 import java.time.OffsetDateTime;
 import java.time.Duration;
 
-/**
- * Domain model for a scheduled flight.
- */
 public class ScheduledFlight {
     private Long id;
     private OffsetDateTime departureDateTime;
     private OffsetDateTime arrivalDateTime;
     private FlightStatus status;
-    private Route route;
+    private IataCode originCode;
+    private IataCode destinationCode;
     private RegistrationNumber aircraftRegistrationNumber;
 
     public ScheduledFlight(OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime,
-                           FlightStatus status, Route route, RegistrationNumber aircraftRegistrationNumber) {
+                           FlightStatus status, IataCode originCode, IataCode destinationCode,
+                           RegistrationNumber aircraftRegistrationNumber) {
         if (departureDateTime == null) {
             throw new InvalidFlightScheduleException("Departure date/time must not be null.");
         }
@@ -28,8 +26,11 @@ public class ScheduledFlight {
         if (status == null) {
             throw new InvalidFlightScheduleException("Flight status must not be null.");
         }
-        if (route == null) {
-            throw new InvalidFlightScheduleException("Route must not be null.");
+        if (originCode == null) {
+            throw new InvalidFlightScheduleException("Origin IATA code must not be null.");
+        }
+        if (destinationCode == null) {
+            throw new InvalidFlightScheduleException("Destination IATA code must not be null.");
         }
         if (aircraftRegistrationNumber == null) {
             throw new InvalidFlightScheduleException("Aircraft registration number must not be null.");
@@ -40,17 +41,25 @@ public class ScheduledFlight {
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.status = status;
-        this.route = route;
+        this.originCode = originCode;
+        this.destinationCode = destinationCode;
         this.aircraftRegistrationNumber = aircraftRegistrationNumber;
     }
 
+    public ScheduledFlight(Long id, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime,
+                           FlightStatus status, IataCode originCode, IataCode destinationCode,
+                           RegistrationNumber aircraftRegistrationNumber) {
+        this(departureDateTime, arrivalDateTime, status, originCode, destinationCode, aircraftRegistrationNumber);
+        this.id = id;
+    }
+
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
+
     public OffsetDateTime getDepartureDateTime() { return departureDateTime; }
     public OffsetDateTime getArrivalDateTime() { return arrivalDateTime; }
     public FlightStatus getStatus() { return status; }
-    public Route getRoute() { return route; }
+    public IataCode getOriginCode() { return originCode; }
+    public IataCode getDestinationCode() { return destinationCode; }
     public RegistrationNumber getAircraftRegistrationNumber() { return aircraftRegistrationNumber; }
 
     public Duration getDuration() {

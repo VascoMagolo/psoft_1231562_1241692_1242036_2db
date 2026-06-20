@@ -5,6 +5,7 @@ import aisafe.routes.domain.InvalidSortParameterException;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.flights.domain.ScheduledFlightRepository;
+import aisafe.shared.application.RouteDistanceService;
 import aisafe.shared.application.UseCase;
 import aisafe.shared.domain.InvalidListingCriteriaException;
 import lombok.RequiredArgsConstructor;

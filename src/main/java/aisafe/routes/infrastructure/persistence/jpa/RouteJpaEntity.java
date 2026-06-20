@@ -15,11 +15,17 @@ public class RouteJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "origin_iata_code", length = 3, nullable = false)
-    private String originCode;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "code", column = @Column(name = "origin_iata_code", length = 3, nullable = false))
+    })
+    private IataCodeJpaEmbeddable originCode;
 
-    @Column(name = "destination_iata_code", length = 3, nullable = false)
-    private String destinationCode;
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "code", column = @Column(name = "destination_iata_code", length = 3, nullable = false))
+    })
+    private IataCodeJpaEmbeddable destinationCode;
 
     @Column(nullable = false)
     private Integer estimatedFlightTime;
@@ -41,8 +47,8 @@ public class RouteJpaEntity {
 
     public RouteJpaEntity(String originCode, String destinationCode, Integer estimatedFlightTime,
                           Double minimumRange, Integer minimumCapacity, RouteStatus status) {
-        this.originCode = originCode;
-        this.destinationCode = destinationCode;
+        this.originCode = new IataCodeJpaEmbeddable(originCode);
+        this.destinationCode = new IataCodeJpaEmbeddable(destinationCode);
         this.estimatedFlightTime = estimatedFlightTime;
         this.minimumRange = minimumRange;
         this.minimumCapacity = minimumCapacity;

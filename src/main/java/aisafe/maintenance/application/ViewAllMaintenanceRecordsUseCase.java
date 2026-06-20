@@ -8,7 +8,6 @@ import aisafe.maintenance.application.dtos.ViewAllMaintenanceRecordsResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import aisafe.shared.domain.PaginatedResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
  * Views all maintenance records from a specific aircraft using its registration number
  */
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class ViewAllMaintenanceRecordsUseCase {
     private final MaintenanceRecordRepository repository;
     private final AircraftRepository aircraftRepository;
@@ -33,7 +31,7 @@ public class ViewAllMaintenanceRecordsUseCase {
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber.getNumber() + " not found."));
 
         PaginatedResult<MaintenanceRecord> recordsPage = repository.findByAircraftRegistration(
-                registrationNumber.getNumber(), pageNumber, pageSize);
+                registrationNumber, pageNumber, pageSize);
 
         List<ViewAllMaintenanceRecordsResponse> data = recordsPage.data().stream()
                 .map(this::toResponse)

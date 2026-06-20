@@ -7,6 +7,7 @@ import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.shared.application.ExportedFile;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.SearchRoutesRequest;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
 import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.infrastructure.BulkImportResponseBuilder;
@@ -32,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import aisafe.shared.infrastructure.ETagUtils;
 
@@ -252,7 +254,7 @@ public class RouteController {
             @Parameter(description = "Destination IATA code") @RequestParam(required = false) String destination,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<RouteResponse> assembler) {
-        PaginatedResult<RouteResponse> result = this.searchRoutes.execute(origin, destination, pageable.getPageNumber(), pageable.getPageSize());
+        PaginatedResult<RouteResponse> result = this.searchRoutes.execute(new SearchRoutesRequest(origin, destination, pageable.getPageNumber(), pageable.getPageSize()));
         Page<RouteResponse> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(routePage, this::toModel));
     }
@@ -296,7 +298,7 @@ public class RouteController {
             @ApiResponse(responseCode = "400", description = "Invalid request")
     })
     @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<java.util.Map<String, Object>> importRoutes(
+    public ResponseEntity<Map<String, Object>> importRoutes(
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
             Authentication authentication) {
         String username = authentication != null ? authentication.getName() : "BulkImport";

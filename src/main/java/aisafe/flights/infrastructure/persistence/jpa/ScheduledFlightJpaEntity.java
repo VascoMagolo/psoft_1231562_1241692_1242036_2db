@@ -1,4 +1,4 @@
-package aisafe.flights.infrastructure.persistence;
+package aisafe.flights.infrastructure.persistence.jpa;
 
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
 import aisafe.flights.domain.FlightStatus;

@@ -8,10 +8,10 @@ import aisafe.airports.domain.AirportStatisticsData;
 import java.util.List;
 
 @UseCase(readOnly = true)
-public class AirportStatisticsUseCase {
+public class GetAirportStatisticsUseCase {
     private final AirportRepository airportRepository;
 
-    public AirportStatisticsUseCase(AirportRepository airportRepository) {
+    public GetAirportStatisticsUseCase(AirportRepository airportRepository) {
         this.airportRepository = airportRepository;
     }
 

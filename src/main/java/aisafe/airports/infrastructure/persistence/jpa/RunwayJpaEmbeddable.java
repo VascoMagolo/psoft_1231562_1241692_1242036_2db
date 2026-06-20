@@ -8,7 +8,7 @@ import lombok.Setter;
 @Embeddable
 @Getter
 @Setter
-public class RunwayEmbeddable {
+public class RunwayJpaEmbeddable {
 
     @Column(nullable = false)
     private String name;
@@ -19,9 +19,9 @@ public class RunwayEmbeddable {
     @Column(nullable = false)
     private String orientation;
 
-    public RunwayEmbeddable() {}
+    public RunwayJpaEmbeddable() {}
 
-    public RunwayEmbeddable(String name, Integer length, String orientation) {
+    public RunwayJpaEmbeddable(String name, Integer length, String orientation) {
         this.name = name;
         this.length = length;
         this.orientation = orientation;

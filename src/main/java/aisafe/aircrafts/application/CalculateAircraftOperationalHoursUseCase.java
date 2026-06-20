@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.CalculateAircraftOperationalHoursRequest;
 import aisafe.aircrafts.application.dtos.AircraftOperationalHoursResponse;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
@@ -22,7 +23,8 @@ public class CalculateAircraftOperationalHoursUseCase {
         this.aircraftRepository = aircraftRepository;
     }
 
-    public AircraftOperationalHoursResponse execute(RegistrationNumber registrationNumber) {
+    public AircraftOperationalHoursResponse execute(CalculateAircraftOperationalHoursRequest request) {
+        RegistrationNumber registrationNumber = request.registrationNumber();
         if (!aircraftRepository.existsByRegistrationNumber(registrationNumber)) {
             throw new AircraftNotFoundException("Aircraft with registration " + registrationNumber.getNumber() + " not found.");
         }

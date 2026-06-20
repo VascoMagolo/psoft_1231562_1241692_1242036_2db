@@ -60,7 +60,7 @@ public class Route {
     public Integer getMinimumCapacity() { return minimumCapacity; }
     public RouteStatus getStatus() { return status; }
 
-    public void setStatus(RouteStatus status) { this.status = status; }
+    public void changeStatus(RouteStatus status) { this.status = status; }
 
     public void updateRoute(Integer flightTime, Double range, Integer capacity) {
         if (flightTime != null) {

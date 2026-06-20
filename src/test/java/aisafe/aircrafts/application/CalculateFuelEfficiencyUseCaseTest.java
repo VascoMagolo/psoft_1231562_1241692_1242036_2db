@@ -1,9 +1,11 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.CalculateFuelEfficiencyRequest;
 import aisafe.aircrafts.application.dtos.FuelEfficiencyResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteNotFoundException;
 import aisafe.routes.domain.RouteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +48,7 @@ class CalculateFuelEfficiencyUseCaseTest {
     void ensureCalculatesOnlyPerAircraftWhenRouteNotProvided() {
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
 
-        FuelEfficiencyResponse response = useCase.execute("CS-TPA", null, null);
+        FuelEfficiencyResponse response = useCase.execute(new CalculateFuelEfficiencyRequest("CS-TPA", null, null));
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.registrationNumber());
@@ -62,7 +64,7 @@ class CalculateFuelEfficiencyUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(Optional.of(route));
 
-        FuelEfficiencyResponse response = useCase.execute("CS-TPA", "OPO", "LIS");
+        FuelEfficiencyResponse response = useCase.execute(new CalculateFuelEfficiencyRequest("CS-TPA", "OPO", "LIS"));
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.registrationNumber());
@@ -76,7 +78,7 @@ class CalculateFuelEfficiencyUseCaseTest {
     void ensureExceptionWhenAircraftNotFound() {
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.empty());
 
-        assertThrows(AircraftNotFoundException.class, () -> useCase.execute("CS-TPA", null, null));
+        assertThrows(AircraftNotFoundException.class, () -> useCase.execute(new CalculateFuelEfficiencyRequest("CS-TPA", null, null)));
     }
 
     @Test
@@ -84,6 +86,6 @@ class CalculateFuelEfficiencyUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(Optional.of(aircraft));
         when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> useCase.execute("CS-TPA", "OPO", "LIS"));
+        assertThrows(RouteNotFoundException.class, () -> useCase.execute(new CalculateFuelEfficiencyRequest("CS-TPA", "OPO", "LIS")));
     }
 }

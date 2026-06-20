@@ -1,5 +1,6 @@
 package aisafe.aircrafts.application;
 
+import aisafe.aircrafts.application.dtos.ListAircraftRequest;
 import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.domain.PaginatedResult;
@@ -38,7 +39,7 @@ class ListAircraftUseCaseTest {
         PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(aircraft), 1L);
         when(aircraftRepository.findAll(0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(0, 10);
+        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.data().size());
@@ -59,7 +60,7 @@ class ListAircraftUseCaseTest {
         PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(), 0L);
         when(aircraftRepository.findAll(0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(0, 10);
+        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
 
         assertNotNull(result);
         assertTrue(result.data().isEmpty());

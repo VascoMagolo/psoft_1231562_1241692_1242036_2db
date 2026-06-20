@@ -1,4 +1,4 @@
-package aisafe.flights.infrastructure.persistence;
+package aisafe.flights.infrastructure.persistence.jpa;
 
 /**
  * JPA Projection for model utilization metrics.

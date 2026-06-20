@@ -1,6 +1,8 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.SearchRoutesRequest;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.shared.domain.PaginatedResult;
@@ -32,7 +34,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any(), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute("OPO", "LIS", 0, 20);
+        PaginatedResult<RouteResponse> result = searchRoutes.execute(new SearchRoutesRequest("OPO", "LIS", 0, 20));
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOriginAndDestination(any(), any(), anyInt(), anyInt());
@@ -43,7 +45,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByOrigin(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute("OPO", null, 0, 20);
+        PaginatedResult<RouteResponse> result = searchRoutes.execute(new SearchRoutesRequest("OPO", null, 0, 20));
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOrigin(any(IataCode.class), anyInt(), anyInt());
@@ -54,7 +56,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findByDestination(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute(null, "LIS", 0, 20);
+        PaginatedResult<RouteResponse> result = searchRoutes.execute(new SearchRoutesRequest(null, "LIS", 0, 20));
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByDestination(any(IataCode.class), anyInt(), anyInt());
@@ -65,7 +67,7 @@ class SearchRoutesUseCaseTest {
         when(routeRepository.findAll(anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(sample), 1L));
 
-        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = searchRoutes.execute(null, null, 0, 20);
+        PaginatedResult<RouteResponse> result = searchRoutes.execute(new SearchRoutesRequest(null, null, 0, 20));
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findAll(anyInt(), anyInt());

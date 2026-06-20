@@ -48,13 +48,16 @@ class OngoingMaintenanceRepositoryTest {
     void ensureFindByStatusReturnsOnlyInProgressRecords() {
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Engine overhaul", LocalDateTime.of(2026, 6, 1, 8, 0), 8, null,
-                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(100)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Airframe check", LocalDateTime.of(2026, 6, 5, 9, 0), 4, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME), "CS-TPA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.AIRFRAME),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(100)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Avionics check", LocalDateTime.of(2026, 5, 10, 10, 0), 6, null,
-                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.AVIONICS), "CS-LXA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.AVIONICS),
+                new RegistrationNumberJpaEmbeddable("CS-LXA"), BigDecimal.valueOf(100)));
 
         Page<MaintenanceRecordJpaEntity> page = recordRepository.findByStatusOrderByStartDateDesc(
                 MaintenanceStatus.IN_PROGRESS, PageRequest.of(0, 20));
@@ -67,10 +70,12 @@ class OngoingMaintenanceRepositoryTest {
     void ensureFindByStatusOrderedByStartDateDesc() {
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Earlier record", LocalDateTime.of(2026, 5, 1, 8, 0), 4, null,
-                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(100)));
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Later record", LocalDateTime.of(2026, 6, 15, 8, 0), 4, null,
-                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.AIRFRAME), "CS-LXA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.AIRFRAME),
+                new RegistrationNumberJpaEmbeddable("CS-LXA"), BigDecimal.valueOf(100)));
 
         Page<MaintenanceRecordJpaEntity> page = recordRepository.findByStatusOrderByStartDateDesc(
                 MaintenanceStatus.IN_PROGRESS, PageRequest.of(0, 20));
@@ -84,7 +89,8 @@ class OngoingMaintenanceRepositoryTest {
     void ensureFindByStatusReturnsEmptyWhenNoneMatch() {
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Planned only", LocalDateTime.of(2026, 7, 1, 8, 0), 4, null,
-                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA", BigDecimal.valueOf(100)));
+                List.of(part), template, MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(100)));
 
         Page<MaintenanceRecordJpaEntity> page = recordRepository.findByStatusOrderByStartDateDesc(
                 MaintenanceStatus.IN_PROGRESS, PageRequest.of(0, 20));

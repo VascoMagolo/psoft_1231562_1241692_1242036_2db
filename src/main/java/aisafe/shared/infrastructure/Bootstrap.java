@@ -150,17 +150,17 @@ public class Bootstrap implements ApplicationRunner {
                 // Completed flight for aircraft 1
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(2), now.minusDays(2).plusHours(2),
-                        FlightStatus.COMPLETED, managedRoute1, managedAircraft1.getRegistrationNumber()));
-                        
+                        FlightStatus.COMPLETED, managedRoute1.getOrigin(), managedRoute1.getDestination(), managedAircraft1.getRegistrationNumber()));
+
                 // Completed flight for aircraft 1
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(1), now.minusDays(1).plusHours(3),
-                        FlightStatus.COMPLETED, managedRoute2, managedAircraft1.getRegistrationNumber()));
-                        
+                        FlightStatus.COMPLETED, managedRoute2.getOrigin(), managedRoute2.getDestination(), managedAircraft1.getRegistrationNumber()));
+
                 // Completed flight for aircraft 2
                 scheduledFlightRepository.save(new ScheduledFlight(
                         now.minusDays(3), now.minusDays(3).plusHours(4),
-                        FlightStatus.COMPLETED, managedRoute1, managedAircraft2.getRegistrationNumber()));
+                        FlightStatus.COMPLETED, managedRoute1.getOrigin(), managedRoute1.getDestination(), managedAircraft2.getRegistrationNumber()));
             }
         }
 
@@ -171,7 +171,7 @@ public class Bootstrap implements ApplicationRunner {
             AircraftModel e195e2 = aircraftModelRepository.findByModelName("Embraer E195-E2").orElseThrow();
             List<AircraftModel> models = List.of(a320neo, b737max, e195e2);
             maintenanceTemplateRepository.save(new MaintenanceTemplate("Inspection to the starter motor",
-                    MaintenanceType.INSPECTION, List.of("Airbus A320neo", "Boeing 737 MAX"), List.of("starterMotor inspection"), 300, 365));
+                    MaintenanceType.INSPECTION, List.of(new ModelName("Airbus A320neo"), new ModelName("Boeing 737 MAX")), List.of("starterMotor inspection"), 300, 365));
         }
 
         if (maintenancePartRepository.count() == 0) {

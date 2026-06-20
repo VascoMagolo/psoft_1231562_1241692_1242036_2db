@@ -17,9 +17,9 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
     boolean existsByStartDateAndTemplate(LocalDateTime startDate, MaintenanceTemplateJpaEntity template);
     boolean existsByPartsContaining(MaintenancePartJpaEntity part);
     boolean existsByTemplate(MaintenanceTemplateJpaEntity template);
-    boolean existsByAircraftRegistration(String aircraftRegistration);
-    List<MaintenanceRecordJpaEntity> findByAircraftRegistrationAndStatusOrderByCompletedAtDesc(String aircraftRegistration, MaintenanceStatus status);
-    Page<MaintenanceRecordJpaEntity> findByAircraftRegistration(String aircraftRegistration, Pageable pageable);
+    boolean existsByAircraftRegistration_Number(String number);
+    List<MaintenanceRecordJpaEntity> findByAircraftRegistration_NumberAndStatusOrderByCompletedAtDesc(String number, MaintenanceStatus status);
+    Page<MaintenanceRecordJpaEntity> findByAircraftRegistration_Number(String number, Pageable pageable);
     Optional<MaintenanceRecordJpaEntity> findByRecordId(UUID recordId);
 
     @Query("SELECT m.version FROM MaintenanceRecordJpaEntity m WHERE m.recordId = :recordId")
@@ -30,22 +30,22 @@ public interface SpringDataMaintenanceRecordRepository extends JpaRepository<Mai
 
     Page<MaintenanceRecordJpaEntity> findByStatusOrderByStartDateDesc(MaintenanceStatus status, Pageable pageable);
 
-    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration = :registration")
+    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration.number = :registration")
     BigDecimal sumCostByAircraftRegistration(@Param("registration") String registration);
 
-    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration IN :registrations")
+    @Query("SELECT SUM(r.cost) FROM MaintenanceRecordJpaEntity r WHERE r.aircraftRegistration.number IN :registrations")
     BigDecimal sumCostByRegistrations(@Param("registrations") List<String> registrations);
 
     @Query("SELECT AVG(TIMESTAMPDIFF(SECOND, m.startDate, m.completedAt)) / 3600.0 " +
            "FROM MaintenanceRecordJpaEntity m " +
-           "WHERE m.aircraftRegistration IN :registrations " +
+           "WHERE m.aircraftRegistration.number IN :registrations " +
            "AND m.status = 'COMPLETED' " +
            "AND m.completedAt IS NOT NULL")
     Double findAverageTurnaroundHours(@Param("registrations") List<String> registrations);
 
     @Query("SELECT DISTINCT m FROM MaintenanceRecordJpaEntity m " +
            "INNER JOIN m.components c " +
-           "WHERE (:registration IS NULL OR m.aircraftRegistration = :registration) " +
+           "WHERE (:registration IS NULL OR m.aircraftRegistration.number = :registration) " +
            "AND (:from IS NULL OR m.startDate >= :from) " +
            "AND (:to IS NULL OR m.startDate <= :to) " +
            "AND (:component IS NULL OR c = :component)")

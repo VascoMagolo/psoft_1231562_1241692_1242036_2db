@@ -7,6 +7,10 @@ import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftReposit
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftModelJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftModelRepository;
 import aisafe.flights.domain.FlightStatus;
+import aisafe.flights.infrastructure.persistence.jpa.RouteUtilizationProjection;
+import aisafe.flights.infrastructure.persistence.jpa.ScheduledFlightJpaEntity;
+import aisafe.flights.infrastructure.persistence.jpa.ScheduledFlightJpaRepository;
+import aisafe.flights.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
 import aisafe.routes.infrastructure.persistence.jpa.SpringDataRouteRepository;

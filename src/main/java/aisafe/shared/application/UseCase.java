@@ -1,6 +1,5 @@
 package aisafe.shared.application;
 
-import aisafe.shared.infrastructure.UseCaseLoggingAdvice;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>Any class annotated with {@code @UseCase} is also intercepted by
- * {@link UseCaseLoggingAdvice}, which logs the method name, parameters, and execution time
+ * {@code UseCaseLoggingAdvice}, which logs the method name, parameters, and execution time
  * for every public method invocation -- without any log statements in the use case code itself.</p>
  */
 @Documented

@@ -35,7 +35,7 @@ class ViewAllMaintenanceRecordsUseCaseTest {
     void ensureRecordsAreReturnedSuccessfully() {
         RegistrationNumber reg = new RegistrationNumber("CS-TPA");
         when(aircraftRepository.findByRegistrationNumber(reg)).thenReturn(Optional.of(mock(Aircraft.class)));
-        when(repository.findByAircraftRegistration(eq("CS-TPA"), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0));
+        when(repository.findByAircraftRegistration(eq(reg), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0));
 
         assertDoesNotThrow(() -> viewAllMaintenanceRecords.execute(reg, 0, 20));
     }
@@ -47,6 +47,6 @@ class ViewAllMaintenanceRecordsUseCaseTest {
 
         assertThrows(AircraftNotFoundException.class, () ->
                 viewAllMaintenanceRecords.execute(reg, 0, 20));
-        verify(repository, never()).findByAircraftRegistration(any(), anyInt(), anyInt());
+        verify(repository, never()).findByAircraftRegistration(any(RegistrationNumber.class), anyInt(), anyInt());
     }
 }

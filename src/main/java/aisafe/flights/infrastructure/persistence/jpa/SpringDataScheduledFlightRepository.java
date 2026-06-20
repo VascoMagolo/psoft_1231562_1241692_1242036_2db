@@ -1,4 +1,4 @@
-package aisafe.flights.infrastructure.persistence;
+package aisafe.flights.infrastructure.persistence.jpa;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,18 +59,18 @@ public interface SpringDataScheduledFlightRepository extends JpaRepository<Sched
                                   @Param("arrivalDateTime") OffsetDateTime arrivalDateTime);
 
     @Query("SELECT COUNT(f) FROM ScheduledFlightJpaEntity f " +
-           "WHERE f.route.originCode = :originCode " +
-           "AND f.route.destinationCode = :destinationCode")
+           "WHERE f.route.originCode.code = :originCode " +
+           "AND f.route.destinationCode.code = :destinationCode")
     long countByRoute(@Param("originCode") String originCode, @Param("destinationCode") String destinationCode);
 
     boolean existsByAircraftRegistrationNumberNumber(String registration);
 
-    @Query("SELECT f.route.id AS routeId, f.route.originCode AS originCode, f.route.destinationCode AS destinationCode, COUNT(f.id) AS flightCount " +
+    @Query("SELECT f.route.id AS routeId, f.route.originCode.code AS originCode, f.route.destinationCode.code AS destinationCode, COUNT(f.id) AS flightCount " +
            "FROM ScheduledFlightJpaEntity f " +
            "WHERE f.status = 'COMPLETED' " +
            "AND (cast(:startDate as timestamp) IS NULL OR f.departureDateTime >= :startDate) " +
            "AND (cast(:endDate as timestamp) IS NULL OR f.arrivalDateTime <= :endDate) " +
-           "GROUP BY f.route.id, f.route.originCode, f.route.destinationCode " +
+           "GROUP BY f.route.id, f.route.originCode.code, f.route.destinationCode.code " +
            "ORDER BY flightCount DESC")
     Page<RouteUtilizationProjection> findFlightUtilizationReports(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate, Pageable pageable);
 }

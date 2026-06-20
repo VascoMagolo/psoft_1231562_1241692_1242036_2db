@@ -15,14 +15,14 @@ public class AirportMapper {
                 .collect(Collectors.toList());
 
         Airport airport = new Airport(
-                entity.getIataCode(),
+                entity.getIataCode().getCode(),
                 entity.getName(),
                 entity.getCity(),
                 entity.getCountry(),
                 entity.getRegion(),
                 entity.getTimezone(),
-                entity.getLatitude(),
-                entity.getLongitude(),
+                entity.getCoordinates().getLatitude(),
+                entity.getCoordinates().getLongitude(),
                 runways
         );
 
@@ -57,14 +57,13 @@ public class AirportMapper {
         if (domain == null) return null;
 
         AirportJpaEntity entity = new AirportJpaEntity();
-        entity.setIataCode(domain.getIataCode().getCode());
+        entity.setIataCode(new IataCodeJpaEmbeddable(domain.getIataCode().getCode()));
         entity.setName(domain.getName());
         entity.setCity(domain.getCity());
         entity.setCountry(domain.getCountry());
         entity.setRegion(domain.getRegion());
         entity.setTimezone(domain.getTimezone());
-        entity.setLatitude(domain.getCoordinates().getLatitude());
-        entity.setLongitude(domain.getCoordinates().getLongitude());
+        entity.setCoordinates(new CoordinatesJpaEmbeddable(domain.getCoordinates().getLatitude(), domain.getCoordinates().getLongitude()));
         entity.setStatus(domain.getStatus().name());
         entity.setOperationalHours(domain.getOperationalHours());
 
@@ -78,11 +77,11 @@ public class AirportMapper {
                 .collect(Collectors.toList()));
 
         entity.setRunways(domain.getRunways().stream()
-                .map(r -> new RunwayEmbeddable(r.getName(), r.getLength(), r.getOrientation()))
+                .map(r -> new RunwayJpaEmbeddable(r.getName(), r.getLength(), r.getOrientation()))
                 .collect(Collectors.toList()));
 
         entity.setContacts(domain.getContacts().stream()
-                .map(c -> new ContactEmbeddable(c.getType().name(), c.getValue(), c.getDescription()))
+                .map(c -> new ContactJpaEmbeddable(c.getType().name(), c.getValue(), c.getDescription()))
                 .collect(Collectors.toList()));
 
         entity.setServices(domain.getServices().stream()

@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AirportStatisticsUseCaseTest {
+class GetAirportStatisticsUseCaseTest {
 
     @Mock
     private AirportRepository airportRepository;
 
     @InjectMocks
-    private AirportStatisticsUseCase airportStatistics;
+    private GetAirportStatisticsUseCase airportStatistics;
 
     @Test
     void ensureEmptyResultReturnsEmptyList() {

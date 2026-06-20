@@ -4,20 +4,20 @@ import aisafe.aircrafts.domain.ModelName;
 
 public class AircraftCertification {
 
-    private final Airport airport;
+    private final IataCode airportCode;
     private final ModelName aircraftModelName;
 
-    public AircraftCertification(Airport airport, ModelName aircraftModelName) {
-        if (airport == null) {
-            throw new InvalidAircraftCertificationException("Airport cannot be null.");
+    public AircraftCertification(IataCode airportCode, ModelName aircraftModelName) {
+        if (airportCode == null) {
+            throw new InvalidAircraftCertificationException("Airport code cannot be null.");
         }
         if (aircraftModelName == null) {
             throw new InvalidAircraftCertificationException("Aircraft model name cannot be null.");
         }
-        this.airport = airport;
+        this.airportCode = airportCode;
         this.aircraftModelName = aircraftModelName;
     }
 
-    public Airport getAirport() { return airport; }
+    public IataCode getAirportCode() { return airportCode; }
     public ModelName getAircraftModelName() { return aircraftModelName; }
 }

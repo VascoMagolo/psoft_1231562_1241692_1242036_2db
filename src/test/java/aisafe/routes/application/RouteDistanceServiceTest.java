@@ -4,6 +4,7 @@ import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.Coordinates;
 import aisafe.routes.domain.Route;
+import aisafe.shared.application.RouteDistanceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
+import aisafe.aircrafts.domain.InvalidUtilizationCriteriaException;
 import aisafe.flights.domain.ModelUtilizationData;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.shared.application.UseCase;

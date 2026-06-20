@@ -8,7 +8,7 @@ import lombok.Setter;
 @Embeddable
 @Getter
 @Setter
-public class ContactEmbeddable {
+public class ContactJpaEmbeddable {
 
     @Column(nullable = false)
     private String type;
@@ -18,9 +18,9 @@ public class ContactEmbeddable {
 
     private String description;
 
-    public ContactEmbeddable() {}
+    public ContactJpaEmbeddable() {}
 
-    public ContactEmbeddable(String type, String value, String description) {
+    public ContactJpaEmbeddable(String type, String value, String description) {
         this.type = type;
         this.value = value;
         this.description = description;

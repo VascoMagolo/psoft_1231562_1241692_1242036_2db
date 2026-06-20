@@ -29,7 +29,7 @@ class ViewRouteHistoryUseCaseTest {
 
     @Test
     void ensureHistoryIsReturnedSuccessfully() {
-        RouteHistory entry = new RouteHistory("OPO", "LIS", "Route created", "system");
+        RouteHistory entry = new RouteHistory(new IataCode("OPO"), new IataCode("LIS"), "Route created", "system");
         when(routeRepository.existsByOriginAndDestination(any(IataCode.class), any(IataCode.class))).thenReturn(true);
         when(historyRepository.findAllByRoute("OPO", "LIS")).thenReturn(List.of(entry));
 

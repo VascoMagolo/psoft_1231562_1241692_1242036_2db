@@ -14,7 +14,7 @@ public interface ScheduledFlightRepository extends BaseRepository<ScheduledFligh
     Optional<ScheduledFlight> findById(Long id);
     List<ScheduledFlight> findByAircraftRegistration(RegistrationNumber registration);
     List<ScheduledFlight> findFlightsForUtilization(RegistrationNumber registration, OffsetDateTime start, OffsetDateTime end);
-    boolean hasOverlappingFlights(RegistrationNumber registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime);
+    boolean existsByOverlappingSchedule(RegistrationNumber registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime);
     boolean existsByAircraftRegistration(RegistrationNumber registration);
     long countByRoute(IataCode origin, IataCode destination);
     List<ModelUtilizationData> findTopModelsByFlightHours(int limit);

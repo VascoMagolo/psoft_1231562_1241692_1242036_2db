@@ -10,7 +10,7 @@ import aisafe.flights.application.dtos.ScheduleFlightRequest;
 import aisafe.flights.domain.AircraftIncompatibilityException;
 import aisafe.flights.domain.AircraftUnavailableException;
 import aisafe.airports.domain.IataCode;
-import aisafe.routes.application.RouteDistanceService;
+import aisafe.shared.application.RouteDistanceService;
 import aisafe.flights.domain.FlightStatus;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteNotFoundException;
@@ -53,7 +53,7 @@ public class ScheduleFlightUseCase {
             throw new AircraftIncompatibilityException("Route distance exceeds aircraft maximum range.");
         }
         RegistrationNumber regNum = new RegistrationNumber(aircraftId);
-        if (scheduledFlightRepository.hasOverlappingFlights(regNum, request.departureDateTime(), request.arrivalDateTime())) {
+        if (scheduledFlightRepository.existsByOverlappingSchedule(regNum, request.departureDateTime(), request.arrivalDateTime())) {
             throw new AircraftUnavailableException(aircraftId);
         }
 
@@ -61,10 +61,11 @@ public class ScheduleFlightUseCase {
                 request.departureDateTime(),
                 request.arrivalDateTime(),
                 FlightStatus.SCHEDULED,
-                route,
+                new IataCode(origin),
+                new IataCode(destination),
                 regNum
         );
-        scheduledFlightRepository.save(scheduledFlight);
-        return FlightResponse.from(scheduledFlight);
+        ScheduledFlight saved = scheduledFlightRepository.save(scheduledFlight);
+        return FlightResponse.from(saved);
     }
 }

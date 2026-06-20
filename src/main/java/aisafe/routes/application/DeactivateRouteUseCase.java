@@ -35,9 +35,9 @@ public class DeactivateRouteUseCase {
             }
         }
 
-        route.setStatus(RouteStatus.INACTIVE);
+        route.changeStatus(RouteStatus.INACTIVE);
         routeRepository.save(route);
-        routeHistoryRepository.save(new RouteHistory(origin, destination, "Route deactivated", changedBy));
+        routeHistoryRepository.save(new RouteHistory(new IataCode(origin), new IataCode(destination), "Route deactivated", changedBy));
         
         Long updatedVersion = routeRepository.findVersionFor(new IataCode(origin), new IataCode(destination));
         return RouteResponse.from(route, updatedVersion);

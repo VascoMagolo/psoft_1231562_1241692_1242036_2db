@@ -49,7 +49,7 @@ class RouteTest {
     @Test
     void ensureSetStatusInactiveSetsRouteInactive() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        route.setStatus(RouteStatus.INACTIVE);
+        route.changeStatus(RouteStatus.INACTIVE);
         assertEquals(RouteStatus.INACTIVE, route.getStatus());
     }
 

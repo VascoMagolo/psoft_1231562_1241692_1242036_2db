@@ -1,7 +1,7 @@
 package aisafe.flights.domain;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
-import aisafe.routes.domain.Route;
+import aisafe.airports.domain.IataCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -11,12 +11,12 @@ import java.time.OffsetDateTime;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 class ScheduledFlightTest {
 
-    @Mock
-    private Route mockRoute;
+    private final IataCode originCode = new IataCode("OPO");
+    private final IataCode destinationCode = new IataCode("LIS");
+
     @Mock
     private RegistrationNumber mockRegistrationNumber;
 
@@ -30,24 +30,24 @@ class ScheduledFlightTest {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
 
-        ScheduledFlight flight = new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber);
+        ScheduledFlight flight = new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber);
 
         assertNotNull(flight);
         assertEquals(departure, flight.getDepartureDateTime());
         assertEquals(arrival, flight.getArrivalDateTime());
         assertEquals(FlightStatus.SCHEDULED, flight.getStatus());
-        assertEquals(mockRoute, flight.getRoute());
+        assertEquals(originCode, flight.getOriginCode());
+        assertEquals(destinationCode, flight.getDestinationCode());
         assertEquals(mockRegistrationNumber, flight.getAircraftRegistrationNumber());
         assertNull(flight.getId());
     }
 
     @Test
-    void ensureSetIdWorksCorrectly() {
+    void ensureReconstitutionConstructorSetsId() {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
-        ScheduledFlight flight = new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber);
         Long expectedId = 123L;
-        flight.setId(expectedId);
+        ScheduledFlight flight = new ScheduledFlight(expectedId, departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber);
         assertEquals(expectedId, flight.getId());
     }
 
@@ -55,18 +55,15 @@ class ScheduledFlightTest {
     void ensureGetDurationCalculatesCorrectly() {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
-        ScheduledFlight flight = new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber);
+        ScheduledFlight flight = new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber);
         assertEquals(Duration.ofHours(2), flight.getDuration());
     }
 
     @Test
     void ensureGetDurationReturnsZeroIfDatesAreNull() {
-        // This scenario is prevented by constructor validation, but good to test for robustness
         ScheduledFlight flight = new ScheduledFlight(
-                OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber
+                OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
         );
-        // Using reflection to set private fields to null for this specific test case, as constructor prevents it.
-        // In a real scenario, consider if this state is actually reachable.
         try {
             java.lang.reflect.Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
             departureField.setAccessible(true);
@@ -85,14 +82,14 @@ class ScheduledFlightTest {
     void ensureConstructorThrowsExceptionForNullDepartureDateTime() {
         OffsetDateTime arrival = OffsetDateTime.now().plusHours(2);
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(null, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber));
+                new ScheduledFlight(null, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber));
     }
 
     @Test
     void ensureConstructorThrowsExceptionForNullArrivalDateTime() {
         OffsetDateTime departure = OffsetDateTime.now();
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, null, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber));
+                new ScheduledFlight(departure, null, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber));
     }
 
     @Test
@@ -100,15 +97,15 @@ class ScheduledFlightTest {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, arrival, null, mockRoute, mockRegistrationNumber));
+                new ScheduledFlight(departure, arrival, null, originCode, destinationCode, mockRegistrationNumber));
     }
 
     @Test
-    void ensureConstructorThrowsExceptionForNullRoute() {
+    void ensureConstructorThrowsExceptionForNullOriginCode() {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, null, mockRegistrationNumber));
+                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, null, destinationCode, mockRegistrationNumber));
     }
 
     @Test
@@ -116,7 +113,7 @@ class ScheduledFlightTest {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure.plusHours(2);
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, null));
+                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, null));
     }
 
     @Test
@@ -124,7 +121,7 @@ class ScheduledFlightTest {
         OffsetDateTime departure = OffsetDateTime.now().plusHours(2);
         OffsetDateTime arrival = OffsetDateTime.now();
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber));
+                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber));
     }
 
     @Test
@@ -132,6 +129,6 @@ class ScheduledFlightTest {
         OffsetDateTime departure = OffsetDateTime.now();
         OffsetDateTime arrival = departure;
         assertThrows(InvalidFlightScheduleException.class, () ->
-                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, mockRoute, mockRegistrationNumber));
+                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber));
     }
 }

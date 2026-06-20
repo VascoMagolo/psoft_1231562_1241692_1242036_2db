@@ -21,8 +21,8 @@ public class AirportJpaEntity {
     @Version
     private Long version;
 
-    @Column(length = 3, nullable = false, unique = true)
-    private String iataCode;
+    @Embedded
+    private IataCodeJpaEmbeddable iataCode;
 
     @Column(nullable = false)
     private String name;
@@ -49,21 +49,18 @@ public class AirportJpaEntity {
     @Column(nullable = false)
     private String status;
 
-    @Column(nullable = false)
-    private Double latitude;
-
-    @Column(nullable = false)
-    private Double longitude;
+    @Embedded
+    private CoordinatesJpaEmbeddable coordinates;
 
     @ElementCollection
     @CollectionTable(name = "airport_runways", joinColumns = @JoinColumn(name = "airport_id"))
     @BatchSize(size = 25)
-    private List<RunwayEmbeddable> runways = new ArrayList<>();
+    private List<RunwayJpaEmbeddable> runways = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_contacts", joinColumns = @JoinColumn(name = "airport_id"))
     @BatchSize(size = 25)
-    private List<ContactEmbeddable> contacts = new ArrayList<>();
+    private List<ContactJpaEmbeddable> contacts = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "airport_services", joinColumns = @JoinColumn(name = "airport_id"))

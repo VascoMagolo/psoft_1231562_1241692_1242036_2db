@@ -57,7 +57,7 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
     }
 
     @Override
-    public void save(AircraftModel domainModel) {
+    public AircraftModel save(AircraftModel domainModel) {
         AircraftModelJpaEntity jpaEntity = springRepo.findByModelName(domainModel.getModelName())
                 .orElse(new AircraftModelJpaEntity());
 
@@ -68,6 +68,7 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
         }
 
         springRepo.save(newData);
+        return domainModel;
     }
 
     @Override

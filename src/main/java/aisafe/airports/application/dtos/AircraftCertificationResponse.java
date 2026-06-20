@@ -8,7 +8,7 @@ public record AircraftCertificationResponse(
 ) {
     public static AircraftCertificationResponse from(AircraftCertification certification) {
         return new AircraftCertificationResponse(
-                certification.getAirport().getIataCode().getCode(),
+                certification.getAirportCode().getCode(),
                 certification.getAircraftModelName().getName()
         );
     }

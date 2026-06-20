@@ -42,22 +42,22 @@ class TurnaroundRepositoryTest {
 
         MaintenanceRecordJpaEntity r1 = new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Completed check", LocalDateTime.of(2024, 6, 1, 8, 0), 32, null,
-                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA",
-                BigDecimal.valueOf(1000));
-        r1.setCompletedAt(LocalDateTime.of(2024, 6, 2, 16, 0));   // 32h turnaround
+                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(1000));
+        r1.setCompletedAt(LocalDateTime.of(2024, 6, 2, 16, 0));
         recordRepository.save(r1);
 
         MaintenanceRecordJpaEntity r2 = new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Another completed", LocalDateTime.of(2024, 7, 1, 8, 0), 24, null,
-                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE), "CS-TPA",
-                BigDecimal.valueOf(500));
-        r2.setCompletedAt(LocalDateTime.of(2024, 7, 2, 8, 0));    // 24h turnaround
+                List.of(part), template, MaintenanceStatus.COMPLETED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(500));
+        r2.setCompletedAt(LocalDateTime.of(2024, 7, 2, 8, 0));
         recordRepository.save(r2);
 
         recordRepository.save(new MaintenanceRecordJpaEntity(
                 UUID.randomUUID(), "Ongoing check", LocalDateTime.now(), 8, null,
-                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE), "CS-TPA",
-                BigDecimal.valueOf(200)));
+                List.of(part), template, MaintenanceStatus.IN_PROGRESS, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(200)));
     }
 
     @Test
@@ -65,7 +65,7 @@ class TurnaroundRepositoryTest {
         Double avg = recordRepository.findAverageTurnaroundHours(List.of("CS-TPA"));
 
         assertNotNull(avg);
-        assertEquals(28.0, avg, 0.001);  // average of 32h and 24h = 28h
+        assertEquals(28.0, avg, 0.001);
     }
 
     @Test

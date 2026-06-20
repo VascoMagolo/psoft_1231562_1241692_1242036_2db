@@ -24,7 +24,7 @@ class GetTopUtilizedModelsUseCaseTest {
     private GetTopUtilizedModelsUseCase useCase;
 
     @Test
-    void executeWithAssignmentsReturnsModels() {
+    void ensureWithAssignmentsReturnsModels() {
         ModelUtilizationData data = new ModelUtilizationData("A320", 150L);
 
         when(repository.findTopModelsByAssignments(5)).thenReturn(List.of(data));
@@ -37,7 +37,7 @@ class GetTopUtilizedModelsUseCaseTest {
     }
 
     @Test
-    void executeWithHoursReturnsModels() {
+    void ensureWithHoursReturnsModels() {
         ModelUtilizationData data = new ModelUtilizationData("A320", 5000L);
 
         when(repository.findTopModelsByFlightHours(5)).thenReturn(List.of(data));
@@ -50,7 +50,7 @@ class GetTopUtilizedModelsUseCaseTest {
     }
 
     @Test
-    void executeWithInvalidCriteriaThrowsException() {
+    void ensureWithInvalidCriteriaThrowsException() {
         assertThrows(aisafe.shared.domain.DomainException.class, () -> useCase.execute("INVALID"));
     }
 }

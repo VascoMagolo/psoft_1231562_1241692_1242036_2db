@@ -1,4 +1,4 @@
-package aisafe.flights.infrastructure.persistence;
+package aisafe.flights.infrastructure.persistence.jpa;
 
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.IataCode;
@@ -56,13 +56,13 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
-    public void save(ScheduledFlight flight) {
+    public ScheduledFlight save(ScheduledFlight flight) {
         AircraftJpaEntity aircraftEntity = aircraftRepo.findByRegistrationNumber(new RegistrationNumberJpaEmbeddable(flight.getAircraftRegistrationNumber().getNumber()))
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found for scheduled flight"));
 
-        RouteJpaEntity routeEntity = routeRepo.findByOriginCodeOrDestinationCode(flight.getRoute().getOrigin().getCode(), flight.getRoute().getDestination().getCode())
+        RouteJpaEntity routeEntity = routeRepo.findByOriginCode_CodeOrDestinationCode_Code(flight.getOriginCode().getCode(), flight.getDestinationCode().getCode())
                 .stream()
-                .filter(r -> r.getOriginCode().equals(flight.getRoute().getOrigin().getCode()) && r.getDestinationCode().equals(flight.getRoute().getDestination().getCode()))
+                .filter(r -> r.getOriginCode().getCode().equals(flight.getOriginCode().getCode()) && r.getDestinationCode().getCode().equals(flight.getDestinationCode().getCode()))
                 .findFirst()
                 .orElseThrow(() -> new RouteNotFoundException("Route not found for scheduled flight"));
 
@@ -76,7 +76,7 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
         entity.setId(flight.getId());
 
         ScheduledFlightJpaEntity saved = springRepo.save(entity);
-        flight.setId(saved.getId());
+        return ScheduledFlightMapper.toDomain(saved);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
     }
 
     @Override
-    public boolean hasOverlappingFlights(RegistrationNumber registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime) {
+    public boolean existsByOverlappingSchedule(RegistrationNumber registration, OffsetDateTime departureDateTime, OffsetDateTime arrivalDateTime) {
         return springRepo.hasOverlappingFlights(registration.getNumber(), departureDateTime, arrivalDateTime);
     }
 

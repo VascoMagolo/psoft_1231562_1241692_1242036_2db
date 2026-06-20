@@ -1,17 +1,19 @@
 package aisafe.maintenance.domain;
 
+import aisafe.aircrafts.domain.ModelName;
+
 import java.util.Objects;
 import java.util.List;
 
 public class MaintenanceTemplate {
     private final String name;
     private final MaintenanceType templateType;
-    private final List<String> applicableModelNames;
+    private final List<ModelName> applicableModelNames;
     private List<String> checklist;
     private Integer intervalFlightHours;
     private Integer intervalDays;
 
-    public MaintenanceTemplate(String name, MaintenanceType templateType, List<String> applicableModelNames,
+    public MaintenanceTemplate(String name, MaintenanceType templateType, List<ModelName> applicableModelNames,
                                List<String> checklist, Integer intervalFlightHours, Integer intervalDays) {
         if (name == null) throw new MaintenanceInvalidFieldException("Name cannot be null");
         if (name.trim().isEmpty()) throw new MaintenanceInvalidFieldException("Name cannot be empty");
@@ -30,7 +32,7 @@ public class MaintenanceTemplate {
 
     public String getName() { return name; }
     public MaintenanceType getTemplateType() { return templateType; }
-    public List<String> getApplicableModelNames() { return applicableModelNames; }
+    public List<ModelName> getApplicableModelNames() { return applicableModelNames; }
     public List<String> getChecklist() { return checklist; }
     public Integer getIntervalFlightHours() { return intervalFlightHours; }
     public Integer getIntervalDays() { return intervalDays; }

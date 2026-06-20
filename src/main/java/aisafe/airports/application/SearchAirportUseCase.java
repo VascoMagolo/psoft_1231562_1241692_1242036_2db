@@ -2,6 +2,7 @@ package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
+import aisafe.airports.application.dtos.SearchAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.shared.domain.PaginatedResult;
@@ -20,9 +21,9 @@ public class SearchAirportUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public PaginatedResult<AirportResponse> execute(String name, String city, String country, int pageNumber, int pageSize) {
+    public PaginatedResult<AirportResponse> execute(SearchAirportRequest request) {
         PaginatedResult<Airport> domainResult =
-                airportRepository.searchAirports(name, city, country, pageNumber, pageSize);
+                airportRepository.searchAirports(request.name(), request.city(), request.country(), request.pageNumber(), request.pageSize());
 
         List<AirportResponse> dtos = domainResult.data().stream()
                 .map(AirportResponse::from)

@@ -1,4 +1,4 @@
-package aisafe.routes.application;
+package aisafe.shared.application;
 
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;

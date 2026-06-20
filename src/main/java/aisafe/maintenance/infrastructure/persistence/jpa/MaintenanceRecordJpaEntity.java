@@ -60,8 +60,9 @@ public class MaintenanceRecordJpaEntity {
     @BatchSize(size = 25)
     private Set<MaintenanceComponent> components = new HashSet<>();
 
-    @Column(name = "aircraft_registration", nullable = false)
-    private String aircraftRegistration;
+    @Embedded
+    @AttributeOverride(name = "number", column = @Column(name = "aircraft_registration", nullable = false))
+    private RegistrationNumberJpaEmbeddable aircraftRegistration;
 
     @Column(name = "cost", nullable = false, precision = 15, scale = 2)
     private BigDecimal cost;
@@ -74,7 +75,7 @@ public class MaintenanceRecordJpaEntity {
     public MaintenanceRecordJpaEntity(UUID recordId, String description, LocalDateTime startDate, Integer expectedDuration,
                                       String notes, List<MaintenancePartJpaEntity> parts,
                                       MaintenanceTemplateJpaEntity template, MaintenanceStatus status,
-                                      Set<MaintenanceComponent> components, String aircraftRegistration,
+                                      Set<MaintenanceComponent> components, RegistrationNumberJpaEmbeddable aircraftRegistration,
                                       BigDecimal cost) {
         this.recordId = recordId;
         this.description = description;
@@ -100,7 +101,7 @@ public class MaintenanceRecordJpaEntity {
     public MaintenanceTemplateJpaEntity getTemplate() { return template; }
     public MaintenanceStatus getStatus() { return status; }
     public Set<MaintenanceComponent> getComponents() { return components; }
-    public String getAircraftRegistration() { return aircraftRegistration; }
+    public RegistrationNumberJpaEmbeddable getAircraftRegistration() { return aircraftRegistration; }
     public BigDecimal getCost() { return cost; }
     public LocalDateTime getCompletedAt() { return completedAt; }
 

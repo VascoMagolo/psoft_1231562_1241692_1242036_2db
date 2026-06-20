@@ -43,7 +43,7 @@ public class UpdateMaintenanceRecordUseCase {
 
         record.changeStatus(request.status());
         if (request.notes() != null && !request.notes().trim().isEmpty()) {
-            record.setNotes(request.notes());
+            record.updateNotes(request.notes());
         }
 
         recordRepository.save(record);

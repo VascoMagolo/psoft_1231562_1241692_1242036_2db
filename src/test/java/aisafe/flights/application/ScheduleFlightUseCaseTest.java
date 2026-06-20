@@ -8,7 +8,7 @@ import aisafe.flights.application.dtos.FlightResponse;
 import aisafe.flights.application.dtos.ScheduleFlightRequest;
 import aisafe.flights.domain.ScheduledFlight;
 import aisafe.flights.domain.ScheduledFlightRepository;
-import aisafe.routes.application.RouteDistanceService;
+import aisafe.shared.application.RouteDistanceService;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import org.junit.jupiter.api.Test;
@@ -63,6 +63,7 @@ class ScheduleFlightUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
         when(routeDistanceService.calculateDistanceKm(route)).thenReturn(300.0);
+        when(scheduledFlightRepository.save(any(ScheduledFlight.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         FlightResponse result = useCase.execute(request);
 

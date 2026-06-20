@@ -40,9 +40,8 @@ class ViewScheduledFlightsByAircraftUseCaseTest {
         
         // Mocking FlightResponse requirements
         when(flight.getAircraftRegistrationNumber()).thenReturn(new RegistrationNumber(aircraftId));
-        when(flight.getRoute()).thenReturn(mock(aisafe.routes.domain.Route.class));
-        when(flight.getRoute().getOrigin()).thenReturn(new aisafe.airports.domain.IataCode("OPO"));
-        when(flight.getRoute().getDestination()).thenReturn(new aisafe.airports.domain.IataCode("LIS"));
+        when(flight.getOriginCode()).thenReturn(new aisafe.airports.domain.IataCode("OPO"));
+        when(flight.getDestinationCode()).thenReturn(new aisafe.airports.domain.IataCode("LIS"));
 
         List<FlightResponse> result = useCase.execute(aircraftId);
 

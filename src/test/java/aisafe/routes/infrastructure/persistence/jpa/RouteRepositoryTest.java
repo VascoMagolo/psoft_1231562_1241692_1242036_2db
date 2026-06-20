@@ -1,7 +1,7 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
-import aisafe.flights.infrastructure.persistence.SpringDataScheduledFlightRepository;
 import aisafe.airports.domain.IataCode;
+import aisafe.flights.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
@@ -74,8 +74,8 @@ class RouteRepositoryTest {
         List<RouteJpaEntity> result = springRepo.findCompatibleRoutes(6000.0, 150);
 
         assertEquals(1, result.size());
-        assertEquals("XXX", result.get(0).getOriginCode());
-        assertEquals("YYY", result.get(0).getDestinationCode());
+        assertEquals("XXX", result.get(0).getOriginCode().getCode());
+        assertEquals("YYY", result.get(0).getDestinationCode().getCode());
     }
 
     @Test

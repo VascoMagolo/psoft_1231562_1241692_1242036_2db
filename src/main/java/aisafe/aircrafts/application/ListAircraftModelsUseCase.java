@@ -4,7 +4,6 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import aisafe.shared.domain.PaginatedResult;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
  * Returns all stored aircraft models for the aircraft management screens and APIs.
  */
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class ListAircraftModelsUseCase {
 
     private final AircraftModelRepository repository;

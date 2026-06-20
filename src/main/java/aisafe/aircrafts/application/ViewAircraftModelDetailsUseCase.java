@@ -5,10 +5,8 @@ import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.shared.application.UseCase;
-import org.springframework.transaction.annotation.Transactional;
 
 @UseCase(readOnly = true)
-@Transactional(readOnly = true)
 public class ViewAircraftModelDetailsUseCase {
 
     private final AircraftModelRepository repository;

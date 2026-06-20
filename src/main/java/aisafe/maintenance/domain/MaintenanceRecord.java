@@ -66,7 +66,7 @@ public class MaintenanceRecord {
     public BigDecimal getCost() { return cost; }
     public LocalDateTime getCompletedAt() { return completedAt; }
 
-    public void setNotes(String notes) { this.notes = notes; }
+    public void updateNotes(String notes) { this.notes = notes; }
 
     public void changeStatus(MaintenanceStatus status) {
         this.status = status;
