@@ -3,7 +3,7 @@ autonumber
 actor "Backoffice Operator" as BO
 participant "System" as Sys
 
-BO -> Sys : updateAirportDetails(iataCode, operationalHours, contacts, imagePath, services, terminals, gates)
+BO -> Sys : updateAirportDetails(iataCode, operationalHours, contacts, services, terminals, gates, If-Match: version)
 activate Sys
 Sys --> BO : returns updated Airport details
 deactivate Sys

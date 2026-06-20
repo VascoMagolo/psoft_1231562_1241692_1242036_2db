@@ -1,7 +1,5 @@
 package aisafe.airports.domain;
 
-import org.springframework.util.Assert;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +18,7 @@ public class Airport {
     private final Coordinates coordinates;
     private final List<Runway> runways;
     private AirportStatus status;
-    private String imagePath;
+    private List<AirportPhoto> photos;
     private String operationalHours;
     private List<Contact> contacts;
     private List<Service> services;
@@ -29,11 +27,11 @@ public class Airport {
 
     public Airport(String iataCode, String name, String city, String country, String region,
                    String timezone, Double latitude, Double longitude, List<Runway> runways) {
-        Assert.hasText(name, "Airport name cannot be blank");
-        Assert.hasText(city, "City cannot be blank");
-        Assert.hasText(country, "Country cannot be blank");
-        Assert.hasText(timezone, "Timezone cannot be blank");
-        Assert.notEmpty(runways, "Airport must have at least one runway");
+        if (name == null || name.isBlank()) throw new InvalidAirportException("Airport name cannot be blank");
+        if (city == null || city.isBlank()) throw new InvalidAirportException("City cannot be blank");
+        if (country == null || country.isBlank()) throw new InvalidAirportException("Country cannot be blank");
+        if (timezone == null || timezone.isBlank()) throw new InvalidAirportException("Timezone cannot be blank");
+        if (runways == null || runways.isEmpty()) throw new InvalidAirportException("Airport must have at least one runway");
 
         this.iataCode = new IataCode(iataCode);
         this.name = name.trim();
@@ -44,23 +42,26 @@ public class Airport {
         this.coordinates = new Coordinates(latitude, longitude);
         this.runways = new ArrayList<>(runways);
         this.status = AirportStatus.OPERATIONAL;
+        this.photos = new ArrayList<>();
         this.contacts = new ArrayList<>();
         this.services = new ArrayList<>();
         this.terminals = new ArrayList<>();
         this.gates = new ArrayList<>();
     }
 
-    public void updateDetails(String operationalHours, List<Contact> contacts, String imagePath,
+    public void updateDetails(String operationalHours, List<Contact> contacts, List<AirportPhoto> photos,
                               List<Service> services, List<Terminal> terminals, List<Gate> gates) {
         if (operationalHours != null) this.operationalHours = operationalHours;
         if (contacts != null) this.contacts = new ArrayList<>(contacts);
-        if (imagePath != null) this.imagePath = imagePath;
+        if (photos != null) this.photos = new ArrayList<>(photos);
         if (services != null) this.services = new ArrayList<>(services);
         if (terminals != null) this.terminals = new ArrayList<>(terminals);
         if (gates != null) this.gates = new ArrayList<>(gates);
     }
 
-    public void setStatus(AirportStatus status) { this.status = status; }
+    public void addPhoto(AirportPhoto photo) { this.photos.add(photo); }
+
+    public void changeStatus(AirportStatus status) { this.status = status; }
 
     public IataCode getIataCode() { return iataCode; }
     public String getName() { return name; }
@@ -71,7 +72,7 @@ public class Airport {
     public Coordinates getCoordinates() { return coordinates; }
     public List<Runway> getRunways() { return Collections.unmodifiableList(runways); }
     public AirportStatus getStatus() { return status; }
-    public String getImagePath() { return imagePath; }
+    public List<AirportPhoto> getPhotos() { return Collections.unmodifiableList(photos); }
     public String getOperationalHours() { return operationalHours; }
     public List<Contact> getContacts() { return Collections.unmodifiableList(contacts); }
     public List<Service> getServices() { return Collections.unmodifiableList(services); }

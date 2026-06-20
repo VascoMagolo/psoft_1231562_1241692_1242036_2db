@@ -4,12 +4,12 @@ actor "ATCC / Backoffice Operator" as Actor
 participant "System" as Sys
 
 alt Update route details
-    Actor -> Sys : updateRoute(routeId, updatedDetails)
+    Actor -> Sys : updateRoute(origin, destination, updatedDetails)
     activate Sys
     Sys --> Actor : returns updated Route details
     deactivate Sys
 else Deactivate route
-    Actor -> Sys : deactivateRoute(routeId)
+    Actor -> Sys : deactivateRoute(origin, destination)
     activate Sys
     Sys --> Actor : returns deactivated Route details
     deactivate Sys

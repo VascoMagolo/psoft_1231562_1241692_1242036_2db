@@ -33,11 +33,11 @@ class ListRoutesFromAirportUseCaseTest {
     @Test
     void ensureRoutesReturnedForExistingAirport() {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
-        when(airportRepository.existsByIataCodeCode("OPO")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
         when(routeRepository.findByOrigin(any(IataCode.class), anyInt(), anyInt()))
                 .thenReturn(new PaginatedResult<>(List.of(route), 1L));
 
-        PaginatedResult<Route> result = listRoutesFromAirport.execute("OPO", 0, 20);
+        PaginatedResult<aisafe.routes.application.dtos.RouteResponse> result = listRoutesFromAirport.execute("OPO", 0, 20);
 
         assertEquals(1L, result.totalElements());
         verify(routeRepository).findByOrigin(any(IataCode.class), anyInt(), anyInt());
@@ -45,7 +45,7 @@ class ListRoutesFromAirportUseCaseTest {
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> listRoutesFromAirport.execute("XXX", 0, 20));
         verify(routeRepository, never()).findByOrigin(any(), anyInt(), anyInt());

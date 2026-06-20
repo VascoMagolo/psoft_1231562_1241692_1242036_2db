@@ -4,8 +4,9 @@ import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.application.dtos.RouteResponse;
-import aisafe.routes.domain.Route;
+import aisafe.routes.domain.RouteSummaryData;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.RouteStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,22 +33,24 @@ class ViewAirportRoutesUseCaseTest {
 
     @Test
     void ensureRoutesReturnedForExistingAirport() {
-        Route route = new Route("LIS", "OPO", 45, 300.0, 150);
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
-        when(routeRepository.findByOriginOrDestination(any(IataCode.class), any(IataCode.class)))
-                .thenReturn(List.of(route));
+        RouteSummaryData summary = new RouteSummaryData(
+                new IataCode("LIS"), new IataCode("OPO"), 45, 300.0, 150, RouteStatus.ACTIVE, 7L);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
+        when(routeRepository.listSummariesForAirport(any(IataCode.class))).thenReturn(List.of(summary));
 
         List<RouteResponse> result = viewAirportRoutes.execute("LIS");
 
         assertEquals(1, result.size());
-        verify(routeRepository).findByOriginOrDestination(any(IataCode.class), any(IataCode.class));
+        assertEquals(7L, result.get(0).version());
+        verify(routeRepository).listSummariesForAirport(any(IataCode.class));
+        verify(routeRepository, never()).findVersionFor(any(), any());
     }
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.existsByIataCodeCode("XXX")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("XXX"))).thenReturn(false);
 
         assertThrows(AirportNotFoundException.class, () -> viewAirportRoutes.execute("XXX"));
-        verify(routeRepository, never()).findByOriginOrDestination(any(), any());
+        verify(routeRepository, never()).listSummariesForAirport(any());
     }
 }

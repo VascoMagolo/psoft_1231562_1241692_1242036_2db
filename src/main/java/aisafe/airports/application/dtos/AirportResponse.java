@@ -14,7 +14,7 @@ public record AirportResponse(
         String country,
         String region,
         String timezone,
-        String imagePath,
+        int photoCount,
         String operationalHours,
         String status,
         CoordinatesRecord coordinates,
@@ -22,13 +22,14 @@ public record AirportResponse(
         List<ContactRecord> contacts,
         List<String> services,
         List<String> terminals,
-        List<String> gates
+        List<String> gates,
+        Long version
 ) {
     public record CoordinatesRecord(Double latitude, Double longitude) {}
     public record RunwayRecord(String name, Integer length, String orientation) {}
     public record ContactRecord(String type, String value, String description) {}
 
-    public static AirportResponse from(Airport airport) {
+    public static AirportResponse from(Airport airport, Long version) {
         return new AirportResponse(
                 airport.getIataCode().getCode(),
                 airport.getName(),
@@ -36,7 +37,7 @@ public record AirportResponse(
                 airport.getCountry(),
                 airport.getRegion(),
                 airport.getTimezone(),
-                airport.getImagePath(),
+                airport.getPhotos().size(),
                 airport.getOperationalHours(),
                 airport.getStatus().name(),
                 new CoordinatesRecord(
@@ -51,7 +52,12 @@ public record AirportResponse(
                         .toList(),
                 airport.getServices().stream().map(s -> s.getDescription()).toList(),
                 airport.getTerminals().stream().map(t -> t.getName()).toList(),
-                airport.getGates().stream().map(g -> g.getIdentifier()).toList()
+                airport.getGates().stream().map(g -> g.getIdentifier()).toList(),
+                version
         );
+    }
+
+    public static AirportResponse from(Airport airport) {
+        return from(airport, null);
     }
 }

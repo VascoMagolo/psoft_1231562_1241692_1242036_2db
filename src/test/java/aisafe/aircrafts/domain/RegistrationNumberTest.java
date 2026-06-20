@@ -20,26 +20,26 @@ class RegistrationNumberTest {
 
     @Test
     void ensureNullThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new RegistrationNumber(null));
+        assertThrows(InvalidRegistrationNumberException.class, () -> new RegistrationNumber(null));
     }
 
     @Test
     void ensureEmptyStringThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new RegistrationNumber(""));
+        assertThrows(InvalidRegistrationNumberException.class, () -> new RegistrationNumber(""));
     }
 
     @Test
     void ensureTooShortSuffixThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new RegistrationNumber("CS-TP"));
+        assertThrows(InvalidRegistrationNumberException.class, () -> new RegistrationNumber("CS-TP"));
     }
 
     @Test
     void ensureMissingHyphenThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new RegistrationNumber("CSTPA"));
+        assertThrows(InvalidRegistrationNumberException.class, () -> new RegistrationNumber("CSTPA"));
     }
 
     @Test
     void ensureDigitInPrefixThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> new RegistrationNumber("1S-TPA"));
+        assertThrows(InvalidRegistrationNumberException.class, () -> new RegistrationNumber("1S-TPA"));
     }
 }

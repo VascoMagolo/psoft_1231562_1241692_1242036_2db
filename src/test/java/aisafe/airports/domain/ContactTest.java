@@ -1,6 +1,5 @@
 package aisafe.airports.domain;
 
-import aisafe.airports.domain.InvalidContactException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,5 +59,36 @@ class ContactTest {
     void ensureDescriptionIsTrimmed() {
         Contact contact = new Contact(ContactType.OTHER, "value", "  trimmed  ");
         assertEquals("trimmed", contact.getDescription());
+    }
+
+    @Test
+    void ensureEqualContactsAreEqual() {
+        assertEquals(
+            new Contact(ContactType.EMAIL, "info@airport.pt", "General"),
+            new Contact(ContactType.EMAIL, "info@airport.pt", "General")
+        );
+    }
+
+    @Test
+    void ensureDifferentContactsAreNotEqual() {
+        assertNotEquals(
+            new Contact(ContactType.EMAIL, "info@airport.pt", null),
+            new Contact(ContactType.PHONE, "+351213500000", null)
+        );
+    }
+
+    @Test
+    void ensureHashCodeIsConsistentWithEquals() {
+        assertEquals(
+            new Contact(ContactType.EMAIL, "info@airport.pt", null).hashCode(),
+            new Contact(ContactType.EMAIL, "info@airport.pt", null).hashCode()
+        );
+    }
+
+    @Test
+    void ensureToStringContainsValues() {
+        String str = new Contact(ContactType.EMAIL, "info@airport.pt", null).toString();
+        assertTrue(str.contains("EMAIL"));
+        assertTrue(str.contains("info@airport.pt"));
     }
 }

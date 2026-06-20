@@ -1,6 +1,7 @@
 package aisafe.airports.application;
 
 import aisafe.airports.application.dtos.AirportResponse;
+import aisafe.airports.application.dtos.SearchAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.Runway;
@@ -37,7 +38,7 @@ class SearchAirportUseCaseTest {
         PaginatedResult<Airport> domainResult = new PaginatedResult<>(List.of(airport), 1L);
         when(airportRepository.searchAirports("Lisbon", null, null, 0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<AirportResponse> result = searchAirport.execute("Lisbon", null, null, 0, 10);
+        PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest("Lisbon", null, null, 0, 10));
 
         assertEquals(1, result.data().size());
         assertEquals(1L, result.totalElements());
@@ -48,7 +49,7 @@ class SearchAirportUseCaseTest {
         PaginatedResult<Airport> domainResult = new PaginatedResult<>(List.of(), 0L);
         when(airportRepository.searchAirports("Unknown", null, null, 0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<AirportResponse> result = searchAirport.execute("Unknown", null, null, 0, 10);
+        PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest("Unknown", null, null, 0, 10));
 
         assertTrue(result.data().isEmpty());
         assertEquals(0L, result.totalElements());

@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "Maintenance Technician" as Tech
+participant "System" as Sys
+
+Tech -> Sys : updateMaintenanceComponent(id, data)
+activate Sys
+Sys --> Tech : returns updated component details
+deactivate Sys
+@enduml

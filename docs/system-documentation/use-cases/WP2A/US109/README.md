@@ -11,7 +11,7 @@
 - On success the system returns HTTP 200 with the updated airport representation.
 - Invalid or missing status returns HTTP 400.
 - Airport not found returns HTTP 404.
-- Concurrent update conflict returns HTTP 409.
+- Concurrent update conflict returns HTTP 412.
 
 ## Pre-conditions
 
@@ -36,13 +36,13 @@
 | ---- | ----------------------------------- | --------------- |
 | 2    | Status value missing or invalid     | HTTP 400        |
 | 3    | Airport not found                   | HTTP 404        |
-| 4    | Optimistic locking version conflict | HTTP 409        |
+| 4    | Optimistic locking version conflict | HTTP 412        |
 
 ## Design Justification
 
 - `PATCH` is used instead of `PUT` because only a single field is being updated; the full resource representation is not required in the request.
 - `AirportStatus` is an enum validated at the DTO level by Jackson deserialization; invalid values fail before reaching the use case.
-- Optimistic locking (`@Version` on `Airport`) ensures that two concurrent operators cannot silently overwrite each other's status change -- the second writer receives a 409 and must retry.
+- Optimistic locking (`@Version` on `Airport`) ensures that two concurrent operators cannot silently overwrite each other's status change -- the second writer receives a 412 and must retry.
 
 ## Sequence Diagrams
 

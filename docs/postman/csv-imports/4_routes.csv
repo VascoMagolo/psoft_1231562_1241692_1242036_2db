@@ -1,0 +1,3 @@
+originIataCode,destinationIataCode,estimatedFlightTime,minimumRange,minimumCapacity
+HND,KIX,75,430,150
+HND,NRT,30,60,100

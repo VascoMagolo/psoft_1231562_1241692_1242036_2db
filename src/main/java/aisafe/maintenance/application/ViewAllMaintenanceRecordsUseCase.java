@@ -8,16 +8,15 @@ import aisafe.maintenance.application.dtos.ViewAllMaintenanceRecordsResponse;
 import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
 import aisafe.shared.domain.PaginatedResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Views all maintenance records from a specific aircraft using its registration number
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class ViewAllMaintenanceRecordsUseCase {
     private final MaintenanceRecordRepository repository;
     private final AircraftRepository aircraftRepository;
@@ -32,7 +31,7 @@ public class ViewAllMaintenanceRecordsUseCase {
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration number: " + registrationNumber.getNumber() + " not found."));
 
         PaginatedResult<MaintenanceRecord> recordsPage = repository.findByAircraftRegistration(
-                registrationNumber.getNumber(), pageNumber, pageSize);
+                registrationNumber, pageNumber, pageSize);
 
         List<ViewAllMaintenanceRecordsResponse> data = recordsPage.data().stream()
                 .map(this::toResponse)
@@ -43,13 +42,14 @@ public class ViewAllMaintenanceRecordsUseCase {
 
     private ViewAllMaintenanceRecordsResponse toResponse(MaintenanceRecord record) {
         return new ViewAllMaintenanceRecordsResponse(
-                record.getPart().getPartNumber(),
+                record.getParts().stream().map(p -> p.getPartNumber()).toList(),
                 record.getTemplate().getName(),
                 record.getStartDate(),
                 record.getExpectedDuration(),
                 record.getStatus(),
                 record.getNotes(),
-                record.getAircraftRegistration()
+                record.getAircraftRegistration().getNumber(),
+                record.getComponents().stream().map(Enum::name).collect(Collectors.toSet())
         );
     }
 }

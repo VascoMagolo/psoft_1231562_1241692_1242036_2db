@@ -1,5 +1,7 @@
 package aisafe.maintenance.application;
 
+import aisafe.aircrafts.domain.ModelName;
+import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenancePart;
 import aisafe.maintenance.domain.MaintenanceRecord;
@@ -14,9 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,25 +39,26 @@ class DeleteMaintenanceRecordUseCaseTest {
     private MaintenanceRecord buildRecord() {
         MaintenancePart part = new MaintenancePart("PN-001", "Engine Filter", "A filter", 10, 2, MaintenanceComponent.ENGINE);
         MaintenanceTemplate template = new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
-                List.of("ModelA"), List.of("Check oil"), 500, 90);
-        return new MaintenanceRecord("Oil change", LocalDateTime.now(), 2, part, "notes", template,
-                MaintenanceStatus.PLANNED, "CS-ABD");
+                List.of(new ModelName("ModelA")), List.of("Check oil"), 500, 90);
+        return new MaintenanceRecord(UUID.randomUUID(), "Oil change", LocalDateTime.now(), 2, List.of(part), "notes", template,
+                MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-ABD"), BigDecimal.valueOf(1000), null);
     }
 
     @Test
     void ensureMaintenanceRecordIsDeletedSuccessfully() {
         MaintenanceRecord record = buildRecord();
-        when(maintenanceRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+        when(maintenanceRecordRepository.findByRecordId(record.getRecordId())).thenReturn(Optional.of(record));
 
-        assertDoesNotThrow(() -> deleteMaintenanceRecord.execute(1L));
+        assertDoesNotThrow(() -> deleteMaintenanceRecord.execute(record.getRecordId()));
         verify(maintenanceRecordRepository).delete(any(MaintenanceRecord.class));
     }
 
     @Test
     void ensureExceptionWhenMaintenanceRecordNotFound() {
-        when(maintenanceRecordRepository.findById(99L)).thenReturn(Optional.empty());
+        UUID randomId = UUID.randomUUID();
+        when(maintenanceRecordRepository.findByRecordId(randomId)).thenReturn(Optional.empty());
 
-        assertThrows(MaintenanceRecordNotFoundException.class, () -> deleteMaintenanceRecord.execute(99L));
+        assertThrows(MaintenanceRecordNotFoundException.class, () -> deleteMaintenanceRecord.execute(randomId));
         verify(maintenanceRecordRepository, never()).delete(any());
     }
 }

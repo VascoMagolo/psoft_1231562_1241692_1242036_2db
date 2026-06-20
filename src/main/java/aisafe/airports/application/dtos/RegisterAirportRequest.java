@@ -14,7 +14,8 @@ import java.util.List;
  * @param country Country where the airport is located
  * @param region Region where the airport is located
  * @param timezone Timezone of the airport
- * @param imagePath Path to an image representing the airport
+ * @param image optional photo bytes (must be null for JSON requests; use multipart/form-data)
+ * @param imageContentType MIME type of the photo (must be null for JSON requests)
  * @param operationalHours Operational hours of the airport
  * @param runways List of runways at the airport, each with name, length, and orientation
  * @param services List of services available at the airport
@@ -64,8 +65,13 @@ public record RegisterAirportRequest(
         @Valid
         List<RunwayRequest> runways,
 
-        @Schema(description = "Path or URL to an airport image (optional)", example = "https://example.com/lis.jpg")
-        String imagePath,
+        @Schema(description = "Must be null for JSON requests - use multipart/form-data to upload a photo")
+        @Null(message = "For photo upload use multipart/form-data POST /api/airports")
+        byte[] image,
+
+        @Schema(description = "Must be null for JSON requests - use multipart/form-data to upload a photo")
+        @Null(message = "For photo upload use multipart/form-data POST /api/airports")
+        String imageContentType,
 
         @Schema(description = "Operational hours description (optional)", example = "24/7")
         String operationalHours,

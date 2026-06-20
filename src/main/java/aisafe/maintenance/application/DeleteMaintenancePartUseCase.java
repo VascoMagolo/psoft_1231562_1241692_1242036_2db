@@ -21,7 +21,7 @@ public class DeleteMaintenancePartUseCase {
     public void execute(String partNumber) {
         MaintenancePart part = maintenancePartRepository.findByPartNumber(partNumber)
                 .orElseThrow(() -> new MaintenancePartNotFoundException("Maintenance part not found with part number: " + partNumber));
-        if (maintenanceRecordRepository.existsByPart(part)) {
+        if (maintenanceRecordRepository.existsByPartsContaining(part)) {
             throw new ResourceInUseException("Maintenance part is referenced by existing maintenance records and cannot be deleted.");
         }
         maintenancePartRepository.delete(part);

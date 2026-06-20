@@ -1,6 +1,7 @@
 package aisafe.aircrafts.application;
 
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.ViewAircraftDetailsRequest;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,15 +32,15 @@ class ViewAircraftDetailsUseCaseTest {
     @BeforeEach
     void setUp() {
         registrationNumber = new RegistrationNumber("CS-TPA");
-        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, List.of("WiFi"));
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
+        aircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), model, registrationNumber, 150, 5000.0, List.of("WiFi"));
     }
 
     @Test
     void ensureAircraftDetailsAreReturnedSuccessfully() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.of(aircraft));
 
-        ViewAircraftDetailsResponse response = viewAircraftDetailsUseCase.execute(registrationNumber);
+        AircraftResponse response = viewAircraftDetailsUseCase.execute(new ViewAircraftDetailsRequest(registrationNumber));
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.registrationNumber());
@@ -51,6 +52,6 @@ class ViewAircraftDetailsUseCaseTest {
     void ensureExceptionWhenAircraftNotFound() {
         when(aircraftRepository.findByRegistrationNumber(registrationNumber)).thenReturn(Optional.empty());
 
-        assertThrows(AircraftNotFoundException.class, () -> viewAircraftDetailsUseCase.execute(registrationNumber));
+        assertThrows(AircraftNotFoundException.class, () -> viewAircraftDetailsUseCase.execute(new ViewAircraftDetailsRequest(registrationNumber)));
     }
 }

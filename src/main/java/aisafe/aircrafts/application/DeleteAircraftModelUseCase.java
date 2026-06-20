@@ -28,7 +28,7 @@ public class DeleteAircraftModelUseCase {
         AircraftModel model = aircraftModelRepository.findByModelName(modelName)
                 .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model not found with name " + modelName));
 
-        if (aircraftRepository.anyAircraftExistsForModel(modelName)) {
+        if (aircraftRepository.existsByModelName(modelName)) {
             throw new ResourceInUseException("Cannot delete aircraft model because there are aircraft associated with it.");
         }
 

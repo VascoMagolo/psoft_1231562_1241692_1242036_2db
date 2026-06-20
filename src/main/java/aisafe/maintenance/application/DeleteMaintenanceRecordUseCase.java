@@ -5,6 +5,8 @@ import aisafe.maintenance.domain.MaintenanceRecord;
 import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
 
+import java.util.UUID;
+
 @UseCase
 public class DeleteMaintenanceRecordUseCase {
     private final MaintenanceRecordRepository maintenanceRecordRepository;
@@ -13,9 +15,9 @@ public class DeleteMaintenanceRecordUseCase {
         this.maintenanceRecordRepository = maintenanceRecordRepository;
     }
 
-    public void execute(Long id) {
-        MaintenanceRecord record = maintenanceRecordRepository.findById(id)
-                .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record not found with id: " + id));
+    public void execute(UUID recordId) {
+        MaintenanceRecord record = maintenanceRecordRepository.findByRecordId(recordId)
+                .orElseThrow(() -> new MaintenanceRecordNotFoundException("Maintenance record not found with id: " + recordId));
         maintenanceRecordRepository.delete(record);
     }
 }

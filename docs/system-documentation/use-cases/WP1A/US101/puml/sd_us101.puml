@@ -6,7 +6,7 @@ participant "RegisterAircraftModelUseCase" as UC
 participant "AircraftModelRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : POST /api/aircraftModels\n{ modelName, manufacturer, maxRange,\n  fuelCapacity, cruisingSpeed,\n  maximumSeatingCapacity, imagePath }
+BO -> Ctrl : POST /api/aircraftModels\n{ modelName, manufacturer, maxRange,\n  fuelCapacity, cruisingSpeed,\n  maximumSeatingCapacity }
 activate Ctrl
 
 note right of Ctrl
@@ -15,7 +15,6 @@ note right of Ctrl
   - manufacturer: not null (enum)
   - maxRange, fuelCapacity, cruisingSpeed: >= 1.0
   - maximumSeatingCapacity: >= 1
-  - imagePath: not blank
 end note
 
 Ctrl -> UC : execute(request: RegisterAircraftModelRequest)
@@ -43,7 +42,7 @@ else model name is unique
   Repo --> UC : AircraftModel
   deactivate Repo
 
-  UC --> Ctrl : AircraftModelResponse\n{ modelName, manufacturer,\n  fuelCapacity, maxRange, cruisingSpeed,\n  imagePath, maximumSeatingCapacity }
+  UC --> Ctrl : AircraftModelResponse\n{ modelName, manufacturer,\n  fuelCapacity, maxRange, cruisingSpeed,\n  hasImage, maximumSeatingCapacity }
   deactivate UC
   Ctrl --> BO : 201 Created\nEntityModel<AircraftModelResponse> with _links
 end

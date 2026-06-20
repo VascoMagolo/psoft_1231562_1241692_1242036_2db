@@ -1,11 +1,11 @@
 package aisafe.aircrafts.application;
 
 import aisafe.shared.application.UseCase;
-import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.ListAircraftRequest;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.shared.domain.PaginatedResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
  * This use case is read-only and supports pagination and sorting.
  * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class ListAircraftUseCase {
 
     private final AircraftRepository repository;
@@ -31,11 +30,11 @@ public class ListAircraftUseCase {
      * @param pageSize the number of items per page
      * @return a pure Java List of aircraft DTOs
      */
-    public PaginatedResult<ListAircraftsUseCaseResponse> execute(int pageNumber, int pageSize) {
-        PaginatedResult<Aircraft> domainResult = repository.findAll(pageNumber, pageSize);
+    public PaginatedResult<AircraftResponse> execute(ListAircraftRequest request) {
+        PaginatedResult<Aircraft> domainResult = repository.findAll(request.pageNumber(), request.pageSize());
 
-        List<ListAircraftsUseCaseResponse> dtoList = domainResult.data().stream()
-                .map(ListAircraftsUseCaseResponse::from)
+        List<AircraftResponse> dtoList = domainResult.data().stream()
+                .map(a -> AircraftResponse.from(a, null))
                 .collect(Collectors.toList());
 
         return new PaginatedResult<>(dtoList, domainResult.totalElements());

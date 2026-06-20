@@ -47,7 +47,7 @@ Requests flow through three layers within each bounded context:
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                      infrastructure/                        │
-│         Controllers, filters, Spring Security config        │
+│   Controllers, JPA adapters, filters, Spring Security config│
 │   AirportController, RouteController, etc.                  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -74,25 +74,33 @@ src/main/java/aisafe/
 ├── aircrafts/
 │   ├── domain/          # Aircraft, AircraftModel, RegistrationNumber, etc.
 │   ├── application/     # RegisterAircraftUseCase, ListAircraftUseCase, etc.
-│   └── infrastructure/  # AircraftController, AircraftModelController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # AircraftController, AircraftModelController
 ├── airports/
 │   ├── domain/          # Airport, Runway, IataCode, AirportStatus, etc.
 │   ├── application/     # RegisterAirportUseCase, SearchAirportUseCase, etc.
-│   └── infrastructure/  # AirportController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # AirportController
 ├── routes/
 │   ├── domain/          # Route, RouteHistory, RouteRepository, etc.
 │   ├── application/     # CreateRouteUseCase, SearchRoutesUseCase, etc.
-│   └── infrastructure/  # RouteController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # RouteController
 ├── maintenance/
 │   ├── domain/          # MaintenanceRecord, MaintenancePart, MaintenanceTemplate, etc.
 │   ├── application/     # CreateMaintenanceRecordUseCase, etc.
-│   └── infrastructure/  # MaintenanceController
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # MaintenanceController
 ├── security/
 │   ├── domain/          # User, Role, UserRepository
 │   ├── application/     # AuthenticateUserUseCase, JwtService, etc.
 │   └── infrastructure/  # JwtAuthenticationFilter, AuthController, SecurityConfig
 └── shared/
-    ├── domain/          # DomainException, DuplicateResourceException
+    ├── domain/          # DomainException, DuplicateResourceException, ConcurrencyException, PaginatedResult
     ├── application/     # UseCase (base interface + annotations)
     └── infrastructure/  # GlobalExceptionHandler, OpenApiConfig, Bootstrap, etc.
 ```
@@ -149,24 +157,6 @@ To run all tests:
 
 ## Team Tooling
 
-### Pre-commit Hook
-
-A hook runs before every commit to validate the `docs/` folder structure - enforcing that each work package has the required README, PlantUML sources, and generated SVGs. Install it once after cloning:
-
-```bash
-# Unix / macOS
-bash scripts/install-hooks.sh
-
-# Windows
-scripts/install-hooks.ps1
-```
-
-To check the docs structure at any time without committing:
-
-```bash
-python3 scripts/check-docs.py
-```
-
 ### Diagram Generation
 
 PlantUML `.puml` files live in `puml/` subfolders within each work package. To generate the corresponding `.svg` files:
@@ -183,4 +173,4 @@ Use the `-l` flag to preview which files would be converted without actually gen
 
 ## Documentation
 
-Full internal documentation - use cases, FURPS+, domain model, Postman collection, and client Q&A - is available at [`docs/README.md`](docs/README.md).
+Full internal documentation - use cases, glossary, FURPS+, domain model, Postman collection, and client Q&A - is available at [`docs/README.md`](docs/README.md).

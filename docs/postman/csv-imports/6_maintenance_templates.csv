@@ -1,0 +1,2 @@
+templateName,description,flightHoursThreshold,monthsThreshold,flightCyclesThreshold,models,checklist
+Line Check,Daily line maintenance,48,1,30,Boeing 787-10;Airbus A330-900,Check tires;Visual walk-around

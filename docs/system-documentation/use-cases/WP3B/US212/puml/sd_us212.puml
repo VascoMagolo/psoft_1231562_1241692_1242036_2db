@@ -1,0 +1,52 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "FlightController" as Ctrl
+participant "ScheduleFlightUseCase" as UC
+participant "RouteRepository" as RouteRepo
+participant "AircraftRepository" as AcRepo
+participant "FlightRepository" as FlightRepo
+participant "Flight" as Entity
+database "Database" as DB
+
+BO -> Ctrl : POST /api/flights\n(aircraftId, originIataCode, destinationIataCode,\ndepartureDateTime, arrivalDateTime)
+activate Ctrl
+
+Ctrl -> UC : execute(aircraftId, originIataCode, destinationIataCode,\ndepartureDateTime, arrivalDateTime)
+activate UC
+
+UC -> RouteRepo : findByOriginAndDestination(originIataCode, destinationIataCode)
+activate RouteRepo
+RouteRepo --> UC : returns route details
+deactivate RouteRepo
+
+UC -> AcRepo : findById(aircraftId)
+activate AcRepo
+AcRepo --> UC : returns aircraft details
+deactivate AcRepo
+
+UC -> FlightRepo : hasOverlappingFlights(aircraftId, departureDateTime, arrivalDateTime)
+activate FlightRepo
+FlightRepo --> UC : returns false
+deactivate FlightRepo
+
+UC -> Entity : new Flight(route, aircraft, departureDateTime, arrivalDateTime)
+activate Entity
+Entity --> UC : returns flight entity
+deactivate Entity
+
+UC -> FlightRepo : save(flight)
+activate FlightRepo
+FlightRepo -> DB : INSERT INTO flight (origin, destination, aircraft_id, departure, arrival)
+activate DB
+DB --> FlightRepo : returns success
+deactivate DB
+FlightRepo --> UC : returns saved flight
+deactivate FlightRepo
+
+UC --> Ctrl : FlightResponse.from(flight)
+deactivate UC
+
+Ctrl --> BO : returns created scheduled Flight details
+deactivate Ctrl
+@enduml

@@ -23,21 +23,14 @@ public class UpdateAircraftModelUseCase {
         AircraftModel model = aircraftModelRepository.findByModelName(modelName)
                 .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model '" + modelName + "' not found."));
 
-        if (request.cruisingSpeed() != null) {
-            model.setCruisingSpeed(request.cruisingSpeed());
-        }
-        if (request.fuelCapacity() != null) {
-            model.setFuelCapacity(request.fuelCapacity());
-        }
-        if (request.maxRange() != null) {
-            model.setMaxRange(request.maxRange());
-        }
-        if (request.maximumSeatingCapacity() != null) {
-            model.setMaximumSeatingCapacity(request.maximumSeatingCapacity());
-        }
-        if (request.imagePath() != null && !request.imagePath().isBlank()) {
-            model.setImagePath(request.imagePath());
-        }
+        model.updateDetails(
+                request.fuelCapacity(),
+                request.maxRange(),
+                request.cruisingSpeed(),
+                request.maximumSeatingCapacity(),
+                null
+        );
+        
         aircraftModelRepository.save(model);
 
         return AircraftModelResponse.from(model);

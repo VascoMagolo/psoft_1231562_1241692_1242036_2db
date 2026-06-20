@@ -7,22 +7,21 @@ participant "Airport" as Entity
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : POST /api/airports\n{ iataCode, name, city, country, region,\n  timezone, latitude, longitude,\n  runways: [{ name, length, orientation }],\n  imagePath?, operationalHours?,\n  services?: [String],\n  terminals?: [String],\n  gates?: [String] }
+BO -> Ctrl : POST /api/airports (multipart/form-data)\n{ iataCode, name, city, country, region,\n  timezone, latitude, longitude,\n  runwayName[], runwayLength[], runwayOrientation[],\n  operationalHours?, services?: [String],\n  terminals?: [String], gates?: [String],\n  photo?: File }
 activate Ctrl
 
 note right of Ctrl
-  @Valid on RegisterAirportRequest:
-  - iataCode: 3 alphanumeric chars
-  - name, city, country, timezone: not blank
-  - latitude: [-90, 90], longitude: [-180, 180]
-  - runways: at least one entry required
-  - services, terminals, gates: optional
+  Content-Type routing:
+  - multipart/form-data -> this handler (US207)
+  - application/json   -> JSON handler (US106)
+  MIME validation: photo must start with "image/"
+  @Null on image field rejects JSON clients with bytes
 end note
 
 Ctrl -> UC : execute(request: RegisterAirportRequest)
 activate UC
 
-UC -> Repo : existsByIataCodeCode(request.iataCode())
+UC -> Repo : existsByIataCode(request.iataCode())
 activate Repo
 Repo --> UC : false
 deactivate Repo
@@ -32,7 +31,7 @@ activate Entity
 Entity --> UC : airport
 deactivate Entity
 
-UC -> Entity : updateDetails(operationalHours, null,\n  imagePath, services, terminals, gates)
+UC -> Entity : updateDetails(operationalHours, null,\n  photo: AirportPhoto | null, services, terminals, gates)
 activate Entity
 note right of Entity : Optional fields -- only\nnon-null values are applied
 Entity --> UC
@@ -40,15 +39,58 @@ deactivate Entity
 
 UC -> Repo : save(airport)
 activate Repo
-Repo -> DB : INSERT INTO airport\n+ collection tables\n(runways, services, terminals, gates)
+Repo -> DB : INSERT INTO airport\n+ collection tables
 activate DB
 DB --> Repo
 deactivate DB
 deactivate Repo
 
-UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, city, country,\n  status, coordinates, runways,\n  services, terminals, gates }
+UC --> Ctrl : AirportResponse.from(airport)\n{ iataCode, name, ..., photoCount: 0..N }
 deactivate UC
 
 Ctrl --> BO : 201 Created\nEntityModel<AirportResponse> with _links
+deactivate Ctrl
+
+== Add a photo ==
+
+BO -> Ctrl : POST /api/airports/{iataCode}/photos\n(multipart/form-data, photo: File)
+activate Ctrl
+Ctrl -> UC2 : execute(iataCode, bytes, contentType)
+activate UC2
+note over UC2 : UploadAirportPhotoUseCase
+UC2 -> Repo : findByIataCode(iataCode)
+activate Repo
+Repo --> UC2 : Airport
+deactivate Repo
+UC2 -> Entity : addPhoto(AirportPhoto(bytes, contentType))
+activate Entity
+Entity --> UC2
+deactivate Entity
+UC2 -> Repo : save(airport)
+activate Repo
+Repo -> DB : INSERT INTO airport_photos
+activate DB
+DB --> Repo
+deactivate DB
+deactivate Repo
+UC2 --> Ctrl : AirportResponse (photoCount: N)
+deactivate UC2
+Ctrl --> BO : 200 OK
+deactivate Ctrl
+
+== Retrieve photo bytes by index ==
+
+BO -> Ctrl : GET /api/airports/{iataCode}/photos/{index}
+activate Ctrl
+Ctrl -> UC3 : execute(iataCode, index)
+activate UC3
+note over UC3 : GetAirportPhotoUseCase
+UC3 -> Repo : findByIataCode(iataCode)
+activate Repo
+Repo --> UC3 : Airport
+deactivate Repo
+UC3 --> Ctrl : AirportPhotoData(bytes, contentType)
+deactivate UC3
+Ctrl --> BO : 200 OK\nbody: raw bytes\nContent-Type: image/jpeg (or actual type)
 deactivate Ctrl
 @enduml

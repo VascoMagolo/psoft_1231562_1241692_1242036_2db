@@ -1,5 +1,6 @@
 package aisafe.airports.application;
 
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.shared.domain.DuplicateResourceException;
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.AircraftModelRepository;
@@ -11,10 +12,8 @@ import aisafe.airports.domain.AircraftCertification;
 import aisafe.airports.domain.AircraftCertificationRepository;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 
-/**
- * Use case for adding a new aircraft certification to an airport.
- */
 @UseCase
 public class AddAirportCertificationUseCase {
     private final AirportRepository airportRepository;
@@ -30,22 +29,20 @@ public class AddAirportCertificationUseCase {
     }
 
     public AircraftCertificationResponse execute(String iataCodeStr, AddCertificationRequest request) {
-
-        if (!request.airportCode().equalsIgnoreCase(iataCodeStr)) {
-            throw new IllegalArgumentException("airportCode in request body must match the IATA code in the path.");
-        }
-        Airport airport = airportRepository.findByIataCodeCode(iataCodeStr.toUpperCase())
+        Airport airport = airportRepository.findByIataCode(new IataCode(iataCodeStr))
                 .orElseThrow(() -> new AirportNotFoundException(iataCodeStr));
 
-        if (!aircraftModelRepository.existsByModelName(request.aircraftModelName())) {
-            throw new AircraftModelNotFoundException("Aircraft model with name '" + request.aircraftModelName() + "' not found.");
+        ModelName modelName = new ModelName(request.aircraftModelName());
+
+        if (!aircraftModelRepository.existsByModelName(modelName.getName())) {
+            throw new AircraftModelNotFoundException("Aircraft model with name '" + modelName.getName() + "' not found.");
         }
 
-        if (certificationRepository.existsByAirportAndAircraftModelName(airport, request.aircraftModelName())) {
-            throw new DuplicateResourceException("Aircraft model '" + request.aircraftModelName() + "' is already certified for airport " + iataCodeStr + ".");
+        if (certificationRepository.existsByAirportCodeAndAircraftModelName(airport.getIataCode(), modelName)) {
+            throw new DuplicateResourceException("Aircraft model '" + modelName.getName() + "' is already certified for airport " + iataCodeStr + ".");
         }
 
-        AircraftCertification certification = new AircraftCertification(airport, request.aircraftModelName());
+        AircraftCertification certification = new AircraftCertification(airport.getIataCode(), modelName);
         certificationRepository.save(certification);
 
         return AircraftCertificationResponse.from(certification);

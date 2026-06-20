@@ -1,0 +1,9 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+Actor -> Sys : getDueAircraft()
+activate Sys
+Sys --> Actor : returns list of MaintenanceDueAircraftResponse
+deactivate Sys
+@enduml

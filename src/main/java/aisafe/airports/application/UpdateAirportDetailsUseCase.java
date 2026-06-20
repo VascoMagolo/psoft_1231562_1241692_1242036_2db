@@ -6,12 +6,15 @@ import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Contact;
 import aisafe.airports.domain.Gate;
 import aisafe.airports.domain.Service;
 import aisafe.airports.domain.Terminal;
+import aisafe.shared.domain.ConcurrencyException;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Use case for updating the details of an existing airport
@@ -28,11 +31,20 @@ public class UpdateAirportDetailsUseCase {
      * Updates the details of an existing airport based on the provided IATA code and request data.
      * @param iataCode the IATA code of the airport to update
      * @param request  the new details to update for the airport.
+     * @param clientVersion the version from the client's If-Match header
      * @return a DTO containing the updated details of the airport after the update is applied
      */
-    public AirportResponse execute(String iataCode, UpdateAirportDetailsRequest request) {
-        Airport airport = airportRepository.findByIataCodeCode(iataCode)
+    public AirportResponse execute(String iataCode, UpdateAirportDetailsRequest request, Long clientVersion) {
+        IataCode code = new IataCode(iataCode);
+        Airport airport = airportRepository.findByIataCode(code)
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
+
+        if (clientVersion != null) {
+            Long current = airportRepository.findVersionFor(code);
+            if (!Objects.equals(current, clientVersion)) {
+                throw new ConcurrencyException("Airport version mismatch. Please fetch the latest version and retry.");
+            }
+        }
 
         List<Contact> contacts = request.contacts() == null ? null :
                 request.contacts().stream()
@@ -48,9 +60,10 @@ public class UpdateAirportDetailsUseCase {
         List<Gate> gates = request.gates() == null ? null :
                 request.gates().stream().map(Gate::new).toList();
 
-        airport.updateDetails(request.operationalHours(), contacts, request.imagePath(), services, terminals, gates);
+        airport.updateDetails(request.operationalHours(), contacts, null, services, terminals, gates);
 
         airportRepository.save(airport);
-        return AirportResponse.from(airport);
+        Long newVersion = airportRepository.findVersionFor(code);
+        return AirportResponse.from(airport, newVersion);
     }
 }

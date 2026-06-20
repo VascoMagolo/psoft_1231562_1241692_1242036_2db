@@ -1,12 +1,16 @@
 package aisafe.airports.infrastructure;
 
+import aisafe.shared.application.dtos.ImageData;
+
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.infrastructure.RouteController;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.infrastructure.ETagUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,11 +23,19 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
+import aisafe.shared.application.dtos.BulkImportResult;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -42,9 +54,12 @@ public class AirportController {
     private final UpdateAirportStatusUseCase updateAirportStatus;
     private final UpdateAirportDetailsUseCase updateAirportDetails;
     private final ViewAirportRoutesUseCase viewAirportRoutes;
-    private final AirportStatisticsUseCase airportStatistics;
+    private final GetAirportStatisticsUseCase airportStatistics;
     private final ListAirportsByRegionUseCase listAirportsByRegion;
     private final DeleteAirportUseCase deleteAirport;
+    private final UploadAirportPhotoUseCase uploadAirportPhoto;
+    private final GetAirportPhotoUseCase getAirportPhoto;
+    private final ImportAirportsUseCase importAirports;
 
     public AirportController(RegisterAirportUseCase registerAirport,
             AddAirportCertificationUseCase addCertification,
@@ -53,9 +68,12 @@ public class AirportController {
             UpdateAirportStatusUseCase updateAirportStatus,
             UpdateAirportDetailsUseCase updateAirportDetails,
             ViewAirportRoutesUseCase viewAirportRoutes,
-            AirportStatisticsUseCase airportStatistics,
+            GetAirportStatisticsUseCase airportStatistics,
             ListAirportsByRegionUseCase listAirportsByRegion,
-            DeleteAirportUseCase deleteAirport) {
+            DeleteAirportUseCase deleteAirport,
+            UploadAirportPhotoUseCase uploadAirportPhoto,
+            GetAirportPhotoUseCase getAirportPhoto,
+            ImportAirportsUseCase importAirports) {
         this.registerAirport = registerAirport;
         this.addCertification = addCertification;
         this.viewAirportDetails = viewAirportDetails;
@@ -66,6 +84,9 @@ public class AirportController {
         this.airportStatistics = airportStatistics;
         this.listAirportsByRegion = listAirportsByRegion;
         this.deleteAirport = deleteAirport;
+        this.uploadAirportPhoto = uploadAirportPhoto;
+        this.getAirportPhoto = getAirportPhoto;
+        this.importAirports = importAirports;
     }
 
     /**
@@ -80,8 +101,8 @@ public class AirportController {
         String code = airport.iataCode();
         return EntityModel.of(airport,
                 linkTo(methodOn(AirportController.class).getAirport(code)).withSelfRel(),
-                linkTo(methodOn(AirportController.class).updateStatus(code, null)).withRel("update-status"),
-                linkTo(methodOn(AirportController.class).updateDetails(code, null)).withRel("update-details"),
+                linkTo(methodOn(AirportController.class).updateStatus(code, null, null)).withRel("update-status"),
+                linkTo(methodOn(AirportController.class).updateDetails(code, null, null)).withRel("update-details"),
                 linkTo(methodOn(AirportController.class).getRoutes(code)).withRel("routes"),
                 linkTo(methodOn(AirportController.class).addCertification(code, null)).withRel("certifications"));
     }
@@ -102,10 +123,94 @@ public class AirportController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "409", description = "Airport with this IATA code already exists")
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityModel<AirportResponse>> registerAirport(
             @Valid @RequestBody RegisterAirportRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(registerAirport.execute(request)));
+    }
+
+    // US207
+    @Operation(summary = "Register a new airport with optional photo (multipart/form-data)", description = "Creates an airport with runways, optional facilities, and an optional photo file. Requires Backoffice Operator role. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Airport registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data or unsupported image MIME type"),
+            @ApiResponse(responseCode = "409", description = "Airport with this IATA code already exists")
+    })
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EntityModel<AirportResponse>> registerAirportWithPhoto(
+            @RequestParam String iataCode,
+            @RequestParam String name,
+            @RequestParam String city,
+            @RequestParam String country,
+            @RequestParam(required = false) String region,
+            @RequestParam String timezone,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam("runwayName") List<String> runwayNames,
+            @RequestParam("runwayLength") List<Integer> runwayLengths,
+            @RequestParam("runwayOrientation") List<String> runwayOrientations,
+            @RequestParam(required = false) String operationalHours,
+            @RequestParam(required = false) List<String> services,
+            @RequestParam(required = false) List<String> terminals,
+            @RequestParam(required = false) List<String> gates,
+            @RequestParam(value = "photo", required = false) MultipartFile photoFile) throws IOException {
+
+        if (photoFile != null && (photoFile.getContentType() == null
+                || !photoFile.getContentType().startsWith("image/")))
+            return ResponseEntity.badRequest().build();
+
+        if (runwayNames == null || runwayNames.isEmpty())
+            return ResponseEntity.badRequest().build();
+
+        List<RegisterAirportRequest.RunwayRequest> runways = IntStream
+                .range(0, runwayNames.size())
+                .mapToObj(i -> new RegisterAirportRequest.RunwayRequest(
+                        runwayNames.get(i), runwayLengths.get(i), runwayOrientations.get(i)))
+                .toList();
+
+        byte[] photoBytes = photoFile != null ? photoFile.getBytes() : null;
+        String contentType = photoFile != null ? photoFile.getContentType() : null;
+
+        RegisterAirportRequest request = new RegisterAirportRequest(
+                iataCode, name, city, country, region, timezone, latitude, longitude,
+                runways, photoBytes, contentType, operationalHours, services, terminals, gates);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(registerAirport.execute(request)));
+    }
+
+    // US207
+    @Operation(summary = "Add a photo to an airport", description = "Appends a new photo to the airport's photo list. Requires Backoffice Operator role. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photo added successfully"),
+            @ApiResponse(responseCode = "400", description = "Unsupported image MIME type"),
+            @ApiResponse(responseCode = "404", description = "Airport not found")
+    })
+    @PostMapping(value = "/{iataCode}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EntityModel<AirportResponse>> addPhoto(
+            @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @RequestParam("photo") MultipartFile photoFile) throws IOException {
+
+        if (photoFile.getContentType() == null || !photoFile.getContentType().startsWith("image/"))
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok(toModel(
+                uploadAirportPhoto.execute(iataCode.toUpperCase(), photoFile.getBytes(), photoFile.getContentType())));
+    }
+
+    // US207
+    @Operation(summary = "Get a photo of an airport by index", description = "Returns the stored photo bytes at the given 0-based index with the original Content-Type header. (US207)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photo returned"),
+            @ApiResponse(responseCode = "404", description = "Airport not found or no photo at the given index")
+    })
+    @GetMapping("/{iataCode}/photos/{index}")
+    public ResponseEntity<byte[]> getPhoto(
+            @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @Parameter(description = "0-based photo index") @PathVariable int index) {
+        ImageData data = getAirportPhoto.execute(iataCode.toUpperCase(), index);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(data.contentType()))
+                .body(data.bytes());
     }
 
     /**
@@ -183,7 +288,7 @@ public class AirportController {
             @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
             @PageableDefault(size = 20) Pageable pageable,
             PagedResourcesAssembler<AirportResponse> assembler) {
-        PaginatedResult<AirportResponse> result = searchAirport.execute(name, city, country, pageable.getPageNumber(), pageable.getPageSize());
+        PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest(name, city, country, pageable.getPageNumber(), pageable.getPageSize()));
         Page<AirportResponse> page = new PageImpl<>(result.data(), pageable, result.totalElements());
         return ResponseEntity.ok(assembler.toModel(page, this::toModel));
     }
@@ -202,17 +307,19 @@ public class AirportController {
     @Operation(summary = "Update airport operational status", description = "Changes the airport status to OPERATIONAL, CLOSED, or UNDER_MAINTENANCE. Requires Backoffice Operator role. (US109)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid or missing status value"),
+            @ApiResponse(responseCode = "400", description = "Invalid or missing status value, or missing/invalid If-Match header"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
+            @ApiResponse(responseCode = "412", description = "Version mismatch - fetch the latest version and retry")
     })
     @PatchMapping("/{iataCode}/status")
     public ResponseEntity<EntityModel<AirportResponse>> updateStatus(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
+            @Parameter(in = ParameterIn.HEADER, name = "If-Match", required = false, description = "Current resource version for optimistic concurrency control") @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch,
             @Valid @RequestBody UpdateAirportStatusRequest request) {
-        return ResponseEntity.ok(toModel(updateAirportStatus.execute(iataCode.toUpperCase(), request.status())));
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(toModel(updateAirportStatus.execute(iataCode.toUpperCase(), request.status(), version)));
     }
 
     /**
@@ -228,16 +335,19 @@ public class AirportController {
     @Operation(summary = "Update airport details", description = "Updates optional fields: operational hours, contact information, image, services, terminals, and gates. Requires Backoffice Operator role. (US208)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Details updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing or invalid If-Match header"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Airport not found"),
-            @ApiResponse(responseCode = "409", description = "Concurrent update conflict -- please retry")
+            @ApiResponse(responseCode = "412", description = "Version mismatch - fetch the latest version and retry")
     })
     @PatchMapping("/{iataCode}/details")
     public ResponseEntity<EntityModel<AirportResponse>> updateDetails(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
-            @RequestBody UpdateAirportDetailsRequest request) {
-        return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request)));
+            @Parameter(in = ParameterIn.HEADER, name = "If-Match", required = false, description = "Current resource version for optimistic concurrency control") @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch,
+            @Valid @RequestBody UpdateAirportDetailsRequest request) {
+        Long version = ETagUtils.parseVersion(ifMatch);
+        return ResponseEntity.ok(toModel(updateAirportDetails.execute(iataCode.toUpperCase(), request, version)));
     }
 
     /**
@@ -264,7 +374,7 @@ public class AirportController {
         List<EntityModel<RouteResponse>> routeModels = viewAirportRoutes.execute(iataCode.toUpperCase())
                 .stream()
                 .map(r -> EntityModel.of(r,
-                        linkTo(methodOn(RouteController.class).getRouteDetails(r.id())).withSelfRel()))
+                        linkTo(methodOn(RouteController.class).getRouteDetails(r.originIataCode(), r.destinationIataCode())).withSelfRel()))
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(routeModels,
                 linkTo(methodOn(AirportController.class).getRoutes(iataCode)).withSelfRel(),
@@ -319,6 +429,14 @@ public class AirportController {
         return ResponseEntity.ok(CollectionModel.of(
                 listAirportsByRegion.execute(by),
                 linkTo(methodOn(AirportController.class).getAirportsGrouped(by)).withSelfRel()));
+    }
+
+    @Operation(summary = "Import bulk airports via CSV", description = "Parses a CSV file and registers multiple airports in batch. Returns HTTP 201 on full success or 207 Multi-Status for partial success.")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> importAirports(
+            @RequestPart("file") MultipartFile file) {
+        BulkImportResult<String> result = importAirports.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 
     @Operation(summary = "Delete an airport", description = "Permanently removes an airport by IATA code. Requires Admin role.")

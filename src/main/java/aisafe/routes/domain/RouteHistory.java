@@ -1,27 +1,39 @@
 package aisafe.routes.domain;
 
-import lombok.Getter;
+import aisafe.airports.domain.IataCode;
 
 import java.time.LocalDateTime;
 
-@Getter
 public class RouteHistory {
 
-    private Long id;
-    private Long routeId;
+    private IataCode originCode;
+    private IataCode destinationCode;
     private String changeDescription;
     private LocalDateTime changedAt;
     private String changedBy;
 
     protected RouteHistory() {}
 
-    public RouteHistory(Long routeId, String changeDescription, String changedBy) {
-        this.routeId = routeId;
+    public RouteHistory(IataCode originCode, IataCode destinationCode, String changeDescription, String changedBy) {
+        this.originCode = originCode;
+        this.destinationCode = destinationCode;
         this.changeDescription = changeDescription;
         this.changedAt = LocalDateTime.now();
         this.changedBy = changedBy;
     }
 
-    public void setId(Long id) { this.id = id; }
-    public void setChangedAt(LocalDateTime changedAt) { this.changedAt = changedAt; }
+    public RouteHistory(IataCode originCode, IataCode destinationCode, String changeDescription,
+                        LocalDateTime changedAt, String changedBy) {
+        this.originCode = originCode;
+        this.destinationCode = destinationCode;
+        this.changeDescription = changeDescription;
+        this.changedAt = changedAt;
+        this.changedBy = changedBy;
+    }
+
+    public IataCode getOriginCode() { return originCode; }
+    public IataCode getDestinationCode() { return destinationCode; }
+    public String getChangeDescription() { return changeDescription; }
+    public LocalDateTime getChangedAt() { return changedAt; }
+    public String getChangedBy() { return changedBy; }
 }

@@ -7,7 +7,6 @@ import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.AircraftStatus;
 import aisafe.shared.domain.PaginatedResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,8 +16,7 @@ import java.util.stream.Collectors;
  * This use case is read-only and supports pagination and sorting.
  * The returned DTOs are lightweight and only contain fields needed for listing, not full details.
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class SearchAircraftUseCase {
 
     private final AircraftRepository repository;
@@ -31,7 +29,7 @@ public class SearchAircraftUseCase {
      * Search for aircrafts based on pure domain criteria.
      * ZERO Spring Data Pageable imports!
      */
-    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, int pageNumber, int pageSize) {
+    public PaginatedResult<SearchAircraftUseCaseResponse> execute(String modelName, String statusStr, Integer year, String feature, int pageNumber, int pageSize) {
 
         AircraftStatus status = null;
         if (statusStr != null && !statusStr.isBlank()) {
@@ -41,7 +39,7 @@ public class SearchAircraftUseCase {
                 throw new AircraftInvalidFieldException("Invalid aircraft status: " + statusStr);
             }
         }
-        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, pageNumber, pageSize);
+        PaginatedResult<Aircraft> domainResult = repository.searchAircrafts(modelName, status, year, feature, pageNumber, pageSize);
 
         List<SearchAircraftUseCaseResponse> dtoList = domainResult.data().stream()
                 .map(SearchAircraftUseCaseResponse::from)

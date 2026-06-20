@@ -1,0 +1,34 @@
+@startuml sd_us219
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "ATCC / MAINTENANCE_SUPERVISOR" as Actor
+participant "MaintenanceController" as Ctrl
+participant "ViewOngoingMaintenanceUseCase" as UC
+participant "MaintenanceRecordRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/maintenance/records/ongoing
+activate Ctrl
+
+Ctrl -> UC : execute(page, size)
+activate UC
+
+UC -> Repo : findOngoing(page, size)
+activate Repo
+Repo -> DB : SELECT * FROM maintenance_record\nWHERE status = 'IN_PROGRESS'\nORDER BY start_date DESC
+activate DB
+DB --> Repo : in-progress records
+deactivate DB
+Repo --> UC : PaginatedResult<MaintenanceRecord>
+deactivate Repo
+
+UC --> Ctrl : PaginatedResult<MaintenanceRecordResponse>
+deactivate UC
+
+Ctrl --> Actor : 200 OK (PagedModel<MaintenanceRecordResponse>)
+deactivate Ctrl
+
+@enduml

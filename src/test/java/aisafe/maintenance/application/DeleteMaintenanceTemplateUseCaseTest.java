@@ -1,6 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.maintenance.domain.MaintenanceTemplate;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
@@ -33,7 +34,7 @@ class DeleteMaintenanceTemplateUseCaseTest {
 
     private MaintenanceTemplate buildTemplate() {
         return new MaintenanceTemplate("Engine Check", MaintenanceType.INSPECTION,
-                List.of("ModelA"), List.of("Check oil"), 500, 90);
+                List.of(new ModelName("ModelA")), List.of("Check oil"), 500, 90);
     }
 
     @Test

@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "System" as Sys
+
+BO -> Sys : assignAircraftToRoute(aircraftId, originIataCode, destinationIataCode, departureDateTime, arrivalDateTime)
+activate Sys
+Sys --> BO : returns created scheduled Flight details
+deactivate Sys
+@enduml

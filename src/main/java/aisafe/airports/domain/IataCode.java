@@ -1,11 +1,12 @@
 package aisafe.airports.domain;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
  * Value object representing an IATA code for an airport.
  */
-public class IataCode {
+public final class IataCode {
     private final String code;
 
     private static final Pattern IATA_PATTERN = Pattern.compile("^[A-Z0-9]{3}$");
@@ -22,4 +23,22 @@ public class IataCode {
     }
 
     public String getCode() { return code; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IataCode that = (IataCode) o;
+        return Objects.equals(code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code);
+    }
+
+    @Override
+    public String toString() {
+        return code;
+    }
 }

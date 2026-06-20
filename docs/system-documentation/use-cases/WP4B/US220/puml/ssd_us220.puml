@@ -1,0 +1,17 @@
+@startuml ssd_us220
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "ATCC / MAINTENANCE_SUPERVISOR" as Actor
+participant "System" as Sys
+
+activate Actor
+Actor -> Sys : getCostByAircraft(registrationNumber)\nor getCostByModel(modelName)
+activate Sys
+Sys --> Actor : 200 OK (MaintenanceCostResponse)
+deactivate Sys
+deactivate Actor
+
+@enduml

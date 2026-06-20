@@ -8,16 +8,16 @@ participant "AirportRepository" as AirportRepo
 participant "RouteRepository" as RouteRepo
 database "Database" as DB
 
-== View route details by ID ==
-Actor -> Ctrl : GET /api/routes/{id}
+== View route details by origin and destination ==
+Actor -> Ctrl : GET /api/routes/{origin}/{destination}
 activate Ctrl
 
-Ctrl -> DetailsUC : execute(id: Long)
+Ctrl -> DetailsUC : execute(origin: String, destination: String)
 activate DetailsUC
 
-DetailsUC -> RouteRepo : findById(id)
+DetailsUC -> RouteRepo : findByOriginAndDestination(origin, destination)
 activate RouteRepo
-RouteRepo -> DB : SELECT FROM route WHERE id = ?
+RouteRepo -> DB : SELECT FROM route WHERE origin_code = ? AND destination_code = ?
 activate DB
 DB --> RouteRepo : route record
 deactivate DB
@@ -25,12 +25,12 @@ RouteRepo --> DetailsUC : Optional<Route>
 deactivate RouteRepo
 
 alt route found
-  DetailsUC --> Ctrl : RouteResponse\n{ id, originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, active }
+  DetailsUC --> Ctrl : RouteResponse\n{ originIataCode, destinationIataCode,\n  estimatedFlightTime, minimumRange,\n  minimumCapacity, status }
   deactivate DetailsUC
   Ctrl --> Actor : 200 OK\nEntityModel<RouteResponse> with _links
 else route not found
   DetailsUC --> Ctrl : throws RouteNotFoundException
-  Ctrl --> Actor : 404 Not Found\n{ message: "Route with id '...' not found." }
+  Ctrl --> Actor : 404 Not Found\n{ message: "Route '...→...' not found." }
 end
 
 deactivate Ctrl

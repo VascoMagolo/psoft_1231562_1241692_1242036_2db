@@ -1,0 +1,37 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "NetworkController" as Ctrl
+participant "CalculateTotalNetworkDistanceUseCase" as UC
+participant "RouteRepository" as RouteRepo
+participant "RouteDistanceService" as DistService
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/network/total-distance
+activate Ctrl
+
+Ctrl -> UC : execute()
+activate UC
+
+UC -> RouteRepo : findAllActive()
+activate RouteRepo
+RouteRepo -> DB : SELECT FROM route WHERE active = true
+activate DB
+DB --> RouteRepo : list of active routes
+deactivate DB
+RouteRepo --> UC : List<Route>
+deactivate RouteRepo
+
+loop for each active route
+  UC -> DistService : calculateDistanceKm(route)
+  activate DistService
+  DistService --> UC : Double
+  deactivate DistService
+end
+
+UC --> Ctrl : TotalDistanceResponse\n{ totalDistance, unit: "km" }
+deactivate UC
+
+Ctrl --> Actor : 200 OK\nTotalDistanceResponse with _links
+deactivate Ctrl
+@enduml

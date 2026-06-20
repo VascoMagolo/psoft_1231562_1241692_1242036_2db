@@ -3,7 +3,7 @@ autonumber
 actor "ATCC" as Actor
 participant "System" as Sys
 
-Actor -> Sys : getRouteHistory(routeId)
+Actor -> Sys : getRouteHistory(origin, destination)
 activate Sys
 Sys --> Actor : returns route history list
 deactivate Sys

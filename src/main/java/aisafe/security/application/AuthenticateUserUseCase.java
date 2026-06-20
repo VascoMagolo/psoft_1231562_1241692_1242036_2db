@@ -1,16 +1,12 @@
 package aisafe.security.application;
 
 
+import aisafe.shared.application.SuppressArgLogging;
 import aisafe.shared.application.UseCase;
-import aisafe.shared.infrastructure.SuppressArgLogging;
 import aisafe.security.application.dtos.AuthResponse;
 import aisafe.security.application.dtos.LoginRequest;
 import aisafe.security.domain.InvalidCredentialsException;
 import aisafe.security.domain.UserRepository;
-import aisafe.shared.infrastructure.UseCaseLoggingAdvice;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * Application use case that authenticates a patron by username and password and returns a JWT token.
  *
@@ -22,17 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>The message on failure is intentionally generic -- do not distinguish between "username
  * not found" and "wrong password" to prevent username enumeration attacks.</p>
  */
-@UseCase
+@UseCase(readOnly = true)
 @SuppressArgLogging
-@Transactional(readOnly = true)
 public class AuthenticateUserUseCase {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordVerifier passwordVerifier;
     private final JwtService jwtService;
 
-    public AuthenticateUserUseCase(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthenticateUserUseCase(UserRepository userRepository, PasswordVerifier passwordVerifier, JwtService jwtService) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordVerifier = passwordVerifier;
         this.jwtService = jwtService;
     }
     /**
@@ -46,7 +41,7 @@ public class AuthenticateUserUseCase {
         var patron = userRepository.findByUsername(request.username())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!passwordEncoder.matches(request.password(), patron.getPassword())) {
+        if (!passwordVerifier.matches(request.password(), patron.getPassword())) {
             throw new InvalidCredentialsException();
         }
 

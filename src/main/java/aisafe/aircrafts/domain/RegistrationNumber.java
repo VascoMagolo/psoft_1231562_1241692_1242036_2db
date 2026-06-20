@@ -1,38 +1,35 @@
 package aisafe.aircrafts.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
  * Value object for aircraft registration numbers. It normalizes the value to uppercase and enforces the expected `XX-XXX` format.
+ * (Pure Domain Model)
  */
-public class RegistrationNumber {
+public final class RegistrationNumber {
     private static final Pattern PATTERN = Pattern.compile("^[A-Z]{2}-[A-Z]{3}$");
 
-    private String number;
+    private final String number;
 
-    @JsonCreator
     public RegistrationNumber(String number) {
         if (number == null || number.trim().isEmpty()) {
-            throw new IllegalArgumentException("Aircraft registration number cannot be empty.");
+            throw new InvalidRegistrationNumberException("Aircraft registration number cannot be empty.");
         }
 
         String upperCaseNumber = number.trim().toUpperCase();
 
         if (!PATTERN.matcher(upperCaseNumber).matches()) {
-            throw new IllegalArgumentException("Invalid registration number format. Expected format: XX-XXX (e.g., CS-TPA).");
+            throw new InvalidRegistrationNumberException("Invalid registration number format. Expected format: XX-XXX (e.g., CS-TPA).");
         }
 
         this.number = upperCaseNumber;
     }
 
-    @JsonValue
     public String getNumber() {
         return number;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,19 +1,18 @@
 package aisafe.aircrafts.application;
 
 import aisafe.shared.application.UseCase;
-import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
-import org.springframework.transaction.annotation.Transactional;
 
+import aisafe.shared.domain.PaginatedResult;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Returns all stored aircraft models for the aircraft management screens and APIs.
  */
-@UseCase
-@Transactional(readOnly = true)
+@UseCase(readOnly = true)
 public class ListAircraftModelsUseCase {
 
     private final AircraftModelRepository repository;
@@ -27,14 +26,14 @@ public class ListAircraftModelsUseCase {
      * @param pageSize the number of items per page
      * @return a plain Java List of aircraft model DTOs
      */
-    public List<ListAircraftModelsUseCaseResponse> execute(int pageNumber, int pageSize) {
+    public PaginatedResult<AircraftModelResponse> execute(int pageNumber, int pageSize) {
 
-        List<AircraftModel> modelsList = repository.findAll(pageNumber, pageSize);
+        PaginatedResult<AircraftModel> modelsResult = repository.findAll(pageNumber, pageSize);
 
-        return modelsList.stream().map(model -> new ListAircraftModelsUseCaseResponse(
-                model.getModelName(),
-                model.getManufacturer().name(),
-                model.getMaximumSeatingCapacity()
-        )).collect(Collectors.toList());
+        List<AircraftModelResponse> data = modelsResult.data().stream()
+                .map(AircraftModelResponse::from)
+                .collect(Collectors.toList());
+
+        return new PaginatedResult<>(data, modelsResult.totalElements());
     }
 }

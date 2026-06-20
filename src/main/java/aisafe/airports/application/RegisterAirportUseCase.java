@@ -5,7 +5,9 @@ import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.AirportPhoto;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Gate;
 import aisafe.airports.domain.Runway;
 import aisafe.airports.domain.Service;
@@ -30,7 +32,7 @@ public class RegisterAirportUseCase {
      * @return a DTO containing the details of the newly registered airport.
      */
     public AirportResponse execute(RegisterAirportRequest request) {
-        if (airportRepository.existsByIataCodeCode(request.iataCode())) {
+        if (airportRepository.existsByIataCode(new IataCode(request.iataCode()))) {
             throw new DuplicateResourceException("Airport with IATA code '" + request.iataCode() + "' already exists.");
         }
 
@@ -57,9 +59,13 @@ public class RegisterAirportUseCase {
         List<Gate> gates = request.gates() == null ? null :
                 request.gates().stream().map(Gate::new).toList();
 
-        airport.updateDetails(request.operationalHours(), null, request.imagePath(), services, terminals, gates);
+        airport.updateDetails(request.operationalHours(), null, null, services, terminals, gates);
+
+        if (request.image() != null)
+            airport.addPhoto(new AirportPhoto(request.image(), request.imageContentType()));
 
         airportRepository.save(airport);
-        return AirportResponse.from(airport);
+        Long version = airportRepository.findVersionFor(new IataCode(request.iataCode()));
+        return AirportResponse.from(airport, version);
     }
 }

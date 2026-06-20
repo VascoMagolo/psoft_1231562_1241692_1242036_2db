@@ -1,0 +1,34 @@
+@startuml sd_us220
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "ATCC / MAINTENANCE_SUPERVISOR" as Actor
+participant "MaintenanceController" as Ctrl
+participant "ViewMaintenanceCostByAircraftUseCase" as UC
+participant "MaintenanceRecordRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/maintenance/records/cost/aircraft/{registrationNumber}
+activate Ctrl
+
+Ctrl -> UC : execute(registrationNumber)
+activate UC
+
+UC -> Repo : findCostByAircraft(registrationNumber)
+activate Repo
+Repo -> DB : SELECT SUM(cost)... WHERE aircraft_registration = ?
+activate DB
+DB --> Repo : cost projection
+deactivate DB
+Repo --> UC : MaintenanceCostData
+deactivate Repo
+
+UC --> Ctrl : MaintenanceCostByAircraftResponse
+deactivate UC
+
+Ctrl --> Actor : 200 OK
+deactivate Ctrl
+
+@enduml

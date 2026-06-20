@@ -4,6 +4,7 @@ import aisafe.shared.domain.DuplicateResourceException;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,12 +31,12 @@ class RegisterAirportUseCaseTest {
                 iataCode, "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
                 38.77, -9.13,
                 List.of(new RegisterAirportRequest.RunwayRequest("03/21", 3000, "030/210")),
-                null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     @Test
     void ensureAirportIsRegisteredSuccessfully() {
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(false);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(false);
 
         assertDoesNotThrow(() -> registerAirport.execute(buildRequest("LIS")));
         verify(airportRepository).save(any(Airport.class));
@@ -43,7 +44,7 @@ class RegisterAirportUseCaseTest {
 
     @Test
     void ensureExceptionWhenIataCodeAlreadyExists() {
-        when(airportRepository.existsByIataCodeCode("LIS")).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> registerAirport.execute(buildRequest("LIS")));
         verify(airportRepository, never()).save(any());

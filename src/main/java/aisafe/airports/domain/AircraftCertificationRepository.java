@@ -1,12 +1,11 @@
 package aisafe.airports.domain;
 
+import aisafe.aircrafts.domain.ModelName;
+import aisafe.shared.domain.BaseRepository;
+
 import java.util.List;
 
-/**
- * Repository interface for managing AircraftCertification entities.
- */
-public interface AircraftCertificationRepository {
-    List<AircraftCertification> findByAirport(Airport airport);
-    boolean existsByAirportAndAircraftModelName(Airport airport, String aircraftModelName);
-    void save(AircraftCertification certification);
+public interface AircraftCertificationRepository extends BaseRepository<AircraftCertification> {
+    List<AircraftCertification> findByAirportCode(IataCode airportCode);
+    boolean existsByAirportCodeAndAircraftModelName(IataCode airportCode, ModelName aircraftModelName);
 }

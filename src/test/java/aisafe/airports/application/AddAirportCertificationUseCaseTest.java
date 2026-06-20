@@ -1,5 +1,6 @@
 package aisafe.airports.application;
 
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.shared.domain.DuplicateResourceException;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
@@ -41,40 +42,40 @@ class AddAirportCertificationUseCaseTest {
     @Test
     void ensureCertificationIsAddedSuccessfully() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
-        when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(false);
+        when(certificationRepository.existsByAirportCodeAndAircraftModelName(airport.getIataCode(), new ModelName("A320"))).thenReturn(false);
 
-        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
+        assertDoesNotThrow(() -> addCertification.execute("LIS", new AddCertificationRequest("A320")));
         verify(certificationRepository).save(any(AircraftCertification.class));
     }
 
     @Test
     void ensureExceptionWhenAirportNotFound() {
-        when(airportRepository.findByIataCodeCode("XYZ")).thenReturn(Optional.empty());
+        when(airportRepository.findByIataCode(new IataCode("XYZ"))).thenReturn(Optional.empty());
 
-        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("XYZ", "A320")));
+        assertThrows(AirportNotFoundException.class, () -> addCertification.execute("XYZ", new AddCertificationRequest("A320")));
         verify(certificationRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenModelNotFound() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("NON-EXISTENT")).thenReturn(false);
 
-        assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "NON-EXISTENT")));
+        assertThrows(AircraftModelNotFoundException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("NON-EXISTENT")));
         verify(certificationRepository, never()).save(any());
     }
 
     @Test
     void ensureExceptionWhenCertificationAlreadyExists() {
         Airport airport = buildAirport();
-        when(airportRepository.findByIataCodeCode("LIS")).thenReturn(Optional.of(airport));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(airport));
         when(aircraftModelRepository.existsByModelName("A320")).thenReturn(true);
-        when(certificationRepository.existsByAirportAndAircraftModelName(airport, "A320")).thenReturn(true);
+        when(certificationRepository.existsByAirportCodeAndAircraftModelName(airport.getIataCode(), new ModelName("A320"))).thenReturn(true);
 
-        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("LIS", "A320")));
+        assertThrows(DuplicateResourceException.class, () -> addCertification.execute("LIS", new AddCertificationRequest("A320")));
         verify(certificationRepository, never()).save(any());
     }
 }

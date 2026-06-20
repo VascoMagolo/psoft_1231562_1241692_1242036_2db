@@ -1,6 +1,10 @@
 package aisafe.maintenance.application.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Response DTO for returning maintenance record information.
@@ -9,21 +13,24 @@ import java.time.LocalDateTime;
  * @param startDate
  * @param expectedDuration
  * @param notes
- * @param partNumber
+ * @param partNumbers
  * @param templateName
  * @param status
  * @param aircraftRegistration
  * @param version
+ * @param components
  */
 public record MaintenanceRecordResponse(
-        Long id,
+        UUID id,
         String description,
         LocalDateTime startDate,
         Integer expectedDuration,
         String notes,
-        String partNumber,
+        List<String> partNumbers,
         String templateName,
         String status,
         String aircraftRegistration,
-        Long version
+        Long version,
+        Set<String> components,
+        BigDecimal cost
 ) {}

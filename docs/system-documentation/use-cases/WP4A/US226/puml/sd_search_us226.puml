@@ -1,0 +1,31 @@
+@startuml
+autonumber
+actor "Maintenance Supervisor" as MS
+participant "MaintenanceController" as Ctrl
+participant "SearchMaintenancePartUseCase" as UC
+participant "MaintenancePartRepository" as Repo
+database "Database" as DB
+
+MS -> Ctrl : GET /api/maintenance/parts/search?name=...&lowStock=...
+activate Ctrl
+
+Ctrl -> UC : execute(partNumber, name, component, lowStock, pageNumber, pageSize)
+activate UC
+
+UC -> Repo : searchParts(partNumber, name, component, lowStock, pageNumber, pageSize)
+activate Repo
+
+Repo -> DB : SELECT * FROM maintenance_part WHERE ...
+activate DB
+DB --> Repo : resultSet
+deactivate DB
+
+Repo --> UC : PaginatedResult<MaintenancePart>
+deactivate Repo
+
+UC --> Ctrl : PaginatedResult<MaintenancePartResponse>
+deactivate UC
+
+Ctrl --> MS : 200 OK\nPagedModel<EntityModel<MaintenancePartResponse>>
+deactivate Ctrl
+@enduml

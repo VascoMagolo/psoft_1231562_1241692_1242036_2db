@@ -4,11 +4,12 @@ import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelRepository;
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.maintenance.application.dtos.CreateMaintenanceTemplateRequest;
 import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
 import aisafe.maintenance.domain.MaintenanceTemplate;
-import aisafe.maintenance.domain.MaintenanceTemplateAlreadyExistsException;
 import aisafe.maintenance.domain.MaintenanceTemplateRepository;
+import aisafe.shared.domain.DuplicateResourceException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,20 +41,19 @@ public class CreateMaintenanceTemplateUseCase {
         MaintenanceTemplate template = new MaintenanceTemplate(
                 request.name(),
                 request.templateType(),
-                request.applicableModels(),
+                request.applicableModels().stream().map(ModelName::new).collect(Collectors.toList()),
                 request.checklist(),
                 request.intervalFlightHours(),
                 request.intervalDays()
         );
 
         if(maintenanceTemplateRepository.existsByName(template.getName())){
-            throw new MaintenanceTemplateAlreadyExistsException("A template with the name " + template.getName() + " already exists.");
+            throw new DuplicateResourceException("A template with the name " + template.getName() + " already exists.");
         }
 
         maintenanceTemplateRepository.save(template);
 
         return new MaintenanceTemplateResponse(
-                template.getId(),
                 template.getName(),
                 template.getTemplateType().name()
         );

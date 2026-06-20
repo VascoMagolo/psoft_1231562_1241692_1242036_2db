@@ -1,9 +1,10 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.application.UseCase;
+import aisafe.shared.domain.ConcurrencyException;
 
 /**
  * Use case for updating the details of an existing aircraft in the system.
@@ -19,34 +20,43 @@ public class UpdateAircraftUseCase {
         this.aircraftModelRepository = aircraftModelRepository;
     }
 
-    public ViewAircraftDetailsResponse execute(RegistrationNumber registration, UpdateAircraftRequest request, Long clientVersion) {
+    public AircraftResponse execute(RegistrationNumber registration, UpdateAircraftRequest request, Long clientVersion) {
 
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration " + registration.getNumber() + " not found."));
 
+        Long currentVersion = aircraftRepository.findVersionFor(registration);
+        if (currentVersion != null && !currentVersion.equals(clientVersion)) {
+            throw new ConcurrencyException("The aircraft has been updated by another user. Please refresh and try again.");
+        }
+
+        AircraftModel targetModel = aircraft.getModel();
         if (request.modelName() != null && !request.modelName().isBlank()) {
-            AircraftModel newModel = aircraftModelRepository.findByModelName(request.modelName())
+            targetModel = aircraftModelRepository.findByModelName(request.modelName())
                     .orElseThrow(() -> new AircraftModelNotFoundException("Aircraft model '" + request.modelName() + "' not found."));
-            aircraft.setModel(newModel);
         }
 
-        if (request.manufacturingDate() != null) {
-            aircraft.setManufacturingDate(request.manufacturingDate());
-        }
-
-        if (request.seatCapacity() != null) {
-            aircraft.setSeatCapacity(request.seatCapacity());
-            if (request.seatCapacity() > aircraft.getSeatCapacity()) {
-                throw new AircraftInvalidFieldException("Seat capacity cannot be increased beyond the model's maximum seating capacity.");
+        AircraftStatus targetStatus = aircraft.getStatus();
+        if (request.status() != null && !request.status().isBlank()) {
+            if (!AircraftStatus.isValid(request.status())) {
+                throw new AircraftInvalidFieldException("Invalid status value: " + request.status());
             }
+            targetStatus = AircraftStatus.valueOf(request.status().toUpperCase());
         }
 
-        if (request.features() != null) {
-            aircraft.setFeatures(request.features());
-        }
+        aircraft.updateDetails(
+                targetModel,
+                request.manufacturingDate(),
+                request.seatCapacity(),
+                request.range(),
+                request.features(),
+                targetStatus
+        );
 
-        aircraftRepository.save(aircraft, clientVersion);
+        aircraftRepository.save(aircraft);
 
-        return ViewAircraftDetailsResponse.from(aircraft);
+        Long newVersion = aircraftRepository.findVersionFor(registration);
+
+        return AircraftResponse.from(aircraft, newVersion);
     }
 }

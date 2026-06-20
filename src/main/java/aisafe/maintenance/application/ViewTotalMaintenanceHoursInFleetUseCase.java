@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Views all maintenance hours from the whole fleet by joining all the maintenance record hours
  */
-@UseCase
+@UseCase(readOnly = true)
 @Transactional(readOnly = true)
 public class ViewTotalMaintenanceHoursInFleetUseCase {
     private final MaintenanceRecordRepository repository;
@@ -23,10 +23,8 @@ public class ViewTotalMaintenanceHoursInFleetUseCase {
      * @return a response containing the total maintenance hours in the fleet
      */
     public ViewTotalMaintenanceHoursInFleetResponse execute() {
-        Integer totalHours = repository.findAll().stream()
-                .map(MaintenanceRecord::getExpectedDuration)
-                .reduce(0, Integer::sum);
+        Long totalHours = repository.sumTotalMaintenanceHours();
 
-        return new ViewTotalMaintenanceHoursInFleetResponse(totalHours);
+        return new ViewTotalMaintenanceHoursInFleetResponse(totalHours.intValue());
     }
 }

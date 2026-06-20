@@ -6,13 +6,13 @@
 
 ## Acceptance Criteria
 
-- Updatable fields: operational hours, contacts (type, value, description), image path, services, terminals, gates.
+- Updatable fields: operational hours, contacts (type, value, description), services, terminals, gates.
 - All fields are optional; only provided fields are updated (partial update semantics).
 - Contact types must be valid values (`PHONE`, `EMAIL`, `FAX`, etc.).
 - The airport must exist.
 - On success the system returns HTTP 200 with the updated airport representation.
 - Airport not found returns HTTP 404.
-- Concurrent update conflict returns HTTP 409.
+- Concurrent update conflict returns HTTP 412.
 
 ## Pre-conditions
 
@@ -36,7 +36,7 @@
 | Step | Condition                           | System Response |
 | ---- | ----------------------------------- | --------------- |
 | 2    | Airport not found                   | HTTP 404        |
-| 4    | Optimistic locking version conflict | HTTP 409        |
+| 4    | Optimistic locking version conflict | HTTP 412        |
 
 ## Design Justification
 

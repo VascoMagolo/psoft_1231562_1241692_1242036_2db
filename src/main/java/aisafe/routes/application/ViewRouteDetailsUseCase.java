@@ -1,28 +1,34 @@
 package aisafe.routes.application;
 
 import aisafe.shared.application.UseCase;
+import aisafe.airports.domain.IataCode;
+import aisafe.routes.application.dtos.RouteResponse;
 import aisafe.routes.domain.Route;
-import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteNotFoundException;
-import lombok.RequiredArgsConstructor;
+import aisafe.routes.domain.RouteRepository;
 
 /**
  * Use case responsible for retrieving the details of a specific route.
  */
-@UseCase
-@RequiredArgsConstructor
+@UseCase(readOnly = true)
 public class ViewRouteDetailsUseCase {
 
     private final RouteRepository routeRepository;
 
+    public ViewRouteDetailsUseCase(RouteRepository routeRepository) {
+        this.routeRepository = routeRepository;
+    }
+
     /**
-     * Finds a route by its ID or throws an exception if not found.
+     * Finds a route by its origin and destination or throws an exception if not found.
      *
-     * @param id the unique identifier of the route
-     * @return the requested route
+     * @param origin      the IATA code of the origin airport
+     * @param destination the IATA code of the destination airport
+     * @return the requested route response
      */
-    public Route execute(Long id) {
-        return routeRepository.findById(id)
-                .orElseThrow(() -> new RouteNotFoundException(id.toString()));
+    public RouteResponse execute(String origin, String destination) {
+        Route route = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination))
+                .orElseThrow(() -> new RouteNotFoundException(origin + "-" + destination));
+        return RouteResponse.from(route);
     }
 }

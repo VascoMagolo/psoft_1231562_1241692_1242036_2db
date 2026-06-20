@@ -1,5 +1,6 @@
 package aisafe.airports.domain;
 
+import aisafe.shared.domain.DomainException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,37 +25,37 @@ class AirportTest {
 
     @Test
     void ensureBlankNameThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "  ", "Lisbon", "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
     }
 
     @Test
     void ensureBlankCityThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "Lisbon Airport", "", "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
     }
 
     @Test
     void ensureBlankCountryThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "Lisbon Airport", "Lisbon", "  ", "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
     }
 
     @Test
     void ensureBlankTimezoneThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "", 38.77, -9.13, oneRunway()));
     }
 
     @Test
     void ensureEmptyRunwaysThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, List.of()));
     }
 
     @Test
     void ensureNullRunwaysThrowsException() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(DomainException.class, () ->
                 new Airport("LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, null));
     }
 

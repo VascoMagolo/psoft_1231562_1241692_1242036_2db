@@ -1,0 +1,10 @@
+@startuml
+autonumber
+actor "ATCC" as Actor
+participant "System" as Sys
+
+Actor -> Sys : getTotalNetworkDistance()
+activate Sys
+Sys --> Actor : returns total distance covered by active routes
+deactivate Sys
+@enduml

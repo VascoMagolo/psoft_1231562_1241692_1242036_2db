@@ -1,9 +1,10 @@
 package aisafe.aircrafts.application;
 
-import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,17 +30,35 @@ class ListAircraftModelsUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
+        aircraftModel = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
     }
 
     @Test
     void ensureListReturnsModelsSuccessfully() {
-        when(aircraftModelRepository.findAll(0, 10)).thenReturn(List.of(aircraftModel));
+        when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(aircraftModel), 1L));
 
-        List<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+        PaginatedResult<AircraftModelResponse> result = listAircraftModelsUseCase.execute(0, 10);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("A320", result.get(0).modelName());
+        assertEquals(1, result.data().size());
+        
+        AircraftModelResponse response = result.data().get(0);
+        assertEquals("A320", response.modelName());
+        assertEquals(Manufacturer.AIRBUS, response.manufacturer());
+        assertEquals(26730.0, response.fuelCapacity());
+        assertEquals(6150.0, response.maxRange());
+        assertEquals(833.0, response.cruisingSpeed());
+        assertFalse(response.hasImage());
+        assertEquals(180, response.maximumSeatingCapacity());
+    }
+
+    @Test
+    void ensureListReturnsEmptyWhenNoModelsExist() {
+        when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(), 0L));
+
+        PaginatedResult<AircraftModelResponse> result = listAircraftModelsUseCase.execute(0, 10);
+
+        assertNotNull(result);
+        assertTrue(result.data().isEmpty());
     }
 }

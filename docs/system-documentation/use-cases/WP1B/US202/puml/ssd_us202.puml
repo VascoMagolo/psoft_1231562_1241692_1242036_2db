@@ -1,0 +1,20 @@
+@startuml
+autonumber
+actor "Backoffice Operator" as Actor
+participant "System" as Sys
+
+Actor -> Sys : POST /api/aircraftModels (multipart/form-data)\n(modelName, manufacturer, maxRange, fuelCapacity,\n cruisingSpeed, maximumSeatingCapacity, image?)
+activate Sys
+Sys --> Actor : 201 Created - AircraftModelResponse (hasImage: true/false)
+deactivate Sys
+
+Actor -> Sys : PATCH /api/aircraftModels/{modelName}/image (multipart/form-data)\n(image)
+activate Sys
+Sys --> Actor : 200 OK - AircraftModelResponse (hasImage: true)
+deactivate Sys
+
+Actor -> Sys : GET /api/aircraftModels/{modelName}/image
+activate Sys
+Sys --> Actor : 200 OK - raw image bytes\nContent-Type: image/jpeg (or stored type)
+deactivate Sys
+@enduml

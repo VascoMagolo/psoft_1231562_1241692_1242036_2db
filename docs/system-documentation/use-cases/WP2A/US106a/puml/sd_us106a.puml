@@ -8,14 +8,8 @@ participant "AircraftModelRepository" as ModelRepo
 participant "AircraftCertificationRepository" as CertRepo
 database "Database" as DB
 
-Actor -> Ctrl : POST /api/airports/{iataCode}/certifications\n{ airportCode: String, aircraftModelName: String }
+Actor -> Ctrl : POST /api/airports/{iataCode}/certifications\n{ aircraftModelName: String }
 activate Ctrl
-
-note right of Ctrl
-  @Valid on AddCertificationRequest:
-  - airportCode: must match path iataCode
-  - aircraftModelName: not blank
-end note
 
 Ctrl -> UC : execute(iataCode: String,\n  request: AddCertificationRequest)
 activate UC

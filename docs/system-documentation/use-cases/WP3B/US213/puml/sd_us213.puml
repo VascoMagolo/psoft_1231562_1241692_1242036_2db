@@ -1,0 +1,29 @@
+@startuml
+autonumber
+actor "ATCC" as BO
+participant "FlightController" as Ctrl
+participant "GetFlightsByAircraftUseCase" as UC
+participant "FlightRepository" as Repo
+database "Database" as DB
+
+BO -> Ctrl : GET /api/flights?aircraftId={aircraftId}
+activate Ctrl
+
+Ctrl -> UC : execute(aircraftId)
+activate UC
+
+UC -> Repo : findByAircraftId(aircraftId)
+activate Repo
+Repo -> DB : SELECT * FROM flight WHERE aircraft_id = aircraftId
+activate DB
+DB --> Repo : returns flight records
+deactivate DB
+Repo --> UC : returns list of flights
+deactivate Repo
+
+UC --> Ctrl : returns List<FlightResponse>
+deactivate UC
+
+Ctrl --> BO : returns list of Scheduled Flight details
+deactivate Ctrl
+@enduml

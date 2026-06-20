@@ -1,9 +1,9 @@
 package aisafe.airports.application;
 
 import aisafe.airports.application.dtos.AirportGroupResponse;
-import aisafe.airports.domain.Airport;
+import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.AirportRepository;
-import aisafe.airports.domain.Runway;
+import aisafe.airports.domain.IataCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,18 +24,16 @@ class ListAirportsByRegionUseCaseTest {
     @InjectMocks
     private ListAirportsByRegionUseCase listAirportsByRegion;
 
-    private Airport buildAirport(String iata, String country, String region) {
-        Airport a = new Airport(iata, iata + " Airport", "City", country, region, "UTC",
-                0.0, 0.0, List.of(new Runway("01/19", 2500, "010/190")));
-        return a;
+    private AirportGroupingData buildRow(String iata, String country, String region) {
+        return new AirportGroupingData(new IataCode(iata), iata + " Airport", region, country);
     }
 
     @Test
     void ensureGroupByRegionGroupsCorrectly() {
-        Airport lis = buildAirport("LIS", "Portugal", "Europe");
-        Airport jfk = buildAirport("JFK", "USA", "North America");
+        AirportGroupingData lis = buildRow("LIS", "Portugal", "Europe");
+        AirportGroupingData jfk = buildRow("JFK", "USA", "North America");
 
-        when(airportRepository.findAll()).thenReturn(List.of(lis, jfk));
+        when(airportRepository.findAllGroupingByRegion()).thenReturn(List.of(lis, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 
@@ -46,11 +44,11 @@ class ListAirportsByRegionUseCaseTest {
 
     @Test
     void ensureGroupByCountryGroupsCorrectly() {
-        Airport lis = buildAirport("LIS", "Portugal", "Europe");
-        Airport opo = buildAirport("OPO", "Portugal", "Europe");
-        Airport jfk = buildAirport("JFK", "USA", "North America");
+        AirportGroupingData lis = buildRow("LIS", "Portugal", "Europe");
+        AirportGroupingData opo = buildRow("OPO", "Portugal", "Europe");
+        AirportGroupingData jfk = buildRow("JFK", "USA", "North America");
 
-        when(airportRepository.findAll()).thenReturn(List.of(lis, opo, jfk));
+        when(airportRepository.findAllGroupingByCountry()).thenReturn(List.of(lis, opo, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("country");
 
@@ -61,8 +59,8 @@ class ListAirportsByRegionUseCaseTest {
 
     @Test
     void ensureNullRegionFallsBackToUnknown() {
-        Airport a = buildAirport("XXX", "Unknown Country", null);
-        when(airportRepository.findAll()).thenReturn(List.of(a));
+        AirportGroupingData a = buildRow("XXX", "Unknown Country", null);
+        when(airportRepository.findAllGroupingByRegion()).thenReturn(List.of(a));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 

@@ -1,0 +1,73 @@
+@startuml
+autonumber
+actor "ATCC" as MS
+participant "MaintenanceController" as Ctrl
+participant "ViewMaintenanceDueAircraftUseCase" as UC
+participant "AircraftRepository" as AircraftRepo
+participant "MaintenanceTemplateRepository" as TemplateRepo
+participant "MaintenanceRecordRepository" as RecordRepo
+participant "ScheduledFlightRepository" as FlightRepo
+database "Database" as DB
+
+MS -> Ctrl : GET /api/maintenance/records/due
+activate Ctrl
+
+Ctrl -> UC : execute()
+activate UC
+
+UC -> AircraftRepo : findAll()
+activate AircraftRepo
+AircraftRepo -> DB : SELECT FROM aircraft
+activate DB
+DB --> AircraftRepo : list of aircraft
+deactivate DB
+AircraftRepo --> UC : List<Aircraft>
+deactivate AircraftRepo
+
+UC -> TemplateRepo : findAll()
+activate TemplateRepo
+TemplateRepo -> DB : SELECT FROM maintenance_template
+activate DB
+DB --> TemplateRepo : list of templates
+deactivate DB
+TemplateRepo --> UC : List<MaintenanceTemplate>
+deactivate TemplateRepo
+
+loop for each aircraft
+  UC -> RecordRepo : findCompletedByAircraft(registrationNumber)
+  activate RecordRepo
+  RecordRepo -> DB : SELECT FROM maintenance_record WHERE ... ORDER BY completed_at DESC
+  activate DB
+  DB --> RecordRepo : completed records
+  deactivate DB
+  RecordRepo --> UC : List<MaintenanceRecord>
+  deactivate RecordRepo
+
+  alt applicable templates exist
+    loop for each template
+      UC -> FlightRepo : calculateOperationalHoursSince(registrationNumber, startFlightDate)
+      activate FlightRepo
+      FlightRepo -> DB : SELECT SUM(duration) FROM scheduled_flight WHERE ...
+      activate DB
+      DB --> FlightRepo : flight hours
+      deactivate DB
+      FlightRepo --> UC : Double
+      deactivate FlightRepo
+    end
+  else no applicable templates
+    UC -> FlightRepo : calculateOperationalHoursSince(registrationNumber, startFlightDate)
+    activate FlightRepo
+    FlightRepo -> DB : SELECT SUM(duration) FROM scheduled_flight WHERE ...
+    activate DB
+    DB --> FlightRepo : flight hours
+    deactivate DB
+    FlightRepo --> UC : Double
+    deactivate FlightRepo
+  end
+end
+
+UC --> Ctrl : List<MaintenanceDueAircraftResponse>
+deactivate UC
+Ctrl --> MS : 200 OK\nPagedModel<EntityModel<MaintenanceDueAircraftResponse>> with _links
+deactivate Ctrl
+@enduml

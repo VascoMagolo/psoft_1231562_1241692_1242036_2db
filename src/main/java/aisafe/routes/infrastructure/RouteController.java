@@ -1,11 +1,17 @@
 package aisafe.routes.infrastructure;
 
 import aisafe.routes.application.*;
+import aisafe.routes.application.dtos.ActiveRouteResponse;
+import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.routes.application.dtos.CreateRouteRequest;
+import aisafe.shared.application.ExportedFile;
 import aisafe.routes.application.dtos.RouteHistoryResponse;
 import aisafe.routes.application.dtos.RouteResponse;
+import aisafe.routes.application.dtos.SearchRoutesRequest;
 import aisafe.routes.application.dtos.UpdateRouteRequest;
-import aisafe.routes.domain.Route;
+import aisafe.shared.application.dtos.BulkImportResult;
+import aisafe.shared.infrastructure.BulkImportResponseBuilder;
+import org.springframework.security.core.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import aisafe.shared.infrastructure.ETagUtils;
 
@@ -40,58 +47,55 @@ public class RouteController {
     private final CreateRouteUseCase createRoute;
     private final ViewRouteHistoryUseCase viewRouteHistory;
     private final UpdateRouteUseCase updateRoute;
-    private final DesactivateRouteUseCase desactivateRoute;
+    private final DeactivateRouteUseCase deactivateRoute;
     private final ViewRouteDetailsUseCase viewRouteDetails;
     private final ListRoutesFromAirportUseCase listRoutesFromAirport;
     private final SearchRoutesUseCase searchRoutes;
     private final DeleteRouteUseCase deleteRoute;
+    private final ListActiveRoutesUseCase listActiveRoutes;
+    private final SearchAlternativeRoutesUseCase searchAlternativeRoutes;
+    private final ExportRouteNetworkUseCase exportRouteNetwork;
+    private final ImportRoutesUseCase importRoutesUseCase;
 
     public RouteController(CreateRouteUseCase createRoute,
                            ViewRouteHistoryUseCase viewRouteHistory,
                            UpdateRouteUseCase updateRoute,
-                           DesactivateRouteUseCase desactivateRoute,
+                           DeactivateRouteUseCase deactivateRoute,
                            ViewRouteDetailsUseCase viewRouteDetails,
                            ListRoutesFromAirportUseCase listRoutesFromAirport,
                            SearchRoutesUseCase searchRoutes,
-                           DeleteRouteUseCase deleteRoute) {
+                           DeleteRouteUseCase deleteRoute,
+                           ListActiveRoutesUseCase listActiveRoutes,
+                           SearchAlternativeRoutesUseCase searchAlternativeRoutes,
+                           ExportRouteNetworkUseCase exportRouteNetwork,
+                           ImportRoutesUseCase importRoutesUseCase) {
         this.createRoute = createRoute;
         this.viewRouteHistory = viewRouteHistory;
         this.updateRoute = updateRoute;
-        this.desactivateRoute = desactivateRoute;
+        this.deactivateRoute = deactivateRoute;
         this.viewRouteDetails = viewRouteDetails;
         this.listRoutesFromAirport = listRoutesFromAirport;
         this.searchRoutes = searchRoutes;
         this.deleteRoute = deleteRoute;
+        this.listActiveRoutes = listActiveRoutes;
+        this.searchAlternativeRoutes = searchAlternativeRoutes;
+        this.exportRouteNetwork = exportRouteNetwork;
+        this.importRoutesUseCase = importRoutesUseCase;
     }
 
     private EntityModel<RouteResponse> toModel(RouteResponse route) {
-        Long id = route.id();
+        String origin = route.originIataCode();
+        String destination = route.destinationIataCode();
         return EntityModel.of(route,
-                linkTo(methodOn(RouteController.class).getRouteDetails(id)).withSelfRel(),
-                linkTo(methodOn(RouteController.class).getRouteHistory(id)).withRel("history"),
-                linkTo(methodOn(RouteController.class).updateRoute(id, null, null)).withRel("update"),
-                linkTo(methodOn(RouteController.class).deactivateRoute(id, null)).withRel("deactivate"),
-                linkTo(methodOn(RouteController.class).deleteRoute(id)).withRel("delete"));
+                linkTo(methodOn(RouteController.class).getRouteDetails(origin, destination)).withSelfRel(),
+                linkTo(methodOn(RouteController.class).getRouteHistory(origin, destination)).withRel("history"),
+                linkTo(methodOn(RouteController.class).updateRoute(origin, destination, null, null, null)).withRel("update"),
+                linkTo(methodOn(RouteController.class).deactivateRoute(origin, destination, null, null)).withRel("deactivate"),
+                linkTo(methodOn(RouteController.class).deleteRoute(origin, destination)).withRel("delete"));
     }
 
-    private EntityModel<RouteResponse> mapToModel(Route r) {
-        RouteResponse response = new RouteResponse(
-                r.getId(),
-                r.getOrigin().getCode(),
-                r.getDestination().getCode(),
-                r.getEstimatedFlightTime(),
-                r.getMinimumRange(),
-                r.getMinimumCapacity(),
-                r.isActive());
-        return toModel(response);
-    }
 
-    /**
-     * Creates a new flight route in the system.
-     *
-     * @param request the request containing the route information
-     * @return a response entity containing the created route
-     */
+
     // US110
     @Operation(summary = "Create a flight route", description = "Registers a new flight route in the system. (US110)")
     @ApiResponses({
@@ -103,15 +107,40 @@ public class RouteController {
     @PostMapping
     public ResponseEntity<EntityModel<RouteResponse>> createRoute(
             @Valid @RequestBody CreateRouteRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapToModel(createRoute.execute(request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toModel(createRoute.execute(request)));
     }
 
-    /**
-     * Retrieves the complete history of changes made to a route.
-     *
-     * @param id the unique identifier of the route
-     * @return a response entity containing the route history entries
-     */
+    // US214
+    @Operation(summary = "List active routes", description = "Lists active routes sorted by distance or popularity. (US214)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Active routes retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid status or sortBy parameter")
+    })
+    @GetMapping
+    public ResponseEntity<CollectionModel<ActiveRouteResponse>> getActiveRoutes(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy) {
+        return ResponseEntity.ok(CollectionModel.of(
+                listActiveRoutes.execute(status, sortBy),
+                linkTo(methodOn(RouteController.class).getActiveRoutes(status, sortBy)).withSelfRel()));
+    }
+
+    // US216
+    @Operation(summary = "Search alternative routes", description = "Finds indirect active route paths between two airports. (US216)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Alternative routes retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid origin or destination"),
+            @ApiResponse(responseCode = "404", description = "Airport not found")
+    })
+    @GetMapping("/alternatives")
+    public ResponseEntity<CollectionModel<AlternativeRouteResponse>> getAlternativeRoutes(
+            @RequestParam String origin,
+            @RequestParam String destination) {
+        return ResponseEntity.ok(CollectionModel.of(
+                searchAlternativeRoutes.execute(origin, destination),
+                linkTo(methodOn(RouteController.class).getAlternativeRoutes(origin, destination)).withSelfRel()));
+    }
+
     // US111
     @Operation(summary = "Keep track of route history", description = "Retrieves the historical changes and updates made to a specific route. (US111)")
     @ApiResponses({
@@ -120,31 +149,22 @@ public class RouteController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Route not found")
     })
-    @GetMapping("/{id}/history")
+    @GetMapping("/{origin}/{destination}/history")
     public ResponseEntity<CollectionModel<EntityModel<RouteHistoryResponse>>> getRouteHistory(
-            @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
-        List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(id).stream()
-                .map(h -> {
-                    RouteHistoryResponse response = new RouteHistoryResponse(
-                            h.getId(), h.getRouteId(), h.getChangeDescription(),
-                            h.getChangedAt(), h.getChangedBy());
-                    return EntityModel.of(response,
-                            linkTo(methodOn(RouteController.class).getRouteDetails(response.routeId()))
-                                    .withRel("route"));
-                })
+            @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
+            @Parameter(description = "IATA code of the destination airport") @PathVariable String destination) {
+        String originUpper = origin.toUpperCase();
+        String destinationUpper = destination.toUpperCase();
+        List<EntityModel<RouteHistoryResponse>> historyModels = viewRouteHistory.execute(originUpper, destinationUpper).stream()
+                .map(response -> EntityModel.of(response,
+                            linkTo(methodOn(RouteController.class).getRouteDetails(originUpper, destinationUpper))
+                                    .withRel("route")))
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(historyModels,
-                linkTo(methodOn(RouteController.class).getRouteHistory(id)).withSelfRel(),
-                linkTo(methodOn(RouteController.class).getRouteDetails(id)).withRel("route")));
+                linkTo(methodOn(RouteController.class).getRouteHistory(originUpper, destinationUpper)).withSelfRel(),
+                linkTo(methodOn(RouteController.class).getRouteDetails(originUpper, destinationUpper)).withRel("route")));
     }
 
-    /**
-     * Updates the information of an existing route.
-     *
-     * @param id the unique identifier of the route to update
-        * @param request the request containing the updated route data
-     * @return a response entity containing the updated route
-     */
     // US112
     @Operation(summary = "Update route details", description = "Updates the information of an existing flight route. (US112)")
     @ApiResponses({
@@ -155,21 +175,18 @@ public class RouteController {
             @ApiResponse(responseCode = "404", description = "Route not found"),
             @ApiResponse(responseCode = "412", description = "ETag validation failed")
     })
-    @PutMapping("/{id}")
+    @PutMapping("/{origin}/{destination}")
     public ResponseEntity<EntityModel<RouteResponse>> updateRoute(
-            @Parameter(description = "Unique ID of the route to be updated") @PathVariable Long id,
+            @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
+            @Parameter(description = "IATA code of the destination airport") @PathVariable String destination,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
-            @Valid @RequestBody UpdateRouteRequest request) {
+            @Valid @RequestBody UpdateRouteRequest request,
+            Authentication authentication) {
         Long version = ETagUtils.parseVersion(ifMatch);
-        return ResponseEntity.ok(mapToModel(updateRoute.execute(id, request, version)));
+        String username = authentication != null ? authentication.getName() : "anonymous";
+        return ResponseEntity.ok(toModel(updateRoute.execute(origin.toUpperCase(), destination.toUpperCase(), request, version, username)));
     }
 
-    /**
-     * Deactivates an existing route.
-     *
-     * @param id the unique identifier of the route to deactivate
-     * @return a response entity containing the deactivated route
-     */
     // US112
     @Operation(summary = "Deactivate a route", description = "Sets an active flight route status to deactivated. (US112)")
     @ApiResponses({
@@ -179,43 +196,32 @@ public class RouteController {
             @ApiResponse(responseCode = "404", description = "Route not found"),
             @ApiResponse(responseCode = "412", description = "ETag validation failed")
     })
-    @PatchMapping("/{id}/deactivate")
+    @PatchMapping("/{origin}/{destination}/deactivate")
     public ResponseEntity<EntityModel<RouteResponse>> deactivateRoute(
-            @Parameter(description = "Unique ID of the route to deactivate") @PathVariable Long id,
-            @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch) {
+            @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
+            @Parameter(description = "IATA code of the destination airport") @PathVariable String destination,
+            @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
+            Authentication authentication) {
         Long version = ETagUtils.parseVersion(ifMatch);
-        return ResponseEntity.ok(mapToModel(desactivateRoute.execute(id, version)));
+        String username = authentication != null ? authentication.getName() : "anonymous";
+        return ResponseEntity.ok(toModel(deactivateRoute.execute(origin.toUpperCase(), destination.toUpperCase(), version, username)));
     }
 
-
-    /**
-     * Retrieves all active routes departing from a specific airport.
-     *
-     * @param iataCode the IATA code of the origin airport
-     * @param pageable pagination parameters
-     * @param assembler the paged resources assembler
-     * @return a response entity containing the paginated routes
-     */
     // US113
-    @Operation(summary = "View route details", description = "Retrieves the full details of a specific route by its ID. (US113)")
+    @Operation(summary = "View route details", description = "Retrieves the full details of a specific route. (US113)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Route details retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Route not found")
     })
-    @GetMapping("/{id}")
+    @GetMapping("/{origin}/{destination}")
     public ResponseEntity<EntityModel<RouteResponse>> getRouteDetails(
-            @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
-        return ResponseEntity.ok(mapToModel(viewRouteDetails.execute(id)));
+            @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
+            @Parameter(description = "IATA code of the destination airport") @PathVariable String destination) {
+        return ResponseEntity.ok(toModel(viewRouteDetails.execute(origin.toUpperCase(), destination.toUpperCase())));
     }
 
-    /**
-     * Retrieves all active routes departing from a specific airport.
-     *
-     * @param iataCode the IATA code of the origin airport
-     * @return a response entity containing the list of routes
-     */
     // US113
     @Operation(summary = "View routes from airport", description = "Retrieves all active routes originating from a specific airport. (US113)")
     @ApiResponses({
@@ -228,21 +234,12 @@ public class RouteController {
     public ResponseEntity<PagedModel<EntityModel<RouteResponse>>> getRoutesFromAirport(
             @Parameter(description = "IATA code of the origin airport (e.g., LIS, OPO)") @PathVariable String iataCode,
             @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<Route> assembler) {
-        PaginatedResult<Route> result = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable.getPageNumber(), pageable.getPageSize());
-        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
-        return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
+            PagedResourcesAssembler<RouteResponse> assembler) {
+        PaginatedResult<RouteResponse> result = listRoutesFromAirport.execute(iataCode.toUpperCase(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<RouteResponse> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(routePage, this::toModel));
     }
 
-    /**
-     * Searches for routes based on origin and destination filters.
-     *
-     * @param origin the origin airport or location filter
-     * @param destination the destination airport or location filter
-     * @param pageable pagination parameters
-     * @param assembler the paged resources assembler
-     * @return a response entity containing the matching paginated routes
-     */
     // US114
     @Operation(summary = "Search routes", description = "Searches for flight routes based on origin and/or destination criteria. (US114)")
     @ApiResponses({
@@ -253,26 +250,59 @@ public class RouteController {
     })
     @GetMapping("/search")
     public ResponseEntity<PagedModel<EntityModel<RouteResponse>>> searchRoutes(
-            @Parameter(description = "Origin location or IATA code") @RequestParam(required = false) String origin,
-            @Parameter(description = "Destination location or IATA code") @RequestParam(required = false) String destination,
+            @Parameter(description = "Origin IATA code") @RequestParam(required = false) String origin,
+            @Parameter(description = "Destination IATA code") @RequestParam(required = false) String destination,
             @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<Route> assembler) {
-        PaginatedResult<Route> result = this.searchRoutes.execute(origin, destination, pageable.getPageNumber(), pageable.getPageSize());
-        Page<Route> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
-        return ResponseEntity.ok(assembler.toModel(routePage, this::mapToModel));
+            PagedResourcesAssembler<RouteResponse> assembler) {
+        PaginatedResult<RouteResponse> result = this.searchRoutes.execute(new SearchRoutesRequest(origin, destination, pageable.getPageNumber(), pageable.getPageSize()));
+        Page<RouteResponse> routePage = new PageImpl<>(result.data(), pageable, result.totalElements());
+        return ResponseEntity.ok(assembler.toModel(routePage, this::toModel));
     }
 
-    @Operation(summary = "Delete a route", description = "Permanently removes a flight route by ID. Requires Admin role.")
+    @Operation(summary = "Delete a route", description = "Permanently removes a flight route. Requires Admin role.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Route deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "Route not found")
     })
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{origin}/{destination}")
     public ResponseEntity<Void> deleteRoute(
-            @Parameter(description = "Unique ID of the route") @PathVariable Long id) {
-        deleteRoute.execute(id);
+            @Parameter(description = "IATA code of the origin airport") @PathVariable String origin,
+            @Parameter(description = "IATA code of the destination airport") @PathVariable String destination) {
+        deleteRoute.execute(origin.toUpperCase(), destination.toUpperCase());
         return ResponseEntity.noContent().build();
+    }
+
+    // US228
+    @Operation(summary = "Export route network", description = "Exports the active route network in GeoJSON or KML format. (US228)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Export file generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid format requested"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportRouteNetwork(
+            @RequestParam(defaultValue = "geojson") String format) {
+        ExportedFile file = exportRouteNetwork.execute(format);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, file.contentType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
+                .body(file.content());
+    }
+
+    @Operation(summary = "Import routes", description = "Bulk import routes from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All routes imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Partial success or all failed"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> importRoutes(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : "BulkImport";
+        BulkImportResult<String> result = importRoutesUseCase.execute(file, username);
+        return BulkImportResponseBuilder.buildResponse(result);
     }
 }

@@ -1,6 +1,5 @@
 package aisafe.security.domain;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,39 +12,34 @@ import java.util.*;
 /**
  * Represents a user in the system with authentication and authorization details.
  */
-@Entity
-@Table(name = "users")
 public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Getter
-    @Column(nullable = false, unique = true)
-    private final UUID userID = UUID.randomUUID();
+    private UUID userID;
 
-    @Column(nullable = false)
     private String username;
-
-    @Column(nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @Getter
-    @Setter
     private Role role;
 
-    protected User() {
-    }
+    protected User() {}
 
     public User(String username, String passwordHash, Role role) {
         Assert.hasText(username, "username must not be blank");
         Assert.hasText(passwordHash, "password must not be blank");
         Assert.notNull(role, "role must not be null");
+        this.userID = UUID.randomUUID();
         this.username = username;
         this.passwordHash = passwordHash;
         this.role = role;
+    }
+
+    public void assignRole(Role role) { this.role = role; }
+
+    public static User reconstitute(UUID userID, String username, String passwordHash, Role role) {
+        User user = new User(username, passwordHash, role);
+        user.userID = userID;
+        return user;
     }
 
     @Override

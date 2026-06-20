@@ -1,0 +1,45 @@
+@startuml sd_us221
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "ATCC / MAINTENANCE_SUPERVISOR" as Actor
+participant "MaintenanceController" as Ctrl
+participant "ViewAverageTurnaroundUseCase" as UC
+participant "AircraftModelRepository" as ModelRepo
+participant "MaintenanceRecordRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/maintenance/records/turnaround/model/{modelName}
+activate Ctrl
+
+Ctrl -> UC : execute(modelName)
+activate UC
+
+UC -> ModelRepo : existsByModelName(modelName)
+activate ModelRepo
+ModelRepo --> UC : boolean
+deactivate ModelRepo
+
+alt model not found
+    UC --> Ctrl : throws AircraftModelNotFoundException
+    Ctrl --> Actor : 404 Not Found
+else model found
+    UC -> Repo : findAverageTurnaroundByModel(modelName)
+    activate Repo
+    Repo -> DB : SELECT AVG(expected_duration)...\nWHERE status = 'COMPLETED' AND model = ?
+    activate DB
+    DB --> Repo : turnaround data
+    deactivate DB
+    Repo --> UC : TurnaroundData
+    deactivate Repo
+
+    UC --> Ctrl : AverageTurnaroundByModelResponse
+    deactivate UC
+    Ctrl --> Actor : 200 OK
+end
+
+deactivate Ctrl
+
+@enduml

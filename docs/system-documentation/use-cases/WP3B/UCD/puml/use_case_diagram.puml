@@ -1,0 +1,25 @@
+@startuml
+title Use Case Diagram (UCD) - ATCC Operations
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "ATCC\n(Air Transport Company Collaborator)" as ATCC
+
+rectangle "Flight & Route Management System" {
+
+  usecase "US212: Assign Aircraft to Route\n(Create Scheduled Flight)" as UC212
+  usecase "US213: View Scheduled Flights\nby Aircraft" as UC213
+  usecase "US214: List Active Routes\nSorted by Popularity/Distance" as UC214
+  usecase "US215: Calculate Total\nNetwork Distance" as UC215
+  usecase "US216: Search Alternative Routes\nbetween Airports" as UC216
+
+}
+
+ATCC --> UC212
+ATCC --> UC213
+ATCC --> UC214
+ATCC --> UC215
+ATCC --> UC216
+
+@enduml

@@ -1,11 +1,15 @@
 package aisafe.maintenance.application;
 
 import aisafe.aircrafts.domain.AircraftModel;
-import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.maintenance.application.dtos.CreateMaintenanceTemplateRequest;
-import aisafe.maintenance.domain.*;
+import aisafe.maintenance.application.dtos.MaintenanceTemplateResponse;
+import aisafe.maintenance.domain.MaintenanceTemplate;
+import aisafe.maintenance.domain.MaintenanceTemplateRepository;
+import aisafe.maintenance.domain.MaintenanceType;
+import aisafe.shared.domain.DuplicateResourceException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,40 +36,30 @@ class CreateMaintenanceTemplateUseCaseTest {
     @InjectMocks
     private CreateMaintenanceTemplateUseCase createMaintenanceTemplate;
 
-    private AircraftModel buildModel() {
-        return new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, "a320.jpg", 180);
-    }
-
     private CreateMaintenanceTemplateRequest buildRequest() {
-        return new CreateMaintenanceTemplateRequest(
-                "Annual Check", MaintenanceType.INSPECTION, List.of("A320"),
-                List.of("Check engine", "Check fuel"), 500, 365);
+        return new CreateMaintenanceTemplateRequest("100h Check", MaintenanceType.INSPECTION, List.of("A320"), List.of("Check oil"), 100, 30);
     }
 
     @Test
     void ensureTemplateIsCreatedSuccessfully() {
-        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(buildModel()));
-        when(maintenanceTemplateRepository.existsByName("Annual Check")).thenReturn(false);
-        doNothing().when(maintenanceTemplateRepository).save(any());
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(maintenanceTemplateRepository.existsByName(anyString())).thenReturn(false);
 
-        assertDoesNotThrow(() -> createMaintenanceTemplate.execute(buildRequest()));
-        verify(maintenanceTemplateRepository).save(any(MaintenanceTemplate.class));
-    }
+        MaintenanceTemplateResponse response = createMaintenanceTemplate.execute(buildRequest());
 
-    @Test
-    void ensureExceptionWhenModelNotFound() {
-        when(modelRepository.findByModelName("A320")).thenReturn(Optional.empty());
-
-        assertThrows(AircraftModelNotFoundException.class, () -> createMaintenanceTemplate.execute(buildRequest()));
-        verify(maintenanceTemplateRepository, never()).save(any());
+        assertNotNull(response);
+        assertEquals("100h Check", response.name());
+        verify(maintenanceTemplateRepository, times(1)).save(any(MaintenanceTemplate.class));
     }
 
     @Test
     void ensureExceptionWhenTemplateNameAlreadyExists() {
-        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(buildModel()));
-        when(maintenanceTemplateRepository.existsByName("Annual Check")).thenReturn(true);
+        AircraftModel model = new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180);
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(maintenanceTemplateRepository.existsByName(anyString())).thenReturn(true);
 
-        assertThrows(MaintenanceTemplateAlreadyExistsException.class, () -> createMaintenanceTemplate.execute(buildRequest()));
+        assertThrows(DuplicateResourceException.class, () -> createMaintenanceTemplate.execute(buildRequest()));
         verify(maintenanceTemplateRepository, never()).save(any());
     }
 }

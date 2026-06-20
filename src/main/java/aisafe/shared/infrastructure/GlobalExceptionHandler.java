@@ -1,8 +1,11 @@
 package aisafe.shared.infrastructure;
 
+import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
+import aisafe.aircrafts.domain.InvalidRegistrationNumberException;
 import aisafe.airports.domain.AirportNotFoundException;
+import aisafe.airports.domain.AirportPhotoNotFoundException;
 import aisafe.maintenance.domain.MaintenancePartNotFoundException;
 import aisafe.maintenance.domain.MaintenanceRecordNotFoundException;
 import aisafe.maintenance.domain.MaintenanceTemplateNotFoundException;
@@ -21,6 +24,9 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -36,6 +42,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     /** 401 Unauthorized -- authentication failed. */
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
@@ -47,7 +54,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             AircraftNotFoundException.class,
             AircraftModelNotFoundException.class,
+            AircraftModelImageNotFoundException.class,
             AirportNotFoundException.class,
+            AirportPhotoNotFoundException.class,
             RouteNotFoundException.class,
             MaintenanceRecordNotFoundException.class,
             MaintenancePartNotFoundException.class,
@@ -64,7 +73,8 @@ public class GlobalExceptionHandler {
             DomainException.class,
             IllegalArgumentException.class,
             InvalidIataCodeException.class,
-            InvalidContactException.class
+            InvalidContactException.class,
+            InvalidRegistrationNumberException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -101,6 +111,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
+    /** 400 Bad Request - query/path parameter cannot be converted to its target type (e.g. invalid enum value) */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(message));
+    }
+
     /** 400 Bad Request - bean validation failure (@Valid on request bodies) */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -113,6 +130,7 @@ public class GlobalExceptionHandler {
     /** 500 Internal Server Error - Catch all for unexpected error */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllOtherExceptions(Exception ex) {
+        log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("An unexpected internal server error occurred: " + ex.getMessage()));
     }

@@ -1,0 +1,144 @@
+@startuml
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "AircraftModelController" as Ctrl
+participant "RegisterAircraftModelUseCase" as RegUC
+participant "UpdateAircraftModelImageUseCase" as UpdUC
+participant "GetAircraftModelImageUseCase" as GetUC
+participant "AircraftModelRepository" as Repo
+database "Database" as DB
+
+== POST /api/aircraftModels (multipart/form-data) ==
+
+BO -> Ctrl : POST /api/aircraftModels\nContent-Type: multipart/form-data\n{ modelName, manufacturer, maxRange, fuelCapacity,\n  cruisingSpeed, maximumSeatingCapacity, image? }
+activate Ctrl
+
+alt image file present and MIME type does not start with "image/"
+  Ctrl --> BO : 400 Bad Request
+else image absent or MIME type valid
+  note right of Ctrl
+    RegisterAircraftModelRequest built manually
+    (no @Valid - @Null tombstone not evaluated)
+  end note
+
+  Ctrl -> RegUC : execute(RegisterAircraftModelRequest)
+  activate RegUC
+
+  RegUC -> Repo : existsByModelName(modelName)
+  activate Repo
+  Repo -> DB : SELECT COUNT(*) FROM aircraft_models WHERE model_name = ?
+  activate DB
+  DB --> Repo : count
+  deactivate DB
+  Repo --> RegUC : boolean
+  deactivate Repo
+
+  alt model name already exists
+    RegUC --> Ctrl : throws DuplicateResourceException
+    Ctrl --> BO : 409 Conflict
+  else model name is unique
+    note right of RegUC
+      if request.image() != null:
+        image = new AircraftModelImage(bytes, contentType)
+      else:
+        image = null
+    end note
+
+    RegUC -> Repo : save(new AircraftModel(name, mfr, ..., image, seats))
+    activate Repo
+    Repo -> DB : INSERT INTO aircraft_models
+    activate DB
+    DB --> Repo : saved record
+    deactivate DB
+    Repo --> RegUC : AircraftModel
+    deactivate Repo
+
+    RegUC --> Ctrl : AircraftModelResponse (hasImage: true/false)
+    deactivate RegUC
+    Ctrl --> BO : 201 Created\nEntityModel<AircraftModelResponse> with _links
+  end
+end
+
+deactivate Ctrl
+
+== PATCH /api/aircraftModels/{modelName}/image (multipart/form-data) ==
+
+BO -> Ctrl : PATCH /api/aircraftModels/{modelName}/image\nContent-Type: multipart/form-data\n{ image }
+activate Ctrl
+
+alt MIME type does not start with "image/"
+  Ctrl --> BO : 400 Bad Request
+else MIME type valid
+  Ctrl -> UpdUC : execute(UpdateAircraftModelImageRequest(modelName, bytes, contentType))
+  activate UpdUC
+
+  UpdUC -> Repo : findByModelName(modelName)
+  activate Repo
+  Repo -> DB : SELECT * FROM aircraft_models WHERE model_name = ?
+  activate DB
+  DB --> Repo : row or empty
+  deactivate DB
+  Repo --> UpdUC : Optional<AircraftModel>
+  deactivate Repo
+
+  alt model not found
+    UpdUC --> Ctrl : throws AircraftModelNotFoundException
+    Ctrl --> BO : 404 Not Found
+  else model found
+    note right of UpdUC
+      model.updateDetails(null, null, null, null,
+        new AircraftModelImage(bytes, contentType))
+    end note
+
+    UpdUC -> Repo : save(model)
+    activate Repo
+    Repo -> DB : UPDATE aircraft_models SET image = ?, image_content_type = ?
+    activate DB
+    DB --> Repo : updated record
+    deactivate DB
+    Repo --> UpdUC : AircraftModel
+    deactivate Repo
+
+    UpdUC --> Ctrl : AircraftModelResponse (hasImage: true)
+    deactivate UpdUC
+    Ctrl --> BO : 200 OK\nEntityModel<AircraftModelResponse> with _links
+  end
+end
+
+deactivate Ctrl
+
+== GET /api/aircraftModels/{modelName}/image ==
+
+BO -> Ctrl : GET /api/aircraftModels/{modelName}/image
+activate Ctrl
+
+Ctrl -> GetUC : execute(modelName)
+activate GetUC
+
+GetUC -> Repo : findByModelName(modelName)
+activate Repo
+Repo -> DB : SELECT * FROM aircraft_models WHERE model_name = ?
+activate DB
+DB --> Repo : row or empty
+deactivate DB
+Repo --> GetUC : Optional<AircraftModel>
+deactivate Repo
+
+alt model not found
+  GetUC --> Ctrl : throws AircraftModelNotFoundException
+  Ctrl --> BO : 404 Not Found
+else model found but image is null
+  GetUC --> Ctrl : throws AircraftModelImageNotFoundException
+  Ctrl --> BO : 404 Not Found
+else model found and image present
+  GetUC --> Ctrl : AircraftModelImageData(bytes, contentType)
+  deactivate GetUC
+  Ctrl --> BO : 200 OK\nbody: raw image bytes\nContent-Type: image/jpeg (or stored type)
+end
+
+deactivate Ctrl
+@enduml

@@ -8,13 +8,14 @@
 
 ## Acceptance Criteria
 
-- Both origin and destination airports must exist in the system.
+- Both origin and destination airports must exist in the system and be operational.
 - Origin and destination airports cannot be the same.
 - Estimated flight time is mandatory and must be positive.
 - Minimum aircraft range and capacity are mandatory and must be positive values.
 - The route must be uniquely identified.
 - On success the system returns HTTP 201 with the created route representation.
 - If either airport does not exist, the system returns HTTP 404.
+- If either airport is not operational, the system returns HTTP 400.
 - Invalid or missing required fields return HTTP 400.
 
 ---
@@ -54,6 +55,7 @@
 | 2    | Minimum range or capacity <= 0      | HTTP 400        |
 | 3    | Origin airport does not exist       | HTTP 404        |
 | 3    | Destination airport does not exist  | HTTP 404        |
+| 3    | Origin or destination airport is not operational | HTTP 400 |
 | 3    | Origin and destination are the same | HTTP 400        |
 
 ---

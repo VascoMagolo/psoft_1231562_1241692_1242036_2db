@@ -1,23 +1,23 @@
 package aisafe.airports.domain;
 
-import org.springframework.util.Assert;
+import aisafe.aircrafts.domain.ModelName;
 
-/**
- * Represents the certification of an aircraft model at a specific airport.
- * Each certification indicates that a particular aircraft model is approved for operation at the associated airport.
- */
 public class AircraftCertification {
 
-    private final Airport airport;
-    private final String aircraftModelName;
+    private final IataCode airportCode;
+    private final ModelName aircraftModelName;
 
-    public AircraftCertification(Airport airport, String aircraftModelName) {
-        Assert.notNull(airport, "Airport cannot be null");
-        Assert.hasText(aircraftModelName, "Aircraft model name cannot be blank");
-        this.airport = airport;
+    public AircraftCertification(IataCode airportCode, ModelName aircraftModelName) {
+        if (airportCode == null) {
+            throw new InvalidAircraftCertificationException("Airport code cannot be null.");
+        }
+        if (aircraftModelName == null) {
+            throw new InvalidAircraftCertificationException("Aircraft model name cannot be null.");
+        }
+        this.airportCode = airportCode;
         this.aircraftModelName = aircraftModelName;
     }
 
-    public Airport getAirport() { return airport; }
-    public String getAircraftModelName() { return aircraftModelName; }
+    public IataCode getAirportCode() { return airportCode; }
+    public ModelName getAircraftModelName() { return aircraftModelName; }
 }

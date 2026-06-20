@@ -1,5 +1,6 @@
 package aisafe.shared.infrastructure;
 
+import aisafe.shared.application.SuppressArgLogging;
 import aisafe.shared.application.UseCase;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

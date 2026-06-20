@@ -3,7 +3,7 @@ skinparam classAttributeIconSize 0
 skinparam monochrome true
 hide circle
 
-package "User Aggregate" <<Aggregate>> {
+package "Security Aggregate" <<Aggregate>> {
   enum Role <<Enum>> {
     ADMIN
     BACKOFFICE_OPERATOR
@@ -13,7 +13,7 @@ package "User Aggregate" <<Aggregate>> {
   }
 
   class User <<Entity>> <<Root>> {
-    - id : Long
+    - userID : UUID
     - username : String
     - passwordHash : String
     - role : Role
@@ -36,30 +36,42 @@ package "Aircraft Aggregate" <<Aggregate>> {
     AIRBUS
     EMBRAER
     BOMBARDIER
-    OTHER
+    ATR
+    COMAC
+    SUKHOI
+    MITSUBISHI
   }
   class Aircraft <<Entity>> <<Root>> {
     - manufacturingDate : Date
     - status : AircraftStatus
     - seatCapacity : Integer
+    - range : Double
     - features : List<String>
     - model : AircraftModel
-    - version : Long
   }
 
-  class AircraftModel <<Entity>> <<Root>> {
-    - modelName : String
+  class ModelName <<ValueObject>> {
+    - name : String
+  }
+  class AircraftModel <<Entity>> {
+    - modelName : ModelName
     - fuelCapacity : Double
     - maxRange : Double
     - cruisingSpeed : Double
-    - imagePath : String
+    - maximumSeatingCapacity : Integer
+  }
+  class AircraftModelImage <<ValueObject>> {
+    - bytes : byte[]
+    - contentType : String
   }
   class RegistrationNumber <<ValueObject>> {
-    - registrationNumber : String
+    - number : String
   }
   Aircraft --> AircraftStatus : current status
   RegistrationNumber "1"-->"1" Aircraft
   Manufacturer *-->"1" AircraftModel
+  AircraftModel *-- ModelName
+  AircraftModel *-- "0..1" AircraftModelImage : image
 }
 
 package "Airport Aggregate" <<Aggregate>> {
@@ -109,15 +121,19 @@ package "Airport Aggregate" <<Aggregate>> {
     - description : String
   }
 
+  class AirportPhoto <<ValueObject>> {
+    - bytes : byte[]
+    - contentType : String
+  }
+
   class Airport <<Entity>> <<Root>> {
     - name : String
     - city : String
     - country : String
     - region : String
     - timezone : String
-    - imagePath : String
     - operationalHours : String
-    - operationalStatus : AirportStatus
+    - status : AirportStatus
   }
 
   class AircraftCertification <<Entity>> {
@@ -129,6 +145,7 @@ package "Airport Aggregate" <<Aggregate>> {
 
   Airport *-- IataCode
   Airport *-- Coordinates
+  Airport *-- "*" AirportPhoto : photos
   Airport *-- "*" Runway
   Airport *-- "*" Contact
   Airport *-- "*" Terminal
@@ -136,31 +153,35 @@ package "Airport Aggregate" <<Aggregate>> {
   Airport *-- "*" Service
 }
 
-package "Route Aggregate" {
+package "Routes Context" <<Aggregate>> {
   enum RouteStatus <<Enum>> {
     ACTIVE
-    DEACTIVATED
+    INACTIVE
+    SUSPENDED
   }
 
   class Route <<Entity>> <<Root>> {
-    - id : Integer
+    - estimatedFlightTime : Integer
+    - minimumRange : Double
+    - minimumCapacity : Integer
     - status : RouteStatus
   }
 
-  class RouteVersion <<Entity>> {
-    - versionNumber : Integer
-    - distance : Double
-    - estimatedFlightTime : Integer
-    - minRangeRequirement : Double
-    - minCapacityRequirement : Integer
-    - validFrom : DateTime
+  class RouteHistory <<Entity>> {
+    - originCode : String
+    - destinationCode : String
+    - changeDescription : String
+    - changedAt : DateTime
+    - changedBy : String
   }
 
-  Route "1" *-- "*" RouteVersion : history
+  Route *-- IataCode : origin
+  Route *-- IataCode : destination
+  Route "1" *-- "*" RouteHistory : history
   Route --> RouteStatus : current status
 }
 
-package "Flight Aggregate" <<Aggregate>> {
+package "Flights Context" <<Aggregate>> {
   enum FlightStatus <<Enum>> {
     SCHEDULED
     DELAYED
@@ -170,10 +191,12 @@ package "Flight Aggregate" <<Aggregate>> {
   }
 
   class ScheduledFlight <<Entity>> <<Root>> {
-    - id : Integer
+    - id : Long
     - departureDateTime : DateTime
     - arrivalDateTime : DateTime
     - status : FlightStatus
+    - originCode : IataCode
+    - destinationCode : IataCode
   }
 
   ScheduledFlight --> FlightStatus : current status
@@ -181,26 +204,12 @@ package "Flight Aggregate" <<Aggregate>> {
 
 
 package "Maintenance Aggregate" <<Aggregate>> {
-  enum MaintenanceStatus <<Enum>> {
-     PLANNED
-     IN_PROGRESS
-     COMPLETED
-     CANCELED
-  }
 
   enum MaintenanceType <<Enum>> {
     INSPECTION
     SCHEDULED_MAINTENANCE
     OVERHAUL
     MODIFICATION
-  }
-
-  enum MaintenanceComponent <<Enum>> {
-    ENGINE
-    AIRFRAME
-    AVIONICS
-    INTERIOR
-    EXTERIOR
   }
 
   class MaintenanceTemplate <<Entity>> <<Root>> {
@@ -211,18 +220,35 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - intervalFlightHours : Integer
     - intervalDays : Integer
   }
+  MaintenanceTemplate --> MaintenanceType : applies type
 
+  enum MaintenanceStatus <<Enum>> {
+     PLANNED
+     IN_PROGRESS
+     COMPLETED
+     CANCELED
+  }
+  
   class MaintenanceRecord <<Entity>> <<Root>> {
-    - id : Long
+    - recordId : UUID
     - description : String
-    - startDate : Date
+    - startDate : DateTime
     - expectedDuration : Integer
     - notes : String
     - status : MaintenanceStatus
-    - aircraftRegistration : String
-    - parts : List<MaintenancePart>
+    - aircraftRegistration : RegistrationNumber
+    - version : Long
   }
+  MaintenanceRecord --> MaintenanceStatus : current status
 
+  enum MaintenanceComponent <<Enum>> {
+    ENGINE
+    AIRFRAME
+    AVIONICS
+    INTERIOR
+    EXTERIOR
+  }
+  
   class MaintenancePart <<Entity>> <<Root>> {
     - partNumber : String
     - name : String
@@ -231,9 +257,6 @@ package "Maintenance Aggregate" <<Aggregate>> {
     - minimumThreshold : Integer
     - component : MaintenanceComponent
   }
-
-  MaintenanceTemplate --> MaintenanceType : applies type
-  MaintenanceRecord --> MaintenanceStatus : current status
   MaintenancePart --> MaintenanceComponent : targets
 }
 
@@ -242,11 +265,10 @@ Aircraft "*" --> "1" AircraftModel : is of model
 AircraftModel "1" <-- "*" AircraftCertification : certifies
 Airport "1" <-up- "*" AircraftCertification : certified at
 
-Route "1" --> "1" Airport : origin
-Route "1" --> "1" Airport : destination
+Route --> Airport : origin (by IataCode)
+Route --> Airport : destination (by IataCode)
 
-ScheduledFlight "1" --> "1" Route : follows
-ScheduledFlight "1" --> "1" Aircraft : uses
+ScheduledFlight "*" --> "1" Aircraft : uses (by RegistrationNumber)
 
 MaintenanceTemplate "*" --> "*" AircraftModel : applicable to (by Name)
 MaintenanceRecord "1" --> "*" MaintenancePart : needs

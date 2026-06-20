@@ -1,0 +1,31 @@
+@startuml use_case_diagram
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+left to right direction
+
+actor "ATCC" as ATCC
+actor "MAINTENANCE_TECHNICIAN" as TECH
+actor "MAINTENANCE_SUPERVISOR" as SUPER
+actor "Admin" as ADMIN
+
+rectangle "WP4B - Maintenance Analytics" {
+  usecase "US217 - Categorize Maintenance\nRecords by Component" as US217
+  usecase "US218 - Search Maintenance\nRecords" as US218
+  usecase "US219 - View Ongoing\nMaintenance Activities" as US219
+  usecase "US220 - Generate Maintenance\nCost Reports" as US220
+  usecase "US221 - View Average\nTurnaround Time by Model" as US221
+}
+
+ATCC --> US217
+ATCC --> US218
+ATCC --> US219
+ATCC --> US220
+ATCC --> US221
+ADMIN --> US217
+ADMIN --> US218
+ADMIN --> US219
+ADMIN --> US220
+ADMIN --> US221
+
+@enduml

@@ -1,0 +1,74 @@
+@startuml sd_us106
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator" as BO
+participant "AircraftController" as Ctrl
+participant "UpdateAircraftUseCase" as UC
+participant "AircraftRepository" as Repo
+participant "Aircraft" as Aircraft
+database "Database" as DB
+
+BO -> Ctrl : PATCH /api/aircrafts/{registration}\n{ modelName?, manufacturingDate?,\n  seatCapacity?, features? }\nIf-Match: "{version}"
+activate Ctrl
+
+note right of Ctrl
+  UpdateAircraftRequest:
+  - modelName: optional
+  - manufacturingDate: optional
+  - seatCapacity: optional
+  - features: optional
+end note
+
+Ctrl -> UC : execute(registration, request: UpdateAircraftRequest, ifMatch)
+activate UC
+
+UC -> Repo : findByRegistrationNumber(registration)
+activate Repo
+Repo -> DB : SELECT FROM aircraft WHERE registration_number = ?
+activate DB
+DB --> Repo : aircraft record
+deactivate DB
+Repo --> UC : Optional<Aircraft>
+deactivate Repo
+
+alt aircraft not found
+    UC --> Ctrl : throws AircraftNotFoundException
+    Ctrl --> BO : 404 Not Found
+else aircraft found
+    UC -> Repo : findVersionFor(registration)
+    activate Repo
+    Repo -> DB : SELECT version FROM aircraft WHERE registration_number = ?
+    activate DB
+    DB --> Repo : currentVersion
+    deactivate DB
+    Repo --> UC : Long currentVersion
+    deactivate Repo
+    alt version mismatch (currentVersion != ifMatch)
+        UC --> Ctrl : throws ObjectOptimisticLockingFailureException
+        Ctrl --> BO : 409 Conflict
+    else version matches
+        UC -> Aircraft : update(request)
+        activate Aircraft
+        deactivate Aircraft
+        UC -> Repo : save(aircraft)
+        activate Repo
+        Repo -> DB : UPDATE aircraft SET ...
+        activate DB
+        DB --> Repo
+        deactivate DB
+        deactivate Repo
+        UC -> Repo : findVersionFor(registration)
+        activate Repo
+        Repo --> UC : Long newVersion
+        deactivate Repo
+        UC --> Ctrl : ViewAircraftDetailsResponse\n{ registrationNumber, model, manufacturer,\n  manufacturingDate, status, seatCapacity,\n  features, version }
+        deactivate UC
+        Ctrl --> BO : 200 OK\nEntityModel<ViewAircraftDetailsResponse> with _links
+    end
+end
+
+deactivate Ctrl
+@enduml
