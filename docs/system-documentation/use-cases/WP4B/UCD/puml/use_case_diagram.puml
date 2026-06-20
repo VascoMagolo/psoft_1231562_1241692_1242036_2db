@@ -7,7 +7,6 @@ left to right direction
 actor "ATCC" as ATCC
 actor "MAINTENANCE_TECHNICIAN" as TECH
 actor "MAINTENANCE_SUPERVISOR" as SUPER
-actor "Admin" as ADMIN
 
 rectangle "WP4B - Maintenance Analytics" {
   usecase "US217 - Categorize Maintenance\nRecords by Component" as US217
@@ -17,15 +16,10 @@ rectangle "WP4B - Maintenance Analytics" {
   usecase "US221 - View Average\nTurnaround Time by Model" as US221
 }
 
-ATCC --> US217
-ATCC --> US218
-ATCC --> US219
 ATCC --> US220
-ATCC --> US221
-ADMIN --> US217
-ADMIN --> US218
-ADMIN --> US219
-ADMIN --> US220
-ADMIN --> US221
+TECH --> US217
+TECH --> US218
+SUPER --> US219
+SUPER --> US221
 
 @enduml

@@ -89,6 +89,12 @@ src/main/java/aisafe/
 │   └── infrastructure/
 │       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
 │       └── ...          # RouteController
+├── flights/
+│   ├── domain/          # ScheduledFlight, FlightStatus, ScheduledFlightRepository, etc.
+│   ├── application/     # ScheduledFlightUseCase, ImportFlightsUseCase, etc.
+│   └── infrastructure/
+│       ├── persistence/ # JPA entities, mappers, Spring Data repos, JPA adapters
+│       └── ...          # FlightController
 ├── maintenance/
 │   ├── domain/          # MaintenanceRecord, MaintenancePart, MaintenanceTemplate, etc.
 │   ├── application/     # CreateMaintenanceRecordUseCase, etc.
@@ -146,6 +152,7 @@ src/test/java/aisafe/
 │   └── infrastructure/  # Controller slice tests (MockMvc)
 ├── airports/            # (same pattern)
 ├── routes/              # (same pattern)
+├── flights/              # (same pattern)
 └── maintenance/         # (same pattern)
 ```
 

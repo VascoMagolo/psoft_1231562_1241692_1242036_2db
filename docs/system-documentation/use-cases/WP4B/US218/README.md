@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor or ATCC, I want to search maintenance records by multiple filters so that I can quickly locate relevant maintenance history.
+> As a Maintenance Technician, I want to search maintenance records by multiple filters so that I can quickly locate relevant maintenance history.
 
 ## Acceptance Criteria
 
@@ -13,7 +13,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Technician, Maintenance Supervisor, ATCC, or Admin.
+- The actor is authenticated as a Maintenance Technician or Admin.
 
 ## Post-conditions
 
