@@ -9,7 +9,243 @@
 		{
 			"name": "Bootstrap - Import CSVs (US225)",
 			"description": "Run this folder in Postman Runner to automatically bootstrap the entire system in the correct topological order.",
-			"item": []
+			"item": [
+				{
+					"name": "1. Import Airports (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/1_airports.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/airports/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"airports",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Import Aircraft Models (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/2_aircraft_models.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aircraftModels/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aircraftModels",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Import Aircrafts (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/3_aircrafts.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aircrafts/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aircrafts",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Import Routes (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/4_routes.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/routes/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"routes",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Import Flights (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/5_flights.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/flights/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"flights",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Import Maintenance Templates (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/6_maintenance_templates.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/maintenance/templates/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"maintenance",
+								"templates",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Import Maintenance Parts (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/7_maintenance_parts.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/maintenance/parts/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"maintenance",
+								"parts",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. Import Maintenance Records (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "docs/postman/csv-imports/8_maintenance_records.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/maintenance/records/import",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"maintenance",
+								"records",
+								"import"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "Auth",
