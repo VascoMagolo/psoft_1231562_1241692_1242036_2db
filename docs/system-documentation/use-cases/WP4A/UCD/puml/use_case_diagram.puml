@@ -1,4 +1,4 @@
-@startuml use_case_diagram
+startuml use_case_diagram
 left to right direction
 skinparam monochrome true
 skinparam packageStyle rect
