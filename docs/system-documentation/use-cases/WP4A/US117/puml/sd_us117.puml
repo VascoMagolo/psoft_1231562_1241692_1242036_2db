@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Maintenance Supervisor" as MS
+actor "ATCC" as MS
 participant "MaintenanceController" as Ctrl
 participant "ViewTotalMaintenanceHoursInFleetUseCase" as UC
 participant "MaintenanceRecordRepository" as Repo
