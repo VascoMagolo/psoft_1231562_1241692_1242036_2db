@@ -1,6 +1,6 @@
 package aisafe.aircrafts.application;
 
-import aisafe.aircrafts.application.dtos.AircraftModelImageData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
 import aisafe.aircrafts.domain.AircraftModelNotFoundException;
@@ -16,7 +16,7 @@ public class GetAircraftModelImageUseCase {
         this.repository = repository;
     }
 
-    public AircraftModelImageData execute(String modelName) {
+    public ImageData execute(String modelName) {
         AircraftModel model = repository.findByModelName(modelName)
                 .orElseThrow(() -> new AircraftModelNotFoundException(
                         "Aircraft model '" + modelName + "' not found."));
@@ -26,6 +26,6 @@ public class GetAircraftModelImageUseCase {
                     "Aircraft model '" + modelName + "' has no image.");
         }
 
-        return new AircraftModelImageData(model.getImage().getBytes(), model.getImage().getContentType());
+        return new ImageData(model.getImage().getBytes(), model.getImage().getContentType());
     }
 }

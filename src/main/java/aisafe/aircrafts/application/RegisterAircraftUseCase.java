@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.domain.DuplicateResourceException;
 
@@ -29,7 +29,7 @@ public class RegisterAircraftUseCase {
      * @param request the details of the aircraft to register
      * @return a DTO containing the details of the newly registered aircraft
      */
-    public ViewAircraftDetailsResponse execute(RegisterAircraftRequest request) {
+    public AircraftResponse execute(RegisterAircraftRequest request) {
         AircraftModel model = modelRepository.findByModelName(request.modelName())
                 .orElseThrow(() -> new AircraftInvalidFieldException("Invalid Model Name: " + request.modelName()));
 
@@ -56,6 +56,6 @@ public class RegisterAircraftUseCase {
         aircraftRepository.save(aircraft);
 
         Long version = aircraftRepository.findVersionFor(regNum);
-        return ViewAircraftDetailsResponse.from(aircraft, version);
+        return AircraftResponse.from(aircraft, version);
     }
 }

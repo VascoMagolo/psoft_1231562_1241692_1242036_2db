@@ -1,10 +1,10 @@
 package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
-import aisafe.aircrafts.application.dtos.AircraftModelImageData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
-import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelImageRequest;
 import aisafe.aircrafts.application.dtos.UpdateAircraftModelRequest;
@@ -144,7 +144,7 @@ public class AircraftModelController {
     @Operation(summary = "Get the image of an aircraft model as raw bytes")
     @GetMapping("/{modelName}/image")
     public ResponseEntity<byte[]> getImage(@PathVariable String modelName) {
-        AircraftModelImageData data = getAircraftModelImage.execute(modelName);
+        ImageData data = getAircraftModelImage.execute(modelName);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(data.contentType()))
                 .body(data.bytes());
@@ -152,22 +152,22 @@ public class AircraftModelController {
 
     @Operation(summary = "Get all aircraft models with pagination")
     @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>>> getAllAircraftModels(
+    public ResponseEntity<PagedModel<EntityModel<AircraftModelResponse>>> getAllAircraftModels(
             @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<ListAircraftModelsUseCaseResponse> assembler) {
+            PagedResourcesAssembler<AircraftModelResponse> assembler) {
 
-        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModels.execute(
+        PaginatedResult<AircraftModelResponse> result = listAircraftModels.execute(
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
 
-        Page<ListAircraftModelsUseCaseResponse> modelsPage = new PageImpl<>(
+        Page<AircraftModelResponse> modelsPage = new PageImpl<>(
                 result.data(),
                 pageable,
                 result.totalElements()
         );
 
-        PagedModel<EntityModel<ListAircraftModelsUseCaseResponse>> pagedModel =
+        PagedModel<EntityModel<AircraftModelResponse>> pagedModel =
                 assembler.toModel(modelsPage, model -> EntityModel.of(model)
                         .add(linkTo(methodOn(AircraftModelController.class)
                                 .getAircraftModelByName(model.modelName()))

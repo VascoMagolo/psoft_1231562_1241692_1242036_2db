@@ -1,6 +1,6 @@
 package aisafe.airports.application;
 
-import aisafe.airports.application.dtos.AirportPhotoData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportPhoto;
@@ -49,7 +49,7 @@ class GetAirportPhotoUseCaseTest {
         when(airportRepository.findByIataCode(new IataCode("LIS")))
                 .thenReturn(Optional.of(buildAirportWithPhotos()));
 
-        AirportPhotoData data = getAirportPhoto.execute("LIS", 0);
+        ImageData data = getAirportPhoto.execute("LIS", 0);
 
         assertArrayEquals(new byte[]{1, 2, 3}, data.bytes());
         assertEquals("image/jpeg", data.contentType());
@@ -60,7 +60,7 @@ class GetAirportPhotoUseCaseTest {
         when(airportRepository.findByIataCode(new IataCode("LIS")))
                 .thenReturn(Optional.of(buildAirportWithPhotos()));
 
-        AirportPhotoData data = getAirportPhoto.execute("LIS", 1);
+        ImageData data = getAirportPhoto.execute("LIS", 1);
 
         assertArrayEquals(new byte[]{4, 5, 6}, data.bytes());
         assertEquals("image/png", data.contentType());

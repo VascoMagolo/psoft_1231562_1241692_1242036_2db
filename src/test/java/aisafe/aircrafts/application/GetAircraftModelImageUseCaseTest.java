@@ -1,6 +1,6 @@
 package aisafe.aircrafts.application;
 
-import aisafe.aircrafts.application.dtos.AircraftModelImageData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelImage;
 import aisafe.aircrafts.domain.AircraftModelImageNotFoundException;
@@ -35,7 +35,7 @@ class GetAircraftModelImageUseCaseTest {
 
         when(repository.findByModelName("A320")).thenReturn(Optional.of(model));
 
-        AircraftModelImageData data = useCase.execute("A320");
+        ImageData data = useCase.execute("A320");
 
         assertNotNull(data);
         assertArrayEquals(bytes, data.bytes());

@@ -64,6 +64,7 @@ public class MaintenanceController {
     private final ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase;
     private final ImportMaintenanceTemplatesUseCase importMaintenanceTemplatesUseCase;
     private final ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase;
+    private final ImportMaintenancePartsUseCase importMaintenancePartsUseCase;
 
     public MaintenanceController(CreateMaintenanceTemplateUseCase createMaintenanceTemplateUseCase,
             CreateMaintenanceRecordUseCase createMaintenanceRecordUseCase,
@@ -84,7 +85,8 @@ public class MaintenanceController {
             ViewAverageMaintenanceTurnaroundUseCase viewAverageTurnaroundUseCase,
             ViewMaintenanceDueAircraftUseCase viewMaintenanceDueAircraftUseCase,
             ImportMaintenanceTemplatesUseCase importMaintenanceTemplatesUseCase,
-            ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase) {
+            ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase,
+            ImportMaintenancePartsUseCase importMaintenancePartsUseCase) {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
         this.createMaintenancePartUseCase = createMaintenancePartUseCase;
@@ -105,6 +107,7 @@ public class MaintenanceController {
         this.viewMaintenanceDueAircraftUseCase = viewMaintenanceDueAircraftUseCase;
         this.importMaintenanceTemplatesUseCase = importMaintenanceTemplatesUseCase;
         this.importMaintenanceRecordsUseCase = importMaintenanceRecordsUseCase;
+        this.importMaintenancePartsUseCase = importMaintenancePartsUseCase;
     }
 
     /**
@@ -494,6 +497,19 @@ public class MaintenanceController {
     public ResponseEntity<?> importMaintenanceRecords(
             @Parameter(description = "CSV file containing maintenance records") @RequestParam("file") MultipartFile file) {
         var result = importMaintenanceRecordsUseCase.execute(file);
+        return BulkImportResponseBuilder.buildResponse(result);
+    }
+
+    @Operation(summary = "Import maintenance parts", description = "Bulk imports maintenance parts from a CSV file.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "All parts imported successfully"),
+            @ApiResponse(responseCode = "207", description = "Multi-Status: some parts imported successfully, some failed"),
+            @ApiResponse(responseCode = "400", description = "All parts failed to import")
+    })
+    @PostMapping(value = "/parts/import", consumes = "multipart/form-data")
+    public ResponseEntity<?> importMaintenanceParts(
+            @Parameter(description = "CSV file containing maintenance parts") @RequestParam("file") MultipartFile file) {
+        var result = importMaintenancePartsUseCase.execute(file);
         return BulkImportResponseBuilder.buildResponse(result);
     }
 }

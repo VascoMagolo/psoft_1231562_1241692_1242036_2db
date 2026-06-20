@@ -29,9 +29,9 @@ class ImportMaintenanceRecordsUseCaseTest {
 
     @Test
     void ensureSuccessfulImport() throws Exception {
-        String csvContent = "aircraftRegistration,templateName,date,status,components,parts\n" +
-                "CS-TKA,Engine Check,2023-10-01T10:00:00,PLANNED,ENGINE,\"Engine Part A,Engine Part B\"\n" +
-                "CS-TKB,Landing Gear,2023-11-01T10:00:00,COMPLETED,AIRFRAME,Gear Part A";
+        String csvContent = "registrationNumber,template,startDate,status,components,parts,description,expectedDuration,notes,cost\n" +
+                "CS-TKA,Engine Check,2023-10-01T10:00:00,PLANNED,ENGINE,\"Engine Part A,Engine Part B\",Desc 1,2,,100.00\n" +
+                "CS-TKB,Landing Gear,2023-11-01T10:00:00,COMPLETED,AIRFRAME,Gear Part A,Desc 2,3,Notes,200.00";
 
         MockMultipartFile file = new MockMultipartFile("file", "records.csv", "text/csv", csvContent.getBytes());
 
@@ -46,8 +46,8 @@ class ImportMaintenanceRecordsUseCaseTest {
 
     @Test
     void ensureInvalidDateRecordsError() throws Exception {
-        String csvContent = "aircraftRegistration,templateName,date,status,components,parts\n" +
-                "CS-TKA,Engine Check,invalid-date,PLANNED,ENGINE,Engine Part A";
+        String csvContent = "registrationNumber,template,startDate,status,components,parts,description,expectedDuration,notes,cost\n" +
+                "CS-TKA,Engine Check,invalid-date,PLANNED,ENGINE,Engine Part A,Desc,1,,10.00";
 
         MockMultipartFile file = new MockMultipartFile("file", "records.csv", "text/csv", csvContent.getBytes());
 

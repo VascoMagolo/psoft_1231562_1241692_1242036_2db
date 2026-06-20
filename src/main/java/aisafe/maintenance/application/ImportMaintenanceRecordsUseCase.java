@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @UseCase
 public class ImportMaintenanceRecordsUseCase {
@@ -27,49 +30,80 @@ public class ImportMaintenanceRecordsUseCase {
         this.createMaintenanceRecordUseCase = createMaintenanceRecordUseCase;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public BulkImportResult<MaintenanceRecordResponse> execute(MultipartFile file) {
         BulkImportResult<MaintenanceRecordResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());
              CSVReader csvReader = new CSVReader(reader)) {
 
+            String[] header = csvReader.readNext();
+            if (header == null) {
+                result.addError(0, "File", "CSV file is empty");
+                return result;
+            }
+
+            int regIdx = -1, templateIdx = -1, dateIdx = -1, statusIdx = -1, compIdx = -1, partsIdx = -1;
+            int descIdx = -1, durIdx = -1, notesIdx = -1, costIdx = -1;
+
+            for (int i = 0; i < header.length; i++) {
+                String col = header[i].trim().toLowerCase();
+                if (col.equals("registrationnumber")) regIdx = i;
+                else if (col.equals("template")) templateIdx = i;
+                else if (col.equals("startdate")) dateIdx = i;
+                else if (col.equals("status")) statusIdx = i;
+                else if (col.equals("components")) compIdx = i;
+                else if (col.equals("parts")) partsIdx = i;
+                else if (col.equals("description")) descIdx = i;
+                else if (col.equals("expectedduration")) durIdx = i;
+                else if (col.equals("notes")) notesIdx = i;
+                else if (col.equals("cost")) costIdx = i;
+            }
+
+            if (regIdx == -1 || templateIdx == -1 || dateIdx == -1 || statusIdx == -1 || compIdx == -1 || descIdx == -1 || durIdx == -1 || costIdx == -1) {
+                result.addError(0, "Headers", "Missing required columns");
+                return result;
+            }
+
             String[] line;
-            boolean firstLine = true;
-            int rowIndex = 0;
+            int rowIndex = 1;
             while ((line = csvReader.readNext()) != null) {
                 rowIndex++;
-                if (firstLine) {
-                    firstLine = false;
-                    continue;
-                }
 
                 try {
-                    String aircraftRegistration = line[0];
-                    String templateName = line[1];
-                    LocalDateTime date = LocalDateTime.parse(line[2]);
-                    MaintenanceStatus status = MaintenanceStatus.valueOf(line[3]);
-                    Set<MaintenanceComponent> components = Arrays.stream(line[4].split("[,;]"))
+                    String aircraftRegistration = getValue(line, regIdx);
+                    String templateName = getValue(line, templateIdx);
+                    LocalDateTime date = LocalDateTime.parse(getValue(line, dateIdx));
+                    MaintenanceStatus status = MaintenanceStatus.valueOf(getValue(line, statusIdx));
+                    
+                    Set<MaintenanceComponent> components = Arrays.stream(getValue(line, compIdx).split("[,;]"))
                             .map(String::trim)
                             .map(MaintenanceComponent::valueOf)
                             .collect(Collectors.toSet());
 
                     List<String> parts = new ArrayList<>();
-                    if (line.length > 5 && line[5] != null && !line[5].isEmpty()) {
-                        parts = Arrays.stream(line[5].split("[,;]"))
+                    String partsStr = getValue(line, partsIdx);
+                    if (partsStr != null && !partsStr.isEmpty()) {
+                        parts = Arrays.stream(partsStr.split("[,;]"))
                                 .map(String::trim)
                                 .collect(Collectors.toList());
                     }
 
+                    String description = getValue(line, descIdx);
+                    Integer expectedDuration = Integer.parseInt(getValue(line, durIdx));
+                    String notes = getValue(line, notesIdx);
+                    BigDecimal cost = new BigDecimal(getValue(line, costIdx));
+
                     CreateMaintenanceRecordRequest request = new CreateMaintenanceRecordRequest(
-                            "Bulk imported record",
+                            description,
                             date,
-                            0,
+                            expectedDuration,
                             parts,
-                            null,
+                            notes,
                             templateName,
                             status,
                             aircraftRegistration,
                             components,
-                            null
+                            cost
                     );
                     var response = createMaintenanceRecordUseCase.execute(request);
                     result.addSuccess(response);
@@ -81,5 +115,11 @@ public class ImportMaintenanceRecordsUseCase {
             result.addError(0, "File", "Failed to parse CSV file: " + e.getMessage());
         }
         return result;
+    }
+
+    private String getValue(String[] line, int index) {
+        if (index == -1 || index >= line.length) return null;
+        String val = line[index].trim();
+        return val.isEmpty() ? null : val;
     }
 }

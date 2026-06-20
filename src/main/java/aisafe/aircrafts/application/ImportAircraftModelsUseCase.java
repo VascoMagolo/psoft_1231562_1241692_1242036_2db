@@ -4,6 +4,8 @@ import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.domain.Manufacturer;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +22,7 @@ public class ImportAircraftModelsUseCase {
         this.registerUseCase = registerUseCase;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public BulkImportResult<AircraftModelResponse> execute(MultipartFile file) {
         BulkImportResult<AircraftModelResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());

@@ -1,6 +1,6 @@
 package aisafe.airports.application;
 
-import aisafe.airports.application.dtos.AirportPhotoData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportPhotoNotFoundException;
@@ -17,7 +17,7 @@ public class GetAirportPhotoUseCase {
         this.airportRepository = airportRepository;
     }
 
-    public AirportPhotoData execute(String iataCode, int index) {
+    public ImageData execute(String iataCode, int index) {
         Airport airport = airportRepository.findByIataCode(new IataCode(iataCode))
                 .orElseThrow(() -> new AirportNotFoundException(iataCode));
 
@@ -25,6 +25,6 @@ public class GetAirportPhotoUseCase {
         if (photos.isEmpty() || index >= photos.size())
             throw new AirportPhotoNotFoundException(iataCode);
 
-        return new AirportPhotoData(photos.get(index).getBytes(), photos.get(index).getContentType());
+        return new ImageData(photos.get(index).getBytes(), photos.get(index).getContentType());
     }
 }

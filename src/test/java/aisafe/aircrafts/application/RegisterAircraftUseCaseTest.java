@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.domain.DuplicateResourceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class RegisterAircraftUseCaseTest {
         when(aircraftRepository.existsByRegistrationNumber(any())).thenReturn(false);
         when(aircraftRepository.findVersionFor(any())).thenReturn(0L);
 
-        ViewAircraftDetailsResponse response = registerAircraft.execute(request);
+        AircraftResponse response = registerAircraft.execute(request);
 
         assertNotNull(response);
         assertEquals("CS-TPA", response.registrationNumber());

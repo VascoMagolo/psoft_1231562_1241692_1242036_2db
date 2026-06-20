@@ -1,5 +1,7 @@
 package aisafe.airports.infrastructure;
 
+import aisafe.shared.application.dtos.ImageData;
+
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.airports.domain.AirportNotFoundException;
@@ -171,7 +173,7 @@ class AirportControllerTest {
     @Test
     void ensureGetPhotoByIndexReturns200() throws Exception {
         when(getAirportPhoto.execute(anyString(), anyInt()))
-                .thenReturn(new AirportPhotoData(new byte[]{1, 2, 3}, "image/jpeg"));
+                .thenReturn(new ImageData(new byte[]{1, 2, 3}, "image/jpeg"));
 
         mockMvc.perform(get("/api/airports/LIS/photos/0"))
                 .andExpect(status().isOk())

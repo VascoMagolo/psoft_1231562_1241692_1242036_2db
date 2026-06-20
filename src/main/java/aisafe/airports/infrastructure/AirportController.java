@@ -1,5 +1,7 @@
 package aisafe.airports.infrastructure;
 
+import aisafe.shared.application.dtos.ImageData;
+
 import aisafe.airports.application.*;
 import aisafe.airports.application.dtos.*;
 import aisafe.routes.application.dtos.RouteResponse;
@@ -205,7 +207,7 @@ public class AirportController {
     public ResponseEntity<byte[]> getPhoto(
             @Parameter(description = "3-letter IATA airport code", example = "LIS") @PathVariable String iataCode,
             @Parameter(description = "0-based photo index") @PathVariable int index) {
-        AirportPhotoData data = getAirportPhoto.execute(iataCode.toUpperCase(), index);
+        ImageData data = getAirportPhoto.execute(iataCode.toUpperCase(), index);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(data.contentType()))
                 .body(data.bytes());

@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ListAircraftRequest;
-import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.shared.domain.PaginatedResult;
@@ -30,11 +30,11 @@ public class ListAircraftUseCase {
      * @param pageSize the number of items per page
      * @return a pure Java List of aircraft DTOs
      */
-    public PaginatedResult<ListAircraftsUseCaseResponse> execute(ListAircraftRequest request) {
+    public PaginatedResult<AircraftResponse> execute(ListAircraftRequest request) {
         PaginatedResult<Aircraft> domainResult = repository.findAll(request.pageNumber(), request.pageSize());
 
-        List<ListAircraftsUseCaseResponse> dtoList = domainResult.data().stream()
-                .map(a -> ListAircraftsUseCaseResponse.from(a, null))
+        List<AircraftResponse> dtoList = domainResult.data().stream()
+                .map(a -> AircraftResponse.from(a, null))
                 .collect(Collectors.toList());
 
         return new PaginatedResult<>(dtoList, domainResult.totalElements());

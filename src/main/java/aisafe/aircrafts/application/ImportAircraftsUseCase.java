@@ -1,8 +1,10 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +24,9 @@ public class ImportAircraftsUseCase {
         this.registerUseCase = registerUseCase;
     }
 
-    public BulkImportResult<ViewAircraftDetailsResponse> execute(MultipartFile file) {
-        BulkImportResult<ViewAircraftDetailsResponse> result = new BulkImportResult<>();
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public BulkImportResult<AircraftResponse> execute(MultipartFile file) {
+        BulkImportResult<AircraftResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());
              CSVReader csvReader = new CSVReader(reader)) {
 
@@ -59,7 +62,7 @@ public class ImportAircraftsUseCase {
                             features
                     );
 
-                    ViewAircraftDetailsResponse response = registerUseCase.execute(request);
+                    AircraftResponse response = registerUseCase.execute(request);
                     result.addSuccess(response);
                 } catch (Exception e) {
                     result.addError(rowNumber, String.join(",", line), e.getMessage() != null ? e.getMessage() : "Unknown error");

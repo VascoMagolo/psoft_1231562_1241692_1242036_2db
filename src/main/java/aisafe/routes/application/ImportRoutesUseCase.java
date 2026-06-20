@@ -2,6 +2,8 @@ package aisafe.routes.application;
 
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import aisafe.shared.application.dtos.BulkImportResult;
 import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class ImportRoutesUseCase {
 
     private final CreateRouteUseCase createRouteUseCase;
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public BulkImportResult<String> execute(MultipartFile file, String createdBy) {
         BulkImportResult<String> result = new BulkImportResult<>();
 

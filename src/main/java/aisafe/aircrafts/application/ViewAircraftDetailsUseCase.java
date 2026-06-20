@@ -2,7 +2,7 @@ package aisafe.aircrafts.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.aircrafts.application.dtos.ViewAircraftDetailsRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
@@ -23,15 +23,15 @@ public class ViewAircraftDetailsUseCase {
 
     /**
      * Retrieves the details of an aircraft by its registration number.
-     * @param registrationNumber the registration number of the aircraft to retrieve
+     * @param request the request containing registration number of the aircraft to retrieve
      * @return a DTO containing the details of the aircraft
      */
-    public ViewAircraftDetailsResponse execute(ViewAircraftDetailsRequest request) {
+    public AircraftResponse execute(ViewAircraftDetailsRequest request) {
         RegistrationNumber registrationNumber = request.registrationNumber();
         Aircraft aircraft = repository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found with registration: " + registrationNumber.getNumber()));
 
         Long version = repository.findVersionFor(registrationNumber);
-        return ViewAircraftDetailsResponse.from(aircraft, version);
+        return AircraftResponse.from(aircraft, version);
     }
 }

@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.ListAircraftRequest;
-import aisafe.aircrafts.application.dtos.ListAircraftsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,12 +39,12 @@ class ListAircraftUseCaseTest {
         PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(aircraft), 1L);
         when(aircraftRepository.findAll(0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
+        PaginatedResult<AircraftResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.data().size());
         
-        ListAircraftsUseCaseResponse response = result.data().get(0);
+        AircraftResponse response = result.data().get(0);
         assertEquals("CS-TPA", response.registrationNumber());
         assertEquals("A320", response.model());
         assertEquals(Manufacturer.AIRBUS, response.manufacturer());
@@ -60,7 +60,7 @@ class ListAircraftUseCaseTest {
         PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(), 0L);
         when(aircraftRepository.findAll(0, 10)).thenReturn(domainResult);
 
-        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
+        PaginatedResult<AircraftResponse> result = listAircraftUseCase.execute(new ListAircraftRequest(0, 10));
 
         assertNotNull(result);
         assertTrue(result.data().isEmpty());

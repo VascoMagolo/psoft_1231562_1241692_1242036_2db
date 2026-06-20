@@ -12,6 +12,8 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @UseCase
 public class ImportMaintenanceTemplatesUseCase {
@@ -22,6 +24,7 @@ public class ImportMaintenanceTemplatesUseCase {
         this.createMaintenanceTemplateUseCase = createMaintenanceTemplateUseCase;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public BulkImportResult<MaintenanceTemplateResponse> execute(MultipartFile file) {
         BulkImportResult<MaintenanceTemplateResponse> result = new BulkImportResult<>();
         try (Reader reader = new InputStreamReader(file.getInputStream());

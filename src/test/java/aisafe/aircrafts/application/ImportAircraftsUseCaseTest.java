@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.RegisterAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.shared.application.dtos.BulkImportResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +32,9 @@ class ImportAircraftsUseCaseTest {
                 "PT-ABC,Boeing 737,AVAILABLE,2020-01-01,3000.0,150,WiFi;Screens";
         MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));
         
-        when(registerUseCase.execute(any(RegisterAircraftRequest.class))).thenReturn(mock(ViewAircraftDetailsResponse.class));
+        when(registerUseCase.execute(any(RegisterAircraftRequest.class))).thenReturn(mock(AircraftResponse.class));
         
-        BulkImportResult<ViewAircraftDetailsResponse> result = useCase.execute(file);
+        BulkImportResult<AircraftResponse> result = useCase.execute(file);
         
         assertTrue(result.isFullySuccessful());
         assertEquals(1, result.getSuccessfulImports().size());
@@ -48,7 +48,7 @@ class ImportAircraftsUseCaseTest {
                 "PT-ABC,Boeing 737,AVAILABLE,INVALID_DATE,3000.0,150,WiFi;Screens";
         MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));
         
-        BulkImportResult<ViewAircraftDetailsResponse> result = useCase.execute(file);
+        BulkImportResult<AircraftResponse> result = useCase.execute(file);
         
         assertFalse(result.isFullySuccessful());
         assertEquals(0, result.getSuccessfulImports().size());

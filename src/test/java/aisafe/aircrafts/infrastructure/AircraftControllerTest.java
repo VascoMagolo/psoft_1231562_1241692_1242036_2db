@@ -79,11 +79,11 @@ class AircraftControllerTest {
     @MockitoBean
     private ImportAircraftsUseCase importAircrafts;
 
-    private ViewAircraftDetailsResponse sampleResponse;
+    private AircraftResponse sampleResponse;
 
     @BeforeEach
     void setUp() {
-        sampleResponse = new ViewAircraftDetailsResponse(
+        sampleResponse = new AircraftResponse(
                 "CS-TPA", "A320", Manufacturer.AIRBUS, LocalDate.of(2020, 1, 1),
                 AircraftStatus.AVAILABLE, 150, 5000.0, List.of("WiFi"), 0L);
     }
@@ -213,7 +213,7 @@ class AircraftControllerTest {
 
     @Test
     void ensureImportAircraftsReturns207WhenPartialSuccess() throws Exception {
-        BulkImportResult<ViewAircraftDetailsResponse> result = new BulkImportResult<>();
+        BulkImportResult<AircraftResponse> result = new BulkImportResult<>();
         result.addSuccess(sampleResponse);
         result.addError(2, "data", "error");
 

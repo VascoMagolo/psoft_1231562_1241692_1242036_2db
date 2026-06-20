@@ -1,6 +1,6 @@
 package aisafe.aircrafts.application;
 
-import aisafe.aircrafts.application.dtos.ListAircraftModelsUseCaseResponse;
+import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelRepository;
 import aisafe.aircrafts.domain.Manufacturer;
@@ -37,12 +37,12 @@ class ListAircraftModelsUseCaseTest {
     void ensureListReturnsModelsSuccessfully() {
         when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(aircraftModel), 1L));
 
-        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+        PaginatedResult<AircraftModelResponse> result = listAircraftModelsUseCase.execute(0, 10);
 
         assertNotNull(result);
         assertEquals(1, result.data().size());
         
-        ListAircraftModelsUseCaseResponse response = result.data().get(0);
+        AircraftModelResponse response = result.data().get(0);
         assertEquals("A320", response.modelName());
         assertEquals(Manufacturer.AIRBUS, response.manufacturer());
         assertEquals(26730.0, response.fuelCapacity());
@@ -56,7 +56,7 @@ class ListAircraftModelsUseCaseTest {
     void ensureListReturnsEmptyWhenNoModelsExist() {
         when(aircraftModelRepository.findAll(0, 10)).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
-        PaginatedResult<ListAircraftModelsUseCaseResponse> result = listAircraftModelsUseCase.execute(0, 10);
+        PaginatedResult<AircraftModelResponse> result = listAircraftModelsUseCase.execute(0, 10);
 
         assertNotNull(result);
         assertTrue(result.data().isEmpty());

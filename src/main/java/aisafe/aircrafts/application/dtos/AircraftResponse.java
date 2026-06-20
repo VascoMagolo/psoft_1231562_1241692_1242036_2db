@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Detailed aircraft view returned when looking up an aircraft by registration number.
  */
-public record ViewAircraftDetailsResponse(
+public record AircraftResponse(
         String registrationNumber,
         String model,
         Manufacturer manufacturer,
@@ -21,8 +21,8 @@ public record ViewAircraftDetailsResponse(
         List<String> features,
         Long version
 ) {
-    public static ViewAircraftDetailsResponse from(Aircraft aircraft, Long version) {
-        return new ViewAircraftDetailsResponse(
+    public static AircraftResponse from(Aircraft aircraft, Long version) {
+        return new AircraftResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
                 aircraft.getModel().getManufacturer(),

@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.application.UseCase;
 import aisafe.shared.domain.ConcurrencyException;
@@ -20,7 +20,7 @@ public class UpdateAircraftUseCase {
         this.aircraftModelRepository = aircraftModelRepository;
     }
 
-    public ViewAircraftDetailsResponse execute(RegistrationNumber registration, UpdateAircraftRequest request, Long clientVersion) {
+    public AircraftResponse execute(RegistrationNumber registration, UpdateAircraftRequest request, Long clientVersion) {
 
         Aircraft aircraft = aircraftRepository.findByRegistrationNumber(registration)
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft with registration " + registration.getNumber() + " not found."));
@@ -57,6 +57,6 @@ public class UpdateAircraftUseCase {
 
         Long newVersion = aircraftRepository.findVersionFor(registration);
 
-        return ViewAircraftDetailsResponse.from(aircraft, newVersion);
+        return AircraftResponse.from(aircraft, newVersion);
     }
 }

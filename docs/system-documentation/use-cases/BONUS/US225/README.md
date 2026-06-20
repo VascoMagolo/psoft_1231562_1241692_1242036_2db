@@ -32,6 +32,7 @@
 | Flights               | `POST /api/flights/import`              | FlightController         |
 | Maintenance Templates | `POST /api/maintenance/templates/import`| MaintenanceController    |
 | Maintenance Records   | `POST /api/maintenance/records/import`  | MaintenanceController    |
+| Maintenance Parts     | `POST /api/maintenance/parts/import`    | MaintenanceController    |
 
 ## Main Success Scenario
 
@@ -55,6 +56,7 @@
 - [SSD - Import Flights](puml/ssd_ImportFlightsUseCase.puml)
 - [SSD - Import Maintenance Records](puml/ssd_ImportMaintenanceRecordsUseCase.puml)
 - [SSD - Import Maintenance Templates](puml/ssd_ImportMaintenanceTemplatesUseCase.puml)
+- [SSD - Import Maintenance Parts](puml/ssd_ImportMaintenancePartsUseCase.puml)
 - [SSD - Import Routes](puml/ssd_ImportRoutesUseCase.puml)
 - [SD - Import Aircraft Models](puml/sd_ImportAircraftModelsUseCase.puml)
 - [SD - Import Aircrafts](puml/sd_ImportAircraftsUseCase.puml)
@@ -62,4 +64,5 @@
 - [SD - Import Flights](puml/sd_ImportFlightsUseCase.puml)
 - [SD - Import Maintenance Records](puml/sd_ImportMaintenanceRecordsUseCase.puml)
 - [SD - Import Maintenance Templates](puml/sd_ImportMaintenanceTemplatesUseCase.puml)
+- [SD - Import Maintenance Parts](puml/sd_ImportMaintenancePartsUseCase.puml)
 - [SD - Import Routes](puml/sd_ImportRoutesUseCase.puml)

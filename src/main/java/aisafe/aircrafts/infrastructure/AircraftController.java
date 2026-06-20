@@ -80,7 +80,7 @@ public class AircraftController {
     @Operation(summary = "Bulk import aircrafts via CSV")
     @PostMapping(value = "/import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<java.util.Map<String, Object>> importAircrafts(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        BulkImportResult<ViewAircraftDetailsResponse> result = importAircrafts.execute(file);
+        BulkImportResult<AircraftResponse> result = importAircrafts.execute(file);
         return BulkImportResponseBuilder.buildResponse(result);
     }
 
@@ -93,10 +93,10 @@ public class AircraftController {
             @ApiResponse(responseCode = "409", description = "Aircraft with given registration number already exists")
     })
     @PostMapping
-    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> registerAircraft(
+    public ResponseEntity<EntityModel<AircraftResponse>> registerAircraft(
             @Valid @RequestBody RegisterAircraftRequest request) {
 
-        ViewAircraftDetailsResponse createdAircraft = registerAircraft.execute(request);
+        AircraftResponse createdAircraft = registerAircraft.execute(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(toHateoasModel(createdAircraft, new RegistrationNumber(request.registrationNumber())));
@@ -104,20 +104,20 @@ public class AircraftController {
 
     @Operation(summary = "Get all aircrafts with pagination", description = "Retrieves a paginated list of all aircrafts in the fleet.")
     @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<ListAircraftsUseCaseResponse>>> getAllAircraft(
+    public ResponseEntity<PagedModel<EntityModel<AircraftResponse>>> getAllAircraft(
             @PageableDefault(size = 20) Pageable pageable,
-            PagedResourcesAssembler<ListAircraftsUseCaseResponse> assembler) {
+            PagedResourcesAssembler<AircraftResponse> assembler) {
 
-        PaginatedResult<ListAircraftsUseCaseResponse> result = listAircraft.execute(
+        PaginatedResult<AircraftResponse> result = listAircraft.execute(
                 new ListAircraftRequest(pageable.getPageNumber(), pageable.getPageSize())
         );
 
-        Page<ListAircraftsUseCaseResponse> aircraftPage = new PageImpl<>(
+        Page<AircraftResponse> aircraftPage = new PageImpl<>(
                 result.data(),
                 pageable,
                 result.totalElements()
         );
-        PagedModel<EntityModel<ListAircraftsUseCaseResponse>> pagedModel =
+        PagedModel<EntityModel<AircraftResponse>> pagedModel =
                 assembler.toModel(aircraftPage, aircraft -> EntityModel.of(aircraft)
                         .add(linkTo(methodOn(AircraftController.class)
                                 .getAircraftByRegistrationNumber(aircraft.registrationNumber()))
@@ -134,12 +134,12 @@ public class AircraftController {
             @ApiResponse(responseCode = "404", description = "Aircraft not found with specified registration number")
     })
     @GetMapping("/{registrationStr}")
-    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> getAircraftByRegistrationNumber(
+    public ResponseEntity<EntityModel<AircraftResponse>> getAircraftByRegistrationNumber(
             @Parameter(description = "Unique registration number code of the aircraft (e.g. CS-TKA)")
             @PathVariable String registrationStr) {
 
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
-        ViewAircraftDetailsResponse aircraft = viewAircraftDetails.execute(new ViewAircraftDetailsRequest(registration));
+        AircraftResponse aircraft = viewAircraftDetails.execute(new ViewAircraftDetailsRequest(registration));
         return ResponseEntity.ok(toHateoasModel(aircraft, registration));
     }
 
@@ -206,14 +206,14 @@ public class AircraftController {
             @ApiResponse(responseCode = "409", description = "Conflict detected -- The resource version has changed or matches a concurrency collision state")
     })
     @PatchMapping("/{registrationStr}")
-    public ResponseEntity<EntityModel<ViewAircraftDetailsResponse>> updateAircraft(
+    public ResponseEntity<EntityModel<AircraftResponse>> updateAircraft(
             @PathVariable String registrationStr,
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
             @RequestBody UpdateAircraftRequest request) {
 
         Long version = ETagUtils.parseVersion(ifMatchHeader);
         RegistrationNumber registration = new RegistrationNumber(registrationStr);
-        ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registration, request, version);
+        AircraftResponse response = updateAircraftUseCase.execute(registration, request, version);
         return ResponseEntity.ok(toHateoasModel(response, registration));
     }
 
@@ -316,8 +316,8 @@ public class AircraftController {
         return ResponseEntity.ok(model);
     }
 
-    private EntityModel<ViewAircraftDetailsResponse> toHateoasModel(ViewAircraftDetailsResponse response, RegistrationNumber registration) {
-        EntityModel<ViewAircraftDetailsResponse> model = EntityModel.of(response);
+    private EntityModel<AircraftResponse> toHateoasModel(AircraftResponse response, RegistrationNumber registration) {
+        EntityModel<AircraftResponse> model = EntityModel.of(response);
         model.add(linkTo(methodOn(AircraftController.class).getAircraftByRegistrationNumber(registration.getNumber())).withSelfRel());
         model.add(linkTo(methodOn(AircraftController.class).getAllAircraft(Pageable.unpaged(), null)).withRel("all-aircrafts"));
         model.add(linkTo(methodOn(AircraftController.class).updateAircraft(registration.getNumber(), null, null)).withRel("update-aircraft"));

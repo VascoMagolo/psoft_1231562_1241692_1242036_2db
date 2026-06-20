@@ -1,7 +1,7 @@
 package aisafe.aircrafts.application;
 
 import aisafe.aircrafts.application.dtos.UpdateAircraftRequest;
-import aisafe.aircrafts.application.dtos.ViewAircraftDetailsResponse;
+import aisafe.aircrafts.application.dtos.AircraftResponse;
 import aisafe.aircrafts.domain.*;
 import aisafe.shared.domain.ConcurrencyException;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +49,7 @@ class UpdateAircraftUseCaseTest {
         when(aircraftModelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
         when(aircraftRepository.findVersionFor(registrationNumber)).thenReturn(0L).thenReturn(1L);
 
-        ViewAircraftDetailsResponse response = updateAircraftUseCase.execute(registrationNumber, request, 0L);
+        AircraftResponse response = updateAircraftUseCase.execute(registrationNumber, request, 0L);
 
         assertNotNull(response);
         assertEquals(AircraftStatus.INACTIVE, response.status());

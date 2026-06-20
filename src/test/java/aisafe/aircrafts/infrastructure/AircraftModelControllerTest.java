@@ -1,7 +1,7 @@
 package aisafe.aircrafts.infrastructure;
 
 import aisafe.aircrafts.application.*;
-import aisafe.aircrafts.application.dtos.AircraftModelImageData;
+import aisafe.shared.application.dtos.ImageData;
 import aisafe.aircrafts.application.dtos.AircraftModelResponse;
 import aisafe.aircrafts.application.dtos.RegisterAircraftModelRequest;
 import aisafe.aircrafts.application.dtos.TopUtilizedModelResponse;
@@ -199,7 +199,7 @@ class AircraftModelControllerTest {
     @Test
     void ensureGetImageReturns200() throws Exception {
         when(getAircraftModelImage.execute("A320"))
-                .thenReturn(new AircraftModelImageData(new byte[]{1, 2, 3}, "image/jpeg"));
+                .thenReturn(new ImageData(new byte[]{1, 2, 3}, "image/jpeg"));
 
         mockMvc.perform(get("/api/aircraftModels/A320/image"))
                 .andExpect(status().isOk())

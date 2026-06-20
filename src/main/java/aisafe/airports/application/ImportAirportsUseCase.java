@@ -3,6 +3,8 @@ package aisafe.airports.application;
 import aisafe.airports.application.dtos.RegisterAirportRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.shared.application.UseCase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import aisafe.shared.application.dtos.BulkImportResult;
 import aisafe.shared.domain.DomainException;
 import com.opencsv.CSVReader;
@@ -20,6 +22,7 @@ public class ImportAirportsUseCase {
 
     private final RegisterAirportUseCase registerAirportUseCase;
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public BulkImportResult<String> execute(MultipartFile file) {
         BulkImportResult<String> result = new BulkImportResult<>();
 

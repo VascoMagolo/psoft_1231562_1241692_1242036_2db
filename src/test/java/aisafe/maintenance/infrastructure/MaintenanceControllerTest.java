@@ -100,6 +100,9 @@ class MaintenanceControllerTest {
     private ImportMaintenanceRecordsUseCase importMaintenanceRecordsUseCase;
 
     @MockitoBean
+    private ImportMaintenancePartsUseCase importMaintenancePartsUseCase;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
