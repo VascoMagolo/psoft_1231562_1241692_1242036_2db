@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c1813379-8ddf-4f72-9bc6-59826f161d19",
+		"_postman_id": "e7282c1f-980a-479b-9e04-05f92ea58aa5",
 		"name": "AISAFE",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28173718"
@@ -8,7 +8,6 @@
 	"item": [
 		{
 			"name": "Bootstrap - Import CSVs (US225)",
-			"description": "Run this folder in Postman Runner to automatically bootstrap the entire system in the correct topological order.",
 			"item": [
 				{
 					"name": "1. Import Airports (CSV)",
@@ -21,7 +20,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/1_airports.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/1_airports.csv"
 								}
 							]
 						},
@@ -37,7 +36,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "2. Import Aircraft Models (CSV)",
@@ -50,7 +68,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/2_aircraft_models.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/2_aircraft_models.csv"
 								}
 							]
 						},
@@ -66,7 +84,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "3. Import Aircrafts (CSV)",
@@ -79,7 +116,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/3_aircrafts.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/3_aircrafts.csv"
 								}
 							]
 						},
@@ -95,7 +132,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "4. Import Routes (CSV)",
@@ -108,7 +164,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/4_routes.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/4_routes.csv"
 								}
 							]
 						},
@@ -124,7 +180,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "5. Import Flights (CSV)",
@@ -137,7 +212,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/5_flights.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/5_flights.csv"
 								}
 							]
 						},
@@ -153,7 +228,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "6. Import Maintenance Templates (CSV)",
@@ -166,7 +260,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/6_maintenance_templates.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/6_maintenance_templates.csv"
 								}
 							]
 						},
@@ -183,7 +277,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "7. Import Maintenance Parts (CSV)",
@@ -196,7 +309,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/7_maintenance_parts.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/7_maintenance_parts.csv"
 								}
 							]
 						},
@@ -213,7 +326,26 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				},
 				{
 					"name": "8. Import Maintenance Records (CSV)",
@@ -226,7 +358,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "docs/postman/csv-imports/8_maintenance_records.csv"
+									"src": "/C:/Users/vasco/Documents/aisafe/docs/postman/csv-imports/8_maintenance_records.csv"
 								}
 							]
 						},
@@ -243,9 +375,29 @@
 							]
 						}
 					},
-					"response": []
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 or 207\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 207]);",
+									"});",
+									"",
+									"pm.test(\"Response contains successfulCount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.successfulCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					]
 				}
-			]
+			],
+			"description": "Run this folder in Postman Runner to automatically bootstrap the entire system in the correct topological order."
 		},
 		{
 			"name": "Auth",
@@ -587,19 +739,21 @@
 				},
 				{
 					"name": "Register Aircraft Model with Image [Backoffice Operator]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+									"pm.test(\"Has model name\", () => pm.expect(pm.response.json().modelName).to.exist);"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/aircraftModels",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"aircraftModels"
-							]
-						},
 						"body": {
 							"mode": "formdata",
 							"formdata": [
@@ -636,27 +790,37 @@
 								{
 									"key": "image",
 									"value": "",
-									"type": "file",
-									"src": ""
+									"type": "file"
 								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aircraftModels",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aircraftModels"
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "View Aircraft Model Details [Backoffice Operator, ATCC]",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
 									"pm.test(\"Has model name\", () => pm.expect(pm.response.json().modelName).to.exist);"
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "View Aircraft Model Details [Backoffice Operator, ATCC]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -672,18 +836,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has model name\", () => pm.expect(pm.response.json().modelName).to.exist);"
-								]
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "List Aircraft Models [Backoffice Operator, ATCC]",
@@ -846,9 +999,30 @@
 				},
 				{
 					"name": "Update Aircraft Model Image [Backoffice Operator]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
 						"url": {
 							"raw": "{{base_url}}/api/aircraftModels/{{aircraft_model_name}}/image",
 							"host": [
@@ -860,19 +1034,12 @@
 								"{{aircraft_model_name}}",
 								"image"
 							]
-						},
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "image",
-									"value": "",
-									"type": "file",
-									"src": ""
-								}
-							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Aircraft Model Image [Backoffice Operator, ATCC]",
 					"event": [
 						{
 							"listen": "test",
@@ -883,10 +1050,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Aircraft Model Image [Backoffice Operator, ATCC]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -903,17 +1067,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
-								]
-							}
-						}
-					]
+					"response": []
 				}
 			]
 		},
@@ -1406,19 +1560,21 @@
 			"item": [
 				{
 					"name": "Register Airport with Photo [Backoffice Operator]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+									"pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/airports",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"airports"
-							]
-						},
 						"body": {
 							"mode": "formdata",
 							"formdata": [
@@ -1480,24 +1636,22 @@
 								{
 									"key": "photo",
 									"value": "",
-									"type": "file",
-									"src": ""
+									"type": "file"
 								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/airports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"airports"
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
-									"pm.test(\"Has IATA code\", () => pm.expect(pm.response.json().iataCode).to.exist);"
-								]
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Register Airport [Backoffice Operator]",
@@ -2025,9 +2179,30 @@
 				},
 				{
 					"name": "Add Airport Photo [Backoffice Operator]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "photo",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
 						"url": {
 							"raw": "{{base_url}}/api/airports/{{airport_iata}}/photos",
 							"host": [
@@ -2039,19 +2214,12 @@
 								"{{airport_iata}}",
 								"photos"
 							]
-						},
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "photo",
-									"value": "",
-									"type": "file",
-									"src": ""
-								}
-							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Airport Photo [any auth]",
 					"event": [
 						{
 							"listen": "test",
@@ -2062,10 +2230,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Airport Photo [any auth]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2083,17 +2248,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
-								]
-							}
-						}
-					]
+					"response": []
 				}
 			]
 		},
@@ -2380,6 +2535,17 @@
 				},
 				{
 					"name": "List Active Routes [ATCC, Admin]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2400,6 +2566,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Alternative Routes [ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -2410,10 +2580,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Alternative Routes [ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2439,6 +2606,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Routes From Airport [ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -2449,10 +2620,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Routes From Airport [ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2469,6 +2637,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Search Routes [ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -2479,10 +2651,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Search Routes [ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2512,17 +2681,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
-								]
-							}
-						}
-					]
+					"response": []
 				}
 			]
 		},
@@ -2930,6 +3089,17 @@
 				},
 				{
 					"name": "Delete Maintenance Record [Maintenance Technician, Admin]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -2946,6 +3116,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Delete Maintenance Template [Maintenance Technician, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -2956,10 +3130,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Delete Maintenance Template [Maintenance Technician, Admin]",
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -2976,6 +3147,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Delete Maintenance Part [Maintenance Technician, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -2986,10 +3161,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Delete Maintenance Part [Maintenance Technician, Admin]",
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -3006,20 +3178,21 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Search Maintenance Records [Maintenance Technician, Supervisor, ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Search Maintenance Records [Maintenance Technician, Supervisor, ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3050,6 +3223,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Ongoing Maintenance [Maintenance Supervisor, Technician, ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -3060,10 +3237,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Ongoing Maintenance [Maintenance Supervisor, Technician, ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3090,20 +3264,22 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Maintenance Cost by Aircraft [ATCC, Backoffice Operator, Maintenance Supervisor, Admin]",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Has total cost\", () => pm.expect(pm.response.json().totalCost).to.exist);"
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Maintenance Cost by Aircraft [ATCC, Backoffice Operator, Maintenance Supervisor, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3122,6 +3298,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Maintenance Cost by Model [ATCC, Backoffice Operator, Maintenance Supervisor, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -3133,10 +3313,7 @@
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Maintenance Cost by Model [ATCC, Backoffice Operator, Maintenance Supervisor, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3155,6 +3332,10 @@
 							]
 						}
 					},
+					"response": []
+				},
+				{
+					"name": "Get Average Turnaround by Model [Maintenance Supervisor, Technician, ATCC, Admin]",
 					"event": [
 						{
 							"listen": "test",
@@ -3162,14 +3343,11 @@
 								"type": "text/javascript",
 								"exec": [
 									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has total cost\", () => pm.expect(pm.response.json().totalCost).to.exist);"
+									"pm.test(\"Has average turnaround\", () => pm.expect(pm.response.json().averageTurnaroundHours).to.exist);"
 								]
 							}
 						}
-					]
-				},
-				{
-					"name": "Get Average Turnaround by Model [Maintenance Supervisor, Technician, ATCC, Admin]",
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3188,18 +3366,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has average turnaround\", () => pm.expect(pm.response.json().averageTurnaroundHours).to.exist);"
-								]
-							}
-						}
-					]
+					"response": []
 				}
 			]
 		},
@@ -3208,29 +3375,6 @@
 			"item": [
 				{
 					"name": "Schedule Flight [ATCC, Admin]",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/flights",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"flights"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"aircraftId\": \"{{aircraft_registration}}\",\n    \"originIataCode\": \"{{route_origin}}\",\n    \"destinationIataCode\": \"{{route_destination}}\",\n    \"departureDateTime\": \"2026-07-01T08:00:00Z\",\n    \"arrivalDateTime\": \"2026-07-01T09:00:00Z\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
 					"event": [
 						{
 							"listen": "test",
@@ -3242,10 +3386,45 @@
 								]
 							}
 						}
-					]
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"aircraftId\": \"{{aircraft_registration}}\",\n    \"originIataCode\": \"{{route_origin}}\",\n    \"destinationIataCode\": \"{{route_destination}}\",\n    \"departureDateTime\": \"2026-07-01T08:00:00Z\",\n    \"arrivalDateTime\": \"2026-07-01T09:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/flights",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"flights"
+							]
+						}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Scheduled Flights by Aircraft [ATCC, Admin]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3266,17 +3445,7 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
-								]
-							}
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "Flights Utilization Rate",
@@ -3330,6 +3499,18 @@
 			"item": [
 				{
 					"name": "Get Total Network Distance [ATCC, Admin]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Has total distance\", () => pm.expect(pm.response.json().totalDistance).to.be.a(\"number\"));"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3345,54 +3526,9 @@
 							]
 						}
 					},
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-									"pm.test(\"Has total distance\", () => pm.expect(pm.response.json().totalDistance).to.be.a(\"number\"));"
-								]
-							}
-						}
-					]
+					"response": []
 				}
 			]
-		},
-		{
-			"name": "System Bulk Import (ZIP)",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{admin_token}}"
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "file",
-							"type": "file",
-							"src": []
-						}
-					]
-				},
-				"url": {
-					"raw": "{{base_url}}/api/system/import",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"api",
-						"system",
-						"import"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {
@@ -3483,8 +3619,7 @@
 		},
 		{
 			"key": "airport_version",
-			"value": "0",
-			"type": "string"
+			"value": "0"
 		}
 	]
 }
