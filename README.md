@@ -157,24 +157,6 @@ To run all tests:
 
 ## Team Tooling
 
-### Pre-commit Hook
-
-A hook runs before every commit to validate the `docs/` folder structure - enforcing that each work package has the required README, PlantUML sources, and generated SVGs. Install it once after cloning:
-
-```bash
-# Unix / macOS
-bash scripts/install-hooks.sh
-
-# Windows
-scripts/install-hooks.ps1
-```
-
-To check the docs structure at any time without committing:
-
-```bash
-python3 scripts/check-docs.py
-```
-
 ### Diagram Generation
 
 PlantUML `.puml` files live in `puml/` subfolders within each work package. To generate the corresponding `.svg` files:
@@ -191,4 +173,4 @@ Use the `-l` flag to preview which files would be converted without actually gen
 
 ## Documentation
 
-Full internal documentation - use cases, FURPS+, domain model, Postman collection, and client Q&A - is available at [`docs/README.md`](docs/README.md).
+Full internal documentation - use cases, glossary, FURPS+, domain model, Postman collection, and client Q&A - is available at [`docs/README.md`](docs/README.md).

@@ -1,0 +1,36 @@
+@startuml sd_us205
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "Backoffice Operator / ATCC" as Actor
+participant "AircraftController" as Ctrl
+participant "ViewFleetStatusUseCase" as UC
+participant "AircraftRepository" as Repo
+database "Database" as DB
+
+Actor -> Ctrl : GET /api/aircrafts/fleet-status
+activate Ctrl
+
+Ctrl -> UC : execute()
+activate UC
+
+UC -> Repo : findAll(0, MAX_INT)
+activate Repo
+Repo -> DB : SELECT FROM aircraft
+activate DB
+DB --> Repo : aircraft records
+deactivate DB
+Repo --> UC : PaginatedResult<Aircraft>
+deactivate Repo
+
+UC -> UC : group aircraft by status,\ncount per group
+
+UC --> Ctrl : FleetStatusResponse\n{ groups: List<FleetStatusGroupResponse> }
+deactivate UC
+
+Ctrl --> Actor : 200 OK\nEntityModel<FleetStatusResponse> with _links
+deactivate Ctrl
+
+@enduml

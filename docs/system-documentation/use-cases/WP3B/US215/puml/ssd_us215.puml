@@ -1,10 +1,10 @@
 @startuml
 autonumber
-actor "ATCC" as BO
+actor "ATCC" as Actor
 participant "System" as Sys
 
-BO -> Sys : getActiveRoutes(status, sortBy)
+Actor -> Sys : getTotalNetworkDistance()
 activate Sys
-Sys --> BO : returns list of active Route details sorted by criteria
+Sys --> Actor : returns total distance covered by active routes
 deactivate Sys
 @enduml

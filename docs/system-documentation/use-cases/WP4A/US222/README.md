@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor, I want to see a list of aircraft that are currently due for scheduled maintenance so that I can plan maintenance checks proactively.
+> As an ATCC, I want to see a list of aircraft that are currently due for scheduled maintenance so that I can plan maintenance checks proactively.
 
 ## Acceptance Criteria
 

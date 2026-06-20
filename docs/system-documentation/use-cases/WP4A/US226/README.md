@@ -19,7 +19,8 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Supervisor.
+- For registration and updates: the actor is authenticated as a Maintenance Technician, Maintenance Supervisor, or Admin.
+- For search and inventory tracking: any authenticated user may access the endpoint.
 - For registration: No part with the same part number exists yet.
 
 ## Post-conditions

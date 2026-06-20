@@ -23,7 +23,7 @@
 
 ## Main Success Scenario
 
-1. The actor sends `PATCH /api/aircrafts/{registration}/status` with the new status and the `If-Match` header.
+1. The actor sends `PATCH /api/aircrafts/{registration}` with the new status and the `If-Match` header.
 2. The controller parses the version from the ETag value.
 3. The use case loads the aircraft and verifies the version.
 4. The use case updates the status and saves the entity.

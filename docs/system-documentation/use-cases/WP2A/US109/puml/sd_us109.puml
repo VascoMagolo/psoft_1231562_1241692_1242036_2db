@@ -7,7 +7,7 @@ participant "Airport" as Entity
 participant "AirportRepository" as Repo
 database "Database" as DB
 
-BO -> Ctrl : PATCH /api/airports/{iataCode}/status\n{ status: "OPERATIONAL" | "CLOSED" | "UNDER_MAINTENANCE" }
+BO -> Ctrl : PATCH /api/airports/{iataCode}/status\nIf-Match: <version>\n{ status: "OPERATIONAL" | "CLOSED" | "UNDER_MAINTENANCE" }
 activate Ctrl
 
 note right of Ctrl
@@ -15,7 +15,7 @@ note right of Ctrl
   - status: not null, must be valid enum value
 end note
 
-Ctrl -> UC : execute(iataCode: String,\n  request.status(): AirportStatus)
+Ctrl -> UC : execute(iataCode: String,\n  request.status(): AirportStatus,\n  version: Long)
 activate UC
 
 UC -> Repo : findByIataCodeCode(iataCode)

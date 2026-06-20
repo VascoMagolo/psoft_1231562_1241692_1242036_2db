@@ -47,5 +47,5 @@
 
 ## Sequence Diagrams
 
-- [System Sequence Diagram](puml/ssd_us106.puml)
-- [Sequence Diagram](puml/sd_us106.puml)
+- [System Sequence Diagram](puml/ssd_updateAircraft.puml)
+- [Sequence Diagram](puml/sd_updateAircraft.puml)

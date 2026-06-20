@@ -1,0 +1,17 @@
+@startuml ssd_us219
+autonumber
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+actor "ATCC / MAINTENANCE_SUPERVISOR" as Actor
+participant "System" as Sys
+
+activate Actor
+Actor -> Sys : getOngoingMaintenance()
+activate Sys
+Sys --> Actor : 200 OK (Page<MaintenanceRecordResponse>)
+deactivate Sys
+deactivate Actor
+
+@enduml

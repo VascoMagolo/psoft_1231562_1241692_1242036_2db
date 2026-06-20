@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor, I want to view the total maintenance hours for the fleet so that I can understand the overall maintenance effort.
+> As an ATCC, I want to view the total maintenance hours for the fleet so that I can understand the overall maintenance effort.
 
 ## Acceptance Criteria
 
@@ -12,7 +12,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Supervisor or authorised maintenance user.
+- The actor is authenticated as an ATCC or Admin.
 
 ## Post-conditions
 

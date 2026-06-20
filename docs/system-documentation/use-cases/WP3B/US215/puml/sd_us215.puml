@@ -1,40 +1,37 @@
 @startuml
 autonumber
-actor "ATCC" as BO
-participant "RouteController" as Ctrl
-participant "ListActiveRoutesUseCase" as UC
+actor "ATCC" as Actor
+participant "NetworkController" as Ctrl
+participant "CalculateTotalNetworkDistanceUseCase" as UC
 participant "RouteRepository" as RouteRepo
-participant "AirportRepository" as AirportRepo
+participant "RouteDistanceService" as DistService
 database "Database" as DB
 
-BO -> Ctrl : GET /api/routes?status=active&sortBy={sortBy}
+Actor -> Ctrl : GET /api/network/total-distance
 activate Ctrl
 
-Ctrl -> UC : execute(status="active", sortBy)
+Ctrl -> UC : execute()
 activate UC
 
-UC -> RouteRepo : findActiveRoutes()
+UC -> RouteRepo : findAllActive()
 activate RouteRepo
-RouteRepo -> DB : SELECT * FROM route WHERE active = true
+RouteRepo -> DB : SELECT FROM route WHERE active = true
 activate DB
-DB --> RouteRepo : returns active route records
+DB --> RouteRepo : list of active routes
 deactivate DB
-RouteRepo --> UC : returns list of active routes
+RouteRepo --> UC : List<Route>
 deactivate RouteRepo
 
-alt sortBy == "distance"
-    loop for each route
-        UC -> AirportRepo : findCoordinates(route.originIata, route.destinationIata)
-        activate AirportRepo
-        AirportRepo --> UC : returns origin and destination Airports
-        deactivate AirportRepo
-    end
-
+loop for each active route
+  UC -> DistService : calculateDistanceKm(route)
+  activate DistService
+  DistService --> UC : Double
+  deactivate DistService
 end
 
-UC --> Ctrl : returns List<RouteResponse>
+UC --> Ctrl : TotalDistanceResponse\n{ totalDistance, unit: "km" }
 deactivate UC
 
-Ctrl --> BO : returns list of active Route details sorted by criteria
+Ctrl --> Actor : 200 OK\nTotalDistanceResponse with _links
 deactivate Ctrl
 @enduml
