@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor or ATCC, I want to filter maintenance records by component so that I can categorize maintenance activity by area of the aircraft.
+> As a Maintenance Technician, I want to filter maintenance records by component so that I can categorize maintenance activity by area of the aircraft.
 
 ## Acceptance Criteria
 
@@ -13,7 +13,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Technician, Maintenance Supervisor, ATCC, or Admin.
+- The actor is authenticated as a Maintenance Technician or Admin.
 
 ## Post-conditions
 

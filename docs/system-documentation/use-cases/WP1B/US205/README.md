@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Backoffice Operator or ATCC, I want to view the status of all aircraft in the fleet so that I can assess operational availability at a glance.
+> As an ATCC, I want to view the status of all aircraft in the fleet so that I can assess operational availability at a glance.
 
 ## Acceptance Criteria
 
@@ -14,7 +14,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Backoffice Operator, ATCC, or Admin.
+- The actor is authenticated as an ATCC or Admin.
 
 ## Post-conditions
 

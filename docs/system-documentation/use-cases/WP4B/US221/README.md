@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor or ATCC, I want to view the average turnaround time for completed maintenance records of a given aircraft model so that I can benchmark maintenance efficiency.
+> As a Maintenance Supervisor, I want to view the average turnaround time for completed maintenance records of a given aircraft model so that I can benchmark maintenance efficiency.
 
 ## Acceptance Criteria
 
@@ -13,7 +13,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Supervisor, Maintenance Technician, ATCC, or Admin.
+- The actor is authenticated as a Maintenance Supervisor or Admin.
 
 ## Post-conditions
 

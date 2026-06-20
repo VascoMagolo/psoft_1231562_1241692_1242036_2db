@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor or ATCC, I want to view all ongoing maintenance activities so that I can monitor what is currently in progress across the fleet.
+> As a Maintenance Supervisor, I want to view all ongoing maintenance activities so that I can monitor what is currently in progress across the fleet.
 
 ## Acceptance Criteria
 
@@ -13,7 +13,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as a Maintenance Technician, Maintenance Supervisor, ATCC, or Admin.
+- The actor is authenticated as a Maintenance Supervisor or Admin.
 
 ## Post-conditions
 

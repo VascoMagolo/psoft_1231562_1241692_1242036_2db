@@ -4,7 +4,7 @@ skinparam monochrome true
 skinparam packageStyle rect
 skinparam shadowing false
 
-actor "Backoffice Operator / ATCC" as Actor
+actor "ATCC" as Actor
 participant "AircraftController" as Ctrl
 participant "ViewFleetStatusUseCase" as UC
 participant "AircraftRepository" as Repo

@@ -1,6 +1,6 @@
 @startuml
 autonumber
-actor "Backoffice Operator" as Actor
+actor "ATCC" as Actor
 participant "System" as Sys
 Actor -> Sys : getOperationalHours(registrationNumber)
 activate Sys

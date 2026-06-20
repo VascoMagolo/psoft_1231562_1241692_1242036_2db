@@ -2,7 +2,7 @@
 
 ## User Story
 
-> As a Maintenance Supervisor or ATCC, I want to view maintenance cost reports aggregated by aircraft or by aircraft model so that I can understand the cost distribution of maintenance operations.
+> As an ATCC, I want to view maintenance cost reports aggregated by aircraft or by aircraft model so that I can understand the cost distribution of maintenance operations.
 
 ## Acceptance Criteria
 
@@ -12,7 +12,7 @@
 
 ## Pre-conditions
 
-- The actor is authenticated as ATCC, Backoffice Operator, Maintenance Supervisor, or Admin.
+- The actor is authenticated as ATCC or Admin.
 
 ## Post-conditions
 
