@@ -58,4 +58,56 @@ class GenerateFlightUtilizationReportUseCaseTest {
 
         assertThrows(InvalidFlightDateRangeException.class, () -> useCase.execute(start, end, 0, 20));
     }
+
+    @Test
+    void ensureReportIsGeneratedWithDefaultPageAndSize() {
+        OffsetDateTime start = OffsetDateTime.now().minusDays(10);
+        OffsetDateTime end = OffsetDateTime.now();
+        List<RouteUtilizationData> mockData = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        PaginatedResult<RouteUtilizationData> mockPaginatedResult = new PaginatedResult<>(mockData, 1L);
+
+        when(repository.getFlightUtilizationReport(start, end, 0, 20)).thenReturn(mockPaginatedResult);
+
+        PaginatedResult<FlightUtilizationResponse> result = useCase.execute(start, end, null, null);
+
+        assertEquals(1L, result.totalElements());
+    }
+
+    @Test
+    void ensureReportIsGeneratedWithNullDates() {
+        List<RouteUtilizationData> mockData = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        PaginatedResult<RouteUtilizationData> mockPaginatedResult = new PaginatedResult<>(mockData, 1L);
+
+        when(repository.getFlightUtilizationReport(null, null, 0, 20)).thenReturn(mockPaginatedResult);
+
+        PaginatedResult<FlightUtilizationResponse> result = useCase.execute(null, null, 0, 20);
+
+        assertEquals(1L, result.totalElements());
+     }
+
+    @Test
+    void ensureReportIsGeneratedWithNullEndDate() {
+        OffsetDateTime start = OffsetDateTime.now().minusDays(10);
+        List<RouteUtilizationData> mockData = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        PaginatedResult<RouteUtilizationData> mockPaginatedResult = new PaginatedResult<>(mockData, 1L);
+
+        when(repository.getFlightUtilizationReport(start, null, 0, 20)).thenReturn(mockPaginatedResult);
+
+        PaginatedResult<FlightUtilizationResponse> result = useCase.execute(start, null, 0, 20);
+
+        assertEquals(1L, result.totalElements());
+    }
+
+    @Test
+    void ensureReportIsGeneratedWithNullStartDate() {
+        OffsetDateTime end = OffsetDateTime.now();
+        List<RouteUtilizationData> mockData = List.of(new RouteUtilizationData(1L, "OPO", "LIS", 5L));
+        PaginatedResult<RouteUtilizationData> mockPaginatedResult = new PaginatedResult<>(mockData, 1L);
+
+        when(repository.getFlightUtilizationReport(null, end, 0, 20)).thenReturn(mockPaginatedResult);
+
+        PaginatedResult<FlightUtilizationResponse> result = useCase.execute(null, end, 0, 20);
+
+        assertEquals(1L, result.totalElements());
+    }
 }

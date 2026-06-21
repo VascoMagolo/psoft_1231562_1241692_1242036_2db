@@ -24,7 +24,12 @@ class GateTest {
 
     @Test
     void ensureEqualGatesAreEqual() {
-        assertEquals(new Gate("A1"), new Gate("A1"));
+        Gate g1 = new Gate("A1");
+        Gate g2 = new Gate("A1");
+        assertEquals(g1, g2);
+        assertEquals(g1, g1);
+        assertNotEquals(g1, null);
+        assertNotEquals(g1, "not a gate");
     }
 
     @Test

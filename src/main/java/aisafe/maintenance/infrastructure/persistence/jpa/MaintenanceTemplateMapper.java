@@ -6,6 +6,10 @@ import aisafe.maintenance.domain.MaintenanceTemplate;
 import java.util.stream.Collectors;
 
 public class MaintenanceTemplateMapper {
+    private MaintenanceTemplateMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static MaintenanceTemplate toDomain(MaintenanceTemplateJpaEntity entity) {
         return new MaintenanceTemplate(
                 entity.getName(),

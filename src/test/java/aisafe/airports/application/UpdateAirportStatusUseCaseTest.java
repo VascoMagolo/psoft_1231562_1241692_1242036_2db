@@ -63,4 +63,16 @@ class UpdateAirportStatusUseCaseTest {
         assertThrows(ConcurrencyException.class, () -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED, 0L));
         verify(airportRepository, never()).save(any());
     }
+
+    @Test
+    void ensureStatusIsUpdatedSuccessfullyWithNullVersion() {
+        Airport airport = buildAirport();
+        IataCode code = new IataCode("LIS");
+        when(airportRepository.findByIataCode(code)).thenReturn(Optional.of(airport));
+        when(airportRepository.findVersionFor(code)).thenReturn(0L);
+
+        assertDoesNotThrow(() -> updateAirportStatus.execute("LIS", AirportStatus.CLOSED, null));
+        verify(airportRepository).save(airport);
+        verify(airportRepository).findVersionFor(code);
+    }
 }

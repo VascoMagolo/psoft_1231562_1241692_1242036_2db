@@ -74,9 +74,10 @@ public class GlobalExceptionHandler {
             IllegalArgumentException.class,
             InvalidIataCodeException.class,
             InvalidContactException.class,
-            InvalidRegistrationNumberException.class
+            InvalidRegistrationNumberException.class,
+            org.springframework.web.bind.MissingServletRequestParameterException.class
     })
-    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handleBadRequest(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));
     }

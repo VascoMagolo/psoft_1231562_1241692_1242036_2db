@@ -3,6 +3,10 @@ package aisafe.maintenance.infrastructure.persistence.jpa;
 import aisafe.maintenance.domain.MaintenancePart;
 
 public class MaintenancePartMapper {
+    private MaintenancePartMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static MaintenancePart toDomain(MaintenancePartJpaEntity entity) {
         if (entity == null) return null;
         return new MaintenancePart(

@@ -63,10 +63,12 @@ class ContactTest {
 
     @Test
     void ensureEqualContactsAreEqual() {
-        assertEquals(
-            new Contact(ContactType.EMAIL, "info@airport.pt", "General"),
-            new Contact(ContactType.EMAIL, "info@airport.pt", "General")
-        );
+        Contact contact1 = new Contact(ContactType.EMAIL, "info@airport.pt", "General");
+        Contact contact2 = new Contact(ContactType.EMAIL, "info@airport.pt", "General");
+        assertEquals(contact1, contact2);
+        assertEquals(contact1, contact1);
+        assertNotEquals(contact1, null);
+        assertNotEquals(contact1, "not a contact");
     }
 
     @Test
@@ -90,5 +92,21 @@ class ContactTest {
         String str = new Contact(ContactType.EMAIL, "info@airport.pt", null).toString();
         assertTrue(str.contains("EMAIL"));
         assertTrue(str.contains("info@airport.pt"));
+    }
+
+    @Test
+    void ensureDifferentValueSameTypeNotEqual() {
+        assertNotEquals(
+            new Contact(ContactType.EMAIL, "info1@airport.pt", null),
+            new Contact(ContactType.EMAIL, "info2@airport.pt", null)
+        );
+    }
+
+    @Test
+    void ensureDifferentDescriptionSameTypeValueNotEqual() {
+        assertNotEquals(
+            new Contact(ContactType.EMAIL, "info@airport.pt", "Description 1"),
+            new Contact(ContactType.EMAIL, "info@airport.pt", "Description 2")
+        );
     }
 }

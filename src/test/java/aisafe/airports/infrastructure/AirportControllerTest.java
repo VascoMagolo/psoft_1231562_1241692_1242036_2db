@@ -23,13 +23,16 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import java.util.List;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -164,6 +167,15 @@ class AirportControllerTest {
     @Test
     void ensureAddPhotoWithNonImageFileReturns400() throws Exception {
         MockMultipartFile photo = new MockMultipartFile("photo", "file.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports/LIS/photos")
+                        .file(photo))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureAddPhotoReturns400WhenContentTypeIsNull() throws Exception {
+        MockMultipartFile photo = new MockMultipartFile("photo", "lis.jpg", null, new byte[]{1, 2, 3});
 
         mockMvc.perform(multipart("/api/airports/LIS/photos")
                         .file(photo))
@@ -359,5 +371,122 @@ class AirportControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.successfulCount").value(2))
                 .andExpect(jsonPath("$.errorCount").value(0));
+    }
+
+    @Test
+    void ensureRegisterAirportWithPhotoReturns201() throws Exception {
+        when(registerAirport.execute(any())).thenReturn(sampleAirportResponse);
+
+        MockMultipartFile photo = new MockMultipartFile("photo", "lis.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports")
+                        .file(photo)
+                        .param("iataCode", "LIS")
+                        .param("name", "Lisbon Airport")
+                        .param("city", "Lisbon")
+                        .param("country", "Portugal")
+                        .param("timezone", "Europe/Lisbon")
+                        .param("latitude", "38.77")
+                        .param("longitude", "-9.13")
+                        .param("runwayName", "03/21")
+                        .param("runwayLength", "3000")
+                        .param("runwayOrientation", "030/210"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.iataCode").value("LIS"));
+    }
+
+    @Test
+    void ensureRegisterAirportWithPhotoReturns400ForNonImagePhoto() throws Exception {
+        MockMultipartFile photo = new MockMultipartFile("photo", "lis.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports")
+                        .file(photo)
+                        .param("iataCode", "LIS")
+                        .param("name", "Lisbon Airport")
+                        .param("city", "Lisbon")
+                        .param("country", "Portugal")
+                        .param("timezone", "Europe/Lisbon")
+                        .param("latitude", "38.77")
+                        .param("longitude", "-9.13")
+                        .param("runwayName", "03/21")
+                        .param("runwayLength", "3000")
+                        .param("runwayOrientation", "030/210"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureRegisterAirportWithPhotoReturns400ForEmptyRunways() throws Exception {
+        mockMvc.perform(multipart("/api/airports")
+                        .param("iataCode", "LIS")
+                        .param("name", "Lisbon Airport")
+                        .param("city", "Lisbon")
+                        .param("country", "Portugal")
+                        .param("timezone", "Europe/Lisbon")
+                        .param("latitude", "38.77")
+                        .param("longitude", "-9.13"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureRegisterAirportWithoutPhotoReturns201() throws Exception {
+        when(registerAirport.execute(any())).thenReturn(sampleAirportResponse);
+
+        mockMvc.perform(multipart("/api/airports")
+                        .param("iataCode", "LIS")
+                        .param("name", "Lisbon Airport")
+                        .param("city", "Lisbon")
+                        .param("country", "Portugal")
+                        .param("timezone", "Europe/Lisbon")
+                        .param("latitude", "38.77")
+                        .param("longitude", "-9.13")
+                        .param("runwayName", "03/21")
+                        .param("runwayLength", "3000")
+                        .param("runwayOrientation", "030/210"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.iataCode").value("LIS"));
+    }
+
+    @Test
+    void ensureRegisterAirportWithPhotoReturns400WhenContentTypeIsNull() throws Exception {
+        // Simulate a multipart file with null content type
+        MockMultipartFile photo = new MockMultipartFile("photo", "lis.jpg", null, new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/airports")
+                        .file(photo)
+                        .param("iataCode", "LIS")
+                        .param("name", "Lisbon Airport")
+                        .param("city", "Lisbon")
+                        .param("country", "Portugal")
+                        .param("timezone", "Europe/Lisbon")
+                        .param("latitude", "38.77")
+                        .param("longitude", "-9.13")
+                        .param("runwayName", "03/21")
+                        .param("runwayLength", "3000")
+                        .param("runwayOrientation", "030/210"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureControllerMethodRegisterAirportWithPhotoReturns400DirectCall() throws Exception {
+        AirportController controller = new AirportController(
+                registerAirport, addCertification, viewAirportDetails, searchAirport,
+                updateAirportStatus, updateAirportDetails, viewAirportRoutes,
+                airportStatistics, listAirportsByRegion, deleteAirport,
+                uploadAirportPhoto, getAirportPhoto, importAirports
+        );
+
+        // Direct call with null runwayNames
+        ResponseEntity<EntityModel<AirportResponse>> response1 = controller.registerAirportWithPhoto(
+                "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
+                38.77, -9.13, null, List.of(), List.of(), "24h", List.of(), List.of(), List.of(), null
+        );
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response1.getStatusCode().value());
+
+        // Direct call with empty runwayNames
+        ResponseEntity<EntityModel<AirportResponse>> response2 = controller.registerAirportWithPhoto(
+                "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
+                38.77, -9.13, List.of(), List.of(), List.of(), "24h", List.of(), List.of(), List.of(), null
+        );
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response2.getStatusCode().value());
     }
 }

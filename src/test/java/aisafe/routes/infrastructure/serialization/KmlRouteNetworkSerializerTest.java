@@ -44,4 +44,40 @@ class KmlRouteNetworkSerializerTest {
         assertTrue(kmlContent.contains("-8.6814,41.2481"), "Missing first coordinate\n" + kmlContent);
         assertTrue(kmlContent.contains("-9.1342,38.7742"), "Missing second coordinate\n" + kmlContent);
     }
+
+    @Test
+    void ensureSupportsCorrectFormat() {
+        assertTrue(serializer.supports("kml"));
+        assertTrue(serializer.supports("KML"));
+        assertFalse(serializer.supports("geojson"));
+    }
+
+    @Test
+    void ensureSerializeThrowsExceptionWhenAirportMissing() {
+        Route route = new Route("OPO", "LIS", 60, 300.0, 100);
+        // empty airport map will cause NullPointerException during serialization, wrapped into RuntimeException
+        assertThrows(RuntimeException.class, () -> serializer.serialize(List.of(route), Map.of()));
+    }
+
+    @Test
+    void ensureSerializeThrowsExceptionOnKmlMarshalError() throws Exception {
+        Route route = new Route("OPO", "LIS", 60, 300.0, 100);
+        Airport origin = mock(Airport.class);
+        when(origin.getIataCode()).thenReturn(new IataCode("OPO"));
+        when(origin.getCoordinates()).thenReturn(new Coordinates(41.2481, -8.6814));
+        Airport destination = mock(Airport.class);
+        when(destination.getIataCode()).thenReturn(new IataCode("LIS"));
+        when(destination.getCoordinates()).thenReturn(new Coordinates(38.7742, -9.1342));
+        Map<String, Airport> airports = Map.of("OPO", origin, "LIS", destination);
+
+        de.micromata.opengis.kml.v_2_2_0.Document realDocument = new de.micromata.opengis.kml.v_2_2_0.Kml().createAndSetDocument();
+
+        try (var mocked = org.mockito.Mockito.mockConstruction(de.micromata.opengis.kml.v_2_2_0.Kml.class, (mock, context) -> {
+            when(mock.createAndSetDocument()).thenReturn(realDocument);
+            org.mockito.Mockito.doThrow(new RuntimeException("JAXB marshalling error")).when(mock).marshal(org.mockito.ArgumentMatchers.any(java.io.OutputStream.class));
+        })) {
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> serializer.serialize(List.of(route), airports));
+            assertEquals("Failed to serialize to KML", ex.getMessage());
+        }
+    }
 }

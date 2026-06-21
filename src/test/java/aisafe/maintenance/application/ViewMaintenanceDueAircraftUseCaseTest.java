@@ -140,4 +140,105 @@ class ViewMaintenanceDueAircraftUseCaseTest {
         assertEquals("CS-TKA", result.data().get(0).registrationNumber());
         assertTrue(result.data().get(0).dueReason().contains("Exceeded default flight hours limit"));
     }
+
+    @Test
+    void ensureFallbackToGlobalThresholdsWithCompletedRecordAndDaysLimit() {
+        MaintenanceTemplate diffTemplate = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check"), 100, 30);
+        MaintenancePart part = new MaintenancePart("P123", "Part 1", "Desc", 10, 5, MaintenanceComponent.ENGINE);
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "R1", LocalDateTime.now().minusDays(400), 4,
+                List.of(part), "Notes", diffTemplate, MaintenanceStatus.COMPLETED,
+                Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TKA"), BigDecimal.valueOf(100), LocalDateTime.now().minusDays(400)
+        );
+
+        when(aircraftRepository.findAll()).thenReturn(List.of(aircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(diffTemplate));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(List.of(record));
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(10.0);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertEquals(1, result.data().size());
+        assertTrue(result.data().get(0).dueReason().contains("Exceeded default elapsed days limit"));
+    }
+
+    @Test
+    void ensureFallbackToGlobalThresholdsWithNullFlightHours() {
+        MaintenanceTemplate diffTemplate = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check"), 100, 30);
+        Aircraft recentAircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.now().minusDays(10), model, new RegistrationNumber("CS-TKA"), 180, 5000.0, List.of("WiFi"));
+
+        when(aircraftRepository.findAll()).thenReturn(List.of(recentAircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(diffTemplate));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(Collections.emptyList());
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(null);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertTrue(result.data().isEmpty());
+    }
+
+    @Test
+    void ensureExecuteWithPageOutOfBoundsReturnsEmpty() {
+        when(aircraftRepository.findAll()).thenReturn(List.of(aircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(template));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(Collections.emptyList());
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(120.0);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(5, 1);
+        assertTrue(result.data().isEmpty());
+        assertEquals(1, result.totalElements());
+    }
+
+    @Test
+    void ensureAircraftDueWhenLastCompletedRecordHasNullCompletedAt() {
+        MaintenancePart part = new MaintenancePart("P123", "Part 1", "Desc", 10, 5, MaintenanceComponent.ENGINE);
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "R1", LocalDateTime.now().minusDays(5), 4,
+                List.of(part), "Notes", template, MaintenanceStatus.COMPLETED,
+                Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TKA"), BigDecimal.valueOf(100), null // null completedAt
+        );
+
+        when(aircraftRepository.findAll()).thenReturn(List.of(aircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(template));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(List.of(record));
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(10.0);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        // It falls back to manufacturing date, which is 40 days ago, making it due (> 30 days)
+        assertEquals(1, result.data().size());
+        assertTrue(result.data().get(0).dueReason().contains("Exceeded elapsed days limit"));
+    }
+
+    @Test
+    void ensureFallbackToGlobalThresholdsWhenLastCompletedRecordHasNullCompletedAt() {
+        MaintenanceTemplate diffTemplate = new MaintenanceTemplate("Annual Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")), List.of("Check"), 100, 30);
+        MaintenancePart part = new MaintenancePart("P123", "Part 1", "Desc", 10, 5, MaintenanceComponent.ENGINE);
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "R1", LocalDateTime.now().minusDays(5), 4,
+                List.of(part), "Notes", diffTemplate, MaintenanceStatus.COMPLETED,
+                Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TKA"), BigDecimal.valueOf(100), null // null completedAt
+        );
+
+        when(aircraftRepository.findAll()).thenReturn(List.of(aircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(diffTemplate));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(List.of(record));
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(10.0);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        // Global days threshold is 365 days. Manufacturing date is 40 days ago, so not due on days.
+        // Flight hours is 10.0 (< 300), so not due on flight hours.
+        assertTrue(result.data().isEmpty());
+    }
+
+    @Test
+    void ensureAircraftNotDueWhenFlightHoursIsNullAndNoDaysLimit() {
+        // Set manufacturing date to 10 days ago (below 30 days)
+        Aircraft recentAircraft = new Aircraft(AircraftStatus.AVAILABLE, LocalDate.now().minusDays(10), model, new RegistrationNumber("CS-TKA"), 180, 5000.0, List.of("WiFi"));
+
+        when(aircraftRepository.findAll()).thenReturn(List.of(recentAircraft));
+        when(maintenanceTemplateRepository.findAll()).thenReturn(List.of(template));
+        when(maintenanceRecordRepository.findCompletedByAircraft(any())).thenReturn(Collections.emptyList());
+        when(flightRepository.calculateOperationalHoursSince(any(), any())).thenReturn(null);
+
+        PaginatedResult<MaintenanceDueAircraftResponse> result = useCase.execute(0, 20);
+        assertTrue(result.data().isEmpty());
+    }
 }

@@ -65,5 +65,60 @@ class FlightControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.flightResponseList[0].aircraftId").value("CS-TPA"));
     }
+
+    @Test
+    void ensureImportFlightsSuccessReturns201() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        bulkImportResult.addSuccess("FLIGHT-1");
+
+        when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPA,OPO-LIS".getBytes());
+
+        mockMvc.perform(multipart("/api/flights/import")
+                        .file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalProcessed").value(1))
+                .andExpect(jsonPath("$.successfulCount").value(1))
+                .andExpect(jsonPath("$.errorCount").value(0));
+    }
+
+    @Test
+    void ensureImportFlightsPartialSuccessReturns207() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        bulkImportResult.addSuccess("FLIGHT-1");
+        bulkImportResult.addError(2, "bad-row", "invalid route");
+
+        when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPA,OPO-LIS\nCS-TPB,invalid".getBytes());
+
+        mockMvc.perform(multipart("/api/flights/import")
+                        .file(file))
+                .andExpect(status().isMultiStatus())
+                .andExpect(jsonPath("$.totalProcessed").value(2))
+                .andExpect(jsonPath("$.successfulCount").value(1))
+                .andExpect(jsonPath("$.errorCount").value(1));
+    }
+
+    @Test
+    void ensureImportFlightsFailureReturns400() throws Exception {
+        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        bulkImportResult.addError(1, "bad-row", "invalid route");
+
+        when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPB,invalid".getBytes());
+
+        mockMvc.perform(multipart("/api/flights/import")
+                        .file(file))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.totalProcessed").value(1))
+                .andExpect(jsonPath("$.successfulCount").value(0))
+                .andExpect(jsonPath("$.errorCount").value(1));
+    }
 }
 

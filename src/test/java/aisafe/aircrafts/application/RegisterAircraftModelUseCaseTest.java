@@ -47,4 +47,18 @@ class RegisterAircraftModelUseCaseTest {
                 registerAircraftModel.execute(buildRequest()));
         verify(repository, never()).save(any());
     }
+
+    @Test
+    void ensureModelIsRegisteredWithImage() {
+        RegisterAircraftModelRequest requestWithImage = new RegisterAircraftModelRequest(
+                "A320", Manufacturer.AIRBUS, 6150.0, 26730.0, 833.0, 180, new byte[]{1, 2, 3}, "image/png"
+        );
+        when(repository.existsByModelName("A320")).thenReturn(false);
+
+        AircraftModelResponse response = registerAircraftModel.execute(requestWithImage);
+
+        assertNotNull(response);
+        assertEquals("A320", response.modelName());
+        verify(repository, times(1)).save(any(AircraftModel.class));
+    }
 }

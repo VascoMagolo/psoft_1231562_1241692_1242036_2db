@@ -65,4 +65,125 @@ class ImportAirportsUseCaseTest {
         assertEquals("OPO", result.getSuccessfulImports().get(0));
         assertEquals("Invalid latitude", result.getErrors().get(0).getErrorMessage());
     }
+
+    @Test
+    void ensureEmptyCsvFileReturnsError() {
+        MockMultipartFile file = new MockMultipartFile("file", "airports.csv", "text/csv", new byte[0]);
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertFalse(result.isFullySuccessful());
+        assertEquals(1, result.getErrors().size());
+        assertEquals("CSV file is empty", result.getErrors().get(0).getErrorMessage());
+    }
+
+    @Test
+    void ensureMissingRequiredHeadersReturnsError() {
+        String csvData = "iataCode,city,country\nOPO,Porto,Portugal";
+        MockMultipartFile file = new MockMultipartFile("file", "airports.csv", "text/csv", csvData.getBytes());
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertFalse(result.isFullySuccessful());
+        assertEquals(1, result.getErrors().size());
+        assertTrue(result.getErrors().get(0).getErrorMessage().contains("Missing required columns"));
+    }
+
+    @Test
+    void ensureIoExceptionReturnsError() throws Exception {
+        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertFalse(result.isFullySuccessful());
+        assertEquals(1, result.getErrors().size());
+        assertTrue(result.getErrors().get(0).getErrorMessage().contains("Failed to parse CSV file"));
+    }
+
+    @Test
+    void ensureCsvImportHandlesNumberFormatAndOutOfBoundsIndex() {
+        // LIS row only has 3 columns (out of bounds for other indexes)
+        String csvData = "iataCode,name,city,country,region,timezone,latitude,longitude\n" +
+                "OPO,Francisco Sa Carneiro,Porto,Portugal,Europe,Europe/Lisbon,abc,xyz\n" +
+                "LIS,Humberto Delgado,Lisbon";
+
+        MockMultipartFile file = new MockMultipartFile("file", "airports.csv", "text/csv", csvData.getBytes());
+
+        when(registerAirportUseCase.execute(any(RegisterAirportRequest.class))).thenAnswer(invocation -> {
+            RegisterAirportRequest req = invocation.getArgument(0);
+            if (req.latitude() == null || req.longitude() == null || req.country() == null) {
+                throw new IllegalArgumentException("Invalid airport data");
+            }
+            return null;
+        });
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertFalse(result.isFullySuccessful());
+        assertEquals(2, result.getTotalRowsProcessed());
+        assertEquals(2, result.getErrors().size());
+    }
+
+    @Test
+    void ensureCsvImportSucceedsWithoutOptionalColumns() {
+        // Only required columns: iataCode, name, city, country
+        String csvData = "iataCode,name,city,country\n" +
+                "OPO,Francisco Sa Carneiro,Porto,Portugal";
+
+        MockMultipartFile file = new MockMultipartFile("file", "airports.csv", "text/csv", csvData.getBytes());
+
+        when(registerAirportUseCase.execute(any(RegisterAirportRequest.class))).thenReturn(null);
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertTrue(result.isFullySuccessful());
+        assertEquals(1, result.getTotalRowsProcessed());
+        assertEquals(1, result.getSuccessfulImports().size());
+        verify(registerAirportUseCase).execute(argThat(req ->
+                req.iataCode().equals("OPO") &&
+                req.region() == null &&
+                req.timezone() == null &&
+                req.latitude() == null &&
+                req.longitude() == null
+        ));
+    }
+
+    @Test
+    void ensureCsvImportSucceedsWithEmptyOptionalValues() {
+        // Optional fields present but empty
+        String csvData = "iataCode,name,city,country,region,timezone,latitude,longitude\n" +
+                "OPO,Francisco Sa Carneiro,Porto,Portugal, ,  ,,";
+
+        MockMultipartFile file = new MockMultipartFile("file", "airports.csv", "text/csv", csvData.getBytes());
+
+        when(registerAirportUseCase.execute(any(RegisterAirportRequest.class))).thenReturn(null);
+
+        BulkImportResult<String> result = importAirportsUseCase.execute(file);
+
+        assertTrue(result.isFullySuccessful());
+        assertEquals(1, result.getTotalRowsProcessed());
+        verify(registerAirportUseCase).execute(argThat(req ->
+                req.iataCode().equals("OPO") &&
+                req.region() == null &&
+                req.timezone() == null &&
+                req.latitude() == null &&
+                req.longitude() == null
+        ));
+    }
+
+    @Test
+    void ensureMissingOtherRequiredHeadersReturnsError() {
+        // Missing iataCode
+        String csv1 = "name,city,country\nFrancisco,Porto,Portugal";
+        assertFalse(importAirportsUseCase.execute(new MockMultipartFile("file", "airports.csv", "text/csv", csv1.getBytes())).isFullySuccessful());
+
+        // Missing city
+        String csv2 = "iataCode,name,country\nOPO,Francisco,Portugal";
+        assertFalse(importAirportsUseCase.execute(new MockMultipartFile("file", "airports.csv", "text/csv", csv2.getBytes())).isFullySuccessful());
+
+        // Missing country
+        String csv3 = "iataCode,name,city\nOPO,Francisco,Porto";
+        assertFalse(importAirportsUseCase.execute(new MockMultipartFile("file", "airports.csv", "text/csv", csv3.getBytes())).isFullySuccessful());
+    }
 }

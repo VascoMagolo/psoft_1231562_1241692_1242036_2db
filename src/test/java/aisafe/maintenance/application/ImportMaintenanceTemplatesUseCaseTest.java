@@ -58,4 +58,16 @@ class ImportMaintenanceTemplatesUseCaseTest {
         assertEquals(1, result.getErrors().size());
         verify(createMaintenanceTemplateUseCase, never()).execute(any(CreateMaintenanceTemplateRequest.class));
     }
+
+    @Test
+    void execute_IoException_ReturnsError() throws Exception {
+        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+
+        BulkImportResult<MaintenanceTemplateResponse> result = importUseCase.execute(file);
+
+        assertFalse(result.isFullySuccessful());
+        assertEquals(1, result.getErrors().size());
+        assertTrue(result.getErrors().get(0).getErrorMessage().contains("Failed to parse CSV file"));
+    }
 }

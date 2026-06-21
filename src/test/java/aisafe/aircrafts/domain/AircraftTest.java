@@ -78,4 +78,77 @@ class AircraftTest {
         assertThrows(AircraftInvalidFieldException.class, () ->
                 new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), buildModel(), new RegistrationNumber("CS-TPA"), 150, 0.0, List.of()));
     }
+
+    @Test
+    void ensureChangeStatusUpdatesStatus() {
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1),
+                buildModel(), new RegistrationNumber("CS-TPA"), 150, 6000.0, List.of("WiFi"));
+
+        aircraft.changeStatus(AircraftStatus.INACTIVE);
+
+        assertEquals(AircraftStatus.INACTIVE, aircraft.getStatus());
+    }
+
+    @Test
+    void ensureChangeStatusThrowsWhenNull() {
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1),
+                buildModel(), new RegistrationNumber("CS-TPA"), 150, 6000.0, List.of());
+
+        assertThrows(AircraftInvalidFieldException.class, () -> aircraft.changeStatus(null));
+    }
+
+    @Test
+    void ensureUpdateDetailsUpdatesAllFields() {
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1),
+                buildModel(), new RegistrationNumber("CS-TPA"), 150, 6000.0, List.of("WiFi"));
+
+        AircraftModel newModel = new AircraftModel("B737", Manufacturer.BOEING, 26020.0, 5765.0, 842.0, null, 189);
+        LocalDate newDate = LocalDate.of(2022, 6, 15);
+
+        aircraft.updateDetails(newModel, newDate, 180, 5500.0, List.of("USB", "IFE"), AircraftStatus.UNDER_MAINTENANCE);
+
+        assertEquals(newModel, aircraft.getModel());
+        assertEquals(newDate, aircraft.getManufacturingDate());
+        assertEquals(180, aircraft.getSeatCapacity());
+        assertEquals(5500.0, aircraft.getRange());
+        assertEquals(List.of("USB", "IFE"), aircraft.getFeatures());
+        assertEquals(AircraftStatus.UNDER_MAINTENANCE, aircraft.getStatus());
+    }
+
+    @Test
+    void ensureUpdateDetailsKeepsFieldsWhenNull() {
+        AircraftModel originalModel = buildModel();
+        LocalDate originalDate = LocalDate.of(2020, 1, 1);
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE, originalDate,
+                originalModel, new RegistrationNumber("CS-TPA"), 150, 6000.0, List.of("WiFi"));
+
+        aircraft.updateDetails(null, null, null, null, null, null);
+
+        assertEquals(originalModel, aircraft.getModel());
+        assertEquals(originalDate, aircraft.getManufacturingDate());
+        assertEquals(150, aircraft.getSeatCapacity());
+        assertEquals(6000.0, aircraft.getRange());
+        assertEquals(List.of("WiFi"), aircraft.getFeatures());
+        assertEquals(AircraftStatus.AVAILABLE, aircraft.getStatus());
+    }
+
+    @Test
+    void ensureNullSeatCapacityThrowsException() {
+        assertThrows(AircraftInvalidFieldException.class, () ->
+                new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1), buildModel(), new RegistrationNumber("CS-TPA"), null, 6000.0, List.of()));
+    }
+
+    @Test
+    void ensureNullFeaturesDefaultsToEmptyList() {
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE, LocalDate.of(2020, 1, 1),
+                buildModel(), new RegistrationNumber("CS-TPA"), 150, 6000.0, null);
+
+        assertNotNull(aircraft.getFeatures());
+        assertTrue(aircraft.getFeatures().isEmpty());
+    }
 }

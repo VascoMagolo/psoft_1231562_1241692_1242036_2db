@@ -41,4 +41,22 @@ class ServiceTest {
     void ensureToStringContainsDescription() {
         assertTrue(new Service("Fuel refueling").toString().contains("Fuel refueling"));
     }
+
+    @Test
+    void ensureEqualsSameReference() {
+        Service service = new Service("Fuel refueling");
+        assertEquals(service, service);
+    }
+
+    @Test
+    void ensureEqualsNull() {
+        Service service = new Service("Fuel refueling");
+        assertFalse(service.equals(null));
+    }
+
+    @Test
+    void ensureEqualsDifferentClass() {
+        Service service = new Service("Fuel refueling");
+        assertFalse(service.equals("Fuel refueling"));
+    }
 }

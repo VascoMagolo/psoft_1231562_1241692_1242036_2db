@@ -69,4 +69,16 @@ class AircraftModelImageTest {
         assertTrue(s.contains("image/jpeg"));
         assertTrue(s.contains("3"));
     }
+
+    @Test
+    void ensureEqualsReturnsFalseForDifferentClass() {
+        AircraftModelImage image = new AircraftModelImage(new byte[]{1, 2, 3}, "image/jpeg");
+        assertNotEquals(image, "string");
+    }
+
+    @Test
+    void ensureEqualsReturnsFalseForNull() {
+        AircraftModelImage image = new AircraftModelImage(new byte[]{1, 2, 3}, "image/jpeg");
+        assertNotEquals(image, null);
+    }
 }

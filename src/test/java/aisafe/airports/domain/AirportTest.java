@@ -64,4 +64,28 @@ class AirportTest {
         assertDoesNotThrow(() ->
                 new Airport("LIS", "Lisbon Airport", "Lisbon", "Portugal", null, "Europe/Lisbon", 38.77, -9.13, oneRunway()));
     }
+
+    @Test
+    void ensureNullConstructorArgumentsThrowExceptions() {
+        assertThrows(DomainException.class, () ->
+                new Airport("LIS", null, "Lisbon", "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
+        assertThrows(DomainException.class, () ->
+                new Airport("LIS", "Lisbon", null, "Portugal", "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
+        assertThrows(DomainException.class, () ->
+                new Airport("LIS", "Lisbon", "Lisbon", null, "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway()));
+        assertThrows(DomainException.class, () ->
+                new Airport("LIS", "Lisbon", "Lisbon", "Portugal", "Europe", null, 38.77, -9.13, oneRunway()));
+    }
+
+    @Test
+    void ensureUpdateDetailsHandlesNullsAndValues() {
+        Airport airport = new Airport("LIS", "Lisbon Airport", "Lisbon", "Portugal",
+                "Europe", "Europe/Lisbon", 38.77, -9.13, oneRunway());
+
+        assertDoesNotThrow(() -> airport.updateDetails(null, null, null, null, null, null));
+        assertNull(airport.getOperationalHours());
+
+        airport.updateDetails("08:00-20:00", List.of(), List.of(), List.of(), List.of(), List.of());
+        assertEquals("08:00-20:00", airport.getOperationalHours());
+    }
 }

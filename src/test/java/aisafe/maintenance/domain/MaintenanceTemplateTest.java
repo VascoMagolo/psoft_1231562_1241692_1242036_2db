@@ -82,4 +82,29 @@ class MaintenanceTemplateTest {
         assertEquals(temp1.hashCode(), temp2.hashCode());
         assertNotEquals(temp1.hashCode(), temp3.hashCode());
     }
+
+    @Test
+    void ensureUpdateDetailsWithNullOrEmptyValuesDoesNotChangeFields() {
+        MaintenanceTemplate template = new MaintenanceTemplate("T1", MaintenanceType.INSPECTION, List.of(new ModelName("M1")), List.of("C1"), 100, 30);
+        
+        template.updateDetails(null, null, null);
+        assertEquals(List.of("C1"), template.getChecklist());
+        assertEquals(100, template.getIntervalFlightHours());
+        assertEquals(30, template.getIntervalDays());
+
+        template.updateDetails(List.of(), null, null);
+        assertEquals(List.of("C1"), template.getChecklist());
+    }
+
+    @Test
+    void ensureEqualsBranches() {
+        MaintenanceTemplate temp1 = new MaintenanceTemplate("T1", MaintenanceType.INSPECTION, List.of(new ModelName("M1")), List.of("C1"), 100, 30);
+        
+        // same instance
+        assertEquals(temp1, temp1);
+        // null object
+        assertNotEquals(temp1, null);
+        // different class
+        assertNotEquals(temp1, "some string");
+    }
 }

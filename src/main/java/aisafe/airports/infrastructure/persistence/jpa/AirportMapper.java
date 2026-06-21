@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class AirportMapper {
 
+    private AirportMapper() {}
+
     public static Airport toDomain(AirportJpaEntity entity) {
         if (entity == null) return null;
 

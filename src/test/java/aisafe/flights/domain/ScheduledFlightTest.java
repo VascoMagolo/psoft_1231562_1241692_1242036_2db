@@ -131,4 +131,42 @@ class ScheduledFlightTest {
         assertThrows(InvalidFlightScheduleException.class, () ->
                 new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber));
     }
+
+    @Test
+    void ensureGetDurationReturnsZeroIfDepartureDateIsNull() {
+        ScheduledFlight flight = new ScheduledFlight(
+                OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
+        );
+        try {
+            java.lang.reflect.Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
+            departureField.setAccessible(true);
+            departureField.set(flight, null);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Failed to set fields to null via reflection: " + e.getMessage());
+        }
+        assertEquals(Duration.ZERO, flight.getDuration());
+    }
+
+    @Test
+    void ensureGetDurationReturnsZeroIfArrivalDateIsNull() {
+        ScheduledFlight flight = new ScheduledFlight(
+                OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
+        );
+        try {
+            java.lang.reflect.Field arrivalField = ScheduledFlight.class.getDeclaredField("arrivalDateTime");
+            arrivalField.setAccessible(true);
+            arrivalField.set(flight, null);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Failed to set fields to null via reflection: " + e.getMessage());
+        }
+        assertEquals(Duration.ZERO, flight.getDuration());
+    }
+
+    @Test
+    void ensureConstructorThrowsExceptionForNullDestinationCode() {
+        OffsetDateTime departure = OffsetDateTime.now();
+        OffsetDateTime arrival = departure.plusHours(2);
+        assertThrows(InvalidFlightScheduleException.class, () ->
+                new ScheduledFlight(departure, arrival, FlightStatus.SCHEDULED, originCode, null, mockRegistrationNumber));
+    }
 }

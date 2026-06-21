@@ -41,6 +41,13 @@ class MaintenanceRecordTest {
     }
 
     @Test
+    void ensureNullDescriptionThrowsException() {
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
+                new MaintenanceRecord(UUID.randomUUID(), null, LocalDateTime.now(), 4,
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), null));
+    }
+
+    @Test
     void ensureNullStartDateThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenanceRecord(UUID.randomUUID(), "Engine check", null, 4,
@@ -172,5 +179,25 @@ class MaintenanceRecordTest {
                 new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), known);
 
         assertEquals(known, record.getCompletedAt());
+     }
+
+    @Test
+    void ensureCompletedAtIsNotSetWhenStatusChangedToInProgress() {
+        MaintenanceRecord record = new MaintenanceRecord(UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4,
+                List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE),
+                new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), null);
+
+        record.changeStatus(MaintenanceStatus.IN_PROGRESS);
+
+        assertNull(record.getCompletedAt());
+        assertEquals(MaintenanceStatus.IN_PROGRESS, record.getStatus());
+    }
+
+    @Test
+    void ensureNullRecordIdThrowsException() {
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
+                new MaintenanceRecord(null, "Engine check", LocalDateTime.now(), 4,
+                        List.of(buildPart()), null, buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE),
+                        new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), null));
     }
 }

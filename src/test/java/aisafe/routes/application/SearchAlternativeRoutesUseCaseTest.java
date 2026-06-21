@@ -41,4 +41,17 @@ class SearchAlternativeRoutesUseCaseTest {
     void executeWithSameOriginAndDestinationThrowsException() {
         assertThrows(InvalidRouteException.class, () -> useCase.execute("OPO", "OPO"));
     }
+
+    @Test
+    void ensureThrowsWhenOriginAirportDoesNotExist() {
+        when(airportRepository.existsByIataCode(new aisafe.airports.domain.IataCode("OPO"))).thenReturn(false);
+        assertThrows(aisafe.airports.domain.AirportNotFoundException.class, () -> useCase.execute("OPO", "LIS"));
+    }
+
+    @Test
+    void ensureThrowsWhenDestinationAirportDoesNotExist() {
+        when(airportRepository.existsByIataCode(new aisafe.airports.domain.IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new aisafe.airports.domain.IataCode("LIS"))).thenReturn(false);
+        assertThrows(aisafe.airports.domain.AirportNotFoundException.class, () -> useCase.execute("OPO", "LIS"));
+    }
 }

@@ -48,4 +48,13 @@ class ViewScheduledFlightsByAircraftUseCaseTest {
         assertEquals(1, result.size());
         assertEquals(aircraftId, result.get(0).aircraftId());
     }
+
+    @Test
+    void ensureExceptionThrownWhenAircraftNotFound() {
+        String aircraftId = "CS-TPA";
+        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
+
+        assertThrows(aisafe.aircrafts.domain.AircraftNotFoundException.class, () -> useCase.execute(aircraftId));
+        verify(scheduledFlightRepository, never()).findByAircraftRegistration(any());
+    }
 }

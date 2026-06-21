@@ -55,4 +55,52 @@ class ImportAircraftModelsUseCaseTest {
         assertEquals(1, result.getErrors().size());
         verify(registerUseCase, never()).execute(any());
     }
+
+    @Test
+    void ensureEmptyCsvReturnsEmptyResult() {
+        MultipartFile file = new MockMultipartFile("file", "empty.csv", "text/csv", new byte[0]);
+
+        BulkImportResult<AircraftModelResponse> result = useCase.execute(file);
+
+        assertEquals(0, result.getSuccessfulImports().size());
+        assertEquals(0, result.getErrors().size());
+    }
+
+    @Test
+    void ensureRecordErrorWhenRowHasTooFewColumns() {
+        String csvData = "modelName,manufacturer,maximumTakeoffWeight,maximumPayloadCapacity,cruiseSpeed,maximumSeatCapacity\n" +
+                "Boeing 737,BOEING,1000.0";
+        MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));
+
+        BulkImportResult<AircraftModelResponse> result = useCase.execute(file);
+
+        assertEquals(0, result.getSuccessfulImports().size());
+        assertEquals(1, result.getErrors().size());
+        verify(registerUseCase, never()).execute(any());
+    }
+
+    @Test
+    void ensureThrowsExceptionWhenFileReadingFails() throws Exception {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> useCase.execute(file));
+        assertEquals("Failed to process CSV file", exception.getMessage());
+        assertTrue(exception.getCause() instanceof java.io.IOException);
+    }
+
+    @Test
+    void ensureRecordErrorWhenExceptionHasNullMessage() {
+        String csvData = "modelName,manufacturer,maximumTakeoffWeight,maximumPayloadCapacity,cruiseSpeed,maximumSeatCapacity\n" +
+                "Boeing 737,BOEING,1000.0,2000.0,500.0,150";
+        MultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", csvData.getBytes(StandardCharsets.UTF_8));
+        
+        when(registerUseCase.execute(any(RegisterAircraftModelRequest.class))).thenThrow(new NullPointerException());
+        
+        BulkImportResult<AircraftModelResponse> result = useCase.execute(file);
+        
+        assertFalse(result.isFullySuccessful());
+        assertEquals(1, result.getErrors().size());
+        assertEquals("Unknown error", result.getErrors().get(0).getErrorMessage());
+    }
 }

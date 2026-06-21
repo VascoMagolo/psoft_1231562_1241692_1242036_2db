@@ -45,6 +45,9 @@ class AirportPhotoTest {
         AirportPhoto b = new AirportPhoto(bytes.clone(), "image/jpeg");
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a, a);
+        assertNotEquals(a, null);
+        assertNotEquals(a, "not a photo");
     }
 
     @Test

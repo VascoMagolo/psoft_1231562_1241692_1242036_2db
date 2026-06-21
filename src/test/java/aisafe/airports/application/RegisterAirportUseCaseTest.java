@@ -49,4 +49,20 @@ class RegisterAirportUseCaseTest {
         assertThrows(DuplicateResourceException.class, () -> registerAirport.execute(buildRequest("LIS")));
         verify(airportRepository, never()).save(any());
     }
+
+    @Test
+    void ensureAirportIsRegisteredWithAllDetails() {
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(false);
+
+        RegisterAirportRequest request = new RegisterAirportRequest(
+                "LIS", "Lisbon Airport", "Lisbon", "Portugal", "Europe", "Europe/Lisbon",
+                38.77, -9.13,
+                List.of(new RegisterAirportRequest.RunwayRequest("03/21", 3000, "030/210")),
+                new byte[]{1, 2, 3}, "image/jpeg", "24/7",
+                List.of("WiFi"), List.of("T1"), List.of("G1")
+        );
+
+        assertDoesNotThrow(() -> registerAirport.execute(request));
+        verify(airportRepository).save(any(Airport.class));
+    }
 }

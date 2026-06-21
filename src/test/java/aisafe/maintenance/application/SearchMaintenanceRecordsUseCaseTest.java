@@ -13,6 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.math.BigDecimal;
+import java.util.UUID;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,5 +89,32 @@ class SearchMaintenanceRecordsUseCaseTest {
         searchMaintenanceRecords.execute(reg, from, to, MaintenanceComponent.AVIONICS, 0, 10);
 
         verify(repository).search(eq(reg), eq(from), eq(to), eq(MaintenanceComponent.AVIONICS), eq(0), eq(10));
+    }
+
+    @Test
+    void ensureReturnsMappedRecordsSuccessfully() {
+        RegistrationNumber reg = new RegistrationNumber("CS-TPA");
+        aisafe.maintenance.domain.MaintenanceTemplate template = new aisafe.maintenance.domain.MaintenanceTemplate(
+                "Annual Check", aisafe.maintenance.domain.MaintenanceType.INSPECTION,
+                List.of(new aisafe.aircrafts.domain.ModelName("B737")), List.of("Check"), 100, 30);
+        aisafe.maintenance.domain.MaintenancePart part = new aisafe.maintenance.domain.MaintenancePart(
+                "P123", "Part 1", "Desc", 10, 5, MaintenanceComponent.ENGINE);
+        aisafe.maintenance.domain.MaintenanceRecord record = new aisafe.maintenance.domain.MaintenanceRecord(
+                UUID.randomUUID(), "R1", LocalDateTime.now().minusDays(5), 4,
+                List.of(part), "Notes", template, aisafe.maintenance.domain.MaintenanceStatus.COMPLETED,
+                Set.of(MaintenanceComponent.ENGINE), reg, BigDecimal.valueOf(100), LocalDateTime.now().minusDays(5)
+        );
+
+        when(repository.search(isNull(), isNull(), isNull(), isNull(), anyInt(), anyInt()))
+                .thenReturn(new PaginatedResult<>(List.of(record), 1));
+        when(repository.findVersionFor(any())).thenReturn(2L);
+
+        PaginatedResult<MaintenanceRecordResponse> result = searchMaintenanceRecords.execute(null, null, null, null, 0, 20);
+
+        assertEquals(1, result.data().size());
+        assertEquals("CS-TPA", result.data().get(0).aircraftRegistration());
+        assertEquals("R1", result.data().get(0).description());
+        assertEquals("Annual Check", result.data().get(0).templateName());
+        assertEquals(2L, result.data().get(0).version());
     }
 }

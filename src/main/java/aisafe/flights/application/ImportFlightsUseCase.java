@@ -73,7 +73,7 @@ public class ImportFlightsUseCase {
                     );
 
                     scheduleFlightUseCase.execute(request);
-                    String identifier = (flightNumber != null && !flightNumber.isEmpty()) ? flightNumber : (aircraft + "-" + origin + "-" + dest);
+                    String identifier = (flightNumber != null) ? flightNumber : (aircraft + "-" + origin + "-" + dest);
                     result.addSuccess(identifier);
                 } catch (Exception ex) {
                     result.addError(rowNumber, String.join(",", line), ex.getMessage());

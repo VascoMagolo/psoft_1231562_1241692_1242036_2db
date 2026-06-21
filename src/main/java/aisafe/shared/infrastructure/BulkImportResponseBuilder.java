@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class BulkImportResponseBuilder {
 
+    private BulkImportResponseBuilder() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static <T> ResponseEntity<Map<String, Object>> buildResponse(BulkImportResult<T> result) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("totalProcessed", result.getTotalRowsProcessed());

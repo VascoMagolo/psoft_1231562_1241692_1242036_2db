@@ -49,4 +49,45 @@ class SearchAircraftUseCaseTest {
     void ensureExceptionForInvalidStatus() {
         assertThrows(AircraftInvalidFieldException.class, () -> searchAircraftUseCase.execute(null, "INVALID_STATUS", null, null, 0, 10));
     }
+
+    @Test
+    void ensureBlankStatusTreatedAsNull() {
+        PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(), 0L);
+        when(aircraftRepository.searchAircrafts(eq(null), isNull(), eq(null), eq(null), eq(0), eq(10))).thenReturn(domainResult);
+
+        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraftUseCase.execute(null, "   ", null, null, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(0, result.data().size());
+        verify(aircraftRepository).searchAircrafts(eq(null), isNull(), eq(null), eq(null), eq(0), eq(10));
+    }
+
+    @Test
+    void ensureNullStatusTreatedAsNull() {
+        PaginatedResult<Aircraft> domainResult = new PaginatedResult<>(List.of(), 0L);
+        when(aircraftRepository.searchAircrafts(eq(null), isNull(), eq(null), eq(null), eq(0), eq(10))).thenReturn(domainResult);
+
+        PaginatedResult<SearchAircraftUseCaseResponse> result = searchAircraftUseCase.execute(null, null, null, null, 0, 10);
+
+        assertNotNull(result);
+        assertEquals(0, result.data().size());
+        verify(aircraftRepository).searchAircrafts(eq(null), isNull(), eq(null), eq(null), eq(0), eq(10));
+    }
+
+    @Test
+    void ensureSearchAircraftUseCaseResponseHandlesNullManufacturingDate() {
+        Aircraft mockAircraft = mock(Aircraft.class);
+        when(mockAircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
+        when(mockAircraft.getModel()).thenReturn(new AircraftModel("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, null, 180));
+        when(mockAircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
+        when(mockAircraft.getManufacturingDate()).thenReturn(null);
+
+        SearchAircraftUseCaseResponse response = SearchAircraftUseCaseResponse.from(mockAircraft);
+
+        assertNotNull(response);
+        assertEquals("CS-TPA", response.registrationNumber());
+        assertEquals("A320", response.model());
+        assertEquals("AVAILABLE", response.status());
+        assertEquals(0, response.manufacturingYear());
+    }
 }

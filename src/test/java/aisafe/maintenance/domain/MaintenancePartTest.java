@@ -19,6 +19,12 @@ class MaintenancePartTest {
     }
 
     @Test
+    void ensureNullNameThrowsException() {
+        assertThrows(MaintenanceInvalidFieldException.class, () ->
+                new MaintenancePart("P001", null, null, 10, 2, MaintenanceComponent.ENGINE));
+    }
+
+    @Test
     void ensureNullPartNumberThrowsException() {
         assertThrows(MaintenanceInvalidFieldException.class, () ->
                 new MaintenancePart(null, "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE));
@@ -82,5 +88,38 @@ class MaintenancePartTest {
         assertNotEquals(part1, part3);
         assertEquals(part1.hashCode(), part2.hashCode());
         assertNotEquals(part1.hashCode(), part3.hashCode());
+    }
+
+    @Test
+    void ensureUpdateDetailsThrowsOnNegativeStock() {
+        MaintenancePart part = new MaintenancePart("P001", "Engine Filter", "Old desc", 10, 2, MaintenanceComponent.ENGINE);
+        assertThrows(MaintenanceInvalidFieldException.class, () -> part.updateDetails("Desc", -1, 5));
+    }
+
+    @Test
+    void ensureUpdateDetailsThrowsOnNegativeThreshold() {
+        MaintenancePart part = new MaintenancePart("P001", "Engine Filter", "Old desc", 10, 2, MaintenanceComponent.ENGINE);
+        assertThrows(MaintenanceInvalidFieldException.class, () -> part.updateDetails("Desc", 20, -5));
+    }
+
+    @Test
+    void ensureUpdateDetailsWithNullValuesDoesNotChangeFields() {
+        MaintenancePart part = new MaintenancePart("P001", "Engine Filter", "Old desc", 10, 2, MaintenanceComponent.ENGINE);
+        part.updateDetails(null, null, null);
+        assertEquals("Old desc", part.getDescription());
+        assertEquals(10, part.getStockQuantity());
+        assertEquals(2, part.getMinimumThreshold());
+    }
+
+    @Test
+    void ensureEqualsBranches() {
+        MaintenancePart part = new MaintenancePart("P001", "Engine Filter", null, 10, 2, MaintenanceComponent.ENGINE);
+        
+        // same instance
+        assertEquals(part, part);
+        // null object
+        assertNotEquals(part, null);
+        // different class
+        assertNotEquals(part, "some string");
     }
 }

@@ -57,7 +57,12 @@ class CoordinatesTest {
 
     @Test
     void ensureEqualCoordinatesAreEqual() {
-        assertEquals(new Coordinates(38.77, -9.13), new Coordinates(38.77, -9.13));
+        Coordinates c1 = new Coordinates(38.77, -9.13);
+        Coordinates c2 = new Coordinates(38.77, -9.13);
+        assertEquals(c1, c2);
+        assertEquals(c1, c1);
+        assertNotEquals(c1, null);
+        assertNotEquals(c1, "not coordinates");
     }
 
     @Test

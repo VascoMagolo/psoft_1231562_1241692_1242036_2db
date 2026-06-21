@@ -1,7 +1,7 @@
 package aisafe.aircrafts.infrastructure.persistence.jpa;
 
-import aisafe.aircrafts.domain.AircraftStatus;
-import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.aircrafts.domain.*;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +28,12 @@ class SpringDataAircraftRepositoryTest {
     @Autowired
     private SpringDataAircraftModelRepository modelRepository;
 
+    @Autowired
+    private AircraftRepository domainAircraftRepository;
+
+    @Autowired
+    private aisafe.aircrafts.domain.AircraftModelRepository domainModelRepository;
+
     private AircraftModelJpaEntity createModel(String name) {
         AircraftModelJpaEntity model = new AircraftModelJpaEntity();
         model.setModelName(name);
@@ -36,6 +43,11 @@ class SpringDataAircraftRepositoryTest {
         model.setCruisingSpeed(800.0);
         model.setMaximumSeatingCapacity(180);
         return modelRepository.save(model);
+    }
+
+    private AircraftModel createDomainModel(String name) {
+        AircraftModel model = new AircraftModel(name, Manufacturer.AIRBUS, 20000.0, 6000.0, 800.0, null, 180);
+        return domainModelRepository.save(model);
     }
 
     @Test
@@ -100,5 +112,188 @@ class SpringDataAircraftRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             aircraftRepository.saveAndFlush(a2);
         });
+    }
+
+    @Test
+    void ensureDomainRepositoryCount() {
+        long initialCount = domainAircraftRepository.count();
+        AircraftModel model = createDomainModel("A320-COUNT");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-CNT"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+        assertEquals(initialCount + 1, domainAircraftRepository.count());
+    }
+
+    @Test
+    void ensureDomainRepositorySearchAircrafts() {
+        AircraftModel model = createDomainModel("A320-SEARCH-DOM");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.of(2021, 1, 1),
+                model,
+                new RegistrationNumber("CS-SCH"),
+                150,
+                5000.0,
+                List.of("WiFi")
+        );
+        domainAircraftRepository.save(aircraft);
+
+        PaginatedResult<Aircraft> res1 = domainAircraftRepository.searchAircrafts("A320-SEARCH-DOM", AircraftStatus.AVAILABLE, 2021, "WiFi", 0, 10);
+        assertEquals(1, res1.totalElements());
+
+        // Test with null status and other search filters
+        PaginatedResult<Aircraft> res2 = domainAircraftRepository.searchAircrafts(null, null, null, null, 0, 10);
+        assertTrue(res2.totalElements() > 0);
+    }
+
+    @Test
+    void ensureDomainRepositoryFindAllAndPaginated() {
+        AircraftModel model = createDomainModel("A320-FINDALL");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-FAL"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+
+        List<Aircraft> all = domainAircraftRepository.findAll();
+        assertTrue(all.stream().anyMatch(a -> a.getRegistrationNumber().getNumber().equals("CS-FAL")));
+
+        PaginatedResult<Aircraft> paginated = domainAircraftRepository.findAll(0, 10);
+        assertTrue(paginated.data().stream().anyMatch(a -> a.getRegistrationNumber().getNumber().equals("CS-FAL")));
+    }
+
+    @Test
+    void ensureDomainRepositoryExistsAndFindMethods() {
+        AircraftModel model = createDomainModel("A320-EXISTS");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-EXS"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+
+        assertTrue(domainAircraftRepository.existsByRegistrationNumber(new RegistrationNumber("CS-EXS")));
+        assertFalse(domainAircraftRepository.existsByRegistrationNumber(new RegistrationNumber("CS-NEX")));
+
+        assertTrue(domainAircraftRepository.existsByModelName("A320-EXISTS"));
+        assertFalse(domainAircraftRepository.existsByModelName("B737-NEX"));
+
+        Optional<Aircraft> found = domainAircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-EXS"));
+        assertTrue(found.isPresent());
+        assertEquals("CS-EXS", found.get().getRegistrationNumber().getNumber());
+    }
+
+    @Test
+    void ensureDomainRepositorySaveExistingUpdatesRecord() {
+        AircraftModel model = createDomainModel("A320-UPDATE");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-UPD"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+
+        aircraft.changeStatus(AircraftStatus.INACTIVE);
+        domainAircraftRepository.save(aircraft);
+
+        Optional<Aircraft> found = domainAircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-UPD"));
+        assertTrue(found.isPresent());
+        assertEquals(AircraftStatus.INACTIVE, found.get().getStatus());
+    }
+
+    @Test
+    void ensureDomainRepositorySaveThrowsWhenModelNotFound() {
+        AircraftModel model = new AircraftModel("NON-EXISTENT-MODEL", Manufacturer.AIRBUS, 20000.0, 5000.0, 800.0, null, 150);
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-ERR"),
+                150,
+                5000.0,
+                List.of()
+        );
+
+        assertThrows(AircraftModelNotFoundException.class, () -> {
+            domainAircraftRepository.save(aircraft);
+        });
+    }
+
+    @Test
+    void ensureDomainRepositoryDelete() {
+        AircraftModel model = createDomainModel("A320-DELETE");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-DEL"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+        assertTrue(domainAircraftRepository.existsByRegistrationNumber(new RegistrationNumber("CS-DEL")));
+
+        domainAircraftRepository.delete(aircraft);
+        assertFalse(domainAircraftRepository.existsByRegistrationNumber(new RegistrationNumber("CS-DEL")));
+    }
+
+    @Test
+    void ensureDomainRepositoryDeleteThrowsWhenNotFound() {
+        AircraftModel model = createDomainModel("A320-DEL-ERR");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-DER"),
+                150,
+                5000.0,
+                List.of()
+        );
+
+        assertThrows(AircraftNotFoundException.class, () -> {
+            domainAircraftRepository.delete(aircraft);
+        });
+    }
+
+    @Test
+    void ensureDomainRepositoryFindVersionFor() {
+        AircraftModel model = createDomainModel("A320-VERSION");
+        Aircraft aircraft = new Aircraft(
+                AircraftStatus.AVAILABLE,
+                LocalDate.now(),
+                model,
+                new RegistrationNumber("CS-VER"),
+                150,
+                5000.0,
+                List.of()
+        );
+        domainAircraftRepository.save(aircraft);
+
+        Long version = domainAircraftRepository.findVersionFor(new RegistrationNumber("CS-VER"));
+        assertNotNull(version);
+
+        Long nonExistentVersion = domainAircraftRepository.findVersionFor(new RegistrationNumber("CS-NVX"));
+        assertEquals(0L, nonExistentVersion);
     }
 }

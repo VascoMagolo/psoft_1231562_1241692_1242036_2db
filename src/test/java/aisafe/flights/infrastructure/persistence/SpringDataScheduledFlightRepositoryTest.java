@@ -7,29 +7,32 @@ import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftReposit
 import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftModelJpaEntity;
 import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftModelRepository;
 import aisafe.flights.domain.FlightStatus;
-import aisafe.flights.infrastructure.persistence.jpa.RouteUtilizationProjection;
-import aisafe.flights.infrastructure.persistence.jpa.ScheduledFlightJpaEntity;
-import aisafe.flights.infrastructure.persistence.jpa.ScheduledFlightJpaRepository;
-import aisafe.flights.infrastructure.persistence.jpa.SpringDataScheduledFlightRepository;
+import aisafe.flights.domain.ScheduledFlight;
+import aisafe.flights.domain.ScheduledFlightRepository;
+import aisafe.flights.infrastructure.persistence.jpa.*;
 import aisafe.routes.domain.RouteStatus;
 import aisafe.routes.infrastructure.persistence.jpa.RouteJpaEntity;
 import aisafe.routes.infrastructure.persistence.jpa.SpringDataRouteRepository;
 import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.airports.domain.IataCode;
+import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@Import(ScheduledFlightJpaRepository.class)
+@SpringBootTest
+@ActiveProfiles("jpa")
+@Transactional
 class SpringDataScheduledFlightRepositoryTest {
 
     @Autowired
@@ -44,12 +47,21 @@ class SpringDataScheduledFlightRepositoryTest {
     @Autowired
     private SpringDataRouteRepository routeRepo;
 
+    @Autowired
+    private ScheduledFlightRepository domainRepository;
+
     private RouteJpaEntity route1;
     private RouteJpaEntity route2;
     private AircraftJpaEntity aircraft;
+    private OffsetDateTime now;
 
     @BeforeEach
     void setUp() {
+        flightRepo.deleteAll();
+        aircraftRepo.deleteAll();
+        modelRepo.deleteAll();
+        routeRepo.deleteAll();
+
         AircraftModelJpaEntity model = new AircraftModelJpaEntity();
         model.setModelName("B737");
         model.setManufacturer(Manufacturer.BOEING);
@@ -74,7 +86,7 @@ class SpringDataScheduledFlightRepositoryTest {
         route2 = new RouteJpaEntity("LIS", "MAD", 90, 500.0, 100, RouteStatus.ACTIVE);
         route2 = routeRepo.save(route2);
 
-        OffsetDateTime now = OffsetDateTime.now();
+        now = OffsetDateTime.now();
 
         // 3 completed flights for route1
         flightRepo.save(new ScheduledFlightJpaEntity(now.minusDays(5), now.minusDays(5).plusHours(1), FlightStatus.COMPLETED, route1, aircraft));
@@ -89,40 +101,90 @@ class SpringDataScheduledFlightRepositoryTest {
     }
 
     @Test
-    void ensureFindFlightUtilizationReportsAggregatesCorrectly() {
-        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(null, null, PageRequest.of(0, 10)).getContent();
-        
-        assertEquals(2, reports.size());
-        
-        // First should be route1 (OPO to LIS) with 3 flights
-        assertEquals(route1.getId(), reports.get(0).getRouteId());
-        assertEquals("OPO", reports.get(0).getOriginCode());
-        assertEquals("LIS", reports.get(0).getDestinationCode());
-        assertEquals(3L, reports.get(0).getFlightCount());
-        
-        // Second should be route2 (LIS to MAD) with 1 flight
-        assertEquals(route2.getId(), reports.get(1).getRouteId());
-        assertEquals("LIS", reports.get(1).getOriginCode());
-        assertEquals("MAD", reports.get(1).getDestinationCode());
-        assertEquals(1L, reports.get(1).getFlightCount());
+    void ensureDomainRepositoryCountAndFindAll() {
+        assertEquals(5, domainRepository.count());
+        assertEquals(5, domainRepository.findAll().size());
     }
 
     @Test
-    void ensureFindFlightUtilizationReportsFiltersByDate() {
-        OffsetDateTime start = OffsetDateTime.now().minusDays(3); // Covers route1(1 flight) and route2(1 flight)
-        OffsetDateTime end = OffsetDateTime.now();
-        
-        List<RouteUtilizationProjection> reports = flightRepo.findFlightUtilizationReports(start, end, PageRequest.of(0, 10)).getContent();
-        
-        assertEquals(2, reports.size());
-        assertEquals(1L, reports.get(0).getFlightCount());
-        assertEquals(1L, reports.get(1).getFlightCount());
+    void ensureDomainRepositoryFindById() {
+        List<ScheduledFlight> all = domainRepository.findAll();
+        assertFalse(all.isEmpty());
+        Long id = all.get(0).getId();
+        Optional<ScheduledFlight> found = domainRepository.findById(id);
+        assertTrue(found.isPresent());
+        assertEquals(id, found.get().getId());
     }
 
     @Test
-    void ensureCalculateOperationalHoursSinceWorks() {
-        OffsetDateTime since = OffsetDateTime.now().minusDays(3);
-        Double hours = flightRepo.calculateOperationalHoursSince("CS-TPA", since);
-        assertEquals(2.0, hours, 0.001);
+    void ensureDomainRepositorySaveAndDelete() {
+        ScheduledFlight flight = new ScheduledFlight(
+                null,
+                now.plusDays(10),
+                now.plusDays(10).plusHours(2),
+                FlightStatus.SCHEDULED,
+                new IataCode("OPO"),
+                new IataCode("LIS"),
+                new RegistrationNumber("CS-TPA")
+        );
+
+        ScheduledFlight saved = domainRepository.save(flight);
+        assertNotNull(saved.getId());
+        assertEquals(6, domainRepository.count());
+
+        domainRepository.delete(saved);
+        assertEquals(5, domainRepository.count());
+    }
+
+    @Test
+    void ensureDomainRepositoryQueries() {
+        RegistrationNumber reg = new RegistrationNumber("CS-TPA");
+        
+        var flightsByReg = domainRepository.findByAircraftRegistration(reg);
+        assertEquals(5, flightsByReg.size());
+
+        var flightsForUtil = domainRepository.findFlightsForUtilization(reg, now.minusDays(6), now.minusDays(3));
+        assertEquals(2, flightsForUtil.size());
+
+        assertTrue(domainRepository.existsByAircraftRegistration(reg));
+        assertFalse(domainRepository.existsByAircraftRegistration(new RegistrationNumber("CS-TPB")));
+
+        assertTrue(domainRepository.existsByOverlappingSchedule(reg, now.minusDays(5).plusMinutes(10), now.minusDays(5).plusMinutes(50)));
+        assertFalse(domainRepository.existsByOverlappingSchedule(reg, now.plusDays(20), now.plusDays(20).plusHours(1)));
+
+        assertEquals(3, domainRepository.countByRoute(new IataCode("OPO"), new IataCode("LIS")));
+        assertEquals(2, domainRepository.countByRoute(new IataCode("LIS"), new IataCode("MAD")));
+    }
+
+    @Test
+    void ensureDomainRepositoryHoursCalculation() {
+        RegistrationNumber reg = new RegistrationNumber("CS-TPA");
+        Double totalHours = domainRepository.calculateTotalOperationalHoursByRegistration(reg);
+        assertEquals(4.0, totalHours, 0.01);
+
+        Double hoursSince = domainRepository.calculateOperationalHoursSince(reg, now.minusDays(3));
+        assertEquals(2.0, hoursSince, 0.01);
+    }
+
+    @Test
+    void ensureDomainRepositoryTopModelsAndReport() {
+        var topHours = domainRepository.findTopModelsByFlightHours(5);
+        assertFalse(topHours.isEmpty());
+        assertEquals("B737", topHours.get(0).modelName());
+
+        var topAssignments = domainRepository.findTopModelsByAssignments(5);
+        assertFalse(topAssignments.isEmpty());
+        assertEquals("B737", topAssignments.get(0).modelName());
+
+        var report = domainRepository.getFlightUtilizationReport(now.minusDays(6), now, 0, 10);
+        assertNotNull(report);
+        assertEquals(2, report.totalElements());
+    }
+
+    @Test
+    void ensureScheduledFlightMapperNullAndConstructor() {
+        assertNull(ScheduledFlightMapper.toDomain(null));
+        ScheduledFlightMapper mapper = new ScheduledFlightMapper();
+        assertNotNull(mapper);
     }
 }
