@@ -6,6 +6,7 @@ import aisafe.maintenance.domain.*;
 import aisafe.security.application.JwtService;
 import aisafe.security.domain.UserRepository;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.application.dtos.BulkImportResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -386,5 +388,71 @@ class MaintenanceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.maintenanceDueAircraftResponseList[0].registrationNumber").value("CS-TPA"))
                 .andExpect(jsonPath("$._embedded.maintenanceDueAircraftResponseList[0].dueReason").value("Hours limit exceeded"));
+    }
+
+    @Test
+    void ensureDeleteRecordReturns204() throws Exception {
+        mockMvc.perform(delete("/api/maintenance/records/" + sampleRecordId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureDeleteTemplateReturns204() throws Exception {
+        mockMvc.perform(delete("/api/maintenance/templates/Annual Check"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureDeletePartReturns204() throws Exception {
+        mockMvc.perform(delete("/api/maintenance/parts/P001"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureImportTemplatesReturns201() throws Exception {
+        BulkImportResult<MaintenanceTemplateResponse> bulkImportResult = new BulkImportResult<>();
+        bulkImportResult.addSuccess(new MaintenanceTemplateResponse("Annual Check", "INSPECTION"));
+
+        when(importMaintenanceTemplatesUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "templates.csv", MediaType.TEXT_PLAIN_VALUE, "header\ndata".getBytes());
+
+        mockMvc.perform(multipart("/api/maintenance/templates/import")
+                        .file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.successfulCount").value(1));
+    }
+
+    @Test
+    void ensureImportRecordsReturns201() throws Exception {
+        BulkImportResult<MaintenanceRecordResponse> bulkImportResult = new BulkImportResult<>();
+        bulkImportResult.addSuccess(sampleRecordResponse);
+
+        when(importMaintenanceRecordsUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "records.csv", MediaType.TEXT_PLAIN_VALUE, "header\ndata".getBytes());
+
+        mockMvc.perform(multipart("/api/maintenance/records/import")
+                        .file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.successfulCount").value(1));
+    }
+
+    @Test
+    void ensureImportPartsReturns201() throws Exception {
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
+        bulkImportResult.addSuccess("P001");
+
+        when(importMaintenancePartsUseCase.execute(any())).thenReturn(bulkImportResult);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "parts.csv", MediaType.TEXT_PLAIN_VALUE, "header\ndata".getBytes());
+
+        mockMvc.perform(multipart("/api/maintenance/parts/import")
+                        .file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.successfulCount").value(1));
     }
 }

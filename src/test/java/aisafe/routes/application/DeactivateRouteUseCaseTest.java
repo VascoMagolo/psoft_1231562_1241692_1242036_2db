@@ -59,4 +59,19 @@ class DeactivateRouteUseCaseTest {
         assertThrows(RouteNotFoundException.class, () -> deactivateRoute.execute("OPO", "LIS", null, "testuser"));
         verify(routeRepository, never()).save(any());
     }
+
+    @Test
+    void ensureRouteIsDeactivatedSuccessfullyWithVersion() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        IataCode origin = new IataCode("OPO");
+        IataCode dest = new IataCode("LIS");
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
+        when(routeRepository.findVersionFor(origin, dest)).thenReturn(1L);
+
+        RouteResponse result = deactivateRoute.execute("OPO", "LIS", 1L, "testuser");
+
+        assertEquals(RouteStatus.INACTIVE, result.status());
+        verify(routeRepository).save(route);
+    }
 }

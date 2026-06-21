@@ -76,4 +76,61 @@ class RouteTest {
         Route route = new Route("OPO", "LIS", 45, 300.0, 150);
         assertThrows(DomainException.class, () -> route.updateRoute(-5, null, null));
     }
+
+    @Test
+    void ensureDefaultConstructorForJPA() {
+        Route route = new Route();
+        assertNotNull(route);
+        assertNull(route.getOrigin());
+        assertNull(route.getDestination());
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenOriginIsNull() {
+        assertThrows(DomainException.class, () -> new Route(null, "LIS", 45, 300.0, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenOriginIsBlank() {
+        assertThrows(DomainException.class, () -> new Route("   ", "LIS", 45, 300.0, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenDestinationIsNull() {
+        assertThrows(DomainException.class, () -> new Route("OPO", null, 45, 300.0, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenDestinationIsBlank() {
+        assertThrows(DomainException.class, () -> new Route("OPO", "   ", 45, 300.0, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenFlightTimeIsNull() {
+        assertThrows(DomainException.class, () -> new Route("OPO", "LIS", null, 300.0, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenRangeIsNull() {
+        assertThrows(DomainException.class, () -> new Route("OPO", "LIS", 45, null, 150));
+    }
+
+    @Test
+    void ensureConstructorThrowsWhenCapacityIsNull() {
+        assertThrows(DomainException.class, () -> new Route("OPO", "LIS", 45, 300.0, null));
+    }
+
+    @Test
+    void ensureUpdateRouteWithInvalidRangeThrowsException() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        assertThrows(DomainException.class, () -> route.updateRoute(null, -10.0, null));
+        assertThrows(DomainException.class, () -> route.updateRoute(null, 0.0, null));
+    }
+
+    @Test
+    void ensureUpdateRouteWithInvalidCapacityThrowsException() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        assertThrows(DomainException.class, () -> route.updateRoute(null, null, -10));
+        assertThrows(DomainException.class, () -> route.updateRoute(null, null, 0));
+    }
 }

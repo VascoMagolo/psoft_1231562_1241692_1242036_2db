@@ -67,4 +67,25 @@ class GetAircraftUtilizationUseCaseTest {
         assertEquals(0.0, result.get(1).flightHours());
         assertEquals(0.0, result.get(1).utilizationRatePercentage());
     }
+
+    @Test
+    void ensureIgnoresFlightsOutsideQueryRange() {
+        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(true);
+
+        LocalDate start = LocalDate.of(2023, 1, 1);
+        LocalDate end = LocalDate.of(2023, 1, 2);
+
+        ScheduledFlight flight = Mockito.mock(ScheduledFlight.class);
+        // Departs outside the start-end range (e.g. on Jan 3rd)
+        when(flight.getDepartureDateTime()).thenReturn(OffsetDateTime.of(2023, 1, 3, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        when(scheduledFlightRepository.findFlightsForUtilization(any(RegistrationNumber.class), any(OffsetDateTime.class), any(OffsetDateTime.class)))
+                .thenReturn(List.of(flight));
+
+        List<UtilizationDataPointResponse> result = useCase.execute(new GetAircraftUtilizationRequest("XX-XXX", start, end));
+
+        assertEquals(2, result.size());
+        assertEquals(0.0, result.get(0).flightHours());
+        assertEquals(0.0, result.get(1).flightHours());
+    }
 }

@@ -1,7 +1,9 @@
 package aisafe.flights.application;
 
+import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.airports.domain.IataCode;
 import aisafe.flights.application.dtos.FlightResponse;
 import aisafe.flights.domain.ScheduledFlight;
 import aisafe.flights.domain.ScheduledFlightRepository;
@@ -40,12 +42,21 @@ class ViewScheduledFlightsByAircraftUseCaseTest {
         
         // Mocking FlightResponse requirements
         when(flight.getAircraftRegistrationNumber()).thenReturn(new RegistrationNumber(aircraftId));
-        when(flight.getOriginCode()).thenReturn(new aisafe.airports.domain.IataCode("OPO"));
-        when(flight.getDestinationCode()).thenReturn(new aisafe.airports.domain.IataCode("LIS"));
+        when(flight.getOriginCode()).thenReturn(new IataCode("OPO"));
+        when(flight.getDestinationCode()).thenReturn(new IataCode("LIS"));
 
         List<FlightResponse> result = useCase.execute(aircraftId);
 
         assertEquals(1, result.size());
         assertEquals(aircraftId, result.get(0).aircraftId());
+    }
+
+    @Test
+    void ensureExceptionThrownWhenAircraftNotFound() {
+        String aircraftId = "CS-TPA";
+        when(aircraftRepository.existsByRegistrationNumber(any(RegistrationNumber.class))).thenReturn(false);
+
+        assertThrows(AircraftNotFoundException.class, () -> useCase.execute(aircraftId));
+        verify(scheduledFlightRepository, never()).findByAircraftRegistration(any());
     }
 }

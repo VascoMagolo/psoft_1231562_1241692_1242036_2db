@@ -47,4 +47,16 @@ class ModelNameTest {
     void ensureToStringReturnsName() {
         assertEquals("A320", new ModelName("A320").toString());
     }
+
+    @Test
+    void ensureEqualsReturnsFalseForDifferentClass() {
+        ModelName modelName = new ModelName("A320");
+        assertNotEquals(modelName, "A320");
+    }
+
+    @Test
+    void ensureEqualsReturnsFalseForNull() {
+        ModelName modelName = new ModelName("A320");
+        assertNotEquals(modelName, null);
+    }
 }

@@ -6,6 +6,7 @@ import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteHistory;
 import aisafe.routes.domain.RouteHistoryRepository;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.InvalidRouteException;
 import aisafe.shared.domain.DuplicateResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,7 +99,20 @@ class CreateRouteUseCaseTest {
 
         when(airportRepository.findByIataCode(new IataCode("OPO"))).thenReturn(Optional.of(opo));
 
-        assertThrows(aisafe.routes.domain.InvalidRouteException.class, () -> createRoute.execute(request));
+        assertThrows(InvalidRouteException.class, () -> createRoute.execute(request));
+        verify(routeRepository, never()).save(any());
+    }
+
+    @Test
+    void ensureExceptionThrownWhenDestinationAirportNotOperational() {
+        CreateRouteRequest request = new CreateRouteRequest("OPO", "LIS", 45, 300.0, 150, "admin");
+        Airport lis = createSampleAirport("LIS");
+        lis.changeStatus(AirportStatus.CLOSED);
+
+        when(airportRepository.findByIataCode(new IataCode("OPO"))).thenReturn(Optional.of(createSampleAirport("OPO")));
+        when(airportRepository.findByIataCode(new IataCode("LIS"))).thenReturn(Optional.of(lis));
+
+        assertThrows(InvalidRouteException.class, () -> createRoute.execute(request));
         verify(routeRepository, never()).save(any());
     }
 }

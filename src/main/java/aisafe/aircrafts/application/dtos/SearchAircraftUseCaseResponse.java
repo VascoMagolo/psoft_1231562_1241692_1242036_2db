@@ -16,7 +16,7 @@ public record SearchAircraftUseCaseResponse(
                 aircraft.getRegistrationNumber().getNumber(),
                 aircraft.getModel().getModelName(),
                 aircraft.getStatus().name(),
-                aircraft.getManufacturingDate() != null ? aircraft.getManufacturingDate().getYear() : null
+                aircraft.getManufacturingDate() != null ? aircraft.getManufacturingDate().getYear() : 0
         );
     }
 }

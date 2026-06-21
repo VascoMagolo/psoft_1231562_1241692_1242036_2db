@@ -77,4 +77,14 @@ class RegisterAircraftUseCaseTest {
 
         assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(request));
     }
+
+    @Test
+    void ensureExceptionWhenInvalidStatus() {
+        RegisterAircraftRequest bogusRequest = new RegisterAircraftRequest("CS-TPA", "A320", LocalDate.of(2020, 1, 1), 150, 5000.0, "BOGUS", List.of());
+        when(modelRepository.findByModelName("A320")).thenReturn(Optional.of(model));
+        when(aircraftRepository.existsByRegistrationNumber(any())).thenReturn(false);
+
+        assertThrows(AircraftInvalidFieldException.class, () -> registerAircraft.execute(bogusRequest));
+        verify(aircraftRepository, never()).save(any());
+    }
 }

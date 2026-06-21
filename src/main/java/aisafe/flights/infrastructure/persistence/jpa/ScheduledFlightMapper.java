@@ -6,6 +6,10 @@ import aisafe.flights.domain.ScheduledFlight;
 
 public class ScheduledFlightMapper {
 
+    private ScheduledFlightMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static ScheduledFlight toDomain(ScheduledFlightJpaEntity entity) {
         if (entity == null) return null;
 

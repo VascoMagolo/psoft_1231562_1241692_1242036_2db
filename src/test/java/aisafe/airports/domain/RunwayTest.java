@@ -41,7 +41,12 @@ class RunwayTest {
 
     @Test
     void ensureEqualRunwaysAreEqual() {
-        assertEquals(new Runway("03/21", 3000, "030/210"), new Runway("03/21", 3000, "030/210"));
+        Runway r1 = new Runway("03/21", 3000, "030/210");
+        Runway r2 = new Runway("03/21", 3000, "030/210");
+        assertEquals(r1, r2);
+        assertEquals(r1, r1);
+        assertNotEquals(r1, null);
+        assertNotEquals(r1, "not a runway");
     }
 
     @Test
@@ -60,5 +65,23 @@ class RunwayTest {
         assertTrue(str.contains("03/21"));
         assertTrue(str.contains("3000"));
         assertTrue(str.contains("030/210"));
+    }
+
+    @Test
+    void ensureBlankNameThrowsException() {
+        assertThrows(InvalidRunwayException.class, () -> new Runway("   ", 3000, "030/210"));
+    }
+
+    @Test
+    void ensureBlankOrientationThrowsException() {
+        assertThrows(InvalidRunwayException.class, () -> new Runway("03/21", 3000, "   "));
+    }
+
+    @Test
+    void ensureRunwayEqualsPartialMatchNotEqual() {
+        Runway r1 = new Runway("03/21", 3000, "030/210");
+        assertNotEquals(r1, new Runway("03/21", 3000, "different"));
+        assertNotEquals(r1, new Runway("03/21", 2000, "030/210"));
+        assertNotEquals(r1, new Runway("different", 3000, "030/210"));
     }
 }

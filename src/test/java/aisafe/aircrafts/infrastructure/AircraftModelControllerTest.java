@@ -171,6 +171,39 @@ class AircraftModelControllerTest {
     }
 
     @Test
+    void ensureCreateModelWithNullImageReturns201() throws Exception {
+        AircraftModelResponse response = new AircraftModelResponse(
+                "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180);
+
+        when(registerAircraftModel.execute(any())).thenReturn(response);
+
+        mockMvc.perform(multipart("/api/aircraftModels")
+                        .param("modelName", "A320")
+                        .param("manufacturer", "AIRBUS")
+                        .param("maxRange", "6150.0")
+                        .param("fuelCapacity", "26730.0")
+                        .param("cruisingSpeed", "833.0")
+                        .param("maximumSeatingCapacity", "180"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.hasImage").value(false));
+    }
+
+    @Test
+    void ensureCreateModelWithNullContentTypeImageReturns400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("image", "doc.jpg", null, new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels")
+                        .file(file)
+                        .param("modelName", "A320")
+                        .param("manufacturer", "AIRBUS")
+                        .param("maxRange", "6150.0")
+                        .param("fuelCapacity", "26730.0")
+                        .param("cruisingSpeed", "833.0")
+                        .param("maximumSeatingCapacity", "180"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void ensureUpdateImageReturns200() throws Exception {
         AircraftModelResponse response = new AircraftModelResponse(
                 "A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, true, 180);
@@ -189,6 +222,16 @@ class AircraftModelControllerTest {
     @Test
     void ensureUpdateImageWithNonImageFileReturns400() throws Exception {
         MockMultipartFile file = new MockMultipartFile("image", "doc.txt", "text/plain", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/aircraftModels/A320/image")
+                        .file(file)
+                        .with(request -> { request.setMethod("PATCH"); return request; }))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureUpdateImageWithNullContentTypeImageReturns400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("image", "doc.jpg", null, new byte[]{1, 2, 3});
 
         mockMvc.perform(multipart("/api/aircraftModels/A320/image")
                         .file(file)
@@ -217,7 +260,9 @@ class AircraftModelControllerTest {
 
     @Test
     void ensureGetAllModelsReturns200() throws Exception {
-        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
+        when(listAircraftModels.execute(anyInt(), anyInt())).thenReturn(
+                new PaginatedResult<>(List.of(new AircraftModelResponse("A320", Manufacturer.AIRBUS, 26730.0, 6150.0, 833.0, false, 180)), 1L)
+        );
 
         mockMvc.perform(get("/api/aircraftModels"))
                 .andExpect(status().isOk());
@@ -263,7 +308,7 @@ class AircraftModelControllerTest {
 
         when(importAircraftModels.execute(any())).thenReturn(result);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+        MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
 
         mockMvc.perform(multipart("/api/aircraftModels/import").file(file))
                 .andExpect(status().isMultiStatus())

@@ -4,6 +4,10 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 import aisafe.maintenance.domain.MaintenanceRecord;
 
 public class MaintenanceRecordMapper {
+    private MaintenanceRecordMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static MaintenanceRecord toDomain(MaintenanceRecordJpaEntity entity) {
         if (entity == null) return null;
         return new MaintenanceRecord(

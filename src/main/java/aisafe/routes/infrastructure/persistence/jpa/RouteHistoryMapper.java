@@ -5,6 +5,10 @@ import aisafe.routes.domain.RouteHistory;
 
 public class RouteHistoryMapper {
 
+    private RouteHistoryMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static RouteHistory toDomain(RouteHistoryJpaEntity entity) {
         return new RouteHistory(
                 new IataCode(entity.getRoute().getOriginCode().getCode()),

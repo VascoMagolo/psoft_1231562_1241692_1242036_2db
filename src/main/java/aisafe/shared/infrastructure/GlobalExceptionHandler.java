@@ -24,6 +24,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +75,10 @@ public class GlobalExceptionHandler {
             IllegalArgumentException.class,
             InvalidIataCodeException.class,
             InvalidContactException.class,
-            InvalidRegistrationNumberException.class
+            InvalidRegistrationNumberException.class,
+            MissingServletRequestParameterException.class
     })
-    public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handleBadRequest(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));
     }

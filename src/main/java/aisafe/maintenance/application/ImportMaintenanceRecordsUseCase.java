@@ -82,7 +82,7 @@ public class ImportMaintenanceRecordsUseCase {
 
                     List<String> parts = new ArrayList<>();
                     String partsStr = getValue(line, partsIdx);
-                    if (partsStr != null && !partsStr.isEmpty()) {
+                    if (partsStr != null) {
                         parts = Arrays.stream(partsStr.split("[,;]"))
                                 .map(String::trim)
                                 .collect(Collectors.toList());

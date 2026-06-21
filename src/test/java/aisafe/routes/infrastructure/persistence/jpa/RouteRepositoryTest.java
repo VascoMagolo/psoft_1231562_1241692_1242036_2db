@@ -5,6 +5,7 @@ import aisafe.flights.infrastructure.persistence.jpa.SpringDataScheduledFlightRe
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.domain.RouteStatus;
+import aisafe.routes.domain.RouteSummaryData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -128,5 +129,73 @@ class RouteRepositoryTest {
 
         assertEquals(1, result.size());
         assertNotNull(result.get(0).getVersion());
+    }
+
+    @Test
+    void ensureRouteRepositoryOperationsWork() {
+        flightRepo.deleteAll();
+        springRepo.deleteAll();
+
+        // 1. Save new
+        Route route = new Route("LIS", "OPO", 45, 300.0, 150);
+        routeRepository.save(route);
+        assertEquals(1, routeRepository.count());
+
+        // 2. Save existing (updating)
+        route.updateRoute(50, 350.0, 160);
+        routeRepository.save(route);
+        assertEquals(1, routeRepository.count());
+        Route saved = routeRepository.findByOriginAndDestination(new IataCode("LIS"), new IataCode("OPO")).get();
+        assertEquals(50, saved.getEstimatedFlightTime());
+
+        // 3. Find Version
+        Long version = routeRepository.findVersionFor(new IataCode("LIS"), new IataCode("OPO"));
+        assertNotNull(version);
+
+        // 4. Exists
+        assertTrue(routeRepository.existsByOriginAndDestination(new IataCode("LIS"), new IataCode("OPO")));
+        assertFalse(routeRepository.existsByOriginAndDestination(new IataCode("LIS"), new IataCode("MAD")));
+
+        // 5. Find All Active
+        List<Route> actives = routeRepository.findAllActive();
+        assertEquals(1, actives.size());
+
+        // 6. Find All
+        List<Route> all = routeRepository.findAll();
+        assertEquals(1, all.size());
+
+        // 7. Find All Paginated
+        var paginated = routeRepository.findAll(0, 10);
+        assertEquals(1, paginated.data().size());
+        assertEquals(1L, paginated.totalElements());
+
+        // 8. Find By Origin Paginated
+        var byOrigin = routeRepository.findByOrigin(new IataCode("LIS"), 0, 10);
+        assertEquals(1, byOrigin.data().size());
+
+        // 9. Find By Destination Paginated
+        var byDest = routeRepository.findByDestination(new IataCode("OPO"), 0, 10);
+        assertEquals(1, byDest.data().size());
+
+        // 10. Find By Origin and Destination Paginated
+        var byOriginDest = routeRepository.findByOriginAndDestination(new IataCode("LIS"), new IataCode("OPO"), 0, 10);
+        assertEquals(1, byOriginDest.data().size());
+
+        // 11. Find By Origin or Destination
+        List<Route> orResults = routeRepository.findByOriginOrDestination(new IataCode("LIS"), new IataCode("OPO"));
+        assertEquals(1, orResults.size());
+
+        // 12. Find Compatible Routes
+        List<Route> compatible = routeRepository.findCompatibleRoutes(400.0, 200);
+        assertEquals(1, compatible.size());
+
+        // 13. List Summaries
+        List<RouteSummaryData> summaries = routeRepository.listSummariesForAirport(new IataCode("LIS"));
+        assertEquals(1, summaries.size());
+        assertEquals("LIS", summaries.get(0).origin().getCode());
+
+        // 14. Delete
+        routeRepository.delete(route);
+        assertEquals(0, routeRepository.count());
     }
 }

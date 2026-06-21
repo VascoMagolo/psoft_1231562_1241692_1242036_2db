@@ -4,6 +4,10 @@ import aisafe.routes.domain.Route;
 
 public class RouteMapper {
 
+    private RouteMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static Route toDomain(RouteJpaEntity entity) {
         Route route = new Route(
                 entity.getOriginCode().getCode(),

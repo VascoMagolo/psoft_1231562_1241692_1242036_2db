@@ -68,4 +68,27 @@ class IataCodeTest {
     void ensureToStringReturnsCode() {
         assertEquals("LIS", new IataCode("LIS").toString());
     }
+
+    @Test
+    void ensureBlankStringThrowsException() {
+        assertThrows(InvalidIataCodeException.class, () -> new IataCode("   "));
+    }
+
+    @Test
+    void ensureSameReferenceIsEqual() {
+        IataCode code = new IataCode("LIS");
+        assertEquals(code, code);
+    }
+
+    @Test
+    void ensureNullNotEqual() {
+        IataCode code = new IataCode("LIS");
+        assertFalse(code.equals(null));
+    }
+
+    @Test
+    void ensureDifferentClassNotEqual() {
+        IataCode code = new IataCode("LIS");
+        assertFalse(code.equals("LIS"));
+    }
 }

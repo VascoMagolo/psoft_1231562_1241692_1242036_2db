@@ -41,4 +41,22 @@ class TerminalTest {
     void ensureToStringContainsName() {
         assertTrue(new Terminal("Terminal 1").toString().contains("Terminal 1"));
     }
+
+    @Test
+    void ensureEqualsSameReference() {
+        Terminal terminal = new Terminal("Terminal 1");
+        assertEquals(terminal, terminal);
+    }
+
+    @Test
+    void ensureEqualsNull() {
+        Terminal terminal = new Terminal("Terminal 1");
+        assertFalse(terminal.equals(null));
+    }
+
+    @Test
+    void ensureEqualsDifferentClass() {
+        Terminal terminal = new Terminal("Terminal 1");
+        assertFalse(terminal.equals("Terminal 1"));
+    }
 }

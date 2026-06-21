@@ -13,15 +13,7 @@ public class AircraftModel {
     public AircraftModel(String modelName, Manufacturer manufacturer, Double fuelCapacity, Double maxRange, Double cruisingSpeed, AircraftModelImage image, Integer maximumSeatingCapacity) {
         if (modelName == null || modelName.isBlank()) throw new AircraftInvalidFieldException("modelName must not be blank");
         if (manufacturer == null) throw new AircraftInvalidFieldException("manufacturer must not be null");
-        if (fuelCapacity == null) throw new AircraftInvalidFieldException("fuelCapacity must not be null");
-        if (maxRange == null) throw new AircraftInvalidFieldException("maxRange must not be null");
-        if (cruisingSpeed == null) throw new AircraftInvalidFieldException("cruisingSpeed must not be null");
-        if (maximumSeatingCapacity == null) throw new AircraftInvalidFieldException("maximumSeatingCapacity must not be null");
-
-        if (maxRange <= 0) throw new AircraftInvalidFieldException("maxRange must be greater than zero");
-        if (fuelCapacity <= 0) throw new AircraftInvalidFieldException("fuelCapacity must be greater than zero");
-        if (cruisingSpeed <= 0) throw new AircraftInvalidFieldException("cruisingSpeed must be greater than zero");
-        if (maximumSeatingCapacity <= 0) throw new AircraftInvalidFieldException("maximumSeatingCapacity must be greater than zero");
+        validateFields(fuelCapacity, maxRange, cruisingSpeed, maximumSeatingCapacity);
 
         this.modelName = modelName;
         this.manufacturer = manufacturer;

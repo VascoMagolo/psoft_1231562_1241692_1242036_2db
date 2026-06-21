@@ -62,4 +62,47 @@ class UpdateRouteUseCaseTest {
                 updateRoute.execute("OPO", "LIS", new UpdateRouteRequest(45, 300.0, 150, null), null, "testuser"));
         verify(routeRepository, never()).save(any());
     }
+
+    @Test
+    void ensureRouteIsUpdatedSuccessfullyWithVersion() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        IataCode origin = new IataCode("OPO");
+        IataCode dest = new IataCode("LIS");
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
+        when(routeRepository.findVersionFor(origin, dest)).thenReturn(1L);
+
+        UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, null);
+        RouteResponse result = updateRoute.execute("OPO", "LIS", request, 1L, "testuser");
+
+        assertEquals(60, result.estimatedFlightTime());
+        verify(routeRepository).save(route);
+    }
+
+    @Test
+    void ensureRouteCanBeDeactivated() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
+
+        UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, false);
+        RouteResponse result = updateRoute.execute("OPO", "LIS", request, null, "testuser");
+
+        assertEquals(RouteStatus.INACTIVE, route.getStatus());
+        verify(routeRepository).save(route);
+    }
+
+    @Test
+    void ensureRouteCanBeActivated() {
+        Route route = new Route("OPO", "LIS", 45, 300.0, 150);
+        route.changeStatus(RouteStatus.INACTIVE);
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(route));
+
+        UpdateRouteRequest request = new UpdateRouteRequest(60, 400.0, 180, true);
+        RouteResponse result = updateRoute.execute("OPO", "LIS", request, null, "testuser");
+
+        assertEquals(RouteStatus.ACTIVE, route.getStatus());
+        verify(routeRepository).save(route);
+    }
 }

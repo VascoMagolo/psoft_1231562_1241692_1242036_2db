@@ -79,7 +79,7 @@ public class ImportRoutesUseCase {
     }
 
     private String getValue(String[] line, int index) {
-        if (index == -1 || index >= line.length) return null;
+        if (index >= line.length) return null;
         String val = line[index].trim();
         return val.isEmpty() ? null : val;
     }

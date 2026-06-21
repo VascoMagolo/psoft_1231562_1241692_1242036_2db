@@ -1,6 +1,8 @@
 package aisafe.routes.application;
 
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.IataCode;
+import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.routes.application.dtos.AlternativeRouteResponse;
 import aisafe.routes.domain.InvalidRouteException;
 import org.junit.jupiter.api.Test;
@@ -40,5 +42,18 @@ class SearchAlternativeRoutesUseCaseTest {
     @Test
     void executeWithSameOriginAndDestinationThrowsException() {
         assertThrows(InvalidRouteException.class, () -> useCase.execute("OPO", "OPO"));
+    }
+
+    @Test
+    void ensureThrowsWhenOriginAirportDoesNotExist() {
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(false);
+        assertThrows(AirportNotFoundException.class, () -> useCase.execute("OPO", "LIS"));
+    }
+
+    @Test
+    void ensureThrowsWhenDestinationAirportDoesNotExist() {
+        when(airportRepository.existsByIataCode(new IataCode("OPO"))).thenReturn(true);
+        when(airportRepository.existsByIataCode(new IataCode("LIS"))).thenReturn(false);
+        assertThrows(AirportNotFoundException.class, () -> useCase.execute("OPO", "LIS"));
     }
 }

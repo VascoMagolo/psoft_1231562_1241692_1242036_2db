@@ -7,6 +7,10 @@ import aisafe.aircrafts.domain.RegistrationNumber;
 
 public class AircraftMapper {
 
+    private AircraftMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static Aircraft toDomain(AircraftJpaEntity entity, AircraftModel pureModel) {
         if (entity == null) return null;
 

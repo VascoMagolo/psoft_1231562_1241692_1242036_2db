@@ -36,4 +36,15 @@ class RouteHistoryTest {
 
         assertEquals(specificTime, routeHistory.getChangedAt());
     }
+
+    @Test
+    void ensureDefaultConstructorForJPA() {
+        RouteHistory history = new RouteHistory();
+        assertNotNull(history);
+        assertNull(history.getOriginCode());
+        assertNull(history.getDestinationCode());
+        assertNull(history.getChangeDescription());
+        assertNull(history.getChangedAt());
+        assertNull(history.getChangedBy());
+    }
 }

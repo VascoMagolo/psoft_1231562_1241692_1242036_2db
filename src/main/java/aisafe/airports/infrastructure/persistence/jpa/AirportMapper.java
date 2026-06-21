@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 public class AirportMapper {
 
+    private AirportMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static Airport toDomain(AirportJpaEntity entity) {
         if (entity == null) return null;
 

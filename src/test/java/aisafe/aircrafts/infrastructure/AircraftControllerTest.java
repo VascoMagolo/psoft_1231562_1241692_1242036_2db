@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -179,7 +181,9 @@ class AircraftControllerTest {
 
     @Test
     void ensureSearchAircraftReturns200() throws Exception {
-        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(new PaginatedResult<>(List.of(), 0L));
+        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(
+                new PaginatedResult<>(List.of(new SearchAircraftUseCaseResponse("CS-TPA", "A320", "AVAILABLE", 2020)), 1L)
+        );
 
         mockMvc.perform(get("/api/aircrafts/search")
                         .param("modelName", "A320"))
@@ -219,11 +223,77 @@ class AircraftControllerTest {
 
         when(importAircrafts.execute(any())).thenReturn(result);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+        MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
 
         mockMvc.perform(multipart("/api/aircrafts/import").file(file))
                 .andExpect(status().isMultiStatus())
                 .andExpect(jsonPath("$.successfulCount").value(1))
                 .andExpect(jsonPath("$.errorCount").value(1));
+    }
+
+    @Test
+    void ensureGetAllAircraftReturns200() throws Exception {
+        when(listAircraft.execute(any())).thenReturn(
+                new PaginatedResult<>(List.of(sampleResponse), 1L));
+
+        mockMvc.perform(get("/api/aircrafts"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureDeleteAircraftReturns204() throws Exception {
+        doNothing().when(deleteAircraft).execute(any());
+
+        mockMvc.perform(delete("/api/aircrafts/CS-TPA"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void ensureGetCompatibleRoutesReturns200() throws Exception {
+        when(viewCompatibleRoutes.execute(any())).thenReturn(
+                List.of(new CompatibleRouteResponse("OPO", "LIS", 60, 300.0, 100)));
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA/compatible-routes"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void ensureGetOperationalHoursReturns200() throws Exception {
+        when(calculateAircraftOperationalHours.execute(any())).thenReturn(
+                new AircraftOperationalHoursResponse("CS-TPA", 1250.5));
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA/operational-hours"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalOperationalHours").value(1250.5));
+    }
+
+    @Test
+    void ensureGetAircraftByRegistrationReturns200() throws Exception {
+        when(viewAircraftDetails.execute(any())).thenReturn(sampleResponse);
+
+        mockMvc.perform(get("/api/aircrafts/CS-TPA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registrationNumber").value("CS-TPA"));
+    }
+
+    @Test
+    void ensureUpdateAircraftWithoutIfMatchReturns400() throws Exception {
+        UpdateAircraftRequest request = new UpdateAircraftRequest("A321", null, 160, 5000.0, null, "INACTIVE");
+
+        mockMvc.perform(patch("/api/aircrafts/CS-TPA")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ensureSearchAircraftWithStatusReturns200() throws Exception {
+        when(searchAircraft.execute(any(), any(), any(), any(), anyInt(), anyInt())).thenReturn(
+                new PaginatedResult<>(List.of(new SearchAircraftUseCaseResponse("CS-TPA", "A320", "AVAILABLE", 2020)), 1L)
+        );
+
+        mockMvc.perform(get("/api/aircrafts/search")
+                        .param("status", "AVAILABLE"))
+                .andExpect(status().isOk());
     }
 }

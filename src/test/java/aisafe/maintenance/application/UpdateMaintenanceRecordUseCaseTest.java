@@ -92,4 +92,38 @@ class UpdateMaintenanceRecordUseCaseTest {
                 updateMaintenanceRecord.execute(record.getRecordId(), request, 0L)); // Client provides version 0
         verify(recordRepository, never()).save(any());
     }
+
+    @Test
+    void ensureRecordIsUpdatedSuccessfullyWithNullNotes() {
+        UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, null);
+
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), "Original notes", buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), null);
+
+        when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
+        when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
+        when(recordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MaintenanceRecordResponse response = updateMaintenanceRecord.execute(record.getRecordId(), request, 0L);
+
+        assertNotNull(response);
+        assertEquals("Original notes", record.getNotes());
+    }
+
+    @Test
+    void ensureRecordIsUpdatedSuccessfullyWithEmptyNotes() {
+        UpdateMaintenanceRecordsRequest request = new UpdateMaintenanceRecordsRequest(MaintenanceStatus.IN_PROGRESS, "   ");
+
+        MaintenanceRecord record = new MaintenanceRecord(
+                UUID.randomUUID(), "Engine check", LocalDateTime.now(), 4, List.of(buildPart()), "Original notes", buildTemplate(), MaintenanceStatus.PLANNED, Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"), BigDecimal.valueOf(1000), null);
+
+        when(recordRepository.findByRecordId(any(UUID.class))).thenReturn(Optional.of(record));
+        when(recordRepository.findVersionFor(any(UUID.class))).thenReturn(0L).thenReturn(1L);
+        when(recordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MaintenanceRecordResponse response = updateMaintenanceRecord.execute(record.getRecordId(), request, 0L);
+
+        assertNotNull(response);
+        assertEquals("Original notes", record.getNotes());
+    }
 }
