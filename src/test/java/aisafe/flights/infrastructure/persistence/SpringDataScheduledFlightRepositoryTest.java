@@ -18,6 +18,9 @@ import aisafe.airports.domain.IataCode;
 import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -182,9 +185,11 @@ class SpringDataScheduledFlightRepositoryTest {
     }
 
     @Test
-    void ensureScheduledFlightMapperNullAndConstructor() {
+    void ensureScheduledFlightMapperNullAndConstructor() throws Exception {
         assertNull(ScheduledFlightMapper.toDomain(null));
-        ScheduledFlightMapper mapper = new ScheduledFlightMapper();
-        assertNotNull(mapper);
+        Constructor<ScheduledFlightMapper> constructor = ScheduledFlightMapper.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertThrows(InvocationTargetException.class, constructor::newInstance);
     }
 }

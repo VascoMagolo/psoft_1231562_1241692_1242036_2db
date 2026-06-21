@@ -308,7 +308,7 @@ class AircraftModelControllerTest {
 
         when(importAircraftModels.execute(any())).thenReturn(result);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
+        MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", "dummy".getBytes());
 
         mockMvc.perform(multipart("/api/aircraftModels/import").file(file))
                 .andExpect(status().isMultiStatus())

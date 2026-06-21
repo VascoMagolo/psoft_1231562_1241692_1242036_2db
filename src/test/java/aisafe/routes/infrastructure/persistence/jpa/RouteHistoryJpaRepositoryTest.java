@@ -3,6 +3,8 @@ package aisafe.routes.infrastructure.persistence.jpa;
 import aisafe.airports.domain.IataCode;
 import aisafe.routes.domain.*;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -232,13 +234,13 @@ class RouteHistoryJpaRepositoryTest {
     @Test
     void ensureMappersPrivateConstructors() throws Exception {
         // Instantiate RouteMapper using reflection to get 100% coverage
-        java.lang.reflect.Constructor<RouteMapper> routeMapperConstructor = RouteMapper.class.getDeclaredConstructor();
+        Constructor<RouteMapper> routeMapperConstructor = RouteMapper.class.getDeclaredConstructor();
         routeMapperConstructor.setAccessible(true);
-        assertThrows(java.lang.reflect.InvocationTargetException.class, routeMapperConstructor::newInstance);
+        assertThrows(InvocationTargetException.class, routeMapperConstructor::newInstance);
 
         // Instantiate RouteHistoryMapper using reflection
-        java.lang.reflect.Constructor<RouteHistoryMapper> routeHistoryMapperConstructor = RouteHistoryMapper.class.getDeclaredConstructor();
+        Constructor<RouteHistoryMapper> routeHistoryMapperConstructor = RouteHistoryMapper.class.getDeclaredConstructor();
         routeHistoryMapperConstructor.setAccessible(true);
-        assertThrows(java.lang.reflect.InvocationTargetException.class, routeHistoryMapperConstructor::newInstance);
+        assertThrows(InvocationTargetException.class, routeHistoryMapperConstructor::newInstance);
     }
 }

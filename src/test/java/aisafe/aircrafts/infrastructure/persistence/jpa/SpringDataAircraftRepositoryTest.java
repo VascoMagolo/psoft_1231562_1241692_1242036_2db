@@ -32,7 +32,7 @@ class SpringDataAircraftRepositoryTest {
     private AircraftRepository domainAircraftRepository;
 
     @Autowired
-    private aisafe.aircrafts.domain.AircraftModelRepository domainModelRepository;
+    private AircraftModelRepository domainModelRepository;
 
     private AircraftModelJpaEntity createModel(String name) {
         AircraftModelJpaEntity model = new AircraftModelJpaEntity();

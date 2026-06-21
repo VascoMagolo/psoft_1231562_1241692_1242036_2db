@@ -3,6 +3,8 @@ package aisafe.routes.application;
 import aisafe.routes.application.dtos.ActiveRouteResponse;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.InvalidSortParameterException;
+import aisafe.shared.domain.InvalidListingCriteriaException;
 import aisafe.flights.domain.ScheduledFlightRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.shared.application.RouteDistanceService;
@@ -50,14 +52,14 @@ class ListActiveRoutesUseCaseTest {
 
     @Test
     void ensureExecuteThrowsInvalidSortParameterExceptionWhenSortByIsInvalid() {
-        assertThrows(aisafe.routes.domain.InvalidSortParameterException.class, () -> {
+        assertThrows(InvalidSortParameterException.class, () -> {
             useCase.execute("active", "invalidSort");
         });
     }
 
     @Test
     void ensureExecuteThrowsInvalidListingCriteriaExceptionWhenStatusIsInvalid() {
-        assertThrows(aisafe.shared.domain.InvalidListingCriteriaException.class, () -> {
+        assertThrows(InvalidListingCriteriaException.class, () -> {
             useCase.execute("inactive", "distance");
         });
     }

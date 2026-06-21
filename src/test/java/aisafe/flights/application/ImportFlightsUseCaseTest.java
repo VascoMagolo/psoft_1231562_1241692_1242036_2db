@@ -5,6 +5,8 @@ import aisafe.shared.application.dtos.BulkImportResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,8 +113,8 @@ class ImportFlightsUseCaseTest {
 
     @Test
     void ensureImportFileStreamErrorRecordsError() throws Exception {
-        org.springframework.web.multipart.MultipartFile mockFile = mock(org.springframework.web.multipart.MultipartFile.class);
-        when(mockFile.getInputStream()).thenThrow(new java.io.IOException("Stream failure"));
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getInputStream()).thenThrow(new IOException("Stream failure"));
 
         BulkImportResult<String> result = importFlightsUseCase.execute(mockFile);
 

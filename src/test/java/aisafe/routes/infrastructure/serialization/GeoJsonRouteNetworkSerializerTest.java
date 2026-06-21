@@ -8,6 +8,7 @@ import aisafe.routes.domain.Route;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Field;
 
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ class GeoJsonRouteNetworkSerializerTest {
 
     @Test
     void ensureSerializeThrowsExceptionOnJacksonError() throws Exception {
-        java.lang.reflect.Field field = GeoJsonRouteNetworkSerializer.class.getDeclaredField("objectMapper");
+        Field field = GeoJsonRouteNetworkSerializer.class.getDeclaredField("objectMapper");
         field.setAccessible(true);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         ObjectMapper realMapper = new ObjectMapper();

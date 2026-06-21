@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,11 +97,11 @@ class ImportAircraftsUseCaseTest {
     @Test
     void ensureThrowsExceptionWhenFileReadingFails() throws Exception {
         MultipartFile file = mock(MultipartFile.class);
-        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+        when(file.getInputStream()).thenThrow(new IOException("Disk read error"));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> useCase.execute(file));
         assertEquals("Failed to process CSV file", exception.getMessage());
-        assertTrue(exception.getCause() instanceof java.io.IOException);
+        assertTrue(exception.getCause() instanceof IOException);
     }
 
     @Test

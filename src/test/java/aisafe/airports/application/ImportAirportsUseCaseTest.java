@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,8 +93,8 @@ class ImportAirportsUseCaseTest {
 
     @Test
     void ensureIoExceptionReturnsError() throws Exception {
-        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
-        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new IOException("Disk read error"));
 
         BulkImportResult<String> result = importAirportsUseCase.execute(file);
 

@@ -364,7 +364,7 @@ class AirportControllerTest {
 
         when(importAirports.execute(any())).thenReturn(result);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "airports.csv", "text/csv", "iataCode,name,city,country\nOPO,Porto,Porto,Portugal\nLIS,Lisbon,Lisbon,Portugal".getBytes());
 
         mockMvc.perform(multipart("/api/airports/import").file(file))

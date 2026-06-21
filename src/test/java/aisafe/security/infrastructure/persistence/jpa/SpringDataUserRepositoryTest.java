@@ -4,6 +4,9 @@ import aisafe.security.domain.Role;
 import aisafe.security.domain.User;
 import aisafe.security.domain.UserRepository;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -59,7 +62,10 @@ class SpringDataUserRepositoryTest {
     }
 
     @Test
-    void ensureConstructorUserMapper() {
-        assertNotNull(new UserMapper());
+    void ensureConstructorUserMapper() throws Exception {
+        Constructor<UserMapper> constructor = UserMapper.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertThrows(InvocationTargetException.class, constructor::newInstance);
     }
 }

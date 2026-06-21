@@ -2,6 +2,9 @@ package aisafe.airports.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.*;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.List;
 
@@ -154,14 +157,14 @@ class AirportMapperAndEmbeddableTest {
 
     @Test
     void ensureUtilityConstructorsArePrivate() throws Exception {
-        java.lang.reflect.Constructor<AirportMapper> c1 = AirportMapper.class.getDeclaredConstructor();
-        assertTrue(java.lang.reflect.Modifier.isPrivate(c1.getModifiers()));
+        Constructor<AirportMapper> c1 = AirportMapper.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(c1.getModifiers()));
         c1.setAccessible(true);
-        c1.newInstance();
+        assertThrows(InvocationTargetException.class, c1::newInstance);
 
-        java.lang.reflect.Constructor<AircraftCertificationMapper> c2 = AircraftCertificationMapper.class.getDeclaredConstructor();
-        assertTrue(java.lang.reflect.Modifier.isPrivate(c2.getModifiers()));
+        Constructor<AircraftCertificationMapper> c2 = AircraftCertificationMapper.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(c2.getModifiers()));
         c2.setAccessible(true);
-        c2.newInstance();
+        assertThrows(InvocationTargetException.class, c2::newInstance);
     }
 }

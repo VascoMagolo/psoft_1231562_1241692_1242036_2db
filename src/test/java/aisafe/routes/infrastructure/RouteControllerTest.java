@@ -18,10 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import aisafe.shared.domain.PaginatedResult;
+import aisafe.shared.application.dtos.BulkImportResult;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.Mockito;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -82,7 +87,7 @@ class RouteControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
-    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    @MockitoBean
     private ImportRoutesUseCase importRoutesUseCase;
 
     private Route sampleRoute;
@@ -197,7 +202,7 @@ class RouteControllerTest {
 
     @Test
     void ensureGetRouteHistoryWithRecordsReturns200() throws Exception {
-        RouteHistoryResponse historyResponse = new RouteHistoryResponse("OPO", "LIS", "Route created", java.time.LocalDateTime.now(), "admin");
+        RouteHistoryResponse historyResponse = new RouteHistoryResponse("OPO", "LIS", "Route created", LocalDateTime.now(), "admin");
         when(viewRouteHistory.execute(anyString(), anyString())).thenReturn(List.of(historyResponse));
 
         mockMvc.perform(get("/api/routes/LIS/MAD/history"))
@@ -212,7 +217,7 @@ class RouteControllerTest {
         UpdateRouteRequest request = new UpdateRouteRequest(50, 400.0, 200, true);
         when(updateRoute.execute(anyString(), anyString(), any(), any(), any())).thenReturn(RouteResponse.from(sampleRoute, 0L));
 
-        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
+        Authentication auth = Mockito.mock(Authentication.class);
         when(auth.getName()).thenReturn("authenticatedUser");
 
         mockMvc.perform(put("/api/routes/LIS/MAD")
@@ -229,7 +234,7 @@ class RouteControllerTest {
         deactivated.changeStatus(RouteStatus.INACTIVE);
         when(deactivateRoute.execute(anyString(), anyString(), any(), any())).thenReturn(RouteResponse.from(deactivated, 0L));
 
-        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
+        Authentication auth = Mockito.mock(Authentication.class);
         when(auth.getName()).thenReturn("authenticatedUser");
 
         mockMvc.perform(patch("/api/routes/OPO/LIS/deactivate")
@@ -241,15 +246,15 @@ class RouteControllerTest {
 
     @Test
     void ensureImportRoutesSuccessReturns201() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addSuccess("OPO-LIS");
 
         when(importRoutesUseCase.execute(any(), any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "routes.csv", MediaType.TEXT_PLAIN_VALUE, "origin,destination\nOPO,LIS".getBytes());
 
-        org.springframework.security.core.Authentication auth = org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class);
+        Authentication auth = Mockito.mock(Authentication.class);
         when(auth.getName()).thenReturn("importUser");
 
         mockMvc.perform(multipart("/api/routes/import")
@@ -263,13 +268,13 @@ class RouteControllerTest {
 
     @Test
     void ensureImportRoutesPartialSuccessReturns207() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addSuccess("OPO-LIS");
         bulkImportResult.addError(2, "LIS-LIS", "Origin and destination cannot be the same");
 
         when(importRoutesUseCase.execute(any(), any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "routes.csv", MediaType.TEXT_PLAIN_VALUE, "origin,destination\nOPO,LIS\nLIS,LIS".getBytes());
 
         mockMvc.perform(multipart("/api/routes/import")
@@ -282,12 +287,12 @@ class RouteControllerTest {
 
     @Test
     void ensureImportRoutesFailureReturns400() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addError(1, "LIS-LIS", "Origin and destination cannot be the same");
 
         when(importRoutesUseCase.execute(any(), any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "routes.csv", MediaType.TEXT_PLAIN_VALUE, "origin,destination\nLIS,LIS".getBytes());
 
         mockMvc.perform(multipart("/api/routes/import")

@@ -12,6 +12,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import aisafe.shared.application.dtos.BulkImportResult;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -36,7 +38,7 @@ class FlightControllerTest {
     @MockitoBean
     private ViewScheduledFlightsByAircraftUseCase viewScheduledFlightsByAircraft;
 
-    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    @MockitoBean
     private ImportFlightsUseCase importFlightsUseCase;
 
     @MockitoBean
@@ -68,12 +70,12 @@ class FlightControllerTest {
 
     @Test
     void ensureImportFlightsSuccessReturns201() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addSuccess("FLIGHT-1");
 
         when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPA,OPO-LIS".getBytes());
 
         mockMvc.perform(multipart("/api/flights/import")
@@ -86,13 +88,13 @@ class FlightControllerTest {
 
     @Test
     void ensureImportFlightsPartialSuccessReturns207() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addSuccess("FLIGHT-1");
         bulkImportResult.addError(2, "bad-row", "invalid route");
 
         when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPA,OPO-LIS\nCS-TPB,invalid".getBytes());
 
         mockMvc.perform(multipart("/api/flights/import")
@@ -105,12 +107,12 @@ class FlightControllerTest {
 
     @Test
     void ensureImportFlightsFailureReturns400() throws Exception {
-        aisafe.shared.application.dtos.BulkImportResult<String> bulkImportResult = new aisafe.shared.application.dtos.BulkImportResult<>();
+        BulkImportResult<String> bulkImportResult = new BulkImportResult<>();
         bulkImportResult.addError(1, "bad-row", "invalid route");
 
         when(importFlightsUseCase.execute(any())).thenReturn(bulkImportResult);
 
-        org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file", "flights.csv", MediaType.TEXT_PLAIN_VALUE, "aircraft,route\nCS-TPB,invalid".getBytes());
 
         mockMvc.perform(multipart("/api/flights/import")

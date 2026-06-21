@@ -7,8 +7,13 @@ import aisafe.shared.application.ExportedFile;
 import aisafe.routes.domain.Route;
 import org.junit.jupiter.api.Test;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import de.micromata.opengis.kml.v_2_2_0.Document;
+import de.micromata.opengis.kml.v_2_2_0.Kml;
+import org.mockito.Mockito;
+import org.mockito.ArgumentMatchers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -70,11 +75,11 @@ class KmlRouteNetworkSerializerTest {
         when(destination.getCoordinates()).thenReturn(new Coordinates(38.7742, -9.1342));
         Map<String, Airport> airports = Map.of("OPO", origin, "LIS", destination);
 
-        de.micromata.opengis.kml.v_2_2_0.Document realDocument = new de.micromata.opengis.kml.v_2_2_0.Kml().createAndSetDocument();
+        Document realDocument = new Kml().createAndSetDocument();
 
-        try (var mocked = org.mockito.Mockito.mockConstruction(de.micromata.opengis.kml.v_2_2_0.Kml.class, (mock, context) -> {
+        try (var mocked = Mockito.mockConstruction(Kml.class, (mock, context) -> {
             when(mock.createAndSetDocument()).thenReturn(realDocument);
-            org.mockito.Mockito.doThrow(new RuntimeException("JAXB marshalling error")).when(mock).marshal(org.mockito.ArgumentMatchers.any(java.io.OutputStream.class));
+            Mockito.doThrow(new RuntimeException("JAXB marshalling error")).when(mock).marshal(ArgumentMatchers.any(OutputStream.class));
         })) {
             RuntimeException ex = assertThrows(RuntimeException.class, () -> serializer.serialize(List.of(route), airports));
             assertEquals("Failed to serialize to KML", ex.getMessage());

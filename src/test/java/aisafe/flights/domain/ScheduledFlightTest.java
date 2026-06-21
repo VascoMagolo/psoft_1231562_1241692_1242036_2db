@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.OffsetDateTime;
 import java.time.Duration;
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,11 +66,11 @@ class ScheduledFlightTest {
                 OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
         );
         try {
-            java.lang.reflect.Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
+            Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
             departureField.setAccessible(true);
             departureField.set(flight, null);
 
-            java.lang.reflect.Field arrivalField = ScheduledFlight.class.getDeclaredField("arrivalDateTime");
+            Field arrivalField = ScheduledFlight.class.getDeclaredField("arrivalDateTime");
             arrivalField.setAccessible(true);
             arrivalField.set(flight, null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -138,7 +139,7 @@ class ScheduledFlightTest {
                 OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
         );
         try {
-            java.lang.reflect.Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
+            Field departureField = ScheduledFlight.class.getDeclaredField("departureDateTime");
             departureField.setAccessible(true);
             departureField.set(flight, null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -153,7 +154,7 @@ class ScheduledFlightTest {
                 OffsetDateTime.now(), OffsetDateTime.now().plusHours(1), FlightStatus.SCHEDULED, originCode, destinationCode, mockRegistrationNumber
         );
         try {
-            java.lang.reflect.Field arrivalField = ScheduledFlight.class.getDeclaredField("arrivalDateTime");
+            Field arrivalField = ScheduledFlight.class.getDeclaredField("arrivalDateTime");
             arrivalField.setAccessible(true);
             arrivalField.set(flight, null);
         } catch (NoSuchFieldException | IllegalAccessException e) {

@@ -1,7 +1,10 @@
 package aisafe.maintenance.infrastructure.persistence.jpa;
 
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.maintenance.domain.*;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.List;
 
@@ -42,7 +45,7 @@ class MaintenanceMappingAndHelperTest {
     @Test
     void ensureMaintenanceTemplateMapperRoundtrip() {
         MaintenanceTemplate domainTemplate = new MaintenanceTemplate(
-                "Line Check", MaintenanceType.INSPECTION, List.of(new aisafe.aircrafts.domain.ModelName("A320")),
+                "Line Check", MaintenanceType.INSPECTION, List.of(new ModelName("A320")),
                 List.of("Verify oil"), 500, 30
         );
 
@@ -99,18 +102,18 @@ class MaintenanceMappingAndHelperTest {
     @Test
     void ensureMappersPrivateConstructors() throws Exception {
         // MaintenancePartMapper
-        java.lang.reflect.Constructor<MaintenancePartMapper> partConstructor = MaintenancePartMapper.class.getDeclaredConstructor();
+        Constructor<MaintenancePartMapper> partConstructor = MaintenancePartMapper.class.getDeclaredConstructor();
         partConstructor.setAccessible(true);
-        assertThrows(java.lang.reflect.InvocationTargetException.class, partConstructor::newInstance);
+        assertThrows(InvocationTargetException.class, partConstructor::newInstance);
 
         // MaintenanceRecordMapper
-        java.lang.reflect.Constructor<MaintenanceRecordMapper> recordConstructor = MaintenanceRecordMapper.class.getDeclaredConstructor();
+        Constructor<MaintenanceRecordMapper> recordConstructor = MaintenanceRecordMapper.class.getDeclaredConstructor();
         recordConstructor.setAccessible(true);
-        assertThrows(java.lang.reflect.InvocationTargetException.class, recordConstructor::newInstance);
+        assertThrows(InvocationTargetException.class, recordConstructor::newInstance);
 
         // MaintenanceTemplateMapper
-        java.lang.reflect.Constructor<MaintenanceTemplateMapper> templateConstructor = MaintenanceTemplateMapper.class.getDeclaredConstructor();
+        Constructor<MaintenanceTemplateMapper> templateConstructor = MaintenanceTemplateMapper.class.getDeclaredConstructor();
         templateConstructor.setAccessible(true);
-        assertThrows(java.lang.reflect.InvocationTargetException.class, templateConstructor::newInstance);
+        assertThrows(InvocationTargetException.class, templateConstructor::newInstance);
     }
 }

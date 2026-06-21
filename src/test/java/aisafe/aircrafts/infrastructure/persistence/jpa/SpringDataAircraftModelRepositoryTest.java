@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,7 +136,7 @@ class SpringDataAircraftModelRepositoryTest {
     @Test
     void ensureDomainRepositoryDeleteThrowsWhenNotFound() {
         AircraftModel model = new AircraftModel("M6-NON-EXISTENT", Manufacturer.AIRBUS, 25000.0, 6000.0, 850.0, null, 180);
-        assertThrows(org.springframework.dao.InvalidDataAccessApiUsageException.class, () -> {
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
             domainRepository.delete(model);
         });
     }

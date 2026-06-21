@@ -1,6 +1,15 @@
 package aisafe.flights.infrastructure.persistence;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.aircrafts.domain.Manufacturer;
+import aisafe.aircrafts.domain.AircraftNotFoundException;
+import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftRepository;
+import aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftModelRepository;
+import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftModelJpaEntity;
+import aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity;
+import aisafe.aircrafts.infrastructure.persistence.jpa.RegistrationNumberJpaEmbeddable;
+import aisafe.routes.domain.RouteNotFoundException;
+import java.time.LocalDate;
 import aisafe.airports.domain.IataCode;
 import aisafe.flights.domain.FlightStatus;
 import aisafe.flights.domain.ScheduledFlight;
@@ -25,25 +34,25 @@ class ScheduledFlightJpaRepositoryAdditionalTest {
     private ScheduledFlightRepository domainRepository;
 
     @Autowired
-    private aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftRepository aircraftRepo;
+    private SpringDataAircraftRepository aircraftRepo;
 
     @Autowired
-    private aisafe.aircrafts.infrastructure.persistence.jpa.SpringDataAircraftModelRepository modelRepo;
+    private SpringDataAircraftModelRepository modelRepo;
 
     private void createAircraft(String registration) {
-        var model = new aisafe.aircrafts.infrastructure.persistence.jpa.AircraftModelJpaEntity();
+        var model = new AircraftModelJpaEntity();
         model.setModelName("B737");
-        model.setManufacturer(aisafe.aircrafts.domain.Manufacturer.BOEING);
+        model.setManufacturer(Manufacturer.BOEING);
         model.setMaximumSeatingCapacity(200);
         model.setMaxRange(20000.0);
         model.setFuelCapacity(5000.0);
         model.setCruisingSpeed(800.0);
         model = modelRepo.save(model);
 
-        var aircraft = new aisafe.aircrafts.infrastructure.persistence.jpa.AircraftJpaEntity();
-        aircraft.setRegistrationNumber(new aisafe.aircrafts.infrastructure.persistence.jpa.RegistrationNumberJpaEmbeddable(registration));
+        var aircraft = new AircraftJpaEntity();
+        aircraft.setRegistrationNumber(new RegistrationNumberJpaEmbeddable(registration));
         aircraft.setModel(model);
-        aircraft.setManufacturingDate(java.time.LocalDate.now());
+        aircraft.setManufacturingDate(LocalDate.now());
         aircraft.setStatus("ACTIVE");
         aircraft.setSeatCapacity(200);
         aircraft.setRange(5000.0);
@@ -62,7 +71,7 @@ class ScheduledFlightJpaRepositoryAdditionalTest {
                 new RegistrationNumber("CS-XXX") // Non-existent registration number
         );
 
-        assertThrows(aisafe.aircrafts.domain.AircraftNotFoundException.class, () -> domainRepository.save(flight));
+        assertThrows(AircraftNotFoundException.class, () -> domainRepository.save(flight));
     }
 
     @Test
@@ -79,7 +88,7 @@ class ScheduledFlightJpaRepositoryAdditionalTest {
                 new RegistrationNumber("CS-TPA")
         );
 
-        assertThrows(aisafe.routes.domain.RouteNotFoundException.class, () -> domainRepository.save(flight));
+        assertThrows(RouteNotFoundException.class, () -> domainRepository.save(flight));
     }
 
     @Test

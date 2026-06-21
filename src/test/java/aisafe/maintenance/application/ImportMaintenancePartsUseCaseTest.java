@@ -1,6 +1,7 @@
 package aisafe.maintenance.application;
 
 import aisafe.maintenance.application.dtos.CreateMaintenancePartRequest;
+import java.io.IOException;
 import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.shared.application.dtos.BulkImportResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,8 +87,8 @@ class ImportMaintenancePartsUseCaseTest {
 
     @Test
     void execute_IoException_ReturnsError() throws Exception {
-        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
-        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new IOException("Disk read error"));
 
         BulkImportResult<String> result = importUseCase.execute(file);
 

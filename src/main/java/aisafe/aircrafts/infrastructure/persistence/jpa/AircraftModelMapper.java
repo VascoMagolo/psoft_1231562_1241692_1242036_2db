@@ -5,6 +5,10 @@ import aisafe.aircrafts.domain.AircraftModelImage;
 
 public class AircraftModelMapper {
 
+    private AircraftModelMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static AircraftModel toDomain(AircraftModelJpaEntity entity) {
         if (entity == null) return null;
 

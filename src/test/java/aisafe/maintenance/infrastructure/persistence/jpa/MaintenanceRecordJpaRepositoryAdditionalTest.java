@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,7 +108,7 @@ class MaintenanceRecordJpaRepositoryAdditionalTest {
                 "Notes",
                 template,
                 MaintenanceStatus.PLANNED,
-                java.util.Set.of(MaintenanceComponent.ENGINE),
+                Set.of(MaintenanceComponent.ENGINE),
                 new RegistrationNumber("CS-TPA"),
                 BigDecimal.valueOf(100.0),
                 null
@@ -150,7 +151,7 @@ class MaintenanceRecordJpaRepositoryAdditionalTest {
                 "Notes",
                 nonExistentTemplate,
                 MaintenanceStatus.PLANNED,
-                java.util.Set.of(MaintenanceComponent.ENGINE),
+                Set.of(MaintenanceComponent.ENGINE),
                 new RegistrationNumber("CS-TPA"),
                 BigDecimal.valueOf(100.0),
                 null
@@ -169,7 +170,7 @@ class MaintenanceRecordJpaRepositoryAdditionalTest {
         MaintenanceRecordJpaEntity entity = new MaintenanceRecordJpaEntity(
                 recordId, "Description", startDate, 10, "Notes",
                 Collections.emptyList(), null, MaintenanceStatus.PLANNED,
-                java.util.Collections.emptySet(), reg, cost
+                Collections.emptySet(), reg, cost
         );
         entity.setId(123L);
         entity.setVersion(2L);

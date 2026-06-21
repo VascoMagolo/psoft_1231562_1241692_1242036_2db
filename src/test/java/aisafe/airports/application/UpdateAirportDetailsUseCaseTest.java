@@ -5,6 +5,7 @@ import aisafe.airports.application.dtos.UpdateAirportDetailsRequest;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.domain.ContactType;
 import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
 import aisafe.shared.domain.ConcurrencyException;
@@ -85,7 +86,7 @@ class UpdateAirportDetailsUseCaseTest {
         when(airportRepository.findVersionFor(code)).thenReturn(0L);
 
         UpdateAirportDetailsRequest.ContactRequest contact = new UpdateAirportDetailsRequest.ContactRequest(
-                aisafe.airports.domain.ContactType.EMAIL, "info@lisbonairport.com", "General Information");
+                ContactType.EMAIL, "info@lisbonairport.com", "General Information");
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", List.of(contact), List.of("Wifi"), List.of("T1"), List.of("A1"));
 
@@ -99,14 +100,14 @@ class UpdateAirportDetailsUseCaseTest {
     @Test
     void ensureUpdateAirportDetailsRequestAndContactRequestWorks() {
         UpdateAirportDetailsRequest.ContactRequest contact = new UpdateAirportDetailsRequest.ContactRequest(
-                aisafe.airports.domain.ContactType.EMAIL, "info@lisbonairport.com", "General Information");
+                ContactType.EMAIL, "info@lisbonairport.com", "General Information");
 
         UpdateAirportDetailsRequest request = new UpdateAirportDetailsRequest(
                 "06:00-23:00", List.of(contact), List.of("Wifi"), List.of("T1"), List.of("A1"));
 
         assertEquals("06:00-23:00", request.operationalHours());
         assertEquals(1, request.contacts().size());
-        assertEquals(aisafe.airports.domain.ContactType.EMAIL, request.contacts().get(0).type());
+        assertEquals(ContactType.EMAIL, request.contacts().get(0).type());
         assertEquals("info@lisbonairport.com", request.contacts().get(0).value());
         assertEquals("General Information", request.contacts().get(0).description());
         assertEquals(List.of("Wifi"), request.services());
@@ -116,9 +117,9 @@ class UpdateAirportDetailsUseCaseTest {
         // Cover equals, hashCode, toString for complete DTO coverage
         assertNotNull(contact.toString());
         assertEquals(contact, new UpdateAirportDetailsRequest.ContactRequest(
-                aisafe.airports.domain.ContactType.EMAIL, "info@lisbonairport.com", "General Information"));
+                ContactType.EMAIL, "info@lisbonairport.com", "General Information"));
         assertEquals(contact.hashCode(), new UpdateAirportDetailsRequest.ContactRequest(
-                aisafe.airports.domain.ContactType.EMAIL, "info@lisbonairport.com", "General Information").hashCode());
+                ContactType.EMAIL, "info@lisbonairport.com", "General Information").hashCode());
 
         assertNotNull(request.toString());
         assertEquals(request, new UpdateAirportDetailsRequest(

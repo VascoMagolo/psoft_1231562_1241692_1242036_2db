@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -100,7 +102,7 @@ class MaintenanceJpaRepositoryImplementationsTest {
     @Test
     void ensureTemplateJpaRepositorySaveNewAndExisting() {
         MaintenanceTemplate template = new MaintenanceTemplate(
-                "Temp 1", MaintenanceType.INSPECTION, new java.util.ArrayList<>(List.of(new ModelName("A320"))), new java.util.ArrayList<>(List.of("Task 1")), 500, 30
+                "Temp 1", MaintenanceType.INSPECTION, new ArrayList<>(List.of(new ModelName("A320"))), new ArrayList<>(List.of("Task 1")), 500, 30
         );
         templateRepository.save(template);
 
@@ -115,7 +117,7 @@ class MaintenanceJpaRepositoryImplementationsTest {
         assertEquals("Temp 1", found.get().getName());
 
         MaintenanceTemplate updatedTemplate = new MaintenanceTemplate(
-                "Temp 1", MaintenanceType.OVERHAUL, new java.util.ArrayList<>(List.of(new ModelName("B737"))), new java.util.ArrayList<>(List.of("Task 1", "Task 2")), 1000, 60
+                "Temp 1", MaintenanceType.OVERHAUL, new ArrayList<>(List.of(new ModelName("B737"))), new ArrayList<>(List.of("Task 1", "Task 2")), 1000, 60
         );
         templateRepository.save(updatedTemplate);
 
@@ -128,7 +130,7 @@ class MaintenanceJpaRepositoryImplementationsTest {
     @Test
     void ensureTemplateJpaRepositoryExistsAndDelete() {
         MaintenanceTemplate template = new MaintenanceTemplate(
-                "Temp 2", MaintenanceType.INSPECTION, new java.util.ArrayList<>(List.of(new ModelName("A320"))), new java.util.ArrayList<>(List.of("Task 2")), 500, 30
+                "Temp 2", MaintenanceType.INSPECTION, new ArrayList<>(List.of(new ModelName("A320"))), new ArrayList<>(List.of("Task 2")), 500, 30
         );
         templateRepository.save(template);
 
@@ -151,14 +153,14 @@ class MaintenanceJpaRepositoryImplementationsTest {
         partRepository.save(part);
 
         MaintenanceTemplate template = new MaintenanceTemplate(
-                "Temp Rec 1", MaintenanceType.INSPECTION, new java.util.ArrayList<>(List.of(new ModelName("A320"))), new java.util.ArrayList<>(List.of("Task")), 500, 30
+                "Temp Rec 1", MaintenanceType.INSPECTION, new ArrayList<>(List.of(new ModelName("A320"))), new ArrayList<>(List.of("Task")), 500, 30
         );
         templateRepository.save(template);
 
         UUID recordId = UUID.randomUUID();
         MaintenanceRecord record = new MaintenanceRecord(
                 recordId, "Record 1", LocalDateTime.of(2026, 6, 20, 12, 0), 5,
-                new java.util.ArrayList<>(List.of(part)), "Notes", template, MaintenanceStatus.PLANNED,
+                new ArrayList<>(List.of(part)), "Notes", template, MaintenanceStatus.PLANNED,
                 Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"),
                 BigDecimal.valueOf(150.0), null
         );
@@ -179,7 +181,7 @@ class MaintenanceJpaRepositoryImplementationsTest {
 
         MaintenanceRecord updatedRecord = new MaintenanceRecord(
                 recordId, "Record 1", LocalDateTime.of(2026, 6, 20, 12, 0), 5,
-                new java.util.ArrayList<>(List.of(part)), "Updated Notes", template, MaintenanceStatus.IN_PROGRESS,
+                new ArrayList<>(List.of(part)), "Updated Notes", template, MaintenanceStatus.IN_PROGRESS,
                 Set.of(MaintenanceComponent.ENGINE), new RegistrationNumber("CS-TPA"),
                 BigDecimal.valueOf(150.0), null
         );
@@ -199,21 +201,21 @@ class MaintenanceJpaRepositoryImplementationsTest {
         partRepository.save(part);
 
         MaintenanceTemplate template = new MaintenanceTemplate(
-                "Temp Rec 2", MaintenanceType.INSPECTION, new java.util.ArrayList<>(List.of(new ModelName("A320"))), new java.util.ArrayList<>(List.of("Task")), 500, 30
+                "Temp Rec 2", MaintenanceType.INSPECTION, new ArrayList<>(List.of(new ModelName("A320"))), new ArrayList<>(List.of("Task")), 500, 30
         );
         templateRepository.save(template);
 
         UUID recordId = UUID.randomUUID();
         MaintenanceRecord record = new MaintenanceRecord(
                 recordId, "Record 2", LocalDateTime.of(2026, 6, 20, 12, 0), 5,
-                new java.util.ArrayList<>(List.of(part)), "Notes", template, MaintenanceStatus.COMPLETED,
+                new ArrayList<>(List.of(part)), "Notes", template, MaintenanceStatus.COMPLETED,
                 Set.of(MaintenanceComponent.AVIONICS), new RegistrationNumber("CS-TPB"),
                 BigDecimal.valueOf(250.00), LocalDateTime.of(2026, 6, 21, 12, 0)
         );
         recordRepository.save(record);
 
         assertTrue(recordRepository.existsByStartDateAndTemplate(LocalDateTime.of(2026, 6, 20, 12, 0), template));
-        assertFalse(recordRepository.existsByStartDateAndTemplate(LocalDateTime.of(2026, 6, 20, 12, 0), new MaintenanceTemplate("NON-EXISTENT-TEMP", MaintenanceType.INSPECTION, new java.util.ArrayList<>(List.of(new ModelName("A320"))), new java.util.ArrayList<>(List.of("Verify")), 100, 30)));
+        assertFalse(recordRepository.existsByStartDateAndTemplate(LocalDateTime.of(2026, 6, 20, 12, 0), new MaintenanceTemplate("NON-EXISTENT-TEMP", MaintenanceType.INSPECTION, new ArrayList<>(List.of(new ModelName("A320"))), new ArrayList<>(List.of("Verify")), 100, 30)));
 
         assertTrue(recordRepository.existsByPartsContaining(part));
         assertFalse(recordRepository.existsByPartsContaining(new MaintenancePart("NON-EXISTENT-PART", "Non", "Desc", 10, 1, MaintenanceComponent.ENGINE)));
@@ -268,7 +270,7 @@ class MaintenanceJpaRepositoryImplementationsTest {
         MaintenanceRecordJpaEntity entity = new MaintenanceRecordJpaEntity(
                 recordId, "Description", LocalDateTime.of(2026, 6, 20, 12, 0), 10, "Notes",
                 List.of(partJpa), templateJpa, MaintenanceStatus.PLANNED,
-                java.util.Collections.singleton(MaintenanceComponent.ENGINE),
+                Collections.singleton(MaintenanceComponent.ENGINE),
                 new RegistrationNumberJpaEmbeddable("CS-TPA"), BigDecimal.valueOf(500.0)
         );
         entity.setCompletedAt(LocalDateTime.of(2026, 6, 20, 22, 0));

@@ -1,9 +1,15 @@
 package aisafe.maintenance.application;
 
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.aircrafts.domain.ModelName;
 import aisafe.maintenance.application.dtos.MaintenanceRecordResponse;
 import aisafe.maintenance.domain.MaintenanceComponent;
 import aisafe.maintenance.domain.MaintenanceRecordRepository;
+import aisafe.maintenance.domain.MaintenanceTemplate;
+import aisafe.maintenance.domain.MaintenanceType;
+import aisafe.maintenance.domain.MaintenancePart;
+import aisafe.maintenance.domain.MaintenanceRecord;
+import aisafe.maintenance.domain.MaintenanceStatus;
 import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,14 +100,14 @@ class SearchMaintenanceRecordsUseCaseTest {
     @Test
     void ensureReturnsMappedRecordsSuccessfully() {
         RegistrationNumber reg = new RegistrationNumber("CS-TPA");
-        aisafe.maintenance.domain.MaintenanceTemplate template = new aisafe.maintenance.domain.MaintenanceTemplate(
-                "Annual Check", aisafe.maintenance.domain.MaintenanceType.INSPECTION,
-                List.of(new aisafe.aircrafts.domain.ModelName("B737")), List.of("Check"), 100, 30);
-        aisafe.maintenance.domain.MaintenancePart part = new aisafe.maintenance.domain.MaintenancePart(
+        MaintenanceTemplate template = new MaintenanceTemplate(
+                "Annual Check", MaintenanceType.INSPECTION,
+                List.of(new ModelName("B737")), List.of("Check"), 100, 30);
+        MaintenancePart part = new MaintenancePart(
                 "P123", "Part 1", "Desc", 10, 5, MaintenanceComponent.ENGINE);
-        aisafe.maintenance.domain.MaintenanceRecord record = new aisafe.maintenance.domain.MaintenanceRecord(
+        MaintenanceRecord record = new MaintenanceRecord(
                 UUID.randomUUID(), "R1", LocalDateTime.now().minusDays(5), 4,
-                List.of(part), "Notes", template, aisafe.maintenance.domain.MaintenanceStatus.COMPLETED,
+                List.of(part), "Notes", template, MaintenanceStatus.COMPLETED,
                 Set.of(MaintenanceComponent.ENGINE), reg, BigDecimal.valueOf(100), LocalDateTime.now().minusDays(5)
         );
 

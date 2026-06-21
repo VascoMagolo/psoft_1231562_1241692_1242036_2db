@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.lang.reflect.Constructor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,7 +71,7 @@ class UserTest {
 
     @Test
     void ensureProtectedConstructor() throws Exception {
-        java.lang.reflect.Constructor<User> constructor = User.class.getDeclaredConstructor();
+        Constructor<User> constructor = User.class.getDeclaredConstructor();
         constructor.setAccessible(true);
         User u = constructor.newInstance();
         assertNotNull(u);

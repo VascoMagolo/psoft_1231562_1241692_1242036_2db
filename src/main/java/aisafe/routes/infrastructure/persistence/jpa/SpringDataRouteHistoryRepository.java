@@ -1,6 +1,7 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,6 +12,6 @@ public interface SpringDataRouteHistoryRepository extends JpaRepository<RouteHis
     List<RouteHistoryJpaEntity> findAllByRoute(@Param("originCode") String originCode, @Param("destinationCode") String destinationCode);
 
     @Query("DELETE FROM RouteHistoryJpaEntity h WHERE h.route.originCode.code = :originCode AND h.route.destinationCode.code = :destinationCode")
-    @org.springframework.data.jpa.repository.Modifying
+    @Modifying
     void deleteAllByRoute(@Param("originCode") String originCode, @Param("destinationCode") String destinationCode);
 }

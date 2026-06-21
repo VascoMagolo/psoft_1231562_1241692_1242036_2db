@@ -3,14 +3,19 @@ package aisafe.flights.application;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftRepository;
 import aisafe.aircrafts.domain.RegistrationNumber;
+import aisafe.aircrafts.domain.AircraftStatus;
+import aisafe.aircrafts.domain.AircraftNotFoundException;
 import aisafe.airports.domain.IataCode;
 import aisafe.flights.application.dtos.FlightResponse;
 import aisafe.flights.application.dtos.ScheduleFlightRequest;
 import aisafe.flights.domain.ScheduledFlight;
 import aisafe.flights.domain.ScheduledFlightRepository;
+import aisafe.flights.domain.AircraftIncompatibilityException;
+import aisafe.flights.domain.AircraftUnavailableException;
 import aisafe.shared.application.RouteDistanceService;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.domain.RouteNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +61,7 @@ class ScheduleFlightUseCaseTest {
         
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
         when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
@@ -87,14 +92,14 @@ class ScheduleFlightUseCaseTest {
         
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
         when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
 
-        assertThrows(aisafe.flights.domain.AircraftIncompatibilityException.class, () -> useCase.execute(request));
+        assertThrows(AircraftIncompatibilityException.class, () -> useCase.execute(request));
         verify(scheduledFlightRepository, never()).save(any());
     }
 
@@ -111,12 +116,12 @@ class ScheduleFlightUseCaseTest {
         
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.UNDER_MAINTENANCE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.UNDER_MAINTENANCE);
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
 
-        assertThrows(aisafe.flights.domain.AircraftUnavailableException.class, () -> useCase.execute(request));
+        assertThrows(AircraftUnavailableException.class, () -> useCase.execute(request));
         verify(scheduledFlightRepository, never()).save(any());
     }
 
@@ -135,14 +140,14 @@ class ScheduleFlightUseCaseTest {
 
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
         when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
 
-        assertThrows(aisafe.flights.domain.AircraftIncompatibilityException.class, () -> useCase.execute(request));
+        assertThrows(AircraftIncompatibilityException.class, () -> useCase.execute(request));
         verify(scheduledFlightRepository, never()).save(any());
     }
 
@@ -161,7 +166,7 @@ class ScheduleFlightUseCaseTest {
 
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
         when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
@@ -169,7 +174,7 @@ class ScheduleFlightUseCaseTest {
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
         when(routeDistanceService.calculateDistanceKm(route)).thenReturn(3000.0); // > range (2000)
 
-        assertThrows(aisafe.flights.domain.AircraftIncompatibilityException.class, () -> useCase.execute(request));
+        assertThrows(AircraftIncompatibilityException.class, () -> useCase.execute(request));
         verify(scheduledFlightRepository, never()).save(any());
     }
 
@@ -188,7 +193,7 @@ class ScheduleFlightUseCaseTest {
 
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.AVAILABLE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.AVAILABLE);
         when(aircraft.getSeatCapacity()).thenReturn(200);
         when(aircraft.getRange()).thenReturn(2000.0);
 
@@ -197,7 +202,7 @@ class ScheduleFlightUseCaseTest {
         when(routeDistanceService.calculateDistanceKm(route)).thenReturn(300.0);
         when(scheduledFlightRepository.existsByOverlappingSchedule(any(), any(), any())).thenReturn(true);
 
-        assertThrows(aisafe.flights.domain.AircraftUnavailableException.class, () -> useCase.execute(request));
+        assertThrows(AircraftUnavailableException.class, () -> useCase.execute(request));
         verify(scheduledFlightRepository, never()).save(any());
     }
 
@@ -208,7 +213,7 @@ class ScheduleFlightUseCaseTest {
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.empty());
 
-        assertThrows(aisafe.routes.domain.RouteNotFoundException.class, () -> useCase.execute(request));
+        assertThrows(RouteNotFoundException.class, () -> useCase.execute(request));
     }
 
     @Test
@@ -220,7 +225,7 @@ class ScheduleFlightUseCaseTest {
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.empty());
 
-        assertThrows(aisafe.aircrafts.domain.AircraftNotFoundException.class, () -> useCase.execute(request));
+        assertThrows(AircraftNotFoundException.class, () -> useCase.execute(request));
     }
 
     @Test
@@ -236,11 +241,11 @@ class ScheduleFlightUseCaseTest {
 
         Aircraft aircraft = mock(Aircraft.class);
         when(aircraft.getRegistrationNumber()).thenReturn(new RegistrationNumber("CS-TPA"));
-        when(aircraft.getStatus()).thenReturn(aisafe.aircrafts.domain.AircraftStatus.INACTIVE);
+        when(aircraft.getStatus()).thenReturn(AircraftStatus.INACTIVE);
 
         when(routeRepository.findByOriginAndDestination(any(), any())).thenReturn(Optional.of(route));
         when(aircraftRepository.findByRegistrationNumber(any())).thenReturn(Optional.of(aircraft));
 
-        assertThrows(aisafe.flights.domain.AircraftUnavailableException.class, () -> useCase.execute(request));
+        assertThrows(AircraftUnavailableException.class, () -> useCase.execute(request));
     }
 }

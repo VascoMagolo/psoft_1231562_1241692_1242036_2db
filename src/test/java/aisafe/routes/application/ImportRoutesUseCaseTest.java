@@ -2,12 +2,14 @@ package aisafe.routes.application;
 
 import aisafe.routes.application.dtos.CreateRouteRequest;
 import aisafe.shared.application.dtos.BulkImportResult;
+import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -113,8 +115,8 @@ class ImportRoutesUseCaseTest {
 
     @Test
     void ensureImportIoExceptionReturnsError() throws Exception {
-        org.springframework.web.multipart.MultipartFile file = mock(org.springframework.web.multipart.MultipartFile.class);
-        when(file.getInputStream()).thenThrow(new java.io.IOException("Disk read error"));
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenThrow(new IOException("Disk read error"));
 
         BulkImportResult<String> result = importRoutesUseCase.execute(file, "Admin");
 

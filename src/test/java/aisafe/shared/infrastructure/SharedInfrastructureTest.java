@@ -6,8 +6,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.tags.Tag;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -91,12 +99,12 @@ class SharedInfrastructureTest {
     @Test
     void ensureDocsStaticResourceConfigWithSlash() throws Exception {
         DocsStaticResourceConfig config = new DocsStaticResourceConfig();
-        java.lang.reflect.Field field = DocsStaticResourceConfig.class.getDeclaredField("docsPath");
+        Field field = DocsStaticResourceConfig.class.getDeclaredField("docsPath");
         field.setAccessible(true);
         field.set(config, "docs/");
 
-        org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry = mock(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry.class);
-        org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration registration = mock(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration.class);
+        ResourceHandlerRegistry registry = mock(ResourceHandlerRegistry.class);
+        ResourceHandlerRegistration registration = mock(ResourceHandlerRegistration.class);
         when(registry.addResourceHandler("/docs/**")).thenReturn(registration);
 
         config.addResourceHandlers(registry);
@@ -106,12 +114,12 @@ class SharedInfrastructureTest {
     @Test
     void ensureDocsStaticResourceConfigWithoutSlash() throws Exception {
         DocsStaticResourceConfig config = new DocsStaticResourceConfig();
-        java.lang.reflect.Field field = DocsStaticResourceConfig.class.getDeclaredField("docsPath");
+        Field field = DocsStaticResourceConfig.class.getDeclaredField("docsPath");
         field.setAccessible(true);
         field.set(config, "docs");
 
-        org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry = mock(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry.class);
-        org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration registration = mock(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration.class);
+        ResourceHandlerRegistry registry = mock(ResourceHandlerRegistry.class);
+        ResourceHandlerRegistration registration = mock(ResourceHandlerRegistration.class);
         when(registry.addResourceHandler("/docs/**")).thenReturn(registration);
 
         config.addResourceHandlers(registry);
@@ -121,20 +129,20 @@ class SharedInfrastructureTest {
     @Test
     void ensureOpenApiConfigSortsTagsCorrectly() {
         OpenApiConfig config = new OpenApiConfig();
-        org.springdoc.core.customizers.OpenApiCustomizer customizer = config.tagOrderCustomizer();
+        OpenApiCustomizer customizer = config.tagOrderCustomizer();
         assertNotNull(customizer);
 
         // Test with null tags list
-        io.swagger.v3.oas.models.OpenAPI openApiWithNullTags = mock(io.swagger.v3.oas.models.OpenAPI.class);
+        OpenAPI openApiWithNullTags = mock(OpenAPI.class);
         when(openApiWithNullTags.getTags()).thenReturn(null);
         assertDoesNotThrow(() -> customizer.customise(openApiWithNullTags));
 
         // Test sorting
-        io.swagger.v3.oas.models.OpenAPI openApi = mock(io.swagger.v3.oas.models.OpenAPI.class);
-        io.swagger.v3.oas.models.tags.Tag tag1 = new io.swagger.v3.oas.models.tags.Tag().name("Airports");
-        io.swagger.v3.oas.models.tags.Tag tag2 = new io.swagger.v3.oas.models.tags.Tag().name("Auth");
-        io.swagger.v3.oas.models.tags.Tag tag3 = new io.swagger.v3.oas.models.tags.Tag().name("UnknownTag");
-        java.util.List<io.swagger.v3.oas.models.tags.Tag> tags = new java.util.ArrayList<>(java.util.List.of(tag1, tag2, tag3));
+        OpenAPI openApi = mock(OpenAPI.class);
+        Tag tag1 = new Tag().name("Airports");
+        Tag tag2 = new Tag().name("Auth");
+        Tag tag3 = new Tag().name("UnknownTag");
+        List<Tag> tags = new ArrayList<>(List.of(tag1, tag2, tag3));
         
         when(openApi.getTags()).thenReturn(tags);
         customizer.customise(openApi);
