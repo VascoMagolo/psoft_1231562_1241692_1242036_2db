@@ -1,0 +1,1029 @@
+{
+  "info": {
+    "_postman_id": "b13905fd-0ce8-5670-bf22-12842fb3269b",
+    "name": "AISafe airports-routes events",
+    "description": "Assignment 2, airports-routes: the events it publishes on RabbitMQ and its read model (CQRS). Needs RabbitMQ, the login and the 3 replicas with EVENTS_ENABLED=true. Select the environment \"AISafe local events\" and run the folders in order. See docs/postman/README.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Setup",
+      "description": "Login, the 3 replicas ready with events on, and RabbitMQ with the exchange and one read-model queue per replica.",
+      "item": [
+        {
+          "name": "Login as atcc",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{login}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"atcc\",\n  \"password\": \"atcc123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"atcc_token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "airports-routes-0 ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/actuator/health/readiness",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "airports-routes-1 ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_1}}/actuator/health/readiness",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "airports-routes-2 ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/actuator/health/readiness",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Exchange airports-routes.events (topic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbit_api}}/exchanges/%2F/airports-routes.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"topic, durable\", () => { pm.expect(pm.response.json().type).to.eql(\"topic\"); pm.expect(pm.response.json().durable).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read-model queue of airports-routes-0, with its consumer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbit_api}}/queues/%2F/airports-routes.read-model.{{ar_node_0}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"durable, one consumer (the replica)\", () => { pm.expect(pm.response.json().durable).to.be.true; pm.expect(pm.response.json().consumers).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read-model queue of airports-routes-1, with its consumer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbit_api}}/queues/%2F/airports-routes.read-model.{{ar_node_1}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"durable, one consumer (the replica)\", () => { pm.expect(pm.response.json().durable).to.be.true; pm.expect(pm.response.json().consumers).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read-model queue of airports-routes-2, with its consumer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbit_api}}/queues/%2F/airports-routes.read-model.{{ar_node_2}}",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"durable, one consumer (the replica)\", () => { pm.expect(pm.response.json().durable).to.be.true; pm.expect(pm.response.json().consumers).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Prepare",
+      "description": "Removes a route OPO-CDG left by an earlier run, and creates the queue postman-events, bound to the exchange with route.* (it plays another service interested in the routes).",
+      "item": [
+        {
+          "name": "Remove route OPO-CDG left by an earlier run",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{ar_0}}/api/routes/OPO/CDG",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204 or 404\", () => pm.expect(pm.response.code).to.be.oneOf([204, 404]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create queue postman-events",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durable\": false,\n  \"auto_delete\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201 or 204\", () => pm.expect(pm.response.code).to.be.oneOf([201, 204]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bind postman-events to the exchange with route.*",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/bindings/%2F/e/airports-routes.events/q/postman-events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"route.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Empty postman-events",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/contents",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1000); // events of the removal above"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Command, then event",
+      "description": "Creating a route (a command, over HTTP) publishes route.created: the replica that created it does not know who receives it.",
+      "item": [
+        {
+          "name": "Create route OPO-CDG on airports-routes-1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{ar_1}}/api/routes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originIataCode\": \"OPO\",\n  \"destinationIataCode\": \"CDG\",\n  \"estimatedFlightTime\": 125,\n  \"minimumRange\": 1200.0,\n  \"minimumCapacity\": 150,\n  \"createdBy\": \"postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received route.created",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"route.created\");",
+                  "pm.test(\"one route.created message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"published by airports-routes-1\", () => pm.expect(event.nodeId).to.eql(pm.environment.get(\"ar_node_1\")));",
+                  "pm.test(\"carries the route\", () => { pm.expect(event.status).to.eql(\"ACTIVE\"); pm.expect(event.data.estimatedFlightTime).to.eql(125); });",
+                  "pm.test(\"stamped\", () => pm.expect(event.stamp).to.be.above(0));",
+                  "pm.test(\"with its version\", () => pm.expect(event.version).to.be.a(\"number\"));",
+                  "pm.environment.set(\"route_version\", event.version);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Read model (CQRS)",
+      "description": "Every replica lists the new route from its own read model (route_view), updated by the event: also replica 0, which holds no copy of the route.",
+      "item": [
+        {
+          "name": "Routes on airports-routes-0 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.test(\"ACTIVE\", () => pm.expect(route.status).to.eql(\"ACTIVE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-1 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_1}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-2 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Update",
+      "description": "Deactivating the route (with the version carried by route.created as If-Match) publishes route.updated, and the read models show the new status.",
+      "item": [
+        {
+          "name": "Deactivate route OPO-CDG on airports-routes-2",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "If-Match",
+                "value": "\"{{route_version}}\""
+              }
+            ],
+            "url": "{{ar_2}}/api/routes/OPO/CDG/deactivate",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received route.updated",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"route.updated\");",
+                  "pm.test(\"one route.updated message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"INACTIVE\", () => { pm.expect(event.status).to.eql(\"INACTIVE\"); pm.expect(event.data.status).to.eql(\"INACTIVE\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-0 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.test(\"INACTIVE\", () => pm.expect(route.status).to.eql(\"INACTIVE\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Delete",
+      "description": "Deleting the route through replica 0 (forwarded to a replica that holds it) publishes route.deleted, and no read model lists it any more.",
+      "item": [
+        {
+          "name": "Delete route OPO-CDG through airports-routes-0",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{ar_0}}/api/routes/OPO/CDG",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received route.deleted",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"route.deleted\");",
+                  "pm.test(\"one route.deleted message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"no route data\", () => { pm.expect(event.status).to.be.null; pm.expect(event.data).to.be.null; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-0 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-1 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_1}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Routes on airports-routes-2 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/routes/search?size=1000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Cleanup",
+      "description": "Deletes the queue postman-events.",
+      "item": [
+        {
+          "name": "Delete queue postman-events",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

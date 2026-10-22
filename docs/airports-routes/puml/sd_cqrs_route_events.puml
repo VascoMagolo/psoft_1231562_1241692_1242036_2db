@@ -1,0 +1,35 @@
+@startuml sd_cqrs_route_events
+title Scenario (Assignment 2): a route created on one replica reaches the read model of every replica
+
+autonumber
+actor "ATCC" as c
+participant "airports-routes-1\n(write side)" as r1
+database "DB replica 1\nroute, replica_state" as db1
+participant "airports-routes-2\n(next in the ring)" as r2
+queue "RabbitMQ\nexchange airports-routes.events\n(topic)" as mq
+participant "airports-routes-0, -1, -2\n(read side)" as listeners
+database "DB of each replica\nroute_view" as views
+
+c -> r1 : POST /api/routes {OPO-CDG} (JWT)
+r1 -> db1 : save route + stamp of the change\n(one transaction)
+r1 -> r2 : copy of the route (replication, as in Assignment 1)
+r1 -> mq : after the commit: route.created\n{key, status, version, data, stamp}
+r1 --> c : 201
+note over mq
+  One durable queue per replica
+  (airports-routes.read-model.<replica>),
+  bound with route.*: every replica gets
+  every route event (publish/subscribe)
+end note
+mq -> listeners : route.created (to each queue)
+listeners -> views : RouteEventListener: apply if later than the stamp kept\n(last writer wins, as the replication)
+
+== read side ==
+c -> listeners : GET /api/routes/search (any replica)
+listeners -> views : read route_view (local, no peers asked)
+listeners --> c : 200, every route of every replica
+
+== a lost event (broker down when it was published) ==
+listeners -> listeners : RouteViewReconciler, on startup and every 60 s:\nwhat this replica and its peers hold (GET /internal/replicas/routes)
+listeners -> views : apply the changes later than the ones kept
+@enduml

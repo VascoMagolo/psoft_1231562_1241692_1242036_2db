@@ -50,3 +50,39 @@ kubectl -n aisafe delete pod aircraft-maintenance-1 airports-routes-1 flight-ops
 newman run docs/postman/aisafe-distributed.postman_collection.json -e /tmp/aisafe-env.json \
   --ssl-extra-ca-certs deploy/entry.crt --folder "8. Failures: with a replica down"
 ```
+
+## Assignment 2: airports-routes events
+
+`aisafe-events.postman_collection.json` tests the events airports-routes publishes on RabbitMQ and
+its read model (CQRS): 26 requests, 58 checks. It runs against a local setup (RabbitMQ is not in the
+k3s deployment yet), with the environment `aisafe-local-events.postman_environment.json`.
+
+| Folder | What it shows |
+|---|---|
+| 0. Setup | Login, the 3 replicas ready, the exchange `airports-routes.events` and one read-model queue per replica, each with its consumer |
+| 1. Prepare | A test queue bound to the exchange with `route.*`, playing another service interested in the routes |
+| 2. Command, then event | Creating a route on replica 1 (HTTP) publishes `route.created`, with the route, its version and the stamp of the change |
+| 3. Read model (CQRS) | The 3 replicas list the new route from their own read model, also replica 0, which holds no copy of it |
+| 4. Update | Deactivating it (If-Match: the version carried by the event) publishes `route.updated`; the read models show it inactive |
+| 5. Delete | Deleting it through replica 0 publishes `route.deleted`; no read model lists it any more |
+| 6. Cleanup | Deletes the test queue |
+
+The queues are read through the RabbitMQ management API (HTTP), since Postman does not speak AMQP.
+
+**Local setup** (from the repository root, after `./mvnw -pl airports-routes,login -am package -DskipTests`):
+
+```sh
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+java -jar login/target/login-0.0.1-SNAPSHOT.jar &
+# 3 replicas in a ring; *.localtest.me resolves to 127.0.0.1, and its first label is the replica id
+PEERS=http://ar0.localtest.me:18090,http://ar1.localtest.me:18091,http://ar2.localtest.me:18092
+for i in 0 1 2; do
+  EVENTS_ENABLED=true NODE_ID=ar$i PORT=1809$i PEERS=$PEERS SEED_NODE=ar0 \
+    java -jar airports-routes/target/airports-routes-0.0.1-SNAPSHOT.jar &
+done
+newman run docs/postman/aisafe-events.postman_collection.json \
+  -e docs/postman/aisafe-local-events.postman_environment.json
+```
+
+The RabbitMQ console is at http://127.0.0.1:15672 (guest/guest): the exchange, the queues and the
+messages can be seen there while the collection runs.
