@@ -1,8 +1,11 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.IataCode;
+import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.infrastructure.readmodel.RouteView;
+import aisafe.routes.infrastructure.replication.RouteReplicaHandler;
 import aisafe.routes.infrastructure.replication.RouteReplicaSender;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -17,10 +20,13 @@ public class RouteJpaRepository implements RouteRepository {
 
     private final SpringDataRouteRepository springRepo;
     private final RouteReplicaSender replicaSender;
+    private final EventPublisher events;
 
-    public RouteJpaRepository(SpringDataRouteRepository springRepo, RouteReplicaSender replicaSender) {
+    public RouteJpaRepository(SpringDataRouteRepository springRepo, RouteReplicaSender replicaSender,
+                              EventPublisher events) {
         this.springRepo = springRepo;
         this.replicaSender = replicaSender;
+        this.events = events;
     }
 
     @Override
@@ -37,7 +43,10 @@ public class RouteJpaRepository implements RouteRepository {
             jpaEntity.setId(e.getId());
             jpaEntity.setVersion(e.getVersion());
         });
-        replicaSender.routeSaved(springRepo.saveAndFlush(jpaEntity));
+        RouteJpaEntity saved = springRepo.saveAndFlush(jpaEntity);
+        replicaSender.routeSaved(saved);
+        events.changed(RouteReplicaHandler.TYPE, "route", existing.isPresent() ? "updated" : "created", key(route),
+                route.getStatus(), saved.getVersion(), RouteView.from(route));
         return route;
     }
 
@@ -61,6 +70,7 @@ public class RouteJpaRepository implements RouteRepository {
                 .ifPresent(entity -> {
                     springRepo.delete(entity);
                     replicaSender.routeDeleted(route.getOrigin().getCode(), route.getDestination().getCode());
+                    events.changed(RouteReplicaHandler.TYPE, "route", "deleted", key(route), null, null, null);
                 });
     }
 
@@ -79,6 +89,10 @@ public class RouteJpaRepository implements RouteRepository {
     @Override
     public boolean existsByOriginAndDestination(IataCode origin, IataCode destination) {
         return springRepo.existsByOriginCode_CodeAndDestinationCode_Code(origin.getCode(), destination.getCode());
+    }
+
+    private static String key(Route route) {
+        return route.getOrigin().getCode() + "-" + route.getDestination().getCode();
     }
 
 

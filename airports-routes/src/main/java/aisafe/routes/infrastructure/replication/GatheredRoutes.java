@@ -4,14 +4,17 @@ import aisafe.routes.application.RoutesAcrossReplicas;
 import aisafe.routes.domain.Route;
 import aisafe.shared.application.Versioned;
 import aisafe.shared.infrastructure.replication.ReplicaGatherer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
- * {@link RoutesAcrossReplicas} built from the routes held here and by the peers.
+ * {@link RoutesAcrossReplicas} built from the routes held here and by the peers. When events are
+ * on, the read model ({@code ReadModelRoutes}) is used instead.
  */
 @Component
+@ConditionalOnProperty(name = "aisafe.events.enabled", havingValue = "false", matchIfMissing = true)
 public class GatheredRoutes implements RoutesAcrossReplicas {
 
     private final ReplicaGatherer gatherer;
