@@ -239,11 +239,20 @@ the change, the same stamp the replication gives it), `nodeId` (the replica that
   write model: they are read to change the entity, with the current `version` for `If-Match`, so
   they must never be behind.
 - Order: each row keeps the stamp of the change it shows, and a change is applied only if it is
-  later (same rule as the replication). Events can arrive in any order. A deleted entity stays as a
-  row marked deleted, so an older event cannot bring it back.
-- Lost events: `ReadModelReconciler` compares the read model with what this replica and its peers
-  hold (`GET /internal/replicas/{type}`, the same export the replication uses). It runs on startup,
-  before the replica reports ready, and then every `READ_MODEL_RECONCILE_MS` (60 s by default).
+  later (same rule as the replication). Events can arrive in any order, and twice. A deleted entity
+  stays as a row marked deleted, so an older event cannot bring it back. The rule is inside the
+  `UPDATE` itself (`... WHERE stamp < ? OR (stamp = ? AND stamp_node < ?)`), so an event and the
+  reconciliation writing the same row at once (e.g. right after a restart) always leave the later
+  change.
+- Lost events: `ReadModelReconciler` compares the read model with what the replicas hold (the same
+  export the replication uses): this replica's own, and for routes and flight copies also the
+  peers' (`GET /internal/replicas/{type}`); airports are a catalog, already all on this replica. It
+  runs on startup, before the replica reports ready, and then every `READ_MODEL_RECONCILE_MS` (60 s
+  by default). A change it cannot apply is logged and skipped, so it never stops the startup.
+- The read model is a table of its own in the replica's database, written only from events: the two
+  models are independent (different tables, different writers, different shape). A second database
+  only for reading would also separate their storage, at the cost of one more database per replica;
+  with H2 per replica it adds nothing the separate table does not give.
 - An event that cannot be applied is dropped, not requeued forever
   (`default-requeue-rejected=false`); the reconciliation repairs that row.
 
@@ -260,6 +269,12 @@ Tested end to end by the [events collection](../postman/README.md#assignment-2-a
 (44 requests, 102 checks), and live with 3 replicas: listings complete with two replicas down, and
 the changes made while RabbitMQ was down reached every replica within one reconciliation.
 
-**Still to do (group decisions):** consuming the events of other services (flight-ops' flights
-instead of C5, aircraft from aircraft-maintenance instead of C1); RabbitMQ in the k3s deployment;
-`/api/v2/unicorns`.
+**Still to do (group decisions):**
+- Consuming the events of other services (flight-ops' flights instead of C5, aircraft from
+  aircraft-maintenance instead of C1); RabbitMQ in the k3s deployment; `/api/v2/unicorns`.
+- A **transactional outbox for the events**: today an event is sent right after the commit, so one
+  is lost if the broker is down or the replica stops in between, and only the reconciliation brings
+  the change in (up to 60 s later). Writing the event to the outbox in the same transaction (the one
+  in `common` the replication already uses) makes the reconciliation only a safety net. As the other
+  services will publish events too, the `EventPublisher` and the event format should then move to
+  `common`.
