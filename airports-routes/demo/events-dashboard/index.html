@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AISafe eventos e CQRS</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #12171e; --card: #151b23; --pill: #1b222b; --line: #252e39;
+    --text: #d8dee5; --dim: #7a8590; --faint: #4d5864;
+    --ok: #3ccf8e; --warn: #f2b33d; --fail: #ff6b6b; --info: #9cc3ff; --off: #3a434d;
+    --route: #22c3c3; --airport: #c59bff; --flightcopy: #b9d655;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px;
+           border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 15px; margin: 0 12px 0 0; font-weight: 600; }
+  .pill { padding: 3px 9px; border-radius: 999px; background: var(--pill); border: 1px solid var(--line); }
+  .pill.ok { color: var(--ok); border-color: #1f5a41; } .pill.fail { color: var(--fail); border-color: #6b2b2b; }
+  button, select { background: #1a212a; color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+                   padding: 5px 10px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--info); }
+  button.danger:hover { border-color: var(--fail); }
+  .spacer { flex: 1; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; padding: 12px 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+  section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 0 0 8px; font-weight: 600; }
+  svg { width: 100%; height: auto; display: block; }
+  .col-title { fill: var(--dim); font-size: 13px; letter-spacing: .06em; }
+  .box { fill: var(--card); stroke: var(--line); stroke-width: 1.5; }
+  .box.up { stroke: #1f5a41; } .box.down { stroke: var(--fail); fill: #1c1314; }
+  .name { fill: var(--text); font-size: 15px; font-weight: 600; }
+  .small { fill: var(--dim); font-size: 12px; }
+  .num { fill: var(--text); font-size: 13px; }
+  .link { stroke: var(--line); stroke-width: 2; fill: none; }
+  .backlog { fill: var(--warn); font-size: 13px; font-weight: 600; }
+  #feed { height: 330px; overflow-y: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; }
+  #feed div { padding: 2px 0; border-bottom: 1px solid #1a2028; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t { color: var(--faint); margin-right: 6px; }
+  .k-route { color: var(--route); } .k-airport { color: var(--airport); } .k-flightcopy { color: var(--flightcopy); }
+  .k-cmd { color: var(--info); } .k-fail { color: var(--fail); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 500; font-size: 12px; }
+  .replicas { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .replicas .r { display: flex; gap: 6px; align-items: center; background: var(--card); border: 1px solid var(--line);
+                 border-radius: 6px; padding: 5px 8px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--dim); margin-top: 8px; font-size: 12px; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .explain { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AISafe · eventos e CQRS (airports-routes)</h1>
+  <span id="broker" class="pill">RabbitMQ …</span>
+  <span class="spacer"></span>
+  <label>Escrever em
+    <select id="target"><option value="">réplica ao acaso</option><option>ar0</option><option>ar1</option><option>ar2</option></select>
+  </label>
+  <button onclick="act({op: 'route'})">Criar rota</button>
+  <button onclick="act({op: 'airport'})">Registar aeroporto</button>
+  <button onclick="act({op: 'flight'})">Voo (C5)</button>
+  <button id="brokerBtn" class="danger" onclick="act({op: 'broker', on: !state.broker})">Parar RabbitMQ</button>
+</header>
+
+<main>
+  <section>
+    <h2>Fluxo: escrita → RabbitMQ → uma fila por réplica → leitura</h2>
+    <svg id="map" viewBox="0 0 1100 470" role="img" aria-label="Escrita, exchange, filas e read models das três réplicas">
+      <text class="col-title" x="110" y="28" text-anchor="middle">ESCRITA (comandos)</text>
+      <text class="col-title" x="470" y="28" text-anchor="middle">RABBITMQ · EXCHANGE</text>
+      <text class="col-title" x="730" y="28" text-anchor="middle">FILAS</text>
+      <text class="col-title" x="975" y="28" text-anchor="middle">LEITURA (read model)</text>
+      <g id="links"></g>
+      <g id="nodes"></g>
+      <g id="dots"></g>
+    </svg>
+    <div class="legend">
+      <span><span class="dot" style="background: var(--route)"></span>route.*</span>
+      <span><span class="dot" style="background: var(--airport)"></span>airport.*</span>
+      <span><span class="dot" style="background: var(--flightcopy)"></span>flightcopy.*</span>
+      <span>· com uma réplica em baixo, a fila dela acumula as mensagens (amarelo) até voltar</span>
+    </div>
+    <div class="replicas" id="replicaControls"></div>
+    <p class="explain">Cada escrita grava na réplica que a recebe e só depois publica um evento. O exchange (topic) entrega uma cópia
+      a cada fila, e cada réplica atualiza a sua tabela de leitura. As listagens leem essa tabela, sem perguntar às outras réplicas.</p>
+  </section>
+
+  <div style="display: grid; gap: 12px; align-content: start;">
+    <section>
+      <h2>O que cada réplica lê</h2>
+      <table>
+        <thead><tr><th>Réplica</th><th>Estado</th><th>Rotas</th><th>Aeroportos</th><th>Voos</th></tr></thead>
+        <tbody id="reads"></tbody>
+      </table>
+      <p class="explain" id="top"></p>
+    </section>
+    <section>
+      <h2>Eventos ao vivo</h2>
+      <div id="feed"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const TOKEN = "__TOKEN__";
+const IDS = ["ar0", "ar1", "ar2"];
+const Y = {ar0: 105, ar1: 245, ar2: 385};
+const X = {write: 110, exchange: 470, queue: 730, read: 975};
+const COLOR = {route: "var(--route)", airport: "var(--airport)", flightcopy: "var(--flightcopy)"};
+const NS = "http://www.w3.org/2000/svg";
+let state = {broker: false, queues: {}, replicas: {}, exchange: null};
+
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+// Static drawing: the lines between write, exchange, queues and read
+const links = document.getElementById("links");
+for (const id of IDS) {
+  el("path", {class: "link", d: `M${X.write + 80},${Y[id]} C${X.write + 200},${Y[id]} ${X.exchange - 160},245 ${X.exchange - 80},245`}, links);
+  el("path", {class: "link", d: `M${X.exchange + 80},245 C${X.exchange + 170},245 ${X.queue - 150},${Y[id]} ${X.queue - 70},${Y[id]}`}, links);
+  el("line", {class: "link", x1: X.queue + 70, y1: Y[id], x2: X.read - 95, y2: Y[id]}, links);
+}
+
+function draw() {
+  const nodes = document.getElementById("nodes");
+  nodes.innerHTML = "";
+  for (const id of IDS) {
+    const r = state.replicas[id] || {};
+    const cls = r.up ? "box up" : "box down";
+    el("rect", {class: cls, x: X.write - 80, y: Y[id] - 34, width: 160, height: 68, rx: 10}, nodes);
+    el("text", {class: "name", x: X.write, y: Y[id] - 6, "text-anchor": "middle"}, nodes, "airports-routes-" + id.slice(2));
+    el("text", {class: "small", x: X.write, y: Y[id] + 16, "text-anchor": "middle"}, nodes, r.up ? "pronta" : "em baixo");
+
+    const q = state.queues[id];
+    el("rect", {class: state.broker && q ? "box up" : "box down", x: X.queue - 70, y: Y[id] - 26, width: 140, height: 52, rx: 26}, nodes);
+    el("text", {class: "small", x: X.queue, y: Y[id] - 4, "text-anchor": "middle"}, nodes, "read-model." + id);
+    if (q && q.ready > 0) {
+      el("text", {class: "backlog", x: X.queue, y: Y[id] + 15, "text-anchor": "middle"}, nodes, q.ready + " à espera");
+    } else {
+      el("text", {class: "small", x: X.queue, y: Y[id] + 15, "text-anchor": "middle"}, nodes,
+         q ? (q.consumers ? "a consumir" : "sem consumidor") : "—");
+    }
+
+    el("rect", {class: cls, x: X.read - 95, y: Y[id] - 40, width: 190, height: 80, rx: 10}, nodes);
+    el("text", {class: "name", x: X.read, y: Y[id] - 14, "text-anchor": "middle"}, nodes, "read_model " + id);
+    el("text", {class: "num", x: X.read, y: Y[id] + 8, "text-anchor": "middle"}, nodes,
+       r.up ? `${r.routes ?? "…"} rotas · ${r.airports ?? "…"} aeroportos` : "em baixo");
+    el("text", {class: "small", x: X.read, y: Y[id] + 27, "text-anchor": "middle"}, nodes, r.up ? `${r.flights ?? "…"} voos` : "");
+  }
+  el("rect", {class: state.broker ? "box up" : "box down", x: X.exchange - 80, y: 200, width: 160, height: 90, rx: 12}, nodes);
+  el("text", {class: "name", x: X.exchange, y: 236, "text-anchor": "middle"}, nodes, "airports-routes");
+  el("text", {class: "name", x: X.exchange, y: 256, "text-anchor": "middle"}, nodes, ".events");
+  el("text", {class: "small", x: X.exchange, y: 276, "text-anchor": "middle"}, nodes,
+     state.broker ? `topic · ${(state.exchange?.rate ?? 0).toFixed(1)} msg/s` : "RabbitMQ em baixo");
+
+  const b = document.getElementById("broker");
+  b.textContent = state.broker ? "RabbitMQ ligado" : "RabbitMQ em baixo";
+  b.className = "pill " + (state.broker ? "ok" : "fail");
+  document.getElementById("brokerBtn").textContent = state.broker ? "Parar RabbitMQ" : "Ligar RabbitMQ";
+
+  document.getElementById("reads").innerHTML = IDS.map(id => {
+    const r = state.replicas[id] || {};
+    const status = r.up ? '<span style="color: var(--ok)">pronta</span>' : '<span style="color: var(--fail)">em baixo</span>';
+    return `<tr><td>${id}</td><td>${status}</td><td>${r.up ? r.routes ?? "" : ""}</td><td>${r.up ? r.airports ?? "" : ""}</td><td>${r.up ? r.flights ?? "" : ""}</td></tr>`;
+  }).join("");
+  const any = IDS.map(id => state.replicas[id]).find(r => r && r.up && r.top);
+  document.getElementById("top").textContent = any && any.top.length
+    ? "Rotas mais populares (US214, do read model): " + any.top.map(t => `${t.route} ${t.flights}`).join(" · ") : "";
+
+  document.getElementById("replicaControls").innerHTML = IDS.map(id => {
+    const up = (state.replicas[id] || {}).up;
+    return `<span class="r">${id} ${up
+      ? `<button class="danger" onclick="act({op: 'stop', replica: '${id}'})">Desligar</button>`
+      : `<button onclick="act({op: 'start', replica: '${id}'})">Ligar</button>`}</span>`;
+  }).join("");
+}
+
+// A dot travelling along a line, then the next one
+function travel(color, legs, done) {
+  const dots = document.getElementById("dots");
+  const c = el("circle", {r: 7, fill: color}, dots);
+  let leg = 0, start = null;
+  function step(ts) {
+    if (start === null) start = ts;
+    const [x1, y1, x2, y2, ms] = legs[leg];
+    const k = Math.min(1, (ts - start) / ms);
+    const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    c.setAttribute("cx", x1 + (x2 - x1) * e);
+    c.setAttribute("cy", y1 + (y2 - y1) * e);
+    if (k < 1) return requestAnimationFrame(step);
+    leg++, start = null;
+    if (leg < legs.length) return requestAnimationFrame(step);
+    c.remove();
+    if (done) done();
+  }
+  requestAnimationFrame(step);
+}
+
+function animate(entity, from) {
+  const color = COLOR[entity] || "var(--info)";
+  const y0 = Y[from] ?? 245;
+  travel(color, [[X.write + 80, y0, X.exchange - 80, 245, 550]], () => {
+    for (const id of IDS) {
+      const consuming = (state.replicas[id] || {}).up && (state.queues[id] || {}).consumers;
+      const legs = [[X.exchange + 80, 245, X.queue - 70, Y[id], 550]];
+      if (consuming) legs.push([X.queue + 70, Y[id], X.read - 95, Y[id], 380]);
+      travel(color, legs);
+    }
+  });
+}
+
+function line(kind, text) {
+  const feed = document.getElementById("feed");
+  const d = document.createElement("div");
+  const time = new Date().toLocaleTimeString("pt-PT");
+  d.innerHTML = `<span class="t">${time}</span><span class="k-${kind}"></span>`;
+  d.lastChild.textContent = text;
+  feed.prepend(d);
+  while (feed.children.length > 200) feed.lastChild.remove();
+}
+
+const source = new EventSource("/events");
+source.onmessage = (m) => {
+  const msg = JSON.parse(m.data);
+  if (msg.type === "state") { state = msg; draw(); }
+  else if (msg.type === "event") {
+    const e = msg.event, entity = msg.routingKey.split(".")[0];
+    animate(entity, e.nodeId);
+    line(entity, `${msg.routingKey}  ${e.key}${e.status ? "  " + e.status : ""}  (de ${e.nodeId})`);
+  } else if (msg.type === "feed") line(msg.kind, msg.text);
+};
+
+async function act(a) {
+  const target = document.getElementById("target").value;
+  if (target && !a.replica) a.replica = target;
+  const res = await fetch("/action", {method: "POST", headers: {"Content-Type": "application/json", "X-Dashboard-Token": TOKEN},
+                                      body: JSON.stringify(a)});
+  const r = await res.json();
+  if (!r.ok) line("fail", r.text);
+}
+draw();
+</script>
+</body>
+</html>
