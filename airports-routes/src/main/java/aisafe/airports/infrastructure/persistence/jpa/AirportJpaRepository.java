@@ -1,10 +1,12 @@
 package aisafe.airports.infrastructure.persistence.jpa;
 
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
 import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.AirportNotFoundException;
 import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
+import aisafe.airports.infrastructure.readmodel.AirportProjection;
 import aisafe.airports.infrastructure.replication.AirportReplica;
 import aisafe.airports.infrastructure.replication.AirportReplicaHandler;
 import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
@@ -102,8 +104,8 @@ public class AirportJpaRepository implements AirportRepository {
         springRepo.saveAndFlush(jpaData);
         // Catalog: copied to every other replica
         replicator.catalogSaved(AirportReplicaHandler.TYPE, airport.getIataCode().getCode(), AirportReplica.from(airport));
-        events.changed(AirportReplicaHandler.TYPE, "airport", existing != null ? "updated" : "created",
-                airport.getIataCode().getCode(), airport.getStatus(), null, null);
+        events.changed(AirportReplicaHandler.TYPE, AirportProjection.ENTITY, existing != null ? "updated" : "created",
+                airport.getIataCode().getCode(), airport.getStatus(), null, AirportResponse.from(airport));
         return airport;
     }
 
@@ -114,6 +116,6 @@ public class AirportJpaRepository implements AirportRepository {
         springRepo.delete(jpaEntity);
         springRepo.flush();
         replicator.catalogDeleted(AirportReplicaHandler.TYPE, airport.getIataCode().getCode());
-        events.changed(AirportReplicaHandler.TYPE, "airport", "deleted", airport.getIataCode().getCode(), null, null, null);
+        events.changed(AirportReplicaHandler.TYPE, AirportProjection.ENTITY, "deleted", airport.getIataCode().getCode(), null, null, null);
     }
 }

@@ -1,7 +1,5 @@
-package aisafe.routes.infrastructure.readmodel;
+package aisafe.airportsroutes.infrastructure.readmodel;
 
-import aisafe.routes.infrastructure.replication.RouteReplica;
-import aisafe.routes.infrastructure.replication.RouteReplicaHandler;
 import aisafe.shared.infrastructure.peers.PeerClient;
 import aisafe.shared.infrastructure.replication.ReplicaEnvelope;
 import aisafe.shared.infrastructure.replication.ReplicaExporter;
@@ -23,39 +21,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Brings the read model up to date with what the replicas hold (the write model), routes and
+ * Brings the read model up to date with what the replicas hold (the write model), entities and
  * deletions alike, with the stamp of their last change. Events keep the read model current; this
  * repairs what events cannot:
  *
  * <ul>
- *   <li><b>on startup</b>, before the replica reports ready: the routes created before this
+ *   <li><b>on startup</b>, before the replica reports ready: what was written before this
  *   replica's queue existed, or while the broker was down;</li>
  *   <li><b>every {@code aisafe.read-model.reconcile-interval-ms}</b> (60 s by default): an event
  *   lost because the broker could not be reached when it was published.</li>
  * </ul>
  *
- * <p>Peers that do not answer are skipped: their routes are also held by the next replica, or
- * come in the next round.</p>
+ * <p>It reads the same export the replication uses ({@code GET /internal/replicas/{type}}). Peers
+ * that do not answer are skipped: their records are also held by the next replica, or come in the
+ * next round.</p>
  */
 @Component
 @ConditionalOnProperty(name = "aisafe.events.enabled", havingValue = "true")
-public class RouteViewReconciler implements ApplicationRunner {
+public class ReadModelReconciler implements ApplicationRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(RouteViewReconciler.class);
+    private static final Logger log = LoggerFactory.getLogger(ReadModelReconciler.class);
 
+    private final List<Projection> projections;
     private final ReplicaExporter exporter;
-    private final RouteReplicaHandler handler;
     private final PeerClient peerClient;
     private final ServiceTokens serviceTokens;
-    private final RouteViewStore store;
+    private final ReadModelStore store;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate readOnly;
 
-    public RouteViewReconciler(ReplicaExporter exporter, RouteReplicaHandler handler, PeerClient peerClient,
-                               ServiceTokens serviceTokens, RouteViewStore store, ObjectMapper objectMapper,
+    public ReadModelReconciler(List<Projection> projections, ReplicaExporter exporter, PeerClient peerClient,
+                               ServiceTokens serviceTokens, ReadModelStore store, ObjectMapper objectMapper,
                                PlatformTransactionManager transactions) {
+        this.projections = projections;
         this.exporter = exporter;
-        this.handler = handler;
         this.peerClient = peerClient;
         this.serviceTokens = serviceTokens;
         this.store = store;
@@ -72,32 +71,35 @@ public class RouteViewReconciler implements ApplicationRunner {
     @Scheduled(initialDelayString = "${aisafe.read-model.reconcile-interval-ms:60000}",
                fixedDelayString = "${aisafe.read-model.reconcile-interval-ms:60000}")
     public void reconcile() {
-        // In a transaction: exporting a route also reads its history
-        List<ReplicaEnvelope> envelopes = new ArrayList<>(readOnly.execute(status -> exporter.export(handler, null)));
+        projections.forEach(this::reconcile);
+    }
+
+    private void reconcile(Projection projection) {
+        // In a transaction: exporting an entity may read related rows (e.g. a route's history)
+        List<ReplicaEnvelope> envelopes = new ArrayList<>(readOnly.execute(status -> exporter.export(projection.handler(), null)));
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(serviceTokens.current());
         JavaType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ReplicaEnvelope.class);
-        for (PeerClient.PeerResponse response : peerClient.getFromAll("/internal/replicas/" + handler.type(), headers)) {
+        for (PeerClient.PeerResponse response : peerClient.getFromAll("/internal/replicas/" + projection.handler().type(), headers)) {
             if (!response.found()) {
                 continue;
             }
             try {
                 envelopes.addAll(objectMapper.readValue(response.body(), listType));
             } catch (RuntimeException e) {
-                log.warn("Read model: unreadable routes from {}, skipped: {}", response.peer(), e.getMessage());
+                log.warn("Read model: unreadable {} from {}, skipped: {}", projection.handler().type(), response.peer(), e.getMessage());
             }
         }
         int applied = 0;
         for (ReplicaEnvelope envelope : envelopes) {
-            RouteView view = envelope.deleted() ? null
-                    : RouteView.from(objectMapper.treeToValue(envelope.payload(), RouteReplica.class).toRoute());
-            if (store.apply(envelope.key(), view, envelope.version(),
-                    envelope.stamp() == null ? 0 : envelope.stamp(), envelope.stampNode())) {
+            Object view = envelope.deleted() ? null : projection.view(envelope.payload());
+            if (store.apply(projection.entity(), envelope.key(), view == null ? null : objectMapper.valueToTree(view),
+                    envelope.version(), envelope.stamp() == null ? 0 : envelope.stamp(), envelope.stampNode())) {
                 applied++;
             }
         }
         if (applied > 0) {
-            log.info("Read model: {} of {} route changes from the replicas applied", applied, envelopes.size());
+            log.info("Read model: {} of {} {} changes from the replicas applied", applied, envelopes.size(), projection.entity());
         }
     }
 }

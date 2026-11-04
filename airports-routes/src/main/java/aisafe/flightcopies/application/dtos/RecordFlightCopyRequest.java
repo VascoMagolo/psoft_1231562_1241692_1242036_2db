@@ -7,7 +7,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.time.OffsetDateTime;
 
 /**
- * Copy of a flight sent by flight-ops (contract C4 in the service map).
+ * Copy of a flight sent by flight-ops (contract C5).
  */
 public record RecordFlightCopyRequest(
         @NotBlank String id,

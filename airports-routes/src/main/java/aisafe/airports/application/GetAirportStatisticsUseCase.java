@@ -2,7 +2,6 @@ package aisafe.airports.application;
 
 import aisafe.shared.application.UseCase;
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
-import aisafe.airports.domain.AirportRepository;
 import aisafe.routes.application.RoutesAcrossReplicas;
 import aisafe.routes.domain.Route;
 import aisafe.shared.application.Versioned;
@@ -21,11 +20,11 @@ import java.util.List;
  */
 @UseCase(readOnly = true)
 public class GetAirportStatisticsUseCase {
-    private final AirportRepository airportRepository;
+    private final AirportListings airports;
     private final RoutesAcrossReplicas routes;
 
-    public GetAirportStatisticsUseCase(AirportRepository airportRepository, RoutesAcrossReplicas routes) {
-        this.airportRepository = airportRepository;
+    public GetAirportStatisticsUseCase(AirportListings airports, RoutesAcrossReplicas routes) {
+        this.airports = airports;
         this.routes = routes;
     }
 
@@ -35,9 +34,9 @@ public class GetAirportStatisticsUseCase {
                 .map(Versioned::value)
                 .flatMap(GetAirportStatisticsUseCase::airportsOf)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        return airportRepository.findAll().stream()
-                .map(a -> new AirportStatisticsResponse(a.getIataCode().getCode(), a.getName(), a.getCity(), a.getCountry(),
-                        routesPerAirport.getOrDefault(a.getIataCode().getCode(), 0L)))
+        return airports.findAll().stream()
+                .map(a -> new AirportStatisticsResponse(a.iataCode(), a.name(), a.city(), a.country(),
+                        routesPerAirport.getOrDefault(a.iataCode(), 0L)))
                 .sorted(Comparator.comparingLong(AirportStatisticsResponse::routeCount).reversed()
                         .thenComparing(AirportStatisticsResponse::iataCode))
                 .toList();

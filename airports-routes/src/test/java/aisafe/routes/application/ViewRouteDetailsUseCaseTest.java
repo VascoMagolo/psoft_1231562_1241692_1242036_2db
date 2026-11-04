@@ -40,6 +40,15 @@ class ViewRouteDetailsUseCaseTest {
         verify(routeRepository).findByOriginAndDestination(any(IataCode.class), any(IataCode.class));
     }
 
+    @Test
+    void ensureRouteDetailsCarryTheVersionForIfMatch() {
+        when(routeRepository.findByOriginAndDestination(any(IataCode.class), any(IataCode.class)))
+                .thenReturn(Optional.of(new Route("OPO", "LIS", 45, 300.0, 150)));
+        when(routeRepository.findVersionFor(any(IataCode.class), any(IataCode.class))).thenReturn(3L);
+
+        assertEquals(3L, viewRouteDetails.execute("OPO", "LIS").version());
+    }
+
 
     @Test
     void ensureExceptionWhenRouteNotFound() {

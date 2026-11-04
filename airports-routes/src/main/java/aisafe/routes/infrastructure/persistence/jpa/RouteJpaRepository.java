@@ -4,6 +4,7 @@ import aisafe.airports.domain.IataCode;
 import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
+import aisafe.routes.infrastructure.readmodel.RouteProjection;
 import aisafe.routes.infrastructure.readmodel.RouteView;
 import aisafe.routes.infrastructure.replication.RouteReplicaHandler;
 import aisafe.routes.infrastructure.replication.RouteReplicaSender;
@@ -45,7 +46,7 @@ public class RouteJpaRepository implements RouteRepository {
         });
         RouteJpaEntity saved = springRepo.saveAndFlush(jpaEntity);
         replicaSender.routeSaved(saved);
-        events.changed(RouteReplicaHandler.TYPE, "route", existing.isPresent() ? "updated" : "created", key(route),
+        events.changed(RouteReplicaHandler.TYPE, RouteProjection.ENTITY, existing.isPresent() ? "updated" : "created", key(route),
                 route.getStatus(), saved.getVersion(), RouteView.from(route));
         return route;
     }
@@ -70,7 +71,7 @@ public class RouteJpaRepository implements RouteRepository {
                 .ifPresent(entity -> {
                     springRepo.delete(entity);
                     replicaSender.routeDeleted(route.getOrigin().getCode(), route.getDestination().getCode());
-                    events.changed(RouteReplicaHandler.TYPE, "route", "deleted", key(route), null, null, null);
+                    events.changed(RouteReplicaHandler.TYPE, RouteProjection.ENTITY, "deleted", key(route), null, null, null);
                 });
     }
 

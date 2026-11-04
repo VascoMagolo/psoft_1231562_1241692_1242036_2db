@@ -2,7 +2,6 @@ package aisafe.airports.application;
 
 import aisafe.airports.application.dtos.AirportGroupResponse;
 import aisafe.airports.domain.AirportGroupingData;
-import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,7 @@ import static org.mockito.Mockito.*;
 class ListAirportsByRegionUseCaseTest {
 
     @Mock
-    private AirportRepository airportRepository;
+    private AirportListings airports;
 
     @InjectMocks
     private ListAirportsByRegionUseCase listAirportsByRegion;
@@ -33,7 +32,7 @@ class ListAirportsByRegionUseCaseTest {
         AirportGroupingData lis = buildRow("LIS", "Portugal", "Europe");
         AirportGroupingData jfk = buildRow("JFK", "USA", "North America");
 
-        when(airportRepository.findAllGroupingByRegion()).thenReturn(List.of(lis, jfk));
+        when(airports.groupedByRegion()).thenReturn(List.of(lis, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 
@@ -48,7 +47,7 @@ class ListAirportsByRegionUseCaseTest {
         AirportGroupingData opo = buildRow("OPO", "Portugal", "Europe");
         AirportGroupingData jfk = buildRow("JFK", "USA", "North America");
 
-        when(airportRepository.findAllGroupingByCountry()).thenReturn(List.of(lis, opo, jfk));
+        when(airports.groupedByCountry()).thenReturn(List.of(lis, opo, jfk));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("country");
 
@@ -60,7 +59,7 @@ class ListAirportsByRegionUseCaseTest {
     @Test
     void ensureNullRegionFallsBackToUnknown() {
         AirportGroupingData a = buildRow("XXX", "Unknown Country", null);
-        when(airportRepository.findAllGroupingByRegion()).thenReturn(List.of(a));
+        when(airports.groupedByRegion()).thenReturn(List.of(a));
 
         List<AirportGroupResponse> result = listAirportsByRegion.execute("region");
 

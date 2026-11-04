@@ -27,8 +27,11 @@ public class ViewRouteDetailsUseCase {
      * @return the requested route response
      */
     public RouteResponse execute(String origin, String destination) {
-        Route route = routeRepository.findByOriginAndDestination(new IataCode(origin), new IataCode(destination))
+        IataCode originCode = new IataCode(origin);
+        IataCode destinationCode = new IataCode(destination);
+        Route route = routeRepository.findByOriginAndDestination(originCode, destinationCode)
                 .orElseThrow(() -> new RouteNotFoundException(origin + "-" + destination));
-        return RouteResponse.from(route);
+        // The version to send back as If-Match when changing the route
+        return RouteResponse.from(route, routeRepository.findVersionFor(originCode, destinationCode));
     }
 }

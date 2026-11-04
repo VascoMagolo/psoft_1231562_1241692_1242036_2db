@@ -2,7 +2,7 @@ package aisafe.airports.application;
 
 import aisafe.airports.application.dtos.AirportStatisticsResponse;
 import aisafe.airports.domain.Airport;
-import aisafe.airports.domain.AirportRepository;
+import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Runway;
 import aisafe.routes.application.RoutesAcrossReplicas;
 import aisafe.routes.domain.Route;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class GetAirportStatisticsUseCaseTest {
 
     @Mock
-    private AirportRepository airportRepository;
+    private AirportListings airports;
 
     @Mock
     private RoutesAcrossReplicas routes;
@@ -30,9 +30,9 @@ class GetAirportStatisticsUseCaseTest {
     @InjectMocks
     private GetAirportStatisticsUseCase airportStatistics;
 
-    private static Airport airport(String code, String city) {
-        return new Airport(code, city + " Airport", city, "Portugal", "Europe", "Europe/Lisbon",
-                38.77, -9.13, List.of(new Runway("03/21", 3000, "030/210")));
+    private static AirportResponse airport(String code, String city) {
+        return AirportResponse.from(new Airport(code, city + " Airport", city, "Portugal", "Europe", "Europe/Lisbon",
+                38.77, -9.13, List.of(new Runway("03/21", 3000, "030/210"))));
     }
 
     private static Versioned<Route> route(String origin, String destination) {
@@ -41,7 +41,7 @@ class GetAirportStatisticsUseCaseTest {
 
     @Test
     void ensureEmptyResultReturnsEmptyList() {
-        when(airportRepository.findAll()).thenReturn(List.of());
+        when(airports.findAll()).thenReturn(List.of());
         when(routes.findAll()).thenReturn(List.of());
 
         List<AirportStatisticsResponse> result = airportStatistics.execute();
@@ -51,7 +51,7 @@ class GetAirportStatisticsUseCaseTest {
 
     @Test
     void ensureRoutesOfEveryReplicaAreCountedForBothAirportsMostConnectedFirst() {
-        when(airportRepository.findAll()).thenReturn(List.of(airport("OPO", "Porto"), airport("LIS", "Lisbon"), airport("FAO", "Faro")));
+        when(airports.findAll()).thenReturn(List.of(airport("OPO", "Porto"), airport("LIS", "Lisbon"), airport("FAO", "Faro")));
         when(routes.findAll()).thenReturn(List.of(route("LIS", "OPO"), route("OPO", "LIS"), route("LIS", "FAO")));
 
         List<AirportStatisticsResponse> result = airportStatistics.execute();
@@ -62,7 +62,7 @@ class GetAirportStatisticsUseCaseTest {
 
     @Test
     void ensureAirportWithoutRoutesCountsZero() {
-        when(airportRepository.findAll()).thenReturn(List.of(airport("LIS", "Lisbon")));
+        when(airports.findAll()).thenReturn(List.of(airport("LIS", "Lisbon")));
         when(routes.findAll()).thenReturn(List.of());
 
         List<AirportStatisticsResponse> result = airportStatistics.execute();

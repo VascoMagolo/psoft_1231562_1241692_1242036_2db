@@ -3,7 +3,6 @@ package aisafe.airports.application;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.application.dtos.SearchAirportRequest;
 import aisafe.airports.domain.Airport;
-import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.Runway;
 import aisafe.shared.domain.PaginatedResult;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.*;
 class SearchAirportUseCaseTest {
 
     @Mock
-    private AirportRepository airportRepository;
+    private AirportListings airports;
 
     @InjectMocks
     private SearchAirportUseCase searchAirport;
@@ -34,9 +33,8 @@ class SearchAirportUseCaseTest {
 
     @Test
     void ensureSearchReturnsPaginatedResults() {
-        Airport airport = buildAirport("LIS");
-        PaginatedResult<Airport> domainResult = new PaginatedResult<>(List.of(airport), 1L);
-        when(airportRepository.searchAirports("Lisbon", null, null, 0, 10)).thenReturn(domainResult);
+        AirportResponse airport = AirportResponse.from(buildAirport("LIS"));
+        when(airports.search("Lisbon", null, null, 0, 10)).thenReturn(new PaginatedResult<>(List.of(airport), 1L));
 
         PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest("Lisbon", null, null, 0, 10));
 
@@ -46,8 +44,7 @@ class SearchAirportUseCaseTest {
 
     @Test
     void ensureSearchWithNoMatchReturnsEmptyResult() {
-        PaginatedResult<Airport> domainResult = new PaginatedResult<>(List.of(), 0L);
-        when(airportRepository.searchAirports("Unknown", null, null, 0, 10)).thenReturn(domainResult);
+        when(airports.search("Unknown", null, null, 0, 10)).thenReturn(new PaginatedResult<>(List.of(), 0L));
 
         PaginatedResult<AirportResponse> result = searchAirport.execute(new SearchAirportRequest("Unknown", null, null, 0, 10));
 
