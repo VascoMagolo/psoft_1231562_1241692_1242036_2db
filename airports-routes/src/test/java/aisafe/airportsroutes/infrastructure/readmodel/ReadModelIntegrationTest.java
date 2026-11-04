@@ -49,6 +49,8 @@ import static org.mockito.Mockito.verify;
  * Every write in its own transaction, as the use cases do: the events leave after the commit.
  */
 @SpringBootTest(properties = {
+        // A database of its own: its deletions leave tombstones that would hide the same keys from other tests
+        "spring.datasource.url=jdbc:h2:mem:readmodel-it",
         "aisafe.events.enabled=true",
         "spring.rabbitmq.listener.simple.auto-startup=false",
         "aisafe.node.id=airports-routes-0",

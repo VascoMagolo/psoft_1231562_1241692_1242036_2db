@@ -1,13 +1,12 @@
 package aisafe.airportsroutes.infrastructure.readmodel;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * The read model (CQRS): table {@code read_model}, one row per entity of every replica (routes,
@@ -32,28 +31,34 @@ public class ReadModelStore {
     }
 
     /**
+     * The stamp rule is inside the {@code UPDATE} itself, so two writers of the same row (an event
+     * and the reconciliation, e.g. right after a restart) cannot both pass it: the later change
+     * always stays.
+     *
      * @param view the entity after the change, null if the change deleted it
      * @return whether the change was applied (false: this row already shows a later change)
      */
-    @Transactional
     public boolean apply(String type, String key, JsonNode view, Long version, long stamp, String stampNode) {
-        List<Map<String, Object>> current = jdbc.queryForList(
-                "SELECT stamp, stamp_node FROM read_model WHERE entity_type = ? AND entity_key = ?", type, key);
-        if (!current.isEmpty() && !isLater(stamp, stampNode,
-                ((Number) current.get(0).get("stamp")).longValue(), (String) current.get(0).get("stamp_node"))) {
-            return false;
+        String node = stampNode == null ? "" : stampNode;
+        String content = view == null ? null : objectMapper.writeValueAsString(view);
+        if (updateIfLater(type, key, content, version, stamp, node)) {
+            return true;
         }
-        boolean deleted = view == null;
-        Object[] values = {deleted ? null : objectMapper.writeValueAsString(view), version, stamp,
-                stampNode == null ? "" : stampNode, deleted, type, key};
-        if (current.isEmpty()) {
+        try {
             jdbc.update("INSERT INTO read_model (content, version, stamp, stamp_node, deleted, entity_type, entity_key) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?)", values);
-        } else {
-            jdbc.update("UPDATE read_model SET content = ?, version = ?, stamp = ?, stamp_node = ?, deleted = ? "
-                    + "WHERE entity_type = ? AND entity_key = ?", values);
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?)", content, version, stamp, node, content == null, type, key);
+            return true;
+        } catch (DuplicateKeyException e) {
+            // The row exists (with a later change), or another writer inserted it first: apply this one only if later
+            return updateIfLater(type, key, content, version, stamp, node);
         }
-        return true;
+    }
+
+    /** Later time; with the same time, the higher replica id (as the replication does). */
+    private boolean updateIfLater(String type, String key, String content, Long version, long stamp, String node) {
+        return jdbc.update("UPDATE read_model SET content = ?, version = ?, stamp = ?, stamp_node = ?, deleted = ? "
+                        + "WHERE entity_type = ? AND entity_key = ? AND (stamp < ? OR (stamp = ? AND stamp_node < ?))",
+                content, version, stamp, node, content == null, type, key, stamp, stamp, node) == 1;
     }
 
     /** Every entity of this type that is not deleted, ordered by key. */
@@ -63,12 +68,6 @@ public class ReadModelStore {
                 (rs, n) -> new Row(rs.getString("entity_key"), objectMapper.readTree(rs.getString("content")),
                         rs.getObject("version", Long.class)),
                 type);
-    }
-
-    /** Later time; with the same time, the higher replica id (as the replication does). */
-    static boolean isLater(long stamp, String node, long otherStamp, String otherNode) {
-        int byTime = Long.compare(stamp, otherStamp);
-        return byTime != 0 ? byTime > 0 : (node == null ? "" : node).compareTo(otherNode == null ? "" : otherNode) > 0;
     }
 
     /** An entity as kept by the read model: its view and its version (the one its ETag is built from). */

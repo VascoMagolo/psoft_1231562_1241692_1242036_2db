@@ -5,10 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -102,6 +108,33 @@ class ReadModelStoreTest {
         assertTrue(store.apply("route", "OPO-LIS", view(55), 0L, 3_000, "airports-routes-0"));
 
         assertEquals(1, store.findAll("route").size());
+    }
+
+    /** An event and the reconciliation applying the same key at once (e.g. right after a restart). */
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void ensureTwoWritersOfTheSameKeyAlwaysLeaveTheLaterChange() throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            for (int i = 0; i < 200; i++) {
+                String key = "RACE-" + i;
+                CyclicBarrier together = new CyclicBarrier(2);
+                Future<?> older = pool.submit(() -> { together.await(); return store.apply("race", key, view(1), 0L, 1_000, "a"); });
+                Future<?> later = pool.submit(() -> { together.await(); return store.apply("race", key, view(2), 1L, 2_000, "a"); });
+                older.get();
+                later.get();
+                assertEquals(2, flightTimeOf("race", key), "the later change stays (" + key + ")");
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    void ensureTheSameChangeAppliedTwiceIsAppliedOnce() {
+        assertTrue(store.apply("route", "OPO-LIS", view(55), 0L, 1_000, "a"));
+
+        assertFalse(store.apply("route", "OPO-LIS", view(55), 0L, 1_000, "a"));
     }
 
     @Test

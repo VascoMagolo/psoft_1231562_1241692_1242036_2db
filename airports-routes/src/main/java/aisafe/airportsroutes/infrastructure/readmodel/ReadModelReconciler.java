@@ -32,9 +32,11 @@ import java.util.List;
  *   lost because the broker could not be reached when it was published.</li>
  * </ul>
  *
- * <p>It reads the same export the replication uses ({@code GET /internal/replicas/{type}}). Peers
- * that do not answer are skipped: their records are also held by the next replica, or come in the
- * next round.</p>
+ * <p>It reads the same export the replication uses: this replica's own, and for records (routes,
+ * flight copies) also the peers' ({@code GET /internal/replicas/{type}}). Catalogs (airports) are
+ * already on every replica, so this replica's export has them all. Peers that do not answer are
+ * skipped: their records are also held by the next replica, or come in the next round. A change
+ * that cannot be applied is logged and skipped, so it never stops the round, nor the startup.</p>
  */
 @Component
 @ConditionalOnProperty(name = "aisafe.events.enabled", havingValue = "true")
@@ -71,15 +73,43 @@ public class ReadModelReconciler implements ApplicationRunner {
     @Scheduled(initialDelayString = "${aisafe.read-model.reconcile-interval-ms:60000}",
                fixedDelayString = "${aisafe.read-model.reconcile-interval-ms:60000}")
     public void reconcile() {
-        projections.forEach(this::reconcile);
+        for (Projection projection : projections) {
+            try {
+                reconcile(projection);
+            } catch (RuntimeException e) {
+                log.warn("Read model: {} not reconciled this round: {}", projection.entity(), e.toString());
+            }
+        }
     }
 
     private void reconcile(Projection projection) {
         // In a transaction: exporting an entity may read related rows (e.g. a route's history)
         List<ReplicaEnvelope> envelopes = new ArrayList<>(readOnly.execute(status -> exporter.export(projection.handler(), null)));
+        if (!projection.handler().isCatalog()) {
+            envelopes.addAll(fromPeers(projection));
+        }
+        int applied = 0;
+        for (ReplicaEnvelope envelope : envelopes) {
+            try {
+                Object view = envelope.deleted() ? null : projection.view(envelope.payload());
+                if (store.apply(projection.entity(), envelope.key(), view == null ? null : objectMapper.valueToTree(view),
+                        envelope.version(), envelope.stamp() == null ? 0 : envelope.stamp(), envelope.stampNode())) {
+                    applied++;
+                }
+            } catch (RuntimeException e) {
+                log.warn("Read model: {} {} not applied: {}", projection.entity(), envelope.key(), e.toString());
+            }
+        }
+        if (applied > 0) {
+            log.info("Read model: {} of {} {} changes from the replicas applied", applied, envelopes.size(), projection.entity());
+        }
+    }
+
+    private List<ReplicaEnvelope> fromPeers(Projection projection) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(serviceTokens.current());
         JavaType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ReplicaEnvelope.class);
+        List<ReplicaEnvelope> envelopes = new ArrayList<>();
         for (PeerClient.PeerResponse response : peerClient.getFromAll("/internal/replicas/" + projection.handler().type(), headers)) {
             if (!response.found()) {
                 continue;
@@ -90,16 +120,6 @@ public class ReadModelReconciler implements ApplicationRunner {
                 log.warn("Read model: unreadable {} from {}, skipped: {}", projection.handler().type(), response.peer(), e.getMessage());
             }
         }
-        int applied = 0;
-        for (ReplicaEnvelope envelope : envelopes) {
-            Object view = envelope.deleted() ? null : projection.view(envelope.payload());
-            if (store.apply(projection.entity(), envelope.key(), view == null ? null : objectMapper.valueToTree(view),
-                    envelope.version(), envelope.stamp() == null ? 0 : envelope.stamp(), envelope.stampNode())) {
-                applied++;
-            }
-        }
-        if (applied > 0) {
-            log.info("Read model: {} of {} {} changes from the replicas applied", applied, envelopes.size(), projection.entity());
-        }
+        return envelopes;
     }
 }
