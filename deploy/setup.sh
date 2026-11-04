@@ -240,20 +240,66 @@ prepare_images() {
   echo "Images of commit $commit"
 }
 
+# A random password of letters and digits (also usable as the Erlang cookie).
+random_secret() {
+  head -c 64 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32
+}
+
+# RabbitMQ users, created inside a broker from the Secret mounted there: no password goes through
+# this computer, the node or a command line outside the broker. Each service may only declare and use its own exchange and queues,
+# the shared exchanges of commands and dead letters, and the events of the services it reads.
+RABBITMQ_USERS="aircraft-maintenance airports-routes flight-ops login postman"
+rabbitmq_users() {
+  on_node "${NODE_IPS[0]}" '
+    ctl() { k3s kubectl -n aisafe exec rabbitmq-0 -c rabbitmq -- rabbitmqctl -q "$@"; }
+    # The password is read inside the broker, from the Secret mounted there (rabbitmq.yaml), and
+    # never leaves it. rabbitmqctl does not read a password from its input there, so it is given as
+    # an argument, inside the broker only, where the same Secret is already readable.
+    add_user() {
+      k3s kubectl -n aisafe exec rabbitmq-0 -c rabbitmq -- \
+        sh -c "rabbitmqctl -q add_user \"\$0\" \"\$(cat /etc/aisafe-rabbitmq/\$0-password)\"" "$1" > /dev/null
+    }
+    existing=$(ctl list_users --no-table-headers | cut -f1)
+    for user in '"$RABBITMQ_USERS"'; do
+      grep -qx "$user" <<< "$existing" || add_user "$user"
+    done
+    permit() {   # permit USER EXCHANGES-IT-READS (other services, separated by |)
+      local own="$1\..*|aisafe\.commands|aisafe\.dead-letter" reads=""
+      [ -z "$2" ] || reads="|($2)\.events"
+      ctl set_permissions -p / "$1" "^($own$reads)\$" "^($own|amq\.default)\$" "^($own$reads|amq\.rabbitmq\.reply-to.*)\$"
+    }
+    permit aircraft-maintenance ""
+    permit airports-routes "aircraft-maintenance"
+    permit flight-ops "aircraft-maintenance|airports-routes"
+    permit login ""
+    # The Postman tests: their own queues, bound to the events of every service; nothing else
+    ctl set_permissions -p / postman "^postman\..*\$" "^postman\..*\$" "^(postman\..*|.*\.events)\$"
+    ctl set_user_tags postman management'
+}
+
 stage_app() {
-  local jwt vips
+  local jwt vips user
+  local rabbitmq_secrets=()
   : "${VIP_AIRPORTS_ROUTES:?missing in deploy/config.sh: add it from deploy/config.example.sh}"
   : "${VIP_FLIGHT_OPS:?missing in deploy/config.sh: add it from deploy/config.example.sh}"
+  : "${VIP_RABBITMQ:?missing in deploy/config.sh: add it from deploy/config.example.sh}"
   prepare_images
-  log "Namespace, JWT secret and the entries' configuration and certificate"
+  log "Namespace, JWT secret, RabbitMQ passwords and the entries' configuration and certificate"
   kube create namespace aisafe --dry-run=client -o yaml | kube apply -f - > /dev/null
   if ! kube -n aisafe get secret aisafe-jwt > /dev/null 2>&1; then
     jwt=$(head -c 32 /dev/urandom | base64)
     secret_yaml aisafe aisafe-jwt "secret=$jwt" | kube apply -f - > /dev/null
   fi
-  # HTTPS on the virtual IPs: a self-signed certificate for the four of them, made on a node (its
+  if ! kube -n aisafe get secret aisafe-rabbitmq > /dev/null 2>&1; then
+    rabbitmq_secrets=("erlang-cookie=$(random_secret)" "admin-password=$(random_secret)")
+    for user in $RABBITMQ_USERS; do
+      rabbitmq_secrets+=("$user-password=$(random_secret)")
+    done
+    secret_yaml aisafe aisafe-rabbitmq "${rabbitmq_secrets[@]}" | kube apply -f - > /dev/null
+  fi
+  # HTTPS on the virtual IPs: a self-signed certificate for all of them, made on a node (its
   # key never leaves the cluster) the first time and again when the virtual IPs change.
-  vips="$VIP_AIRCRAFT_MAINTENANCE $VIP_AIRPORTS_ROUTES $VIP_FLIGHT_OPS $VIP_LOGIN"
+  vips="$VIP_AIRCRAFT_MAINTENANCE $VIP_AIRPORTS_ROUTES $VIP_FLIGHT_OPS $VIP_LOGIN $VIP_RABBITMQ"
   if [ "$(kube -n aisafe get secret entry-tls -o 'jsonpath={.metadata.annotations.aisafe/vips}' 2> /dev/null)" != "$vips" ]; then
     on_node "${NODE_IPS[0]}" "
       dir=\$(mktemp -d)
@@ -267,6 +313,13 @@ stage_app() {
   save_entry_cert
   kube -n aisafe create configmap entry --from-file=envoy.yaml=/dev/stdin --dry-run=client -o yaml \
     < "$DEPLOY_DIR/manifests/envoy.yaml" | kube apply -f - > /dev/null
+
+  log "RabbitMQ (three brokers) and its users"
+  sed -e "s|@VIP_RABBITMQ@|$VIP_RABBITMQ|g" \
+      -e "s|@RABBITMQ_CONFIG_HASH@|$(hash16 < "$DEPLOY_DIR/manifests/rabbitmq.yaml")|g" \
+      "$DEPLOY_DIR/manifests/rabbitmq.yaml" | kube apply -f - > /dev/null
+  kube -n aisafe rollout status statefulset/rabbitmq --timeout=900s
+  rabbitmq_users
 
   log "Applying the manifests"
   sed -e "s|@VIP_AIRCRAFT_MAINTENANCE@|$VIP_AIRCRAFT_MAINTENANCE|g" -e "s|@VIP_LOGIN@|$VIP_LOGIN|g" \

@@ -10,6 +10,7 @@
 #   routes-crash    an airports-routes replica is killed
 #   flight-ops-crash a flight-ops replica is killed
 #   login-crash     a login is killed
+#   rabbitmq-crash  a RabbitMQ broker is killed (Assignment 2: events and the Saga's commands)
 #   deploy          every service restarts, one replica at a time (as deploy/setup.sh does)
 #   node-off        a node loses power
 #   node-freeze     a node freezes (its kernel stops; the watchdog has to restart it)
@@ -28,7 +29,7 @@ TARGET_NODE=${TARGET_NODE:-${NODE_IPS[${#NODE_IPS[@]}-1]}}   # the node hit by n
 INTERVAL=${INTERVAL:-0.2}                     # pause between requests, in each worker
 SETTLE=${SETTLE:-15}                          # seconds of traffic once the system is back to normal
 MAX_RECOVERY=${MAX_RECOVERY:-600}             # seconds to wait for the system to be normal again
-ALL_SCENARIOS=(replica-crash routes-crash flight-ops-crash login-crash deploy node-off node-freeze)
+ALL_SCENARIOS=(replica-crash routes-crash flight-ops-crash login-crash rabbitmq-crash deploy node-off node-freeze)
 
 # Milliseconds since 1970. The date of macOS has no milliseconds: perl, which macOS has, gives them.
 if [[ $(date +%s%3N) =~ ^[0-9]+$ ]]; then
@@ -292,6 +293,7 @@ cause() {
     routes-crash) kube -n aisafe delete pod airports-routes-1 --grace-period=0 --force 2> /dev/null ;;
     flight-ops-crash) kube -n aisafe delete pod flight-ops-1 --grace-period=0 --force 2> /dev/null ;;
     login-crash) kube -n aisafe delete "$(kube -n aisafe get pods -l app=login -o name | head -1)" --grace-period=0 --force 2> /dev/null ;;
+    rabbitmq-crash) kube -n aisafe delete pod rabbitmq-1 --grace-period=0 --force 2> /dev/null ;;
     deploy)
       kube -n aisafe rollout restart statefulset/aircraft-maintenance statefulset/airports-routes statefulset/flight-ops statefulset/login
       kube -n aisafe rollout status statefulset/aircraft-maintenance --timeout=600s
