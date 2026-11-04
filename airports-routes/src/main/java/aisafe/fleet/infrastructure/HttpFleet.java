@@ -11,6 +11,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -31,6 +32,7 @@ import java.util.Optional;
  * and so does the correlation id, so one client request can be followed across services.</p>
  */
 @Component
+@ConditionalOnProperty(name = "aisafe.events.enabled", havingValue = "false", matchIfMissing = true)
 public class HttpFleet implements Fleet {
 
     private static final Logger log = LoggerFactory.getLogger(HttpFleet.class);

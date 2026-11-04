@@ -5,12 +5,14 @@ import aisafe.fleet.domain.AircraftInfo;
 import java.util.Optional;
 
 /**
- * What this service needs to know about the fleet, which belongs to aircraft-maintenance. It is
- * asked through this port, never read from a local copy, so the answer is always the owner's.
+ * What this service needs to know about the fleet, which belongs to aircraft-maintenance.
  *
- * <p>When aircraft-maintenance cannot be reached, both methods throw
+ * <p>Without events (Assignment 1) it is asked to aircraft-maintenance on every call
+ * ({@code HttpFleet}, C1 and C3), and when aircraft-maintenance cannot be reached both methods throw
  * {@link aisafe.fleet.domain.FleetUnavailableException}: an unknown answer is never taken as
- * "does not exist".</p>
+ * "does not exist". With events (Assignment 2) it is read from this replica's copy, kept by the
+ * events of aircraft-maintenance ({@code ReadModelFleet}): always answered, maybe a few moments
+ * behind.</p>
  */
 public interface Fleet {
 
