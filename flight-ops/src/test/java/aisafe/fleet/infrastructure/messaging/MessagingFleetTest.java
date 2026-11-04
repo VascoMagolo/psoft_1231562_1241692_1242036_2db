@@ -17,6 +17,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +31,7 @@ class MessagingFleetTest {
     private final JsonMapper json = JsonMapper.builder().build();
     private final ReadModelStore store = mock(ReadModelStore.class);
     private final CommandBus commands = mock(CommandBus.class);
-    private final MessagingFleet fleet = new MessagingFleet(store, commands);
+    private final MessagingFleet fleet = new MessagingFleet(store, commands, json);
     private final OffsetDateTime departure = OffsetDateTime.of(2027, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
     private final FlightCopy copy = new FlightCopy("F-1", departure, departure.plusHours(2), "SCHEDULED", "OPO", "LIS", "CS-TKA", 1);
 
@@ -51,12 +52,44 @@ class MessagingFleetTest {
     }
 
     @Test
-    void ensureUnknownAircraftAndModelAreEmptyWithoutAskingAnyone() {
+    void ensureUnknownAircraftModelAndRouteAreEmptyAfterAskingTheOwner() {
         when(store.find(anyString(), anyString())).thenReturn(Optional.empty());
+        when(commands.query(anyString(), anyString(), any())).thenReturn(Optional.empty());
 
         assertTrue(fleet.findAircraft("CS-ZZZ").isEmpty());
         assertFalse(fleet.aircraftModelExists("Nothing"));
-        verifyNoInteractions(commands);
+        assertTrue(fleet.findRoute("ZZZ", "YYY").isEmpty());
+        verify(commands).query("aircraft-maintenance", "aircraft.get", Map.of("key", "CS-ZZZ"));
+        verify(commands).query("airports-routes", "route.get", Map.of("origin", "ZZZ", "destination", "YYY"));
+    }
+
+    @Test
+    void ensureAircraftCreatedAMomentAgoIsFoundAtTheOwner() {
+        when(store.find(anyString(), anyString())).thenReturn(Optional.empty());
+        when(commands.query("aircraft-maintenance", "aircraft.get", Map.of("key", "FL-NEW"))).thenReturn(Optional.of(json.readTree(
+                "{\"registrationNumber\":\"FL-NEW\",\"model\":\"Airbus A320neo\",\"status\":\"AVAILABLE\",\"seatCapacity\":150,"
+                        + "\"range\":5000.0,\"fuelConsumptionPerDistanceUnit\":5.0}")));
+
+        assertEquals(new AircraftInfo("FL-NEW", "Airbus A320neo", "AVAILABLE", 150, 5000.0, 5.0),
+                fleet.findAircraft("FL-NEW").orElseThrow());
+    }
+
+    @Test
+    void ensureRouteNotInTheCopyIsAskedToAirportsRoutes() {
+        when(store.find(anyString(), anyString())).thenReturn(Optional.empty());
+        when(commands.query("airports-routes", "route.get", Map.of("origin", "LIS", "destination", "OPO"))).thenReturn(Optional.of(json.readTree(
+                "{\"originIataCode\":\"LIS\",\"destinationIataCode\":\"OPO\",\"status\":\"ACTIVE\",\"estimatedFlightTime\":55,"
+                        + "\"minimumCapacity\":100,\"minimumRange\":300.0,\"distanceKm\":274.03}")));
+
+        assertEquals(new RouteInfo("LIS", "OPO", "ACTIVE", 55, 100, 300.0, 274.03), fleet.findRoute("lis", "opo").orElseThrow());
+    }
+
+    @Test
+    void ensureOwnerNotAnsweringAQueryIsUnavailable() {
+        when(store.find(anyString(), anyString())).thenReturn(Optional.empty());
+        when(commands.query(anyString(), anyString(), any())).thenThrow(new CommandUnavailableException("no answer"));
+
+        assertThrows(FleetUnavailableException.class, () -> fleet.findRoute("LIS", "OPO"));
     }
 
     @Test

@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -27,8 +29,10 @@ import java.util.Optional;
  *
  * <ul>
  *   <li><b>Queries</b> (C1, C2, C3): read from this replica's copy of the aircraft, models and
- *   routes, kept by the events of their owners ({@link FleetProjections}). Local, so scheduling no
- *   longer waits for the other services, and the answer may be a few moments behind.</li>
+ *   routes, kept by the events of their owners ({@link FleetProjections}). Local, so scheduling
+ *   usually does not wait for the other services, and the answer may be a few moments behind. What
+ *   the copy does not have (yet) is asked to the owner over the broker, so an aircraft created a
+ *   moment ago is found at once.</li>
  *   <li><b>Commands</b> (C4, C5, steps of the Saga): sent with {@link CommandBus} to the owner,
  *   which checks them against its own data at that moment and answers. A copy read a moment too
  *   early can never reserve an aircraft that is no longer available: the owner refuses it (409)
@@ -44,15 +48,18 @@ public class MessagingFleet implements Fleet {
 
     private final ReadModelStore store;
     private final CommandBus commands;
+    private final ObjectMapper objectMapper;
 
-    public MessagingFleet(ReadModelStore store, CommandBus commands) {
+    public MessagingFleet(ReadModelStore store, CommandBus commands, ObjectMapper objectMapper) {
         this.store = store;
         this.commands = commands;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public Optional<AircraftInfo> findAircraft(String registration) {
-        return store.find(FleetProjections.AIRCRAFT, registration.trim().toUpperCase())
+        String key = registration.trim().toUpperCase();
+        Optional<AircraftInfo> local = store.find(FleetProjections.AIRCRAFT, key)
                 .map(row -> {
                     JsonNode aircraft = row.view();
                     String model = aircraft.get("modelName").asString();
@@ -65,16 +72,23 @@ public class MessagingFleet implements Fleet {
                             aircraft.hasNonNull("seatCapacity") ? aircraft.get("seatCapacity").asInt() : null,
                             range, fuelCapacity == null || range == null || range == 0 ? null : fuelCapacity / range);
                 });
+        return local.isPresent() ? local
+                : ask(FleetProjections.AIRCRAFT_MAINTENANCE, FleetProjections.AIRCRAFT + ".get", Map.of("key", key))
+                        .map(body -> objectMapper.treeToValue(body, AircraftInfo.class));
     }
 
     @Override
     public boolean aircraftModelExists(String modelName) {
-        return store.find(FleetProjections.AIRCRAFT_MODEL, modelName).isPresent();
+        return store.find(FleetProjections.AIRCRAFT_MODEL, modelName).isPresent()
+                || ask(FleetProjections.AIRCRAFT_MAINTENANCE, FleetProjections.AIRCRAFT_MODEL + ".get",
+                Map.of("key", modelName)).isPresent();
     }
 
     @Override
     public Optional<RouteInfo> findRoute(String origin, String destination) {
-        return store.find(FleetProjections.ROUTE, origin.trim().toUpperCase() + "-" + destination.trim().toUpperCase())
+        String o = origin.trim().toUpperCase();
+        String d = destination.trim().toUpperCase();
+        Optional<RouteInfo> local = store.find(FleetProjections.ROUTE, o + "-" + d)
                 .map(row -> {
                     JsonNode route = row.view();
                     return new RouteInfo(route.get("origin").asString(), route.get("destination").asString(),
@@ -83,6 +97,21 @@ public class MessagingFleet implements Fleet {
                             route.hasNonNull("minimumCapacity") ? route.get("minimumCapacity").asInt() : null,
                             number(route, "minimumRange"), number(route, "distanceKm"));
                 });
+        return local.isPresent() ? local
+                : ask(FleetProjections.AIRPORTS_ROUTES, FleetProjections.ROUTE + ".get", Map.of("origin", o, "destination", d))
+                        .map(body -> objectMapper.treeToValue(body, RouteInfo.class));
+    }
+
+    /**
+     * Not in the copy (yet): asked to the owner over the broker (C1, C2 and C3 as queries), so an
+     * aircraft or a route created a moment ago is never taken as nonexistent.
+     */
+    private Optional<JsonNode> ask(String service, String query, Map<String, String> payload) {
+        try {
+            return commands.query(service, query, payload);
+        } catch (CommandUnavailableException e) {
+            throw new FleetUnavailableException(service + " is not available, try again.");
+        }
     }
 
     @Override

@@ -241,4 +241,26 @@ class ReadModelIntegrationTest {
         invalid.remove("departureDateTime");
         assertEquals(400, c4(invalid).status());
     }
+
+    /** C1 and C3 as queries over the broker, for a copy that does not have the key yet. */
+    @Test
+    void ensureFleetQueriesAnswerFromTheWriteModel() {
+        MessageProperties properties = new MessageProperties();
+        properties.setHeader(Messaging.COMMAND_TYPE_HEADER, "aircraft.get");
+        CommandReply aircraftReply = objectMapper.readValue(commands.onCommand(new Message(
+                objectMapper.writeValueAsBytes(Map.of("key", "cs-tka")), properties)).getBody(), CommandReply.class);
+        assertEquals(200, aircraftReply.status());
+        assertEquals("CS-TKA", aircraftReply.body().get("registrationNumber").asString());
+        assertEquals("Airbus A320neo", aircraftReply.body().get("model").asString());
+
+        CommandReply unknown = objectMapper.readValue(commands.onCommand(new Message(
+                objectMapper.writeValueAsBytes(Map.of("key", "CS-ZZZ")), properties)).getBody(), CommandReply.class);
+        assertEquals(404, unknown.status());
+
+        MessageProperties model = new MessageProperties();
+        model.setHeader(Messaging.COMMAND_TYPE_HEADER, "aircraftmodel.get");
+        CommandReply modelReply = objectMapper.readValue(commands.onCommand(new Message(
+                objectMapper.writeValueAsBytes(Map.of("key", "Airbus A320neo")), model)).getBody(), CommandReply.class);
+        assertEquals(200, modelReply.status());
+    }
 }
