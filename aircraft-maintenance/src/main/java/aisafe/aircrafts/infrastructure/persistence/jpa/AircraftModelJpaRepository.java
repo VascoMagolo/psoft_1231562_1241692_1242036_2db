@@ -1,5 +1,8 @@
 package aisafe.aircrafts.infrastructure.persistence.jpa;
 
+import aisafe.aircrafts.infrastructure.readmodel.AircraftModelProjection;
+import aisafe.aircrafts.infrastructure.readmodel.AircraftModelView;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.infrastructure.replication.Replicator;
 import aisafe.aircrafts.infrastructure.replication.AircraftModelReplicaHandler;
 import aisafe.aircrafts.infrastructure.replication.AircraftModelReplica;
@@ -20,10 +23,13 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
 
     private final SpringDataAircraftModelRepository springRepo;
     private final Replicator replicator;
+    private final EventPublisher events;
 
-    public AircraftModelJpaRepository(SpringDataAircraftModelRepository springRepo, Replicator replicator) {
+    public AircraftModelJpaRepository(SpringDataAircraftModelRepository springRepo, Replicator replicator,
+                                      EventPublisher events) {
         this.springRepo = springRepo;
         this.replicator = replicator;
+        this.events = events;
     }
 
     @Override
@@ -75,6 +81,9 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
         springRepo.save(newData);
         // Catalog: copied to every replica (decision R1)
         replicator.catalogSaved(AircraftModelReplicaHandler.TYPE, domainModel.getModelName(), AircraftModelReplica.from(domainModel));
+        events.changed(AircraftModelReplicaHandler.TYPE, AircraftModelProjection.ENTITY,
+                jpaEntity.getId() != null ? "updated" : "created", domainModel.getModelName(), null, null,
+                AircraftModelView.from(domainModel));
         return domainModel;
     }
 
@@ -84,5 +93,7 @@ public class AircraftModelJpaRepository implements AircraftModelRepository {
                 .orElseThrow(() -> new IllegalArgumentException("Aircraft model not found: " + domainModel.getModelName()));
         springRepo.delete(jpaEntity);
         replicator.catalogDeleted(AircraftModelReplicaHandler.TYPE, domainModel.getModelName());
+        events.changed(AircraftModelReplicaHandler.TYPE, AircraftModelProjection.ENTITY, "deleted",
+                domainModel.getModelName(), null, null, null);
     }
 }

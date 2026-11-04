@@ -1,5 +1,7 @@
 package aisafe.aircrafts.infrastructure.persistence.jpa;
 
+import aisafe.aircrafts.infrastructure.readmodel.AircraftProjection;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.infrastructure.replication.Replicator;
 import aisafe.aircrafts.infrastructure.replication.AircraftReplicaHandler;
 import aisafe.aircrafts.infrastructure.replication.AircraftReplica;
@@ -18,12 +20,14 @@ public class AircraftJpaRepository implements AircraftRepository {
     private final SpringDataAircraftRepository springRepo;
     private final SpringDataAircraftModelRepository modelSpringRepo;
     private final Replicator replicator;
+    private final EventPublisher events;
 
     public AircraftJpaRepository(SpringDataAircraftRepository springRepo, SpringDataAircraftModelRepository modelSpringRepo,
-                                 Replicator replicator) {
+                                 Replicator replicator, EventPublisher events) {
         this.springRepo = springRepo;
         this.modelSpringRepo = modelSpringRepo;
         this.replicator = replicator;
+        this.events = events;
     }
 
     @Override
@@ -70,6 +74,8 @@ public class AircraftJpaRepository implements AircraftRepository {
         // Record: copied to the other holder (home replica and its successor)
         replicator.recordSaved(AircraftReplicaHandler.TYPE, aircraft.getRegistrationNumber().getNumber(),
                 AircraftReplica.from(aircraft), saved.getVersion());
+        events.changed(AircraftReplicaHandler.TYPE, AircraftProjection.ENTITY, existingEntity != null ? "updated" : "created",
+                aircraft.getRegistrationNumber().getNumber(), aircraft.getStatus(), saved.getVersion(), AircraftReplica.from(aircraft));
         return aircraft;
     }
 
@@ -86,5 +92,7 @@ public class AircraftJpaRepository implements AircraftRepository {
                 .orElseThrow(() -> new AircraftNotFoundException("Aircraft not found: " + aircraft.getRegistrationNumber().getNumber()));
         springRepo.delete(jpaEntity);
         replicator.recordDeleted(AircraftReplicaHandler.TYPE, aircraft.getRegistrationNumber().getNumber());
+        events.changed(AircraftReplicaHandler.TYPE, AircraftProjection.ENTITY, "deleted",
+                aircraft.getRegistrationNumber().getNumber(), null, null, null);
     }
 }
