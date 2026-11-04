@@ -3,7 +3,7 @@ package aisafe.airports.infrastructure.readmodel;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.infrastructure.replication.AirportReplica;
 import aisafe.airports.infrastructure.replication.AirportReplicaHandler;
-import aisafe.airportsroutes.infrastructure.readmodel.Projection;
+import aisafe.shared.infrastructure.readmodel.Projection;
 import aisafe.shared.infrastructure.replication.ReplicaHandler;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;

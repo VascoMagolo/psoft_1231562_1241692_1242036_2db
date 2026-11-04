@@ -1,11 +1,12 @@
-package aisafe.airportsroutes.infrastructure.readmodel;
+package aisafe.shared.infrastructure.readmodel;
 
 import aisafe.shared.infrastructure.replication.ReplicaHandler;
 import tools.jackson.databind.JsonNode;
 
 /**
- * One kind of entity kept by the read model (CQRS): how its events are named, where the
- * replicas hold it, and what the read model keeps of it (its view, ready for the queries).
+ * One kind of entity of this service kept by its read model (CQRS): how its events are named,
+ * where the replicas hold it, and what the read model keeps of it (its view, ready for the
+ * queries). Other services can read it too: they ask for it with an {@link ExternalProjection}.
  */
 public interface Projection {
 

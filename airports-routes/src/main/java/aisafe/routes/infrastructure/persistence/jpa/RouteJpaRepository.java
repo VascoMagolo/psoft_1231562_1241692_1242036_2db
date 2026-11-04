@@ -1,7 +1,7 @@
 package aisafe.routes.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.IataCode;
-import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.infrastructure.readmodel.RouteProjection;

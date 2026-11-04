@@ -1,6 +1,6 @@
 package aisafe.flightcopies.infrastructure.readmodel;
 
-import aisafe.airportsroutes.infrastructure.readmodel.ReadModelStore;
+import aisafe.shared.infrastructure.readmodel.ReadModelStore;
 import aisafe.flightcopies.application.FlightCopiesAcrossReplicas;
 import aisafe.flightcopies.domain.FlightCopy;
 import aisafe.flightcopies.infrastructure.replication.FlightCopyReplica;

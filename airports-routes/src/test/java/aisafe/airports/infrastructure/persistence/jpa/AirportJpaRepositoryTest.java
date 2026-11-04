@@ -1,7 +1,7 @@
 package aisafe.airports.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.*;
-import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.domain.PaginatedResult;
 import aisafe.shared.infrastructure.replication.Replicator;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,7 @@
 package aisafe.airportsroutes.infrastructure.readmodel;
 
+import aisafe.shared.infrastructure.readmodel.ReadModelListener;
+import aisafe.shared.infrastructure.readmodel.ReadModelReconciler;
 import aisafe.airports.application.AirportListings;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.Airport;
@@ -7,7 +9,6 @@ import aisafe.airports.domain.AirportRepository;
 import aisafe.airports.domain.IataCode;
 import aisafe.airports.domain.Runway;
 import aisafe.airports.infrastructure.readmodel.ReadModelAirportListings;
-import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
 import aisafe.flightcopies.application.FlightCopiesAcrossReplicas;
 import aisafe.flightcopies.domain.FlightCopy;
 import aisafe.flightcopies.domain.FlightCopyRepository;
@@ -22,9 +23,11 @@ import aisafe.routes.domain.RouteStatus;
 import aisafe.routes.infrastructure.readmodel.ReadModelRoutes;
 import aisafe.shared.application.Versioned;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitOperations;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,8 +43,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Events on, without a broker: what would be sent to RabbitMQ is captured and handed to the
@@ -62,6 +68,7 @@ import static org.mockito.Mockito.verify;
 class ReadModelIntegrationTest {
 
     @MockitoBean private RabbitTemplate rabbit;
+    private final RabbitOperations operations = mock(RabbitOperations.class);
 
     @Autowired private RouteRepository routeRepository;
     @Autowired private RouteHistoryRepository historyRepository;
@@ -92,9 +99,18 @@ class ReadModelIntegrationTest {
         });
     }
 
+    /** The relay publishes through RabbitTemplate.invoke: what it sends is captured on these operations. */
+    @BeforeEach
+    @SuppressWarnings("unchecked")
+    void captureWhatTheRelaySends() {
+        when(rabbit.invoke(any(RabbitOperations.OperationsCallback.class)))
+                .thenAnswer(i -> i.<RabbitOperations.OperationsCallback<?>>getArgument(0).doInRabbit(operations));
+    }
+
+    /** The relay sends from its own thread, once the change is committed: waits for it. */
     private Message lastEvent(String routingKey) {
         ArgumentCaptor<Message> message = ArgumentCaptor.forClass(Message.class);
-        verify(rabbit, atLeastOnce()).send(eq(EventPublisher.EXCHANGE), eq(routingKey), message.capture());
+        verify(operations, timeout(5_000).atLeastOnce()).send(eq("airports-routes.events"), eq(routingKey), message.capture());
         return message.getValue();
     }
 

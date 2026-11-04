@@ -1,4 +1,4 @@
-package aisafe.airportsroutes.infrastructure.readmodel;
+package aisafe.shared.infrastructure.readmodel;
 
 import aisafe.shared.infrastructure.peers.PeerClient;
 import aisafe.shared.infrastructure.replication.ReplicaEnvelope;
@@ -6,6 +6,7 @@ import aisafe.shared.infrastructure.replication.ReplicaExporter;
 import aisafe.shared.infrastructure.security.ServiceTokens;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,9 +33,10 @@ import java.util.List;
  *   lost because the broker could not be reached when it was published.</li>
  * </ul>
  *
- * <p>It reads the same export the replication uses: this replica's own, and for records (routes,
- * flight copies) also the peers' ({@code GET /internal/replicas/{type}}). Catalogs (airports) are
- * already on every replica, so this replica's export has them all. Peers that do not answer are
+ * <p>Only for the entities of this service ({@link Projection}); those of other services come
+ * back with the {@link SnapshotClient}. It reads the same export the replication uses: this
+ * replica's own, and for records also the peers' ({@code GET /internal/replicas/{type}}). Catalogs
+ * are already on every replica, so this replica's export has them all. Peers that do not answer are
  * skipped: their records are also held by the next replica, or come in the next round. A change
  * that cannot be applied is logged and skipped, so it never stops the round, nor the startup.</p>
  */
@@ -52,10 +54,10 @@ public class ReadModelReconciler implements ApplicationRunner {
     private final ObjectMapper objectMapper;
     private final TransactionTemplate readOnly;
 
-    public ReadModelReconciler(List<Projection> projections, ReplicaExporter exporter, PeerClient peerClient,
+    public ReadModelReconciler(ObjectProvider<Projection> projections, ReplicaExporter exporter, PeerClient peerClient,
                                ServiceTokens serviceTokens, ReadModelStore store, ObjectMapper objectMapper,
                                PlatformTransactionManager transactions) {
-        this.projections = projections;
+        this.projections = projections.orderedStream().toList();
         this.exporter = exporter;
         this.peerClient = peerClient;
         this.serviceTokens = serviceTokens;

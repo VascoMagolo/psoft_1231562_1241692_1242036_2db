@@ -1,6 +1,6 @@
 package aisafe.routes.infrastructure.readmodel;
 
-import aisafe.airportsroutes.infrastructure.readmodel.ReadModelStore;
+import aisafe.shared.infrastructure.readmodel.ReadModelStore;
 import aisafe.routes.application.RoutesAcrossReplicas;
 import aisafe.routes.domain.Route;
 import aisafe.shared.application.Versioned;

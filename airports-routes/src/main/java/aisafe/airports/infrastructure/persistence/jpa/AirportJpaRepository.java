@@ -9,7 +9,7 @@ import aisafe.airports.domain.IataCode;
 import aisafe.airports.infrastructure.readmodel.AirportProjection;
 import aisafe.airports.infrastructure.replication.AirportReplica;
 import aisafe.airports.infrastructure.replication.AirportReplicaHandler;
-import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.domain.PaginatedResult;
 import aisafe.shared.infrastructure.replication.Replicator;
 import org.springframework.context.annotation.Profile;
