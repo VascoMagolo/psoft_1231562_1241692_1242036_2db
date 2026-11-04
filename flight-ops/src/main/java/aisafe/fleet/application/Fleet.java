@@ -7,7 +7,10 @@ import aisafe.fleet.domain.RouteInfo;
 import java.util.Optional;
 
 /**
- * Port for communicating with aircraft-maintenance and airports-routes.
+ * Port for communicating with aircraft-maintenance and airports-routes: over HTTP without events
+ * ({@code HttpFleet}, Assignment 1), over RabbitMQ with events ({@code MessagingFleet},
+ * Assignment 2: the queries read a local copy kept by events, the commands of the Saga are sent
+ * through the broker and answered by the owner).
  */
 public interface Fleet {
 

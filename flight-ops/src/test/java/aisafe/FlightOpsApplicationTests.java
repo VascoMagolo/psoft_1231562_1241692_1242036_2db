@@ -19,7 +19,7 @@ class FlightOpsApplicationTests {
 
 	@Test
 	void ensureTheDatabaseStructureComesFromTheMigrations() {
-		assertEquals("5", jdbc.queryForObject(
+		assertEquals("6", jdbc.queryForObject(
 				"select max(\"version\") from \"flyway_schema_history\" where \"success\"", String.class));
 	}
 
