@@ -25,7 +25,8 @@ class HttpPeerQueriesTest {
     record Thing(String id, int size) {}
 
     private final PeerClient peerClient = mock(PeerClient.class);
-    private final HttpPeerQueries queries = new HttpPeerQueries(peerClient, JsonMapper.builder().build());
+    private final aisafe.shared.infrastructure.security.ServiceTokens serviceTokens = mock(aisafe.shared.infrastructure.security.ServiceTokens.class);
+    private final HttpPeerQueries queries = new HttpPeerQueries(peerClient, JsonMapper.builder().build(), serviceTokens);
     private MockHttpServletRequest request;
 
     @BeforeEach
@@ -56,6 +57,19 @@ class HttpPeerQueriesTest {
 
         assertEquals(List.of(new Thing("a", 1), new Thing("b", 2), new Thing("c", 3)), things);
         assertEquals(Set.of("http://peer-3"), UnreachablePeers.of(request));
+    }
+
+    @Test
+    void ensureOutsideARequestTheServiceTokenIsUsed() {
+        // A command taken from RabbitMQ runs outside any HTTP request
+        RequestContextHolder.resetRequestAttributes();
+        when(serviceTokens.current()).thenReturn("service-token");
+        when(peerClient.getFirst(any(), any())).thenReturn(new PeerClient.PeerLookup(java.util.Optional.empty(), List.of()));
+
+        queries.fetchFirst("/internal/aircrafts/CS-TKA", Thing.class);
+
+        verify(peerClient).getFirst(eq("/internal/aircrafts/CS-TKA"),
+                argThat(h -> "Bearer service-token".equals(h.getFirst(HttpHeaders.AUTHORIZATION))));
     }
 
     @Test
