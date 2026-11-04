@@ -54,18 +54,21 @@ newman run docs/postman/aisafe-distributed.postman_collection.json -e /tmp/aisaf
 ## Assignment 2: airports-routes events
 
 `aisafe-events.postman_collection.json` tests the events airports-routes publishes on RabbitMQ and
-its read model (CQRS): 26 requests, 58 checks. It runs against a local setup (RabbitMQ is not in the
-k3s deployment yet), with the environment `aisafe-local-events.postman_environment.json`.
+its read model (CQRS) of routes, airports and flight copies: 44 requests, 102 checks. It runs against
+a local setup (RabbitMQ is not in the k3s deployment yet), with the environment
+`aisafe-local-events.postman_environment.json`.
 
 | Folder | What it shows |
 |---|---|
-| 0. Setup | Login, the 3 replicas ready, the exchange `airports-routes.events` and one read-model queue per replica, each with its consumer |
-| 1. Prepare | A test queue bound to the exchange with `route.*`, playing another service interested in the routes |
+| 0. Setup | Logins, the 3 replicas ready, the exchange `airports-routes.events` and one read-model queue per replica, each with its consumer |
+| 1. Prepare | A test queue bound to the exchange with `route.*`, `airport.*` and `flightcopy.*`, playing another service interested in these events |
 | 2. Command, then event | Creating a route on replica 1 (HTTP) publishes `route.created`, with the route, its version and the stamp of the change |
 | 3. Read model (CQRS) | The 3 replicas list the new route from their own read model, also replica 0, which holds no copy of it |
-| 4. Update | Deactivating it (If-Match: the version carried by the event) publishes `route.updated`; the read models show it inactive |
-| 5. Delete | Deleting it through replica 0 publishes `route.deleted`; no read model lists it any more |
-| 6. Cleanup | Deletes the test queue |
+| 4. Flight copies and route popularity | A copy of a flight (C5) publishes `flightcopy.created`; the route's popularity (US214) grows by one on the 3 replicas |
+| 5. Airports | Registering an airport publishes `airport.created`; the airport search of replicas 0 and 2 finds it in the read model |
+| 6. Update | The route's details give its version; deactivating it with that `If-Match` publishes `route.updated`; the read models show it inactive |
+| 7. Delete | Deleting the route and the airport through replica 0 publishes `route.deleted` and `airport.deleted`; no read model lists them any more |
+| 8. Cleanup | Deletes the test queue |
 
 The queues are read through the RabbitMQ management API (HTTP), since Postman does not speak AMQP.
 

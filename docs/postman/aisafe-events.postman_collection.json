@@ -2,13 +2,13 @@
   "info": {
     "_postman_id": "b13905fd-0ce8-5670-bf22-12842fb3269b",
     "name": "AISafe airports-routes events",
-    "description": "Assignment 2, airports-routes: the events it publishes on RabbitMQ and its read model (CQRS). Needs RabbitMQ, the login and the 3 replicas with EVENTS_ENABLED=true. Select the environment \"AISafe local events\" and run the folders in order. See docs/postman/README.md.",
+    "description": "Assignment 2, airports-routes: the events it publishes on RabbitMQ and its read model (CQRS) of routes, airports and flight copies. Needs RabbitMQ, the login and the 3 replicas with EVENTS_ENABLED=true. Select the environment \"AISafe local events\" and run the folders in order. See docs/postman/README.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "0. Setup",
-      "description": "Login, the 3 replicas ready with events on, and RabbitMQ with the exchange and one read-model queue per replica.",
+      "description": "Logins, the 3 replicas ready with events on, and RabbitMQ with the exchange and one read-model queue per replica.",
       "item": [
         {
           "name": "Login as atcc",
@@ -42,6 +42,43 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.environment.set(\"atcc_token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as operator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{login}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operator\",\n  \"password\": \"operator123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"operator_token\", pm.response.json().token);"
                 ]
               }
             }
@@ -257,7 +294,7 @@
     },
     {
       "name": "1. Prepare",
-      "description": "Removes a route OPO-CDG left by an earlier run, and creates the queue postman-events, bound to the exchange with route.* (it plays another service interested in the routes).",
+      "description": "Removes a route OPO-CDG and an airport FAO left by an earlier run, and creates the queue postman-events, bound to the exchange with route.*, airport.* and flightcopy.* (it plays another service interested in these events).",
       "item": [
         {
           "name": "Remove route OPO-CDG left by an earlier run",
@@ -271,6 +308,35 @@
                 {
                   "key": "token",
                   "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204 or 404\", () => pm.expect(pm.response.code).to.be.oneOf([204, 404]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove airport FAO left by an earlier run",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{ar_0}}/api/airports/FAO",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
                   "type": "string"
                 }
               ]
@@ -385,6 +451,102 @@
           ]
         },
         {
+          "name": "Bind postman-events to the exchange with airport.*",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/bindings/%2F/e/airports-routes.events/q/postman-events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"airport.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bind postman-events to the exchange with flightcopy.*",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/bindings/%2F/e/airports-routes.events/q/postman-events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"flightcopy.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Empty postman-events",
           "request": {
             "method": "DELETE",
@@ -412,7 +574,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "setTimeout(() => {}, 1000); // events of the removal above"
+                  "setTimeout(() => {}, 1000); // events of the removals above"
                 ]
               }
             },
@@ -532,7 +694,7 @@
                   "pm.test(\"one route.created message\", () => pm.expect(message).to.not.be.undefined);",
                   "const event = message ? JSON.parse(message.payload) : {};",
                   "console.log(pm.info.requestName, JSON.stringify(event));",
-                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
                   "pm.test(\"published by airports-routes-1\", () => pm.expect(event.nodeId).to.eql(pm.environment.get(\"ar_node_1\")));",
                   "pm.test(\"carries the route\", () => { pm.expect(event.status).to.eql(\"ACTIVE\"); pm.expect(event.data.estimatedFlightTime).to.eql(125); });",
                   "pm.test(\"stamped\", () => pm.expect(event.stamp).to.be.above(0));",
@@ -547,7 +709,7 @@
     },
     {
       "name": "3. Read model (CQRS)",
-      "description": "Every replica lists the new route from its own read model (route_view), updated by the event: also replica 0, which holds no copy of the route.",
+      "description": "Every replica lists the new route from its own read model, updated by the event: also replica 0, which holds no copy of the route.",
       "item": [
         {
           "name": "Routes on airports-routes-0 (read model)",
@@ -574,8 +736,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
                   "pm.test(\"ACTIVE\", () => pm.expect(route.status).to.eql(\"ACTIVE\"));"
                 ]
@@ -608,8 +770,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);"
                 ]
               }
@@ -641,8 +803,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);"
                 ]
               }
@@ -652,9 +814,474 @@
       ]
     },
     {
-      "name": "4. Update",
-      "description": "Deactivating the route (with the version carried by route.created as If-Match) publishes route.updated, and the read models show the new status.",
+      "name": "4. Flight copies and route popularity",
+      "description": "A copy of a flight (C5, as flight-ops sends it) publishes flightcopy.created; the popularity of the route (US214) grows by one on every replica, read from the read model.",
       "item": [
+        {
+          "name": "Popularity of OPO-CDG on airports-routes-0 (US214, read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/routes?status=active&sortBy=popularity",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const all = pm.response.json()._embedded ? Object.values(pm.response.json()._embedded).flat() : pm.response.json();",
+                  "const route = all.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.environment.set(\"popularity_before\", route ? route.popularity : 0);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Copy of a flight OPO-CDG on airports-routes-1 (C5)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{ar_1}}/internal/flights/{{flight_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{flight_id}}\",\n  \"departureDateTime\": \"2027-06-01T10:00:00Z\",\n  \"arrivalDateTime\": \"2027-06-01T12:05:00Z\",\n  \"status\": \"SCHEDULED\",\n  \"originIataCode\": \"OPO\",\n  \"destinationIataCode\": \"CDG\",\n  \"aircraftRegistration\": \"CS-TKA\",\n  \"version\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set(\"flight_id\", \"postman-\" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received flightcopy.created",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"flightcopy.created\");",
+                  "pm.test(\"one flightcopy.created message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(pm.environment.get(\"flight_id\")));",
+                  "pm.test(\"carries the flight\", () => { pm.expect(event.data.originCode).to.eql(\"OPO\"); pm.expect(event.data.destinationCode).to.eql(\"CDG\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Popularity of OPO-CDG on airports-routes-0 (US214, read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/routes?status=active&sortBy=popularity",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const all = pm.response.json()._embedded ? Object.values(pm.response.json()._embedded).flat() : pm.response.json();",
+                  "const route = all.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.test(\"one more flight\", () => pm.expect(route.popularity).to.eql(Number(pm.environment.get(\"popularity_before\")) + 1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Popularity of OPO-CDG on airports-routes-1 (US214, read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_1}}/api/routes?status=active&sortBy=popularity",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const all = pm.response.json()._embedded ? Object.values(pm.response.json()._embedded).flat() : pm.response.json();",
+                  "const route = all.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.test(\"one more flight\", () => pm.expect(route.popularity).to.eql(Number(pm.environment.get(\"popularity_before\")) + 1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Popularity of OPO-CDG on airports-routes-2 (US214, read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/routes?status=active&sortBy=popularity",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
+                  "const all = pm.response.json()._embedded ? Object.values(pm.response.json()._embedded).flat() : pm.response.json();",
+                  "const route = all.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
+                  "pm.test(\"one more flight\", () => pm.expect(route.popularity).to.eql(Number(pm.environment.get(\"popularity_before\")) + 1));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Airports",
+      "description": "Registering an airport publishes airport.created with the answer the clients get; the airport search of every replica reads it from the read model.",
+      "item": [
+        {
+          "name": "Register airport FAO on airports-routes-1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{ar_1}}/api/airports",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"iataCode\": \"FAO\",\n  \"name\": \"Faro Airport\",\n  \"city\": \"Faro\",\n  \"country\": \"Portugal\",\n  \"region\": \"Europe\",\n  \"timezone\": \"Europe/Lisbon\",\n  \"latitude\": 37.0144,\n  \"longitude\": -7.9659,\n  \"runways\": [\n    {\n      \"name\": \"10/28\",\n      \"length\": 2490,\n      \"orientation\": \"100/280\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received airport.created",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"airport.created\");",
+                  "pm.test(\"one airport.created message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(\"FAO\"));",
+                  "pm.test(\"carries the airport\", () => { pm.expect(event.data.city).to.eql(\"Faro\"); pm.expect(event.data.runways).to.have.lengthOf(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Airports named Faro on airports-routes-0 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_0}}/api/airports/search?name=faro&size=100",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const airport = items.find(a => a.iataCode === \"FAO\");",
+                  "pm.test(\"has FAO\", () => pm.expect(airport).to.not.be.undefined);",
+                  "pm.test(\"Faro, Portugal\", () => { pm.expect(airport.city).to.eql(\"Faro\"); pm.expect(airport.country).to.eql(\"Portugal\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Airports named Faro on airports-routes-2 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/airports/search?name=faro&size=100",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const airport = items.find(a => a.iataCode === \"FAO\");",
+                  "pm.test(\"has FAO\", () => pm.expect(airport).to.not.be.undefined);",
+                  "pm.test(\"Faro, Portugal\", () => { pm.expect(airport.city).to.eql(\"Faro\"); pm.expect(airport.country).to.eql(\"Portugal\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Update",
+      "description": "Deactivating the route publishes route.updated, and the read models show the new status. The version for If-Match comes from the route's details.",
+      "item": [
+        {
+          "name": "Read route OPO-CDG on airports-routes-2 (its version)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/routes/OPO/CDG",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{atcc_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"version for If-Match\", () => pm.expect(pm.response.json().version).to.eql(Number(pm.environment.get(\"route_version\"))));"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Deactivate route OPO-CDG on airports-routes-2",
           "request": {
@@ -745,7 +1372,7 @@
                   "pm.test(\"one route.updated message\", () => pm.expect(message).to.not.be.undefined);",
                   "const event = message ? JSON.parse(message.payload) : {};",
                   "console.log(pm.info.requestName, JSON.stringify(event));",
-                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
                   "pm.test(\"INACTIVE\", () => { pm.expect(event.status).to.eql(\"INACTIVE\"); pm.expect(event.data.status).to.eql(\"INACTIVE\"); });"
                 ]
               }
@@ -777,8 +1404,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"has OPO-CDG\", () => pm.expect(route).to.not.be.undefined);",
                   "pm.test(\"INACTIVE\", () => pm.expect(route.status).to.eql(\"INACTIVE\"));"
                 ]
@@ -789,8 +1416,8 @@
       ]
     },
     {
-      "name": "5. Delete",
-      "description": "Deleting the route through replica 0 (forwarded to a replica that holds it) publishes route.deleted, and no read model lists it any more.",
+      "name": "7. Delete",
+      "description": "Deleting the route and the airport through replica 0 (forwarded to a replica that holds the route) publishes route.deleted and airport.deleted, and no read model lists them any more.",
       "item": [
         {
           "name": "Delete route OPO-CDG through airports-routes-0",
@@ -877,7 +1504,7 @@
                   "pm.test(\"one route.deleted message\", () => pm.expect(message).to.not.be.undefined);",
                   "const event = message ? JSON.parse(message.payload) : {};",
                   "console.log(pm.info.requestName, JSON.stringify(event));",
-                  "pm.test(\"about route OPO-CDG\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(\"OPO-CDG\"));",
                   "pm.test(\"no route data\", () => { pm.expect(event.status).to.be.null; pm.expect(event.data).to.be.null; });"
                 ]
               }
@@ -909,8 +1536,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
                 ]
               }
@@ -942,8 +1569,8 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
                 ]
               }
@@ -975,9 +1602,133 @@
                 "exec": [
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"not partial\", () => pm.expect(pm.response.headers.get(\"X-Partial-Result\")).to.not.eql(\"true\"));",
-                  "const routes = Object.values(pm.response.json()._embedded || {}).flat();",
-                  "const route = routes.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const route = items.find(r => r.originIataCode === \"OPO\" && r.destinationIataCode === \"CDG\");",
                   "pm.test(\"no OPO-CDG\", () => pm.expect(route).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete airport FAO through airports-routes-0",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{ar_0}}/api/airports/FAO",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The queue received airport.deleted",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{rabbit_api}}/queues/%2F/postman-events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbit_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbit_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 10,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // the events reach the queues and the read models asynchronously"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const message = pm.response.json().find(m => m.routing_key === \"airport.deleted\");",
+                  "pm.test(\"one airport.deleted message\", () => pm.expect(message).to.not.be.undefined);",
+                  "const event = message ? JSON.parse(message.payload) : {};",
+                  "console.log(pm.info.requestName, JSON.stringify(event));",
+                  "pm.test(\"about the right entity\", () => pm.expect(event.key).to.eql(\"FAO\"));",
+                  "pm.test(\"no airport data\", () => pm.expect(event.data).to.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Airports named Faro on airports-routes-2 (read model)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{ar_2}}/api/airports/search?name=faro&size=100",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{operator_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const items = Object.values(pm.response.json()._embedded || {}).flat();",
+                  "const airport = items.find(a => a.iataCode === \"FAO\");",
+                  "pm.test(\"no FAO\", () => pm.expect(airport).to.be.undefined);"
                 ]
               }
             }
@@ -986,7 +1737,7 @@
       ]
     },
     {
-      "name": "6. Cleanup",
+      "name": "8. Cleanup",
       "description": "Deletes the queue postman-events.",
       "item": [
         {

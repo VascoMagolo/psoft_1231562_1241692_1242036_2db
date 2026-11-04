@@ -195,7 +195,7 @@ Off by default (`EVENTS_ENABLED=false`): without it the service works exactly as
 with no broker. With `EVENTS_ENABLED=true` it needs RabbitMQ (`RABBITMQ_HOST`, `RABBITMQ_PORT`,
 `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`).
 
-![CQRS](svg/sd_cqrs_route_events.svg)
+![CQRS](svg/sd_cqrs_read_model.svg)
 
 ### 12.1 Events it publishes
 
@@ -204,33 +204,46 @@ made, once it is committed; a copy received from a peer is not published again (
 
 | Routing key | When | `data` |
 |---|---|---|
-| `route.created`, `route.updated` | a route is saved | the route: origin, destination, flight time, minimum range and capacity, status |
-| `route.deleted` | a route is deleted | none |
-| `airport.created`, `airport.updated`, `airport.deleted` | an airport is saved or deleted | none (the IATA code and the status only) |
+| `route.created`, `route.updated` | a route is saved | the route (`RouteView`): origin, destination, flight time, minimum range and capacity, status |
+| `airport.created`, `airport.updated` | an airport is saved | the airport as the clients get it (`AirportResponse`: photos only counted) |
+| `flightcopy.created`, `flightcopy.updated` | a copy of a flight is stored (C5) | the copy: route, aircraft, times, status, version |
+| `route.deleted`, `airport.deleted`, `flightcopy.deleted` | deleted | none |
 
-Body, as JSON: `type` (the routing key), `key` (`OPO-LIS`, or the IATA code), `status`, `version`
-(the one the ETag is built from), `data`, `stamp` and `stampNode` (the time and replica of the change,
-the same stamp the replication gives it), `nodeId` (the replica that published it), `occurredAt`.
+Body, as JSON: `type` (the routing key), `key` (`OPO-LIS`, the IATA code or the flight id), `status`,
+`version` (the one the ETag is built from), `data`, `stamp` and `stampNode` (the time and replica of
+the change, the same stamp the replication gives it), `nodeId` (the replica that published it),
+`occurredAt`.
 
 ### 12.2 Read model (CQRS)
 
 | Side | Where | Kept by |
 |---|---|---|
-| Write (commands: `POST`, `PUT`, `PATCH`, `DELETE`) | table `route`: partitioned, home replica and the next one (section 4) | the use cases, as in Assignment 1 |
-| Read (every route listing of section 7) | table `route_view` of each replica: **every** route of **every** replica | the route events only (`RouteEventListener`) |
+| Write (commands: `POST`, `PUT`, `PATCH`, `DELETE`; and the details of one entity, read before changing it) | the tables of each entity: routes and flight copies partitioned (home and next replica), airports on every replica (section 4) | the use cases, as in Assignment 1 |
+| Read (every listing and report: section 7, airport search and grouping, US210, US214) | table `read_model` of each replica: **every** route, airport and flight copy of **every** replica, as the queries need it (JSON) | the events only (`ReadModelListener`) |
+
+| Query port | Without events (Assignment 1) | With events |
+|---|---|---|
+| `RoutesAcrossReplicas` (route listings, reports) | `GatheredRoutes`: asks the peers | `ReadModelRoutes` |
+| `FlightCopiesAcrossReplicas` (route popularity, US214) | `GatheredFlightCopies`: asks the peers | `ReadModelFlightCopies` |
+| `AirportListings` (search, grouping by region or country, statistics) | `LocalAirportListings`: this replica's airports | `ReadModelAirportListings`: the stored answers, no domain objects built |
 
 - Each replica has its own durable queue, `airports-routes.read-model.<replica>`, bound with
-  `route.*` (publish/subscribe): every replica gets every route event, also those of its own changes.
-- The listings read the route port `RoutesAcrossReplicas`. With events on, it is `ReadModelRoutes`
-  (the local `route_view`) instead of `GatheredRoutes` (asking the peers): the use cases do not
-  change, and **a listing no longer depends on the other replicas being up** (no
-  `X-Partial-Result`).
+  `route.*`, `airport.*` and `flightcopy.*` (publish/subscribe): every replica gets every event,
+  also those of its own changes.
+- The use cases do not change (they read the ports), and **a listing no longer depends on the other
+  replicas being up** (no `X-Partial-Result`).
+- What the read model keeps of each entity is a `Projection` (`RouteProjection`, `AirportProjection`,
+  `FlightCopyProjection`): the routing keys, the view, and how to build it from what the replicas
+  export.
+- The details of one entity (`GET /api/routes/{o}/{d}`, `GET /api/airports/{iata}`) still read the
+  write model: they are read to change the entity, with the current `version` for `If-Match`, so
+  they must never be behind.
 - Order: each row keeps the stamp of the change it shows, and a change is applied only if it is
-  later (same rule as the replication). Events can arrive in any order. A deleted route stays as a
+  later (same rule as the replication). Events can arrive in any order. A deleted entity stays as a
   row marked deleted, so an older event cannot bring it back.
-- Lost events: `RouteViewReconciler` compares `route_view` with what this replica and its peers hold
-  (`GET /internal/replicas/routes`, the same export the replication uses). It runs on startup, before
-  the replica reports ready, and then every `READ_MODEL_RECONCILE_MS` (60 s by default).
+- Lost events: `ReadModelReconciler` compares the read model with what this replica and its peers
+  hold (`GET /internal/replicas/{type}`, the same export the replication uses). It runs on startup,
+  before the replica reports ready, and then every `READ_MODEL_RECONCILE_MS` (60 s by default).
 - An event that cannot be applied is dropped, not requeued forever
   (`default-requeue-rejected=false`); the reconciliation repairs that row.
 
@@ -238,13 +251,15 @@ the same stamp the replication gives it), `nodeId` (the replica that published i
 
 | Situation | Behaviour |
 |---|---|
-| Normal | A new or changed route shows in the listings of every replica a few milliseconds later (eventual consistency, also on the replica that made the change) |
-| Two replicas down | The third still lists every route (its `route_view` has them all); writes to routes only those two held answer as in Assignment 1 |
-| RabbitMQ down | Writes still work (the change is kept, the event is logged as not published); listings show the routes as they were, until the next reconciliation once the broker is back |
+| Normal | A change shows in the listings of every replica a few milliseconds later (eventual consistency, also on the replica that made the change) |
+| Two replicas down | The third still lists every route, airport and the popularity of every route (its read model has them all); writes to routes only those two held answer as in Assignment 1 |
+| RabbitMQ down | Writes still work (the change is kept, the event is logged as not published); listings show the data as it was, until the next reconciliation once the broker is back |
 | A replica down for a while | Its queue keeps the events (durable); it applies them when it comes back, and reconciles on startup |
 
 Tested end to end by the [events collection](../postman/README.md#assignment-2-airports-routes-events)
-(26 requests, 58 checks).
+(44 requests, 102 checks), and live with 3 replicas: listings complete with two replicas down, and
+the changes made while RabbitMQ was down reached every replica within one reconciliation.
 
-**Still to do (group decisions):** consuming the events of other services, such as flight-ops'
-flights instead of C5; RabbitMQ in the k3s deployment; `/api/v2/unicorns`.
+**Still to do (group decisions):** consuming the events of other services (flight-ops' flights
+instead of C5, aircraft from aircraft-maintenance instead of C1); RabbitMQ in the k3s deployment;
+`/api/v2/unicorns`.

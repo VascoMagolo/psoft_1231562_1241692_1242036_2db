@@ -1,0 +1,37 @@
+@startuml sd_cqrs_read_model
+skinparam backgroundColor #FFFFFF
+title Scenario (Assignment 2): a change on one replica reaches the read model of every replica
+
+autonumber
+skinparam defaultFontSize 16
+actor "Client\n(or flight-ops, C5)" as c
+participant "airports-routes-1\n(write side)" as r1
+database "DB replica 1\nroute / airport / flight_copies,\nreplica_state" as db1
+participant "airports-routes-2\n(peer)" as r2
+queue "RabbitMQ\nexchange airports-routes.events\n(topic)" as mq
+participant "airports-routes-0, -1, -2\n(read side)" as readers
+database "DB of each replica\nread_model" as views
+
+c -> r1 : POST /api/routes, POST /api/airports,\nPUT /internal/flights/{id} ... (JWT)
+r1 -> db1 : save + stamp of the change\n(one transaction)
+r1 -> r2 : copy (replication, as in Assignment 1)
+r1 -> mq : after the commit: route.created /\nairport.created / flightcopy.created\n{key, status, version, data, stamp}
+r1 --> c : 201 / 200
+note over mq
+  One durable queue per replica
+  (airports-routes.read-model.<replica>),
+  bound with route.*, airport.*, flightcopy.*:
+  every replica gets every event (publish/subscribe)
+end note
+mq -> readers : the event (to each queue)
+readers -> views : ReadModelListener: apply if later than the stamp kept\n(last writer wins, as the replication)
+
+== read side ==
+c -> readers : GET /api/routes/search, /api/airports/search,\n/api/routes?sortBy=popularity ... (any replica)
+readers -> views : read read_model (local, no peers asked)
+readers --> c : 200, the data of every replica
+
+== a lost event (broker down when it was published) ==
+readers -> readers : ReadModelReconciler, on startup and every 60 s:\nwhat this replica and its peers hold (GET /internal/replicas/{type})
+readers -> views : apply the changes later than the ones kept
+@enduml
