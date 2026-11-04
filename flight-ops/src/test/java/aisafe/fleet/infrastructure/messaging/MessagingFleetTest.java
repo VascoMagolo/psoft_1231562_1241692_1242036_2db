@@ -102,7 +102,7 @@ class MessagingFleetTest {
 
     @Test
     void ensureC4AnswersBecomeTheExceptionsTheSagaHandles() {
-        when(commands.send(eq("aircraft-maintenance"), eq("flightcopy.record"), any()))
+        when(commands.sendIdempotent(eq("aircraft-maintenance"), eq("flightcopy.record"), any()))
                 .thenReturn(new CommandReply(200, null, null))
                 .thenReturn(new CommandReply(404, null, "no aircraft"))
                 .thenReturn(new CommandReply(409, null, "in maintenance"))
@@ -114,12 +114,12 @@ class MessagingFleetTest {
         assertThrows(AircraftConflictException.class, () -> fleet.sendFlightToAircraft(copy));
         assertThrows(FleetUnavailableException.class, () -> fleet.sendFlightToAircraft(copy));
         assertThrows(FleetUnavailableException.class, () -> fleet.sendFlightToAircraft(copy));
-        verify(commands, times(5)).send("aircraft-maintenance", "flightcopy.record", copy);
+        verify(commands, times(5)).sendIdempotent("aircraft-maintenance", "flightcopy.record", copy);
     }
 
     @Test
     void ensureC5AnswersBecomeTheExceptionsTheSagaHandles() {
-        when(commands.send(eq("airports-routes"), eq("flightcopy.record"), any()))
+        when(commands.sendIdempotent(eq("airports-routes"), eq("flightcopy.record"), any()))
                 .thenReturn(new CommandReply(404, null, "no route"))
                 .thenReturn(new CommandReply(409, null, "inactive"))
                 .thenThrow(new CommandUnavailableException("no answer"));

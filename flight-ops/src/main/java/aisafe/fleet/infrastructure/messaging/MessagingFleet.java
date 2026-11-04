@@ -139,7 +139,8 @@ public class MessagingFleet implements Fleet {
 
     private CommandReply send(String service, FlightCopy copy) {
         try {
-            return commands.send(service, RECORD_FLIGHT_COPY, copy);
+            // The copy is idempotent (it carries the flight's version): safe to send once more
+            return commands.sendIdempotent(service, RECORD_FLIGHT_COPY, copy);
         } catch (CommandUnavailableException e) {
             log.warn("{} did not answer {} {}: {}", service, RECORD_FLIGHT_COPY, copy.id(), e.getMessage());
             throw new FleetUnavailableException(service + " is not available, try again.");

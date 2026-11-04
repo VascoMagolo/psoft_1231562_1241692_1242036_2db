@@ -85,13 +85,26 @@ public class CommandBus {
     }
 
     /**
+     * As {@link #send}, sent once more when no answer arrived: only for commands that change nothing
+     * when carried out twice (queries, and the idempotent copies of C4 and C5). The second one goes to
+     * another replica of the owner, e.g. when the first was taken by a replica on a VM that just died.
+     */
+    public CommandReply sendIdempotent(String target, String type, Object payload) {
+        try {
+            return send(target, type, payload);
+        } catch (CommandUnavailableException firstAttempt) {
+            return send(target, type, payload);
+        }
+    }
+
+    /**
      * A query to the owner of some data: the body of its answer, or empty when it does not have it
      * (404, or 400 for a key that cannot exist).
      *
      * @throws CommandUnavailableException if no answer arrived in time, or the owner failed
      */
     public Optional<JsonNode> query(String target, String type, Object payload) {
-        CommandReply reply = send(target, type, payload);
+        CommandReply reply = sendIdempotent(target, type, payload);
         if (reply.ok()) {
             return Optional.ofNullable(reply.body());
         }
