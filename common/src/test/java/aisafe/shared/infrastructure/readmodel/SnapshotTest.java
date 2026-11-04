@@ -102,8 +102,20 @@ class SnapshotTest {
     }
 
     @Test
-    void ensureAfterAnAnswerItWaitsForTheIntervalBeforeAskingAgain() {
+    void ensureEmptyAnswerIsAskedAgainOnTheNextRound() {
         when(commands.send(anyString(), anyString(), any())).thenReturn(answer(List.of()));
+        SnapshotClient client = client(Clock.fixed(Instant.parse("2026-11-04T10:00:00Z"), ZoneOffset.UTC));
+
+        client.fill(AIRCRAFT);
+        client.refresh();
+
+        verify(commands, times(2)).send(anyString(), anyString(), any());
+    }
+
+    @Test
+    void ensureAfterAnAnswerItWaitsForTheIntervalBeforeAskingAgain() {
+        when(commands.send(anyString(), anyString(), any())).thenReturn(answer(List.of(
+                new ReadModelStore.StampedRow("CS-TKA", json.createObjectNode(), 1L, 10, "am-0"))));
         Instant start = Instant.parse("2026-11-04T10:00:00Z");
         SnapshotClient soon = client(Clock.fixed(start, ZoneOffset.UTC));
         soon.fill(AIRCRAFT);

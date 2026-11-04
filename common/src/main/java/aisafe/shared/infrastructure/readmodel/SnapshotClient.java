@@ -113,7 +113,11 @@ public class SnapshotClient implements ApplicationRunner {
                 log.warn("Read model: {} row of the snapshot not applied: {}", projection.entity(), e.toString());
             }
         }
-        lastFilled.put(key(projection), clock.millis());
+        // An empty answer is not taken as filled: during a deploy the owner's replica that answers may
+        // not have filled its own read model yet, so it is asked again in 15 s rather than in 5 min
+        if (total > 0) {
+            lastFilled.put(key(projection), clock.millis());
+        }
         if (applied > 0) {
             log.info("Read model: {} of {} {} from {} applied by the snapshot", applied, total, projection.entity(),
                     projection.source());
