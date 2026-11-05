@@ -123,3 +123,19 @@ Each copy carries the flight's version: C4 and C5 are idempotent, so a step can 
 - **Overlap check across replicas is best effort:** two flights for the same aircraft scheduled at
   the same time on two replicas, during a partition, could overlap.
 - The rest, as for the whole system: [system documentation, section 13](../README.md#13-known-limitations).
+
+## 11. Assignment 2: the Saga over RabbitMQ
+
+With `EVENTS_ENABLED=true` (the k3s deployment), `Fleet` is `MessagingFleet`; the whole picture is in
+[`../assignment-2.md`](../assignment-2.md).
+
+- **Queries (C1, C2, C3):** the aircraft, aircraft models and routes come from this replica's read
+  model, kept by the events of aircraft-maintenance and airports-routes and by a snapshot asked on
+  startup. A key not there yet (an aircraft created a moment ago) is asked to its owner over the
+  broker (`aircraft.get`, `route.get`): never a false 404.
+- **Commands (C4, C5):** the Saga's steps go through the broker as the command `flightcopy.record`
+  (request/reply, expiring in 5 s), checked by the owner at that moment. The answers become the same
+  exceptions as over HTTP, so `ScheduleFlightUseCase` and the compensations did not change: the Saga
+  is still orchestrated here ([diagram](../svg/sd_schedule_flight_saga_amqp.svg)).
+- flight-ops publishes no events of its own: nobody keeps a copy of its flights (the other services
+  receive the copies they need as commands).

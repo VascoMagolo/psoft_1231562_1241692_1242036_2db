@@ -1,0 +1,24 @@
+@startuml sd_snapshot_startup
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 16
+title Scenario: a replica fills its copy of another service's data on startup (snapshot)
+
+autonumber
+participant "flight-ops-2\n(starting)" as fo
+database "its read model" as rm
+queue "RabbitMQ" as mq
+participant "aircraft-maintenance\n(any replica)" as am
+database "its read model" as amrm
+
+fo -> mq : declare its queue, bound to aircraft.*\n(events from now on wait there)
+fo -> mq : command snapshot {entity: aircraft} (reply-to)
+mq -> am : one replica takes it
+am -> amrm : every row of aircraft, deleted ones too, with their stamps
+am --> fo : the rows
+fo -> rm : apply each row if later (same rule as the events)
+fo -> fo : ready (readiness probe)
+note over fo, am
+  Events received meanwhile and the snapshot can arrive in any order: the stamp decides.
+  No answer, or an empty one: asked again every 15 s; then every 5 minutes as a check.
+end note
+@enduml
