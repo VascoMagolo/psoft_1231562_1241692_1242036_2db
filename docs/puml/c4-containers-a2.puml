@@ -1,0 +1,37 @@
+@startuml c4-containers-a2
+skinparam backgroundColor #FFFFFF
+!include <C4/C4_Container>
+skinparam defaultFontSize 16
+skinparam wrapWidth 260
+
+title AISafe - Containers with messaging (Assignment 2)
+
+Person(user, "Users", "Backoffice Operator, ATCC, Maintenance, Admin")
+
+System_Boundary(aisafe, "AISafe (k3s cluster, 3 VMs)") {
+  Container(entry, "Entry", "Envoy, one per VM", "HTTPS behind a virtual IP per service (and the RabbitMQ console): sends each request to a ready replica")
+  Container(login, "login ×3", "Spring Boot", "Issues the JWT; publishes account.*")
+  Container(fo, "flight-ops ×3", "Spring Boot", "Flights; the Saga orchestrator; reads its copy of aircraft, models and routes")
+  Container(ar, "airports-routes ×3", "Spring Boot", "Airports, routes; read model of its own data and a copy of the fleet")
+  Container(am, "aircraft-maintenance ×3", "Spring Boot", "Aircraft, models, maintenance; read model; /api/v2/unicorns")
+  ContainerQueue(mq, "RabbitMQ ×3", "AMQP 0-9-1, quorum queues", "Exchanges <service>.events (topic), aisafe.commands and aisafe.dead-letter (direct)")
+  ContainerDb(foDb, "Flights + copies", "H2 per replica")
+  ContainerDb(arDb, "Routes + read model", "H2 per replica")
+  ContainerDb(amDb, "Aircraft + read model", "H2 per replica")
+}
+
+Rel(user, entry, "REST/JSON + JWT", "HTTPS")
+Rel(entry, fo, "/api/flights")
+Rel(entry, ar, "/api/airports, /api/routes")
+Rel(entry, am, "/api/aircrafts, /api/maintenance, /api/v2/unicorns")
+Rel(entry, login, "/api/auth")
+
+Rel(am, mq, "publishes aircraft.*, aircraftmodel.*, maintenancerecord.*, flightcopy.*; answers C4, aircraft.get, snapshots", "AMQP")
+Rel(ar, mq, "publishes route.*, airport.*, flightcopy.*; consumes aircraft.*; answers C5, route.get", "AMQP")
+Rel(fo, mq, "consumes aircraft.*, route.*; sends C4, C5 (Saga) and queries on a miss", "AMQP")
+Rel(login, mq, "publishes account.*", "AMQP")
+
+Rel(fo, foDb, "JDBC")
+Rel(ar, arDb, "JDBC")
+Rel(am, amDb, "JDBC")
+@enduml

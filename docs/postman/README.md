@@ -51,24 +51,53 @@ newman run docs/postman/aisafe-distributed.postman_collection.json -e /tmp/aisaf
   --ssl-extra-ca-certs deploy/entry.crt --folder "8. Failures: with a replica down"
 ```
 
-## Assignment 2: airports-routes events
+## Assignment 2: messaging and CQRS on the cluster
+
+`aisafe-a2.postman_collection.json` tests Assignment 2 against the cluster (environment "AISafe k3s",
+which also has `rabbit_vip`): 33 requests, 84 checks. It reads the queues through the RabbitMQ
+management API (HTTPS on `rabbit_vip`, the same certificate) as the user `postman`, which may only
+create queues named `postman.*` and bind them to the events of the services.
+
+| Folder                                  | What it shows                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Setup                                | Logins; the management API as `postman`; a test queue `postman.events` bound to `aircraft.*` (aircraft-maintenance) and `flightcopy.*` (airports-routes), playing another service                                                                                                                                                   |
+| 1. The broker                           | The read-model queues of three replicas and the command queues of aircraft-maintenance (C4) and airports-routes (C5): quorum queues, with a dead-letter exchange, taken by their replicas                                                                                                                                           |
+| 2. Command, then event, then read model | An aircraft created on aircraft-maintenance-1 publishes `aircraft.created` (with the aircraft and its stamp); aircraft-maintenance-0 does not hold it (its read of it is forwarded: `X-Data-Node`), but the unicorns of all three replicas list it, from their read models                                                          |
+| 3. Between services over AMQP           | airports-routes finds the routes compatible with the new aircraft (US203) from its copy of the fleet, without C1; flight-ops schedules a flight with it (the Saga, with C4 and C5 as commands through the broker); airports-routes publishes `flightcopy.created` and counts the flight; the aircraft cannot be deleted (C4 stored) |
+| 4. A change travels to every copy       | The aircraft goes under maintenance on aircraft-maintenance-2: `aircraft.updated` arrives, the unicorns of replica 0 turn `GRUMPY`, and flight-ops refuses a new flight with it (409)                                                                                                                                               |
+| 5. `/api/v2/unicorns`                   | A list with a mood per aircraft, from the read model, any role; without a token, refused                                                                                                                                                                                                                                            |
+| 6. Cleanup                              | Deletes the test queue (the aircraft stays: it has a flight)                                                                                                                                                                                                                                                                        |
+
+The password of `postman` is in the cluster's Secret, never in the repository: give it to newman
+(or set `postman_password` in the Postman environment) from a computer with access to a node:
+
+```sh
+newman run docs/postman/aisafe-a2.postman_collection.json -e docs/postman/aisafe-k3s.postman_environment.json \
+  --ssl-extra-ca-certs deploy/entry.crt --env-var "postman_password=$(ssh sidis@192.168.124.43 \
+  "sudo k3s kubectl -n aisafe get secret aisafe-rabbitmq -o go-template='{{index .data \"postman-password\"}}'" | base64 -d)"
+```
+
+The Assignment 1 collection runs unchanged against the cluster with events on (86 requests, 199
+checks): the external API did not change.
+
+## Assignment 2: airports-routes events, locally
 
 `aisafe-events.postman_collection.json` tests the events airports-routes publishes on RabbitMQ and
 its read model (CQRS) of routes, airports and flight copies: 44 requests, 102 checks. It runs against
-a local setup (RabbitMQ is not in the k3s deployment yet), with the environment
-`aisafe-local-events.postman_environment.json`.
+a local setup with the environment `aisafe-local-events.postman_environment.json` (replicas named
+`ar0`, `ar1`, `ar2`).
 
-| Folder | What it shows |
-|---|---|
-| 0. Setup | Logins, the 3 replicas ready, the exchange `airports-routes.events` and one read-model queue per replica, each with its consumer |
-| 1. Prepare | A test queue bound to the exchange with `route.*`, `airport.*` and `flightcopy.*`, playing another service interested in these events |
-| 2. Command, then event | Creating a route on replica 1 (HTTP) publishes `route.created`, with the route, its version and the stamp of the change |
-| 3. Read model (CQRS) | The 3 replicas list the new route from their own read model, also replica 0, which holds no copy of it |
-| 4. Flight copies and route popularity | A copy of a flight (C5) publishes `flightcopy.created`; the route's popularity (US214) grows by one on the 3 replicas |
-| 5. Airports | Registering an airport publishes `airport.created`; the airport search of replicas 0 and 2 finds it in the read model |
-| 6. Update | The route's details give its version; deactivating it with that `If-Match` publishes `route.updated`; the read models show it inactive |
-| 7. Delete | Deleting the route and the airport through replica 0 publishes `route.deleted` and `airport.deleted`; no read model lists them any more |
-| 8. Cleanup | Deletes the test queue |
+| Folder                                | What it shows                                                                                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Setup                              | Logins, the 3 replicas ready, the exchange `airports-routes.events` and one read-model queue per replica, each with its consumer        |
+| 1. Prepare                            | A test queue bound to the exchange with `route.*`, `airport.*` and `flightcopy.*`, playing another service interested in these events   |
+| 2. Command, then event                | Creating a route on replica 1 (HTTP) publishes `route.created`, with the route, its version and the stamp of the change                 |
+| 3. Read model (CQRS)                  | The 3 replicas list the new route from their own read model, also replica 0, which holds no copy of it                                  |
+| 4. Flight copies and route popularity | A copy of a flight (C5) publishes `flightcopy.created`; the route's popularity (US214) grows by one on the 3 replicas                   |
+| 5. Airports                           | Registering an airport publishes `airport.created`; the airport search of replicas 0 and 2 finds it in the read model                   |
+| 6. Update                             | The route's details give its version; deactivating it with that `If-Match` publishes `route.updated`; the read models show it inactive  |
+| 7. Delete                             | Deleting the route and the airport through replica 0 publishes `route.deleted` and `airport.deleted`; no read model lists them any more |
+| 8. Cleanup                            | Deletes the test queue                                                                                                                  |
 
 The queues are read through the RabbitMQ management API (HTTP), since Postman does not speak AMQP.
 

@@ -1,0 +1,40 @@
+@startuml sd_event_to_read_model
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 16
+title Scenario: a command, its event and the read models (CQRS, transactional outbox)
+
+autonumber
+actor "ATCC" as c
+participant "aircraft-maintenance-1" as am1
+database "its H2\n(aircraft, event_outbox)" as db1
+participant "EventRelay\n(aircraft-maintenance-1)" as relay
+queue "RabbitMQ\naircraft-maintenance.events" as ex
+participant "aircraft-maintenance-0..2\n(read-model queues)" as amr
+participant "airports-routes-0..2\nflight-ops-0..2" as others
+
+c -> am1 : POST /api/aircrafts (command)
+group one transaction
+  am1 -> db1 : insert aircraft (write model)
+  am1 -> db1 : replica_state stamp (time, replica)
+  am1 -> db1 : insert event_outbox (aircraft.created, stamp, data)
+end
+am1 --> c : 201 (does not wait for the broker)
+am1 -> relay : after the commit: relay soon
+relay -> ex : publish aircraft.created (persistent)
+ex --> relay : confirm
+relay -> db1 : delete the outbox entry
+note right of relay
+  Broker down: the entry stays,
+  retried every 0.5 s, in order
+end note
+ex -> amr : one quorum queue per replica
+amr -> amr : apply if later than the row (last writer wins)
+ex -> others : their queues, bound to aircraft.*
+others -> others : their copy of the fleet
+
+note over amr, others
+  Queries read these local copies: GET /api/aircrafts, /api/v2/unicorns,
+  compatible routes, scheduling. A message that cannot be applied goes to the
+  dead-letter queue after 5 attempts; snapshots and reconciliation repair the row.
+end note
+@enduml
