@@ -2,6 +2,7 @@ package aisafe.routes.infrastructure.persistence.jpa;
 
 import aisafe.airports.domain.IataCode;
 import aisafe.shared.infrastructure.messaging.EventPublisher;
+import aisafe.routes.application.RouteDistanceService;
 import aisafe.routes.domain.Route;
 import aisafe.routes.domain.RouteRepository;
 import aisafe.routes.infrastructure.readmodel.RouteProjection;
@@ -22,12 +23,14 @@ public class RouteJpaRepository implements RouteRepository {
     private final SpringDataRouteRepository springRepo;
     private final RouteReplicaSender replicaSender;
     private final EventPublisher events;
+    private final RouteDistanceService distances;
 
     public RouteJpaRepository(SpringDataRouteRepository springRepo, RouteReplicaSender replicaSender,
-                              EventPublisher events) {
+                              EventPublisher events, RouteDistanceService distances) {
         this.springRepo = springRepo;
         this.replicaSender = replicaSender;
         this.events = events;
+        this.distances = distances;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class RouteJpaRepository implements RouteRepository {
         RouteJpaEntity saved = springRepo.saveAndFlush(jpaEntity);
         replicaSender.routeSaved(saved);
         events.changed(RouteReplicaHandler.TYPE, RouteProjection.ENTITY, existing.isPresent() ? "updated" : "created", key(route),
-                route.getStatus(), saved.getVersion(), RouteView.from(route));
+                route.getStatus(), saved.getVersion(), RouteView.from(route, distances));
         return route;
     }
 

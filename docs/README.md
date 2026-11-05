@@ -1,13 +1,16 @@
 # AISafe - Distributed System Documentation
 
 Documentation of the distributed version of AISafe (SIDIS, Assignment 1): the PSOFT monolith split
-into three services plus a login, each replicated three times on a k3s cluster. The documentation of
+into three services plus a login, each replicated three times on a k3s cluster. **Assignment 2**
+(RabbitMQ between the services, CQRS, a database per instance, `/api/v2/unicorns`) is in
+[`assignment-2.md`](assignment-2.md); this document describes the base it builds on. The documentation of
 the original monolith (use cases, glossary, FURPS+, domain model) is in
 [`../docs_monolith/`](../docs_monolith/README.md).
 
 |                  |                                                                                                                                                                                                                                                                                                                           |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Use cases        | [every user story](system-documentation/use-cases/README.md) in the distributed system: service, routes, how each request is served across replicas, SSD and SD                                                                                                                                                           |
+| Assignment 2     | [`assignment-2.md`](assignment-2.md): messaging (events, commands, queries), CQRS, database per instance, consistency, failures, unicorns                                                                                                                                                                                 |
 | Contracts        | [C1-C5](system-documentation/contracts/README.md): the calls between services, one page and one SD each                                                                                                                                                                                                                   |
 | Global artifacts | [diagrams, glossary, FURPS+](system-documentation/global-artifacts/README.md)                                                                                                                                                                                                                                             |
 | Team             | [members, ownership and pull requests](TeamMembersAndTasks.md)                                                                                                                                                                                                                                                            |
@@ -85,7 +88,9 @@ cluster and the services).
 | C4  | flight-ops → aircraft-maintenance                  | `PUT /internal/flights/{id}` (copy of a flight) | 200 stored, idempotent; 404 no such aircraft; 409 aircraft cannot take the flight |
 | C5  | flight-ops → airports-routes                       | `PUT /internal/flights/{id}` (copy of a flight) | 200 stored, idempotent; 404 no such route; 409 route not active                   |
 
-All are commands or queries over HTTP (no events or message queues in Assignment 1), carrying the
+In Assignment 2 they go through RabbitMQ: C1-C3 become events kept in local copies (asked to the
+owner only on a miss) and C4-C5 commands with an answer ([`assignment-2.md`](assignment-2.md),
+section 3). In Assignment 1 all are commands or queries over HTTP, carrying the
 user's JWT and the correlation id; outside a user's request (sample data at start-up, retried
 compensations), flight-ops sends its replica's service token instead. They are reachable only from inside the cluster: through the
 virtual IPs, `/internal/**` answers 404. Each one answers wherever the data is: a replica that does not
@@ -237,16 +242,16 @@ On the running cluster: [HTTPS on a virtual IP, plain HTTP refused](screenshots/
 
 ## 12. Main decisions
 
-| Decision                                                                       | Why                                                                               | Alternative left out                                                        |
-| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| 3 services by business capability, plus a login                                | As the assignment proposes; each owns its data                                    | One service per aggregate: more calls, more failure points                  |
-| Dependencies in one direction; US203 and US227 moved to airports-routes        | No cycles between services; aircraft-maintenance works alone                      | aircraft-maintenance calling airports-routes                                |
-| Each service keeps its own copies of types of others (no shared domain module) | Independent deployability                                                         | Sharing domain classes through `common`                                     |
-| Database per replica, records on two replicas, catalogs on all                 | Partitioned data (the assignment asks forwarding to be needed) with redundancy    | Full copy everywhere (no forwarding), or a single copy (no fault tolerance) |
-| Commands over HTTP only                                                        | Events and message queues are left for Assignment 2                               | Messaging                                                                   |
-| Saga with compensations for scheduling flights                                 | Three services, no distributed transactions                                       | Two-phase commit (blocks when one service is down)                          |
-| k3s + MetalLB + Envoy on 3 VMs                                                 | No single point of failure, virtual IPs, retries on another replica, self-healing | Docker Compose on one machine (that machine is a single point of failure)   |
-| Last writer wins with stamps and tombstones                                    | Simple, deterministic, works during partitions                                    | Vector clocks or asking the user to resolve conflicts                       |
+| Decision                                                                       | Why                                                                                         | Alternative left out                                                        |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 3 services by business capability, plus a login                                | As the assignment proposes; each owns its data                                              | One service per aggregate: more calls, more failure points                  |
+| Dependencies in one direction; US203 and US227 moved to airports-routes        | No cycles between services; aircraft-maintenance works alone                                | aircraft-maintenance calling airports-routes                                |
+| Each service keeps its own copies of types of others (no shared domain module) | Independent deployability                                                                   | Sharing domain classes through `common`                                     |
+| Database per replica, records on two replicas, catalogs on all                 | Partitioned data (the assignment asks forwarding to be needed) with redundancy              | Full copy everywhere (no forwarding), or a single copy (no fault tolerance) |
+| Commands over HTTP only (Assignment 1)                                         | Events and message queues were left for Assignment 2 ([`assignment-2.md`](assignment-2.md)) | Messaging                                                                   |
+| Saga with compensations for scheduling flights                                 | Three services, no distributed transactions                                                 | Two-phase commit (blocks when one service is down)                          |
+| k3s + MetalLB + Envoy on 3 VMs                                                 | No single point of failure, virtual IPs, retries on another replica, self-healing           | Docker Compose on one machine (that machine is a single point of failure)   |
+| Last writer wins with stamps and tombstones                                    | Simple, deterministic, works during partitions                                              | Vector clocks or asking the user to resolve conflicts                       |
 
 ## 13. Known limitations
 

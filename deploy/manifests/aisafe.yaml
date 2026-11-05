@@ -1,7 +1,8 @@
 # AISafe on k3s: the services, their virtual IPs (MetalLB), the entry of each node (Envoy) and one
 # port per replica for tests. Applied by deploy/setup.sh, which fills in the @...@ values from
-# deploy/config.sh. The JWT secret (aisafe-jwt) and the entries' certificate (entry-tls) are created
-# by setup.sh, never stored here.
+# deploy/config.sh. The JWT secret (aisafe-jwt), the entries' certificate (entry-tls) and the
+# RabbitMQ passwords (aisafe-rabbitmq) are created by setup.sh, never stored here. RabbitMQ itself
+# is in rabbitmq.yaml.
 #
 # Virtual IPs (HTTPS, port 443), through the entry of the node that announces them:
 #   @VIP_AIRCRAFT_MAINTENANCE@ aircraft-maintenance   @VIP_AIRPORTS_ROUTES@ airports-routes   @VIP_FLIGHT_OPS@ flight-ops   @VIP_LOGIN@ login
@@ -121,6 +122,15 @@ spec:
             # The audit trail (who did what, with what result), next to the database
             - name: AISAFE_AUDIT_FILE
               value: /data/audit.log
+            # Events, read models and commands on RabbitMQ (Assignment 2), with this service's own user
+            - name: EVENTS_ENABLED
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: rabbitmq-client.aisafe.svc.cluster.local
+            - name: RABBITMQ_USERNAME
+              value: aircraft-maintenance
+            - name: RABBITMQ_PASSWORD
+              valueFrom: { secretKeyRef: { name: aisafe-rabbitmq, key: aircraft-maintenance-password } }
           volumeMounts:
             - name: data
               mountPath: /data
@@ -309,6 +319,15 @@ spec:
               value: jdbc:h2:file:/data/airports-routes;DB_CLOSE_ON_EXIT=FALSE
             - name: AISAFE_AUDIT_FILE
               value: /data/audit.log
+            # Events, read models and commands on RabbitMQ (Assignment 2), with this service's own user
+            - name: EVENTS_ENABLED
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: rabbitmq-client.aisafe.svc.cluster.local
+            - name: RABBITMQ_USERNAME
+              value: airports-routes
+            - name: RABBITMQ_PASSWORD
+              valueFrom: { secretKeyRef: { name: aisafe-rabbitmq, key: airports-routes-password } }
             # aircraft-maintenance (contracts C1 and C3), through the entry of this VM (below)
             - name: AIRCRAFT_MAINTENANCE_URL
               value: http://aircraft-maintenance-local
@@ -529,6 +548,15 @@ spec:
               value: jdbc:h2:file:/data/flight-ops;DB_CLOSE_ON_EXIT=FALSE
             - name: AISAFE_AUDIT_FILE
               value: /data/audit.log
+            # Events, read models and commands on RabbitMQ (Assignment 2), with this service's own user
+            - name: EVENTS_ENABLED
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: rabbitmq-client.aisafe.svc.cluster.local
+            - name: RABBITMQ_USERNAME
+              value: flight-ops
+            - name: RABBITMQ_PASSWORD
+              valueFrom: { secretKeyRef: { name: aisafe-rabbitmq, key: flight-ops-password } }
             # aircraft-maintenance (contracts C1 and C4), through the entry of this VM (below)
             - name: AIRCRAFT_MAINTENANCE_URL
               value: http://aircraft-maintenance-local
@@ -727,6 +755,15 @@ spec:
               value: jdbc:h2:file:/data/login;DB_CLOSE_ON_EXIT=FALSE
             - name: AISAFE_AUDIT_FILE
               value: /data/audit.log
+            # Events, read models and commands on RabbitMQ (Assignment 2), with this service's own user
+            - name: EVENTS_ENABLED
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: rabbitmq-client.aisafe.svc.cluster.local
+            - name: RABBITMQ_USERNAME
+              value: login
+            - name: RABBITMQ_PASSWORD
+              valueFrom: { secretKeyRef: { name: aisafe-rabbitmq, key: login-password } }
           volumeMounts:
             - name: data
               mountPath: /data
@@ -796,6 +833,7 @@ spec:
             - containerPort: 10442
             - containerPort: 10443
             - containerPort: 10445
+            - containerPort: 10446
           volumeMounts:
             - name: config
               mountPath: /etc/envoy

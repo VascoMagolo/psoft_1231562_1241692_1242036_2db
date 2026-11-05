@@ -1,5 +1,7 @@
 package aisafe.flightcopies.infrastructure.persistence.jpa;
 
+import aisafe.flightcopies.infrastructure.readmodel.FlightCopyProjection;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.flightcopies.infrastructure.replication.FlightCopyReplica;
 import aisafe.flightcopies.infrastructure.replication.FlightCopyReplicaHandler;
 import aisafe.shared.infrastructure.replication.Replicator;
@@ -21,9 +23,13 @@ public class FlightCopyJpaRepository implements FlightCopyRepository {
     private final SpringDataFlightCopyRepository springRepo;
     private final Replicator replicator;
 
-    public FlightCopyJpaRepository(SpringDataFlightCopyRepository springRepo, Replicator replicator) {
+    private final EventPublisher events;
+
+    public FlightCopyJpaRepository(SpringDataFlightCopyRepository springRepo, Replicator replicator,
+                                   EventPublisher events) {
         this.springRepo = springRepo;
         this.replicator = replicator;
+        this.events = events;
     }
 
     @Override
@@ -38,9 +44,12 @@ public class FlightCopyJpaRepository implements FlightCopyRepository {
 
     @Override
     public FlightCopy save(FlightCopy copy) {
+        boolean existed = springRepo.existsById(copy.getId());
         FlightCopy saved = FlightCopyMapper.toDomain(springRepo.save(FlightCopyMapper.toJpa(copy)));
         // Record: copied to the other holder (home replica and its successor)
         replicator.recordSaved(FlightCopyReplicaHandler.TYPE, saved.getId(), FlightCopyReplica.from(saved), saved.getVersion());
+        events.changed(FlightCopyReplicaHandler.TYPE, FlightCopyProjection.ENTITY, existed ? "updated" : "created",
+                saved.getId(), saved.getStatus(), saved.getVersion(), FlightCopyReplica.from(saved));
         return saved;
     }
 
@@ -48,6 +57,7 @@ public class FlightCopyJpaRepository implements FlightCopyRepository {
     public void delete(FlightCopy copy) {
         springRepo.deleteById(copy.getId());
         replicator.recordDeleted(FlightCopyReplicaHandler.TYPE, copy.getId());
+        events.changed(FlightCopyReplicaHandler.TYPE, FlightCopyProjection.ENTITY, "deleted", copy.getId(), null, null, null);
     }
 
     @Override

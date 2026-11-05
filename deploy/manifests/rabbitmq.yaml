@@ -1,0 +1,201 @@
+# RabbitMQ for AISafe (Assignment 2): a cluster of three brokers, one per VM, so the events and
+# commands between the services survive the loss of a VM like the services do. Every queue the
+# services declare is a quorum queue, replicated on the three brokers: it keeps working with two.
+# Applied by deploy/setup.sh before the services. Its passwords and Erlang cookie (aisafe-rabbitmq)
+# are made by setup.sh, never stored here; setup.sh also creates one user per service.
+#
+#   rabbitmq-client:5672    AMQP, for the services (inside the cluster only)
+#   rabbitmq-client:15672   management API and console; from outside through the entries,
+#                           https://@VIP_RABBITMQ@ (see envoy.yaml)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq
+  namespace: aisafe
+data:
+  enabled_plugins: |
+    [rabbitmq_management].
+  rabbitmq.conf: |
+    # The three brokers find each other by their stable names (StatefulSet + headless service).
+    cluster_formation.peer_discovery_backend = classic_config
+    cluster_formation.classic_config.nodes.1 = rabbit@rabbitmq-0.rabbitmq.aisafe.svc.cluster.local
+    cluster_formation.classic_config.nodes.2 = rabbit@rabbitmq-1.rabbitmq.aisafe.svc.cluster.local
+    cluster_formation.classic_config.nodes.3 = rabbit@rabbitmq-2.rabbitmq.aisafe.svc.cluster.local
+    # A broker cut off from the other two stops instead of going on alone (no split brain).
+    cluster_partition_handling = pause_minority
+    # Within the pod's memory limit; above this the publishers wait (flow control).
+    vm_memory_high_watermark.absolute = 300MiB
+    disk_free_limit.absolute = 256MB
+---
+# Stable names for the brokers (rabbitmq-0.rabbitmq...), also before they are ready: they need
+# each other to form the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: aisafe
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: rabbitmq
+  ports:
+    - { name: amqp, port: 5672 }
+    - { name: epmd, port: 4369 }
+    - { name: dist, port: 25672 }
+    - { name: management, port: 15672 }
+---
+# What the services connect to: any ready broker. If it stops, the services reconnect to another.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-client
+  namespace: aisafe
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - { name: amqp, port: 5672 }
+    - { name: management, port: 15672 }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+  namespace: aisafe
+spec:
+  serviceName: rabbitmq
+  replicas: 3
+  # All three start together: each waits for the others to form the cluster.
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+      annotations:
+        # Restarts the brokers when their configuration changes
+        aisafe/config: "@RABBITMQ_CONFIG_HASH@"
+    spec:
+      # One broker per VM, always: two on the same VM would both go with it.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: rabbitmq
+      tolerations:
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 30
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 30
+      terminationGracePeriodSeconds: 60
+      # The Erlang cookie (shared secret of the brokers) must belong to the rabbitmq user and be
+      # readable by it alone, which a Secret volume cannot do: copied into place first.
+      initContainers:
+        - name: cookie
+          image: rabbitmq:4.3.6-management
+          command: [sh, -c, "cp /cookie/erlang-cookie /var/lib/rabbitmq/.erlang.cookie && chown 999:999 /var/lib/rabbitmq/.erlang.cookie && chmod 400 /var/lib/rabbitmq/.erlang.cookie"]
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/rabbitmq }
+            - { name: cookie, mountPath: /cookie, readOnly: true }
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:4.3.6-management
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+            - containerPort: 25672
+            - containerPort: 4369
+          env:
+            - name: MY_POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: RABBITMQ_NODENAME
+              value: rabbit@$(MY_POD_NAME).rabbitmq.aisafe.svc.cluster.local
+            - name: RABBITMQ_DEFAULT_USER
+              value: admin
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom: { secretKeyRef: { name: aisafe-rabbitmq, key: admin-password } }
+            # Two schedulers: the VMs have two cores, shared with the services.
+            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+              value: "+S 2:2 +sbwt none +sbwtdcpu none +sbwtdio none"
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/rabbitmq }
+            - { name: config, mountPath: /etc/rabbitmq/rabbitmq.conf, subPath: rabbitmq.conf }
+            - { name: config, mountPath: /etc/rabbitmq/enabled_plugins, subPath: enabled_plugins }
+            # The services' passwords, read by setup.sh when it creates their users (only root reads them)
+            - { name: passwords, mountPath: /etc/aisafe-rabbitmq, readOnly: true }
+          resources:
+            requests: { memory: 256Mi, cpu: 100m }
+            limits: { memory: 512Mi }
+          startupProbe:
+            exec: { command: [rabbitmq-diagnostics, -q, ping] }
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            exec: { command: [rabbitmq-diagnostics, -q, check_port_connectivity] }
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            exec: { command: [rabbitmq-diagnostics, -q, ping] }
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 6
+      volumes:
+        - name: config
+          configMap:
+            name: rabbitmq
+        - name: cookie
+          secret:
+            secretName: aisafe-rabbitmq
+            items:
+              - { key: erlang-cookie, path: erlang-cookie }
+        - name: passwords
+          secret:
+            secretName: aisafe-rabbitmq
+            defaultMode: 0400
+            items:
+              - { key: aircraft-maintenance-password, path: aircraft-maintenance-password }
+              - { key: airports-routes-password, path: airports-routes-password }
+              - { key: flight-ops-password, path: flight-ops-password }
+              - { key: login-password, path: login-password }
+              - { key: postman-password, path: postman-password }
+  # Each broker keeps its messages on its VM's disk (k3s local-path), like the services' databases.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources:
+          requests: { storage: 1Gi }
+---
+# The management console and API from outside (HTTPS), through the entry of the node that
+# announces the virtual IP, like the services.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-vip
+  namespace: aisafe
+  annotations:
+    metallb.io/loadBalancerIPs: "@VIP_RABBITMQ@"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: entry
+  ports:
+    - name: https
+      port: 443
+      targetPort: 10446

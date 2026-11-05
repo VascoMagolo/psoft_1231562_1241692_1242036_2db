@@ -10,6 +10,7 @@ import aisafe.shared.application.Versioned;
 import aisafe.shared.infrastructure.replication.ReplicaGatherer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,8 +21,10 @@ import java.util.stream.Collectors;
 
 /**
  * {@link MaintenanceRecordsAcrossReplicas} built from the records held here and by the peers.
+ * When events are on, the read model ({@code ReadModelMaintenanceRecords}) is used instead.
  */
 @Component
+@ConditionalOnProperty(name = "aisafe.events.enabled", havingValue = "false", matchIfMissing = true)
 public class GatheredMaintenanceRecords implements MaintenanceRecordsAcrossReplicas {
 
     private static final Logger log = LoggerFactory.getLogger(GatheredMaintenanceRecords.class);

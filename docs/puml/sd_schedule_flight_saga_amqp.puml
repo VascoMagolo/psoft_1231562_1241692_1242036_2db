@@ -1,0 +1,53 @@
+@startuml sd_schedule_flight_saga_amqp
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 16
+title Scenario: schedule a flight, Saga orchestrated by flight-ops over RabbitMQ
+
+autonumber
+actor "ATCC" as c
+participant "flight-ops" as fo
+database "flights DB +\nread model" as fdb
+queue "RabbitMQ\naisafe.commands" as cmd
+participant "aircraft-maintenance" as am
+participant "airports-routes" as ar
+
+c -> fo : POST /api/flights (JWT)
+fo -> fdb : route and aircraft from its copy (kept by events)
+alt not in the copy yet (created a moment ago)
+  fo -> cmd : route.get / aircraft.get (reply-to, 5 s)
+  cmd -> ar : any replica
+  ar --> fo : C2 answer from the write model
+end
+alt missing, unavailable or incompatible
+  fo --> c : 404 / 409 / 400
+end
+fo -> fdb : save flight PENDING
+
+fo -> cmd : C4 flightcopy.record (reply-to, expires in 5 s)
+cmd -> am : one replica takes it
+am -> am : checks the aircraft now (write model)
+am --> fo : 200 / 404 / 409
+alt refused, or no answer in 5 s
+  fo -> fdb : flight CANCELED
+  fo --> c : 409 / 503
+end
+
+fo -> cmd : C5 flightcopy.record to airports-routes
+cmd -> ar : one replica takes it
+ar --> fo : 200 / 404 / 409
+alt refused, or no answer
+  fo -> cmd : compensation: C4 copy CANCELED
+  note right
+    Not answered: stored and retried every 5 s
+  end note
+  fo -> fdb : flight CANCELED
+  fo --> c : 409 / 503
+end
+fo -> fdb : flight SCHEDULED
+fo --> c : 201
+
+note over fo, ar
+  Orchestration: flight-ops decides every step and every compensation. The copies are idempotent
+  (version), a command that expired goes to the dead-letter queue instead of being carried out late.
+end note
+@enduml

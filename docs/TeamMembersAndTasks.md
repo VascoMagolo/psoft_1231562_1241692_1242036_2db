@@ -1,4 +1,4 @@
-# SIDIS Assignment 1 - Team and tasks
+# SIDIS - Team and tasks
 
 ## 1. Team members
 
@@ -22,6 +22,15 @@ must understand the whole system, not only the part they own.
 | airports-routes                                                                    | Miguel Silva   | WP2A, WP2B, WP3A, WP3B (US214-US216), US227, US228 |
 | flight-ops (with the scheduling Saga)                                              | Vasco Magolo   | WP3B (US212, US213), US229                         |
 | login, `common` (forwarding, replication, security, audit), cluster and deployment | Diogo Nogueira | -                                                  |
+
+### Assignment 2
+
+| Part                                                                                                                          | Owner          |
+| ----------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| airports-routes: events and read model (CQRS)                                                                                 | Miguel Silva   |
+| `common` for every service (event outbox, read models, commands, snapshots), aircraft-maintenance (CQRS, C4, unicorns), login | Diogo Nogueira |
+| airports-routes and flight-ops reading the fleet from events, the Saga's C4 and C5 over the broker (reviewed by their owners) | Diogo Nogueira |
+| RabbitMQ in k3s, Postman of Assignment 2, [`assignment-2.md`](assignment-2.md)                                                | Diogo Nogueira |
 
 ## 3. What each pull request brought
 

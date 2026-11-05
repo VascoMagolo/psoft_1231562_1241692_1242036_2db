@@ -3,6 +3,7 @@
 # answer, to another one. Loaded into the ConfigMap "entry" by deploy/setup.sh.
 # HTTPS, behind the virtual IPs (certificate in the Secret "entry-tls", made by deploy/setup.sh):
 #   10441 -> aircraft-maintenance replicas   10442 -> airports-routes replicas   10443 -> flight-ops replicas   10445 -> logins
+#   10446 -> RabbitMQ management (console and API)
 # Plain HTTP, only for the services' calls from inside the cluster (aircraft-maintenance-local, airports-routes-local):
 #   10081 -> aircraft-maintenance replicas   10082 -> airports-routes replicas
 static_resources:
@@ -322,6 +323,29 @@ static_resources:
                                     typed_config:
                                       "@type": type.googleapis.com/envoy.extensions.retry.host.previous_hosts.v3.PreviousHostsPredicate
                                 host_selection_retry_max_attempts: 3
+    # HTTPS: the RabbitMQ management console and API (users of RabbitMQ itself, see rabbitmq.yaml),
+    # for the Postman tests of the events and to watch the queues during a demonstration.
+    - name: rabbitmq
+      address: { socket_address: { address: 0.0.0.0, port_value: 10446 } }
+      filter_chains:
+        - transport_socket: *tls
+          filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: rabbitmq
+                use_remote_address: true
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                route_config:
+                  virtual_hosts:
+                    - name: rabbitmq
+                      domains: ["*"]
+                      routes:
+                        - match: { prefix: "/" }
+                          route: { cluster: rabbitmq, timeout: 30s }
   clusters:
     - name: aircraft-maintenance
       # Every replica, from the service with their stable names, looked up every second.
@@ -423,3 +447,18 @@ static_resources:
           http_health_check: { path: /actuator/health/readiness }
       # Never send requests to replicas known to be down, even when most of them are.
       common_lb_config: { healthy_panic_threshold: { value: 0 } }
+    - name: rabbitmq
+      # The management API of any ready broker (the rabbitmq-client service).
+      cluster_type:
+        name: envoy.cluster.dns
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.clusters.dns.v3.DnsCluster
+          dns_refresh_rate: 5s
+          respect_dns_ttl: false
+      connect_timeout: 1s
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: rabbitmq
+        endpoints:
+          - lb_endpoints:
+              - endpoint: { address: { socket_address: { address: rabbitmq-client.aisafe.svc.cluster.local, port_value: 15672 } } }

@@ -1,5 +1,7 @@
 package aisafe.maintenance.infrastructure.persistence.jpa;
 
+import aisafe.maintenance.infrastructure.readmodel.MaintenanceRecordProjection;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.infrastructure.replication.Replicator;
 import aisafe.maintenance.infrastructure.replication.MaintenanceRecordReplicaHandler;
 import aisafe.maintenance.infrastructure.replication.MaintenanceRecordReplica;
@@ -21,15 +23,18 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
     private final SpringDataMaintenancePartRepository partSpringRepo;
     private final SpringDataMaintenanceTemplateRepository templateSpringRepo;
     private final Replicator replicator;
+    private final EventPublisher events;
 
     public MaintenanceRecordJpaRepository(SpringDataMaintenanceRecordRepository springRepo,
                                           SpringDataMaintenancePartRepository partSpringRepo,
                                           SpringDataMaintenanceTemplateRepository templateSpringRepo,
-                                          Replicator replicator) {
+                                          Replicator replicator,
+                                          EventPublisher events) {
         this.springRepo = springRepo;
         this.partSpringRepo = partSpringRepo;
         this.templateSpringRepo = templateSpringRepo;
         this.replicator = replicator;
+        this.events = events;
     }
 
     @Override
@@ -83,6 +88,9 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         // Record: copied to the other holder (home replica and its successor)
         replicator.recordSaved(MaintenanceRecordReplicaHandler.TYPE, record.getRecordId().toString(),
                 MaintenanceRecordReplica.from(record), saved.getVersion());
+        events.changed(MaintenanceRecordReplicaHandler.TYPE, MaintenanceRecordProjection.ENTITY,
+                existing != null ? "updated" : "created", record.getRecordId().toString(), record.getStatus(),
+                saved.getVersion(), MaintenanceRecordReplica.from(record));
         return record;
     }
 
@@ -91,6 +99,8 @@ public class MaintenanceRecordJpaRepository implements MaintenanceRecordReposito
         springRepo.findByRecordId(record.getRecordId()).ifPresent(entity -> {
             springRepo.delete(entity);
             replicator.recordDeleted(MaintenanceRecordReplicaHandler.TYPE, record.getRecordId().toString());
+            events.changed(MaintenanceRecordReplicaHandler.TYPE, MaintenanceRecordProjection.ENTITY, "deleted",
+                    record.getRecordId().toString(), null, null, null);
         });
     }
 

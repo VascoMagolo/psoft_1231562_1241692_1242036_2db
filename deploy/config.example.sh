@@ -47,6 +47,7 @@ VIP_AIRCRAFT_MAINTENANCE=192.168.124.25
 VIP_AIRPORTS_ROUTES=192.168.124.26
 VIP_FLIGHT_OPS=192.168.124.27
 VIP_LOGIN=192.168.124.28
+VIP_RABBITMQ=192.168.124.29              # RabbitMQ management console and API (Assignment 2)
 
 # --- Images of the services -----------------------------------------------------------------------
 # ghcr:  built by GitHub Actions at every push (.github/workflows/images.yml) and pulled by the

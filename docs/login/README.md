@@ -58,3 +58,10 @@ on each VM, each with its own database holding every account.
 - Limitation: the services validate tokens with the **same secret** login signs them with, so a
   service could issue tokens. RS256 with a public key (JWKS) would remove that
   ([system documentation, section 13](../README.md#13-known-limitations)).
+
+## 8. Assignment 2
+
+With `EVENTS_ENABLED=true` the login publishes `account.created` and `account.updated` on
+`login.events` (user name and role, never the password hash), through the same outbox as the other
+services. It keeps no read model: it has no listings, and authenticating reads one account from the
+write model. See [`../assignment-2.md`](../assignment-2.md).

@@ -143,4 +143,26 @@ class CommandsTest {
         assertThrows(CommandUnavailableException.class,
                 () -> new CommandBus(rabbit, json, "flight-ops", 5_000).send("aircraft-maintenance", "x", Map.of()));
     }
+
+    @Test
+    void ensureIdempotentCommandIsSentOnceMoreWhenUnanswered() {
+        RabbitTemplate rabbit = mock(RabbitTemplate.class);
+        when(rabbit.sendAndReceive(any(String.class), any(String.class), any(Message.class)))
+                .thenReturn(null)
+                .thenReturn(new Message(json.writeValueAsBytes(new CommandReply(200, null, null)), new MessageProperties()));
+
+        CommandReply reply = new CommandBus(rabbit, json, "flight-ops", 5_000).sendIdempotent("aircraft-maintenance", "x", Map.of());
+
+        assertEquals(200, reply.status());
+        verify(rabbit, times(2)).sendAndReceive(any(String.class), any(String.class), any(Message.class));
+    }
+
+    @Test
+    void ensureIdempotentCommandUnansweredTwiceIsUnavailable() {
+        RabbitTemplate rabbit = mock(RabbitTemplate.class);
+        when(rabbit.sendAndReceive(any(String.class), any(String.class), any(Message.class))).thenReturn(null);
+
+        assertThrows(CommandUnavailableException.class,
+                () -> new CommandBus(rabbit, json, "flight-ops", 5_000).sendIdempotent("aircraft-maintenance", "x", Map.of()));
+    }
 }

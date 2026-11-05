@@ -1,0 +1,1265 @@
+{
+  "info": {
+    "_postman_id": "8249905e-b80e-5c85-9268-9320186048ee",
+    "name": "AISafe distributed (Assignment 2): events, CQRS and the Saga over RabbitMQ",
+    "description": "Runs against the k3s cluster (environment aisafe-k3s), through the virtual IPs (HTTPS, deploy/entry.crt) and the node ports of the replicas, and reads the queues through the RabbitMQ management API as the user postman (its password: see docs/postman/README.md).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Setup",
+      "description": "Logins, the RabbitMQ management API (user postman) and a test queue of our own bound to the events of aircraft-maintenance and airports-routes, playing another service.",
+      "item": [
+        {
+          "name": "Login as atcc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"atcc_token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{login_vip}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"atcc\",\n  \"password\": \"atcc123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login as operator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"operator_token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{login_vip}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operator\",\n  \"password\": \"operator123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login as technician",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"technician_token\", pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{login_vip}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"technician\",\n  \"password\": \"technician123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "RabbitMQ management API, as the postman user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"user postman\", () => pm.expect(pm.response.json().name).to.eql(\"postman\"));",
+                  "pm.environment.set(\"events_seen\", \"[]\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/whoami",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create the test queue postman.events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201 or 204\", () => pm.expect(pm.response.code).to.be.oneOf([201, 204]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durable\": true,\n  \"auto_delete\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bind it to aircraft-maintenance.events with aircraft.*",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/bindings/%2F/e/aircraft-maintenance.events/q/postman.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"aircraft.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bind it to airports-routes.events with flightcopy.*",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/bindings/%2F/e/airports-routes.events/q/postman.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"flightcopy.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Empty it",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events/contents",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. The broker: quorum queues, one per replica, and the command queues",
+      "description": "Every service declares a quorum queue per replica for its read model and a command queue shared by its replicas, with a dead-letter exchange.",
+      "item": [
+        {
+          "name": "Read-model queue of aircraft-maintenance-0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quorum queue (replicated on the brokers)\", () => pm.expect(pm.response.json().type).to.eql(\"quorum\"));",
+                  "pm.test(\"dead-letter exchange\", () => pm.expect(pm.response.json().arguments[\"x-dead-letter-exchange\"]).to.eql(\"aisafe.dead-letter\"));",
+                  "pm.test(\"taken by its replica\", () => pm.expect(pm.response.json().consumers).to.be.at.least(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/aircraft-maintenance.read-model.aircraft-maintenance-0",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Read-model queue of airports-routes-1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quorum queue (replicated on the brokers)\", () => pm.expect(pm.response.json().type).to.eql(\"quorum\"));",
+                  "pm.test(\"dead-letter exchange\", () => pm.expect(pm.response.json().arguments[\"x-dead-letter-exchange\"]).to.eql(\"aisafe.dead-letter\"));",
+                  "pm.test(\"taken by its replica\", () => pm.expect(pm.response.json().consumers).to.be.at.least(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/airports-routes.read-model.airports-routes-1",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Read-model queue of flight-ops-2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quorum queue (replicated on the brokers)\", () => pm.expect(pm.response.json().type).to.eql(\"quorum\"));",
+                  "pm.test(\"dead-letter exchange\", () => pm.expect(pm.response.json().arguments[\"x-dead-letter-exchange\"]).to.eql(\"aisafe.dead-letter\"));",
+                  "pm.test(\"taken by its replica\", () => pm.expect(pm.response.json().consumers).to.be.at.least(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/flight-ops.read-model.flight-ops-2",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Command queue of aircraft-maintenance (C4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quorum queue (replicated on the brokers)\", () => pm.expect(pm.response.json().type).to.eql(\"quorum\"));",
+                  "pm.test(\"dead-letter exchange\", () => pm.expect(pm.response.json().arguments[\"x-dead-letter-exchange\"]).to.eql(\"aisafe.dead-letter\"));",
+                  "pm.test(\"taken by every replica of the service\", () => pm.expect(pm.response.json().consumers).to.be.at.least(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/aircraft-maintenance.commands",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Command queue of airports-routes (C5)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quorum queue (replicated on the brokers)\", () => pm.expect(pm.response.json().type).to.eql(\"quorum\"));",
+                  "pm.test(\"dead-letter exchange\", () => pm.expect(pm.response.json().arguments[\"x-dead-letter-exchange\"]).to.eql(\"aisafe.dead-letter\"));",
+                  "pm.test(\"taken by every replica of the service\", () => pm.expect(pm.response.json().consumers).to.be.at.least(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/airports-routes.commands",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Command, then event, then the read model (CQRS in aircraft-maintenance)",
+      "description": "An aircraft created on aircraft-maintenance-1 (write model: held by -1 and -2) publishes aircraft.created; every replica's read model gets it, also aircraft-maintenance-0, which does not hold it.",
+      "item": [
+        {
+          "name": "Create an aircraft on aircraft-maintenance-1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const letters = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\";",
+                  "pm.environment.set(\"a2_aircraft\", \"UN-\" + Array.from({length: 3}, () => letters[Math.floor(Math.random() * 26)]).join(\"\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"answered by aircraft-maintenance-1\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-1\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_1}}/api/aircrafts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationNumber\": \"{{a2_aircraft}}\",\n  \"modelName\": \"Airbus A320neo\",\n  \"manufacturingDate\": \"2022-04-01\",\n  \"seatCapacity\": 160,\n  \"range\": 5500.0,\n  \"status\": \"AVAILABLE\",\n  \"features\": [\n    \"WiFi\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "The queue received aircraft.created",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The event leaves right after the commit: give it a moment",
+                  "setTimeout(() => {}, 500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const seen = JSON.parse(pm.environment.get(\"events_seen\") || \"[]\");",
+                  "pm.response.json().forEach(m => seen.push(Object.assign({routingKey: m.routing_key}, JSON.parse(m.payload))));",
+                  "pm.environment.set(\"events_seen\", JSON.stringify(seen));",
+                  "const find = (type, key) => seen.filter(e => e.type === type && e.key === key).pop();",
+                  "const event = find(\"aircraft.created\", pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"aircraft.created received\", () => pm.expect(event, \"aircraft.created\").to.be.an(\"object\"));",
+                  "pm.test(\"published by aircraft-maintenance-1\", () => pm.expect(event.nodeId).to.eql(\"aircraft-maintenance-1\"));",
+                  "pm.test(\"status AVAILABLE\", () => pm.expect(event.status).to.eql(\"AVAILABLE\"));",
+                  "pm.test(\"carries the aircraft (event-carried state)\", () => { pm.expect(event.data.modelName).to.eql(\"Airbus A320neo\"); pm.expect(event.data.seatCapacity).to.eql(160); });",
+                  "pm.test(\"stamped (time and replica, for last writer wins)\", () => { pm.expect(event.stamp).to.be.above(0); pm.expect(event.stampNode).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 50,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "aircraft-maintenance-0 does not hold it: its write model forwards the read (X-Data-Node)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by aircraft-maintenance-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-0\"));",
+                  "pm.test(\"data from the replica that holds it (database per instance)\", () => pm.expect(pm.response.headers.get(\"X-Data-Node\")).to.be.oneOf([\"aircraft-maintenance-1\", \"aircraft-maintenance-2\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_0}}/api/aircrafts/{{a2_aircraft}}"
+          }
+        },
+        {
+          "name": "Unicorns on aircraft-maintenance-0 (its own read model)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by aircraft-maintenance-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-0\"));",
+                  "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
+                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
+                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_0}}/api/v2/unicorns"
+          }
+        },
+        {
+          "name": "Unicorns on aircraft-maintenance-1 (its own read model)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by aircraft-maintenance-1\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-1\"));",
+                  "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
+                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
+                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_1}}/api/v2/unicorns"
+          }
+        },
+        {
+          "name": "Unicorns on aircraft-maintenance-2 (its own read model)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by aircraft-maintenance-2\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-2\"));",
+                  "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
+                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
+                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_2}}/api/v2/unicorns"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Between services over AMQP: no more C1, C2 or C3",
+      "description": "airports-routes and flight-ops know the new aircraft from the events of aircraft-maintenance (their own read models); the Saga's steps C4 and C5 are commands through the broker.",
+      "item": [
+        {
+          "name": "Flights on LIS-OPO before (airports-routes, US214)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const lisOpo = ((pm.response.json()._embedded || {}).activeRouteResponseList || []).find(r => r.originIataCode === \"LIS\" && r.destinationIataCode === \"OPO\");",
+                  "pm.environment.set(\"lis_opo_flights\", lisOpo.popularity);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "https://{{ar_vip}}/api/routes?status=active&sortBy=popularity"
+          }
+        },
+        {
+          "name": "airports-routes: routes compatible with the new aircraft (US203, from its copy of the fleet)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200: airports-routes knows the aircraft without asking (C1)\", () => pm.response.to.have.status(200));",
+                  "const routes = Object.values(pm.response.json()._embedded || {})[0] || [];",
+                  "pm.test(\"compatible routes found\", () => pm.expect(routes.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "https://{{ar_vip}}/api/routes/compatible?aircraft={{a2_aircraft}}"
+          }
+        },
+        {
+          "name": "flight-ops: schedule a flight with it (Saga: route and aircraft from its read model, C4 and C5 over AMQP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"scheduled: every step of the Saga done\", () => pm.expect(pm.response.json().status).to.eql(\"SCHEDULED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "https://{{fo_vip}}/api/flights",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aircraftId\": \"{{a2_aircraft}}\",\n  \"originIataCode\": \"LIS\",\n  \"destinationIataCode\": \"OPO\",\n  \"departureDateTime\": \"2031-03-01T08:00:00Z\",\n  \"arrivalDateTime\": \"2031-03-01T09:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "The queue received flightcopy.created from airports-routes (C5 stored, then published)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The event leaves right after the commit: give it a moment",
+                  "setTimeout(() => {}, 500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const seen = JSON.parse(pm.environment.get(\"events_seen\") || \"[]\");",
+                  "pm.response.json().forEach(m => seen.push(Object.assign({routingKey: m.routing_key}, JSON.parse(m.payload))));",
+                  "pm.environment.set(\"events_seen\", JSON.stringify(seen));",
+                  "const find = (type, key) => seen.filter(e => e.type === type && e.key === key).pop();",
+                  "const event = seen.filter(e => e.type === \"flightcopy.created\" && e.data && e.data.aircraftRegistration === pm.environment.get(\"a2_aircraft\")).pop();",
+                  "pm.test(\"flightcopy.created received\", () => pm.expect(event, \"flightcopy.created\").to.be.an(\"object\"));",
+                  "pm.test(\"for the new aircraft\", () => pm.expect(event.data.aircraftRegistration).to.eql(pm.environment.get(\"a2_aircraft\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 50,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "airports-routes holds the flight (C5): LIS-OPO has one more",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const lisOpo = ((pm.response.json()._embedded || {}).activeRouteResponseList || []).find(r => r.originIataCode === \"LIS\" && r.destinationIataCode === \"OPO\");",
+                  "pm.test(\"one more flight on LIS-OPO\", () => pm.expect(lisOpo.popularity).to.eql(Number(pm.environment.get(\"lis_opo_flights\")) + 1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "https://{{ar_vip}}/api/routes?status=active&sortBy=popularity"
+          }
+        },
+        {
+          "name": "aircraft-maintenance holds the flight (C4): the aircraft cannot be deleted, 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{operator_token}}"
+              }
+            ],
+            "url": "https://{{am_vip}}/api/aircrafts/{{a2_aircraft}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. A change travels to every copy",
+      "description": "The aircraft goes into maintenance on aircraft-maintenance-2: the event reaches the unicorns of every replica and the copy of flight-ops, which now refuses a flight with it.",
+      "item": [
+        {
+          "name": "Its version (for If-Match)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"a2_version\", pm.response.json().version);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{operator_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_2}}/api/aircrafts/{{a2_aircraft}}"
+          }
+        },
+        {
+          "name": "Put it under maintenance on aircraft-maintenance-2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{operator_token}}"
+              },
+              {
+                "key": "If-Match",
+                "value": "\"{{a2_version}}\""
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_2}}/api/aircrafts/{{a2_aircraft}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"UNDER_MAINTENANCE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "The queue received aircraft.updated",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The event leaves right after the commit: give it a moment",
+                  "setTimeout(() => {}, 500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const seen = JSON.parse(pm.environment.get(\"events_seen\") || \"[]\");",
+                  "pm.response.json().forEach(m => seen.push(Object.assign({routingKey: m.routing_key}, JSON.parse(m.payload))));",
+                  "pm.environment.set(\"events_seen\", JSON.stringify(seen));",
+                  "const find = (type, key) => seen.filter(e => e.type === type && e.key === key).pop();",
+                  "const event = find(\"aircraft.updated\", pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"aircraft.updated received\", () => pm.expect(event, \"aircraft.updated\").to.be.an(\"object\"));",
+                  "pm.test(\"status UNDER_MAINTENANCE\", () => pm.expect(event.status).to.eql(\"UNDER_MAINTENANCE\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 50,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unicorns on aircraft-maintenance-0 (its own read model)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by aircraft-maintenance-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-0\"));",
+                  "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
+                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
+                  "pm.test(\"GRUMPY\", () => pm.expect(mine.mood).to.eql(\"GRUMPY\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{am_port_0}}/api/v2/unicorns"
+          }
+        },
+        {
+          "name": "flight-ops refuses a flight with it: 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 409 (unavailable aircraft)\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "https://{{fo_vip}}/api/flights",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aircraftId\": \"{{a2_aircraft}}\",\n  \"originIataCode\": \"LIS\",\n  \"destinationIataCode\": \"OPO\",\n  \"departureDateTime\": \"2031-03-05T08:00:00Z\",\n  \"arrivalDateTime\": \"2031-03-05T09:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. /api/v2/unicorns",
+      "description": "The mock endpoint of Assignment 2: the mood of every aircraft, a pure query on the CQRS read side. Any signed-in role.",
+      "item": [
+        {
+          "name": "Every aircraft with a mood, as a technician, through the virtual IP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"JSON list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);",
+                  "pm.test(\"from the read model\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
+                  "pm.test(\"each with registration, model, status, mood and reason\", () => pm.response.json().forEach(u => pm.expect(u).to.have.all.keys(\"registrationNumber\", \"model\", \"status\", \"mood\", \"reason\")));",
+                  "pm.test(\"known moods only\", () => pm.response.json().forEach(u => pm.expect(u.mood).to.be.oneOf([\"HAPPY\", \"GRUMPY\", \"SLEEPY\", \"EXCITED\", \"ANXIOUS\"])));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{technician_token}}"
+              }
+            ],
+            "url": "https://{{am_vip}}/api/v2/unicorns"
+          }
+        },
+        {
+          "name": "Without a token: refused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401 or 403\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "https://{{am_vip}}/api/v2/unicorns"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cleanup",
+      "description": "The test queue goes away; the aircraft of this run stays (it has a flight, as in the Assignment 1 collection).",
+      "item": [
+        {
+          "name": "Delete the test queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

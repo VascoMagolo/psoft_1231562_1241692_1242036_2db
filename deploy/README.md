@@ -25,6 +25,7 @@ deploy/
 | MetalLB                                                              | every node                                   | Virtual IPs that move to another node when theirs is lost                              |
 | Entry (Envoy)                                                        | every node                                   | Sends each request to a ready replica, and tries another when one fails                |
 | aircraft-maintenance ×3, airports-routes ×3, flight-ops ×3, login ×3 | one of each per node, each with its own disk | Replication between replicas (see the system documentation)                            |
+| RabbitMQ ×3 (Assignment 2)                                           | one broker per node, each with its own disk  | Events and commands between the services; quorum queues survive the loss of a node     |
 | Vigia                                                                | every node, one acting                       | Turns lost machines back on, isolates those that do not come back, gives replicas back |
 
 On Proxmox, the VMs also get a watchdog: a VM whose system freezes is restarted by Proxmox.
@@ -76,13 +77,33 @@ change). It is self-signed, so clients must trust it: `setup.sh` saves it in `de
 (`curl --cacert deploy/entry.crt https://<virtual IP>/...`). Inside the cluster the requests still go
 in plain HTTP (see the limitations in the system documentation).
 
-| Stage    | Command                    | What it does                                                               |
-| -------- | -------------------------- | -------------------------------------------------------------------------- |
-| machines | `deploy/setup.sh machines` | Creates or updates the VMs on Proxmox (nothing with `MACHINES=existing`)   |
-| cluster  | `deploy/setup.sh cluster`  | Prepares the nodes, installs k3s one node at a time, and MetalLB           |
-| app      | `deploy/setup.sh app`      | Deploys the services, the logins and the entries; also after a code change |
-| vigia    | `deploy/setup.sh vigia`    | Deploys the vigia and gives it access to the machines                      |
-| check    | `deploy/setup.sh check`    | Waits until everything is normal and tries the services                    |
+| Stage    | Command                    | What it does                                                                                       |
+| -------- | -------------------------- | -------------------------------------------------------------------------------------------------- |
+| machines | `deploy/setup.sh machines` | Creates or updates the VMs on Proxmox (nothing with `MACHINES=existing`)                           |
+| cluster  | `deploy/setup.sh cluster`  | Prepares the nodes, installs k3s one node at a time, and MetalLB                                   |
+| app      | `deploy/setup.sh app`      | Deploys RabbitMQ and its users, the services, the logins and the entries; also after a code change |
+| vigia    | `deploy/setup.sh vigia`    | Deploys the vigia and gives it access to the machines                                              |
+| check    | `deploy/setup.sh check`    | Waits until everything is normal and tries the services                                            |
+
+## RabbitMQ (Assignment 2)
+
+`setup.sh app` deploys three brokers (`deploy/manifests/rabbitmq.yaml`) before the services, and:
+
+- makes the Secret `aisafe-rabbitmq` the first time: the Erlang cookie of the brokers, the password of
+  `admin`, and one password per service and for `postman`, all random;
+- creates, inside a broker, one user per service with the permissions it needs and nothing more (its
+  own exchange and queues, the shared exchanges of commands and dead letters, the events of the
+  services it reads), and the user `postman` for the tests;
+- starts the services with `EVENTS_ENABLED=true` and their own user.
+
+The console and the management API are at `https://<VIP_RABBITMQ>` (add `VIP_RABBITMQ` to an older
+`deploy/config.sh`, from `config.example.sh`), with the entries' certificate. To log in as `admin`:
+
+```sh
+ssh sidis@<node> "sudo k3s kubectl -n aisafe get secret aisafe-rabbitmq -o go-template='{{index .data \"admin-password\"}}'" | base64 -d
+```
+
+`deploy/manifests/failure-test.sh rabbitmq-crash` kills a broker while requests run.
 
 ## Images of the services
 
