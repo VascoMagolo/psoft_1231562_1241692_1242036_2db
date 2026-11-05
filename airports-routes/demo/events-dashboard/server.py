@@ -168,7 +168,7 @@ def follow_events():
             bound = False
             continue
         if not bound:
-            rabbit("PUT", "/queues/%2F/" + FEED_QUEUE, {"durable": False, "auto_delete": False})
+            rabbit("PUT", "/queues/%2F/" + FEED_QUEUE, {"durable": True, "auto_delete": False})
             rabbit("POST", f"/bindings/%2F/e/{EXCHANGE}/q/{FEED_QUEUE}", {"routing_key": "#"})
             rabbit("DELETE", f"/queues/%2F/{FEED_QUEUE}/contents")
             bound = True

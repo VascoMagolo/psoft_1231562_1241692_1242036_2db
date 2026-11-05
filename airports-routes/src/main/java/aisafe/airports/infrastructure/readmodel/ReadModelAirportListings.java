@@ -4,7 +4,7 @@ import aisafe.airports.application.AirportListings;
 import aisafe.airports.application.dtos.AirportResponse;
 import aisafe.airports.domain.AirportGroupingData;
 import aisafe.airports.domain.IataCode;
-import aisafe.airportsroutes.infrastructure.readmodel.ReadModelStore;
+import aisafe.shared.infrastructure.readmodel.ReadModelStore;
 import aisafe.shared.domain.PaginatedResult;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

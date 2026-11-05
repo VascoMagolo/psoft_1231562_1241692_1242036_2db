@@ -19,7 +19,7 @@ class AirportsRoutesApplicationTests {
 
 	@Test
 	void ensureTheDatabaseStructureComesFromTheMigrations() {
-		assertEquals("3", jdbc.queryForObject(
+		assertEquals("4", jdbc.queryForObject(
 				"select max(\"version\") from \"flyway_schema_history\" where \"success\"", String.class));
 	}
 

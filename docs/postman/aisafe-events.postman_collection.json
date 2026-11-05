@@ -382,7 +382,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"durable\": false,\n  \"auto_delete\": false\n}",
+              "raw": "{\n  \"durable\": true,\n  \"auto_delete\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"

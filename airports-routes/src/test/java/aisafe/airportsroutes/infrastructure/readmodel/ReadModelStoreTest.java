@@ -1,5 +1,6 @@
 package aisafe.airportsroutes.infrastructure.readmodel;
 
+import aisafe.shared.infrastructure.readmodel.ReadModelStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -145,5 +146,15 @@ class ReadModelStoreTest {
 
         assertEquals(List.of("LIS-OPO", "OPO-LIS", "OPO-MAD"),
                 store.findAll("route").stream().map(ReadModelStore.Row::key).toList());
+    }
+
+    @Test
+    void ensureJsonNullViewIsTakenAsADeletion() {
+        store.apply("route", "OPO-FAO", view(10), 0L, 1_000, "a");
+
+        assertTrue(store.apply("route", "OPO-FAO", JsonMapper.builder().build().nullNode(), null, 2_000, "a"));
+
+        assertTrue(store.findAll("route").stream().noneMatch(r -> r.key().equals("OPO-FAO")));
+        assertTrue(store.findAllStamped("route").stream().anyMatch(r -> r.key().equals("OPO-FAO") && r.view() == null));
     }
 }

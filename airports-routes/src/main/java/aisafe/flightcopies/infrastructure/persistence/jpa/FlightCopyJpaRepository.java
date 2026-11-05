@@ -1,6 +1,6 @@
 package aisafe.flightcopies.infrastructure.persistence.jpa;
 
-import aisafe.airportsroutes.infrastructure.messaging.EventPublisher;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.flightcopies.infrastructure.readmodel.FlightCopyProjection;
 import aisafe.flightcopies.infrastructure.replication.FlightCopyReplica;
 import aisafe.flightcopies.infrastructure.replication.FlightCopyReplicaHandler;

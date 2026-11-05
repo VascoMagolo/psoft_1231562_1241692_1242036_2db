@@ -53,7 +53,7 @@ class DatabaseMigrationTest {
         flyway(url).migrate();
 
         try (Connection db = DriverManager.getConnection(url, "sa", ""); Statement st = db.createStatement()) {
-            assertEquals("3", flyway(url).info().current().getVersion().getVersion());
+            assertEquals("4", flyway(url).info().current().getVersion().getVersion());
             insertRoute(st, "LIS", "OPO");
             assertThrows(SQLException.class, () -> insertRoute(st, "LIS", "OPO"), "one row per origin and destination");
         }
@@ -86,7 +86,7 @@ class DatabaseMigrationTest {
                 assertEquals(List.of(1L, 3L), history, "the history of the dropped copy goes with it");
             }
             assertThrows(SQLException.class, () -> insertRoute(st, "LIS", "OPO"));
-            assertEquals("3", flyway(url).info().current().getVersion().getVersion());
+            assertEquals("4", flyway(url).info().current().getVersion().getVersion());
         }
     }
 }
