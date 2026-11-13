@@ -28,6 +28,7 @@ must understand the whole system, not only the part they own.
 | Part                                                                                                                          | Owner          |
 | ----------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | airports-routes: events and read model (CQRS)                                                                                 | Miguel Silva   |
+| flight-ops: flight events, CQRS read model (`FlightProjection`, `ReadModelFlights`) and reconciliation                        | Vasco Magolo   |
 | `common` for every service (event outbox, read models, commands, snapshots), aircraft-maintenance (CQRS, C4, unicorns), login | Diogo Nogueira |
 | airports-routes and flight-ops reading the fleet from events, the Saga's C4 and C5 over the broker (reviewed by their owners) | Diogo Nogueira |
 | RabbitMQ in k3s, Postman of Assignment 2, [`assignment-2.md`](assignment-2.md)                                                | Diogo Nogueira |

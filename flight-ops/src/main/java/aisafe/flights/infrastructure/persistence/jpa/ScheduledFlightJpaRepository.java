@@ -3,8 +3,10 @@ package aisafe.flights.infrastructure.persistence.jpa;
 import aisafe.flights.domain.RegistrationNumber;
 import aisafe.flights.domain.ScheduledFlight;
 import aisafe.flights.domain.ScheduledFlightRepository;
+import aisafe.flights.infrastructure.readmodel.FlightProjection;
 import aisafe.flights.infrastructure.replication.FlightReplica;
 import aisafe.flights.infrastructure.replication.FlightReplicaHandler;
+import aisafe.shared.infrastructure.messaging.EventPublisher;
 import aisafe.shared.infrastructure.replication.Replicator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -21,6 +23,7 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
 
     private final SpringDataScheduledFlightRepository springRepo;
     private final Replicator replicator;
+    private final EventPublisher events;
 
     // A flight's id must be the same on every replica that holds it and never given twice, without
     // the replicas agreeing on it: each replica gives the ids that end in its own digit
@@ -33,9 +36,11 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
 
     public ScheduledFlightJpaRepository(SpringDataScheduledFlightRepository springRepo,
                                         Replicator replicator,
+                                        EventPublisher events,
                                         @Value("${aisafe.node.id}") String nodeId) {
         this.springRepo = springRepo;
         this.replicator = replicator;
+        this.events = events;
         this.idRest = (replicaIndex(nodeId) + 1) % ID_STEP;
     }
 
@@ -89,6 +94,8 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
             ScheduledFlightJpaEntity saved = springRepo.saveAndFlush(entity);
             ScheduledFlight result = ScheduledFlightMapper.toDomain(saved);
             replicator.recordSaved(FlightReplicaHandler.TYPE, String.valueOf(saved.getFlightId()), FlightReplica.from(result), saved.getVersion());
+            events.changed(FlightReplicaHandler.TYPE, FlightProjection.ENTITY, "updated", String.valueOf(saved.getFlightId()),
+                    result.getStatus(), saved.getVersion(), FlightReplica.from(result));
             return result;
         } else {
             // A new flight gets its id here; a flight from a peer keeps the one it has
@@ -104,18 +111,24 @@ public class ScheduledFlightJpaRepository implements ScheduledFlightRepository {
             ScheduledFlightJpaEntity saved = springRepo.saveAndFlush(entity);
             ScheduledFlight result = ScheduledFlightMapper.toDomain(saved);
             replicator.recordSaved(FlightReplicaHandler.TYPE, String.valueOf(saved.getFlightId()), FlightReplica.from(result), saved.getVersion());
+            events.changed(FlightReplicaHandler.TYPE, FlightProjection.ENTITY, "created", String.valueOf(saved.getFlightId()),
+                    result.getStatus(), saved.getVersion(), FlightReplica.from(result));
             return result;
         }
     }
 
     @Override
     public void delete(ScheduledFlight flight) {
-        if (flight.getId() != null) {
-            springRepo.findByFlightId(flight.getId()).ifPresent(entity -> {
-                springRepo.delete(entity);
-                replicator.recordDeleted(FlightReplicaHandler.TYPE, String.valueOf(entity.getFlightId()));
-            });
-        }
+        Optional<ScheduledFlightJpaEntity> entity = flight.getId() != null
+                ? springRepo.findByFlightId(flight.getId())
+                : springRepo.findByAircraftRegistrationAndDepartureDateTime(
+                        flight.getAircraftRegistrationNumber().getNumber(),
+                        flight.getDepartureDateTime());
+        entity.ifPresent(e -> {
+            springRepo.delete(e);
+            replicator.recordDeleted(FlightReplicaHandler.TYPE, String.valueOf(e.getFlightId()));
+            events.changed(FlightReplicaHandler.TYPE, FlightProjection.ENTITY, "deleted", String.valueOf(e.getFlightId()), null, null, null);
+        });
     }
 
     @Override

@@ -105,18 +105,19 @@ implementation behind them does.
 | `FlightCopiesAcrossReplicas`       | `GatheredFlightCopies` (both services) | `ReadModelFlightCopies`       |
 | `RoutesAcrossReplicas`             | `GatheredRoutes`                       | `ReadModelRoutes`             |
 | `AirportListings`                  | `LocalAirportListings`                 | `ReadModelAirportListings`    |
+| `FlightsAcrossReplicas`            | `GatheredFlights` (asks the peers)     | `ReadModelFlights`            |
 | `Fleet` (airports-routes)          | `HttpFleet` (C1, C3)                   | `ReadModelFleet`              |
 | `Fleet` (flight-ops)               | `HttpFleet` (C1-C5)                    | `MessagingFleet`              |
 
 What the read model keeps of each entity is a `Projection` (its routing keys, its view, and how to
 build it from what the replicas export), or an `ExternalProjection` for another service's entity.
 
-| Service              | Read model: its own entities                                   | Read model: other services' entities           |
-| -------------------- | -------------------------------------------------------------- | ---------------------------------------------- |
-| aircraft-maintenance | aircraft, aircraft models, maintenance records, flight copies  | -                                              |
-| airports-routes      | routes, airports, flight copies                                | aircraft, aircraft models (instead of C1, C3)  |
-| flight-ops           | - (its flights are listed across replicas, as in Assignment 1) | aircraft, aircraft models, routes (C1, C2, C3) |
-| login                | - (no listings: it only authenticates); publishes `account.*`  | -                                              |
+| Service              | Read model: its own entities                                  | Read model: other services' entities          |
+| -------------------- | ------------------------------------------------------------- | --------------------------------------------- |
+| aircraft-maintenance | aircraft, aircraft models, maintenance records, flight copies | -                                             |
+| airports-routes      | routes, airports, flight copies                               | aircraft, aircraft models (instead of C1, C3) |
+| flight-ops           | flights                                                       | aircraft, aircraft models, routes (C1, C2, C3) |
+| login                | - (no listings: it only authenticates); publishes `account.*` | -                                             |
 
 **Why a table in the replica's own database** and not a second database: the two models are
 already independent (different tables, different writers, different shape), and a second H2 per
@@ -215,7 +216,7 @@ route of the new version of the API; the routes of version 1 did not change.
 
 | Test                                  | Result                                                                                                                                               |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit and integration (`./mvnw test`)  | 1258 tests (common 136, aircraft-maintenance 485, airports-routes 435, flight-ops 144, login 58)                                                     |
+| Unit and integration (`./mvnw test`)  | 1267 tests (common 136, aircraft-maintenance 485, airports-routes 435, flight-ops 153, login 58)                                                     |
 | Postman, Assignment 2                 | 33 requests, 84 checks, all passing on the cluster (three runs in a row)                                                                             |
 | Postman, Assignment 1, with events on | 86 requests, 199 checks, all passing: the external API did not change                                                                                |
 | Broker down (local, 3 replicas)       | a route created with RabbitMQ stopped (201), its event kept in the outbox and delivered when the broker came back, then listed by the other replicas |
