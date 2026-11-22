@@ -293,6 +293,54 @@
           }
         },
         {
+          "name": "Bind it to flight-ops.events with flight.*",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/bindings/%2F/e/flight-ops.events/q/postman.events",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routing_key\": \"flight.*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "Empty it",
           "event": [
             {
@@ -819,7 +867,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"scheduled: every step of the Saga done\", () => pm.expect(pm.response.json().status).to.eql(\"SCHEDULED\"));"
+                  "pm.test(\"scheduled: every step of the Saga done\", () => pm.expect(pm.response.json().status).to.eql(\"SCHEDULED\"));",
+                  "pm.environment.set(\"a2_flight\", String(pm.response.json().id));"
                 ]
               }
             }
@@ -911,6 +960,157 @@
                 }
               }
             }
+          }
+        },
+        {
+          "name": "The queue received the flight from flight-ops: flight.created (PENDING), then flight.updated (SCHEDULED)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The event leaves right after the commit: give it a moment",
+                  "setTimeout(() => {}, 500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const seen = JSON.parse(pm.environment.get(\"events_seen\") || \"[]\");",
+                  "pm.response.json().forEach(m => seen.push(Object.assign({routingKey: m.routing_key}, JSON.parse(m.payload))));",
+                  "pm.environment.set(\"events_seen\", JSON.stringify(seen));",
+                  "const flight = pm.environment.get(\"a2_flight\");",
+                  "const ofFlight = seen.filter(e => e.type && e.type.startsWith(\"flight.\") && e.key === flight);",
+                  "const created = ofFlight.filter(e => e.type === \"flight.created\").pop();",
+                  "pm.test(\"flight.created received\", () => pm.expect(created, \"flight.created\").to.be.an(\"object\"));",
+                  "pm.test(\"for the new aircraft\", () => pm.expect(created.data.aircraftRegistration).to.eql(pm.environment.get(\"a2_aircraft\")));",
+                  "pm.test(\"the last event of the flight says SCHEDULED (the Saga done)\", () => pm.expect(ofFlight.pop().status).to.eql(\"SCHEDULED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "https://{{rabbit_vip}}/api/queues/%2F/postman.events/get",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "postman",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{postman_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 50,\n  \"ackmode\": \"ack_requeue_false\",\n  \"encoding\": \"auto\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "flight-ops-0 lists it from its own read model (US213)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by flight-ops-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"flight-ops-0\"));",
+                  "const flights = (pm.response.json()._embedded || {}).flightResponseList || [];",
+                  "const flight = flights.find(f => String(f.id) === pm.environment.get(\"a2_flight\"));",
+                  "pm.test(\"the new flight is listed, SCHEDULED\", () => pm.expect(flight && flight.status).to.eql(\"SCHEDULED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{fo_port_0}}/api/flights?aircraftId={{a2_aircraft}}"
+          }
+        },
+        {
+          "name": "flight-ops-1 lists it from its own read model (US213)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by flight-ops-1\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"flight-ops-1\"));",
+                  "const flights = (pm.response.json()._embedded || {}).flightResponseList || [];",
+                  "const flight = flights.find(f => String(f.id) === pm.environment.get(\"a2_flight\"));",
+                  "pm.test(\"the new flight is listed, SCHEDULED\", () => pm.expect(flight && flight.status).to.eql(\"SCHEDULED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{fo_port_1}}/api/flights?aircraftId={{a2_aircraft}}"
+          }
+        },
+        {
+          "name": "flight-ops-2 lists it from its own read model (US213)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"answered by flight-ops-2\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"flight-ops-2\"));",
+                  "const flights = (pm.response.json()._embedded || {}).flightResponseList || [];",
+                  "const flight = flights.find(f => String(f.id) === pm.environment.get(\"a2_flight\"));",
+                  "pm.test(\"the new flight is listed, SCHEDULED\", () => pm.expect(flight && flight.status).to.eql(\"SCHEDULED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{atcc_token}}"
+              }
+            ],
+            "url": "http://{{node}}:{{fo_port_2}}/api/flights?aircraftId={{a2_aircraft}}"
           }
         },
         {
