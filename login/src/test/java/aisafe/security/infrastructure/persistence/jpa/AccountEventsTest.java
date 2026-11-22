@@ -41,11 +41,23 @@ class AccountEventsTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private PlatformTransactionManager transactions;
 
+    /** The relay sends from its own thread: waits until it has sent everything in the outbox. */
+    private void waitForTheRelay() {
+        long deadline = System.currentTimeMillis() + 5_000;
+        while (outbox.count() > 0 && System.currentTimeMillis() < deadline) {
+            Thread.onSpinWait();
+        }
+        assertEquals(0, outbox.count(), "every event was sent");
+    }
+
     @BeforeEach
     @SuppressWarnings("unchecked")
     void captureWhatTheRelaySends() {
-        when(rabbit.invoke(any(RabbitOperations.OperationsCallback.class)))
-                .thenAnswer(i -> i.<RabbitOperations.OperationsCallback<?>>getArgument(0).doInRabbit(operations));
+        // Stubbing a mock that another thread is calling is not safe: let the relay send the accounts
+        // the login creates on startup first, so it does not touch the mock while it is stubbed.
+        waitForTheRelay();
+        doAnswer(i -> i.<RabbitOperations.OperationsCallback<?>>getArgument(0).doInRabbit(operations))
+                .when(rabbit).invoke(any(RabbitOperations.OperationsCallback.class));
     }
 
     @Test
@@ -53,12 +65,7 @@ class AccountEventsTest {
         new TransactionTemplate(transactions).executeWithoutResult(status ->
                 users.save(new User("events-user", "$2a$10$secret-hash", Role.ATCC)));
 
-        // The relay sends from its own thread, after the accounts the login creates on startup
-        long deadline = System.currentTimeMillis() + 5_000;
-        while (outbox.count() > 0 && System.currentTimeMillis() < deadline) {
-            Thread.onSpinWait();
-        }
-        assertEquals(0, outbox.count(), "every event was sent");
+        waitForTheRelay();
         ArgumentCaptor<Message> sent = ArgumentCaptor.forClass(Message.class);
         verify(operations, atLeastOnce()).send(eq("login.events"), eq("account.created"), sent.capture());
         Message message = sent.getAllValues().stream()
