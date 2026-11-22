@@ -283,5 +283,5 @@ Tested end to end by the [events collection](../postman/README.md#assignment-2-a
 (44 requests, 102 checks), and live with 3 replicas: listings complete with two replicas down, and
 the changes made while RabbitMQ was down reached every replica within one reconciliation.
 
-The rest of Assignment 2 (the other services, RabbitMQ in k3s, the Saga over the broker,
-`/api/v2/unicorns`) is in [`../assignment-2.md`](../assignment-2.md).
+The rest of Assignment 2 (the other services, RabbitMQ in k3s, the Saga over the broker) is
+in [`../assignment-2.md`](../assignment-2.md).

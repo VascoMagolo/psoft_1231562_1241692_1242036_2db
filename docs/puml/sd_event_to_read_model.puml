@@ -33,7 +33,7 @@ ex -> others : their queues, bound to aircraft.*
 others -> others : their copy of the fleet
 
 note over amr, others
-  Queries read these local copies: GET /api/aircrafts, /api/v2/unicorns,
+  Queries read these local copies: GET /api/aircrafts,
   compatible routes, scheduling. A message that cannot be applied goes to the
   dead-letter queue after 5 attempts; snapshots and reconciliation repair the row.
 end note

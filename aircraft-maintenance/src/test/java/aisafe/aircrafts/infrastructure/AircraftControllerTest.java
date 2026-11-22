@@ -218,7 +218,8 @@ class AircraftControllerTest {
                 new PaginatedResult<>(List.of(sampleResponse), 1L));
 
         mockMvc.perform(get("/api/aircrafts"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Query-Side", "peers"));
     }
 
     @Test

@@ -3,7 +3,7 @@
 What Assignment 2 adds to the distributed AISafe of Assignment 1 ([`README.md`](README.md)): the
 services talk through RabbitMQ, each service separates its write model from its read model (CQRS),
 and every instance keeps its own database. The external API does not change: the same REST routes,
-with the same answers, plus `GET /api/v2/unicorns`.
+with the same answers.
 
 Everything here is switched on by `EVENTS_ENABLED=true` (the k3s deployment sets it). Without it,
 each service runs exactly as in Assignment 1 (HTTP between services, no broker), which is how the
@@ -13,14 +13,13 @@ unit tests and a single replica on a laptop still run.
 
 | Asked                                           | How                                                                                                                                                                                                  | Evidence                                                                                        |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| CQRS for the core resources of each service     | Write model: the tables of each entity, partitioned between the replicas (Assignment 1). Read model: a table `read_model` per replica with every entity of every replica, kept by events (section 4) | `X-Query-Side: read-model` on the listings; Postman A2 folder 2                                 |
+| CQRS for the core resources of each service     | Write model: the tables of each entity, partitioned between the replicas (Assignment 1). Read model: a table `read_model` per replica with every entity of every replica, kept by events (section 4) | `X-Query-Side: read-model` on the aircraft listing; Postman A2 folders 2 and 4                  |
 | AMQP and a message broker between services      | RabbitMQ, three brokers. Events for what changed (publish/subscribe), commands with an answer for the Saga, queries on a miss (section 3)                                                            | Postman A2 folders 1, 3, 4; the RabbitMQ console                                                |
 | External endpoints stay HTTP REST               | Unchanged: the same routes and answers as in Assignment 1                                                                                                                                            | The Assignment 1 collection passes against the cluster with events on (86 requests, 199 checks) |
 | Database per service (one per instance)         | One H2 per replica, on the replica's own disk (k3s local-path); nothing reads another service's or replica's database (section 5)                                                                    | `X-Data-Node` on a read forwarded to the replica that holds the data (Postman A2 folder 2)      |
 | At least two instances of each microservice     | Three of each service, and three RabbitMQ brokers, one per VM                                                                                                                                        | `kubectl -n aisafe get pods -o wide`                                                            |
-| Integration tests in Postman                    | `docs/postman/aisafe-a2.postman_collection.json` (38 requests, 98 checks) and the Assignment 1 collection                                                                                            | [`postman/README.md`](postman/README.md)                                                        |
-| `/api/v2/unicorns`, and how it fits CQRS        | The mood of every aircraft, a pure query on the read side of aircraft-maintenance (section 8)                                                                                                        | Postman A2 folders 2, 4, 5                                                                      |
-| Decisions, consistency, communication, failures | Sections 3 to 7 and 10                                                                                                                                                                               | This document                                                                                   |
+| Integration tests in Postman                    | `docs/postman/aisafe-a2.postman_collection.json` (36 requests, 92 checks) and the Assignment 1 collection                                                                                            | [`postman/README.md`](postman/README.md)                                                        |
+| Decisions, consistency, communication, failures | Sections 3 to 7 and 9                                                                                                                                                                                | This document                                                                                   |
 | Deployment instructions                         | [`../deploy/README.md`](../deploy/README.md): `deploy/setup.sh` now also installs RabbitMQ and its users                                                                                             |                                                                                                 |
 
 ## 2. Containers
@@ -93,7 +92,7 @@ queue instead of being carried out after the sender gave up.
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Where      | the tables of each entity, partitioned: a record on its home replica and the next one, catalogs on all (Assignment 1)                     | table `read_model` of each replica: **every** entity of **every** replica, as the queries need it (JSON) |
 | Written by | the use cases (`POST`, `PUT`, `PATCH`, `DELETE`)                                                                                          | only the events, the reconciliation with the peers and the snapshots                                     |
-| Read by    | the details of one entity, read before changing it (`GET /api/aircrafts/{reg}`, with its version for `If-Match`); the checks of a command | every listing and report, `/api/v2/unicorns`, and the other services' copies                             |
+| Read by    | the details of one entity, read before changing it (`GET /api/aircrafts/{reg}`, with its version for `If-Match`); the checks of a command | every listing and report, and the other services' copies                                                 |
 
 The use cases did not change: they read through the same ports as in Assignment 1, and only the
 implementation behind them does.
@@ -178,46 +177,14 @@ Postman A2 collection: an aircraft created on `aircraft-maintenance-1` is held b
 | A network partition between brokers      | `pause_minority`: a broker cut off from the other two stops instead of going on alone (no split brain)                                                                                                                                                                     |
 
 **Measured** with `deploy/manifests/failure-test.sh` on the reference cluster, with events on:
-see section 9 (a broker killed: 0 bad requests; a VM lost: 4 and 1 in more than 4000).
+see section 8 (a broker killed: 0 bad requests; a VM lost: 4 and 1 in more than 4000).
 
-## 8. `/api/v2/unicorns` and CQRS
-
-`GET /api/v2/unicorns` (aircraft-maintenance, any signed-in role) gives the mood of every aircraft:
-
-| Mood      | When                                            |
-| --------- | ----------------------------------------------- |
-| `SLEEPY`  | inactive                                        |
-| `GRUMPY`  | under maintenance, or a maintenance in progress |
-| `EXCITED` | in flight                                       |
-| `ANXIOUS` | available, with a maintenance planned           |
-| `HAPPY`   | available, nothing planned                      |
-
-```json
-[
-  {
-    "registrationNumber": "CS-TKA",
-    "model": "Airbus A320neo",
-    "status": "AVAILABLE",
-    "mood": "HAPPY",
-    "reason": "Ready to fly"
-  }
-]
-```
-
-It is a query and nothing else: `ViewAircraftMoodsUseCase` reads the query side (the fleet and the
-maintenance records of the read model) and never the write model, nor changes anything. So it scales
-with the read model (any replica answers it locally, with the aircraft of every replica), is never
-slowed by the writes, and is eventually consistent: an aircraft put under maintenance turns
-`GRUMPY` as soon as its event reaches the replica (Postman A2 folder 4). The header `X-Query-Side`
-says which side answered (`read-model`, or `peers` without events). `v2` because it is the first
-route of the new version of the API; the routes of version 1 did not change.
-
-## 9. Tests
+## 8. Tests
 
 | Test                                  | Result                                                                                                                                               |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit and integration (`./mvnw test`)  | 1267 tests (common 136, aircraft-maintenance 485, airports-routes 435, flight-ops 153, login 58)                                                     |
-| Postman, Assignment 2                 | 38 requests, 98 checks, all passing on the cluster (three runs in a row, 2026-11-22, with the flight events and read model of flight-ops) |
+| Unit and integration (`./mvnw test`)  | 1263 tests (common 136, aircraft-maintenance 481, airports-routes 435, flight-ops 153, login 58)                                                     |
+| Postman, Assignment 2                 | 36 requests, 92 checks, all passing on the cluster (three runs in a row, 2026-11-22, with the flight events and read model of flight-ops) |
 | Postman, Assignment 1, with events on | 86 requests, 199 checks, all passing (again on 2026-11-22): the external API did not change                                                          |
 | Broker down (local, 3 replicas)       | a route created with RabbitMQ stopped (201), its event kept in the outbox and delivered when the broker came back, then listed by the other replicas |
 | Failure test (`failure-test.sh`)      | below                                                                                                                                                |
@@ -251,7 +218,7 @@ that waited until its connection was declared dead (60 s heartbeat). With a 10 s
 prefetch 1 and one more attempt for the idempotent commands (section 7), the same scenarios gave 0,
 4 and 1.
 
-## 10. Security
+## 9. Security
 
 | Measure                       | How                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -262,7 +229,7 @@ prefetch 1 and one more attempt for the idempotent commands (section 7), the sam
 | Events                        | never carry secrets: `account.*` carries the user name and role, never the password hash; aircraft models without their image bytes                                                                                                                                                                                                                                             |
 | Audit                         | every command handled is one line in the audit trail, like the HTTP requests                                                                                                                                                                                                                                                                                                    |
 
-## 11. Decisions and alternatives
+## 10. Decisions and alternatives
 
 | Decision                                               | Why                                                                                                             | Alternative left out                                                                     |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -276,7 +243,7 @@ prefetch 1 and one more attempt for the idempotent commands (section 7), the sam
 | Snapshots on startup through the broker                | A new replica gets everything from the owners without HTTP between services                                     | Reading the other service's internal API, or replaying a log                             |
 | `EVENTS_ENABLED` switch                                | Assignment 1 still runs and its tests still pass; the broker is optional for development                        | Removing the HTTP contracts                                                              |
 
-## 12. Known limitations
+## 11. Known limitations
 
 - **The read models can be behind**, by milliseconds normally, longer with the broker down; the
   details of an entity (read before changing it) always come from the write model.

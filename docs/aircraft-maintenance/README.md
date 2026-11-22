@@ -117,7 +117,7 @@ when data may be missing (both holders of some records did not answer).
 
 Those of the whole system: [system documentation, section 13](../README.md#13-known-limitations).
 
-## 11. Assignment 2: events, read model and unicorns
+## 11. Assignment 2: events and read model
 
 With `EVENTS_ENABLED=true` (the k3s deployment); the whole picture is in
 [`../assignment-2.md`](../assignment-2.md).
@@ -132,12 +132,10 @@ With `EVENTS_ENABLED=true` (the k3s deployment); the whole picture is in
 - **Read side (CQRS):** `ReadModelAircraft`, `ReadModelMaintenanceRecords` and
   `ReadModelFlightCopies` answer the listings and reports of section 7 from the replica's read model
   (with the aircraft and records of every replica) instead of asking the peers. The use cases did not
-  change. The details of one aircraft still come from the write model.
+  change. The details of one aircraft still come from the write model. The aircraft listing says
+  which side answered in `X-Query-Side` (`read-model`, or `peers` without events).
 - **Commands and queries it answers** (queue `aircraft-maintenance.commands`, any replica):
   `flightcopy.record` (C4, `FlightCopyCommandHandler`, the same use case as the HTTP route),
   `aircraft.get` and `aircraftmodel.get` (C1 and C3 for a copy that does not have the key yet,
   `FleetQueryHandlers`), and `snapshot` (every aircraft or model of the read model, for a replica of
   another service filling its copy).
-- **`GET /api/v2/unicorns`** (`UnicornController`, `ViewAircraftMoodsUseCase`): the mood of every
-  aircraft from the read side only, any signed-in role; `X-Query-Side` says whether it came from the
-  read model or the peers.

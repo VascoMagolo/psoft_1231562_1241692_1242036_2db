@@ -714,7 +714,7 @@
           }
         },
         {
-          "name": "Unicorns on aircraft-maintenance-0 (its own read model)",
+          "name": "List of aircraft on aircraft-maintenance-0 (its own read model)",
           "event": [
             {
               "listen": "test",
@@ -724,9 +724,9 @@
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"answered by aircraft-maintenance-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-0\"));",
                   "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
-                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "const mine = Object.values(pm.response.json()._embedded || {}).flat().find(a => a.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
                   "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
-                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                  "pm.test(\"AVAILABLE\", () => pm.expect(mine.status).to.eql(\"AVAILABLE\"));"
                 ]
               }
             }
@@ -736,14 +736,14 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{technician_token}}"
+                "value": "Bearer {{atcc_token}}"
               }
             ],
-            "url": "http://{{node}}:{{am_port_0}}/api/v2/unicorns"
+            "url": "http://{{node}}:{{am_port_0}}/api/aircrafts?size=1000"
           }
         },
         {
-          "name": "Unicorns on aircraft-maintenance-1 (its own read model)",
+          "name": "List of aircraft on aircraft-maintenance-1 (its own read model)",
           "event": [
             {
               "listen": "test",
@@ -753,9 +753,9 @@
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"answered by aircraft-maintenance-1\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-1\"));",
                   "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
-                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "const mine = Object.values(pm.response.json()._embedded || {}).flat().find(a => a.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
                   "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
-                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                  "pm.test(\"AVAILABLE\", () => pm.expect(mine.status).to.eql(\"AVAILABLE\"));"
                 ]
               }
             }
@@ -765,14 +765,14 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{technician_token}}"
+                "value": "Bearer {{atcc_token}}"
               }
             ],
-            "url": "http://{{node}}:{{am_port_1}}/api/v2/unicorns"
+            "url": "http://{{node}}:{{am_port_1}}/api/aircrafts?size=1000"
           }
         },
         {
-          "name": "Unicorns on aircraft-maintenance-2 (its own read model)",
+          "name": "List of aircraft on aircraft-maintenance-2 (its own read model)",
           "event": [
             {
               "listen": "test",
@@ -782,9 +782,9 @@
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"answered by aircraft-maintenance-2\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-2\"));",
                   "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
-                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "const mine = Object.values(pm.response.json()._embedded || {}).flat().find(a => a.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
                   "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
-                  "pm.test(\"HAPPY\", () => pm.expect(mine.mood).to.eql(\"HAPPY\"));"
+                  "pm.test(\"AVAILABLE\", () => pm.expect(mine.status).to.eql(\"AVAILABLE\"));"
                 ]
               }
             }
@@ -794,10 +794,10 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{technician_token}}"
+                "value": "Bearer {{atcc_token}}"
               }
             ],
-            "url": "http://{{node}}:{{am_port_2}}/api/v2/unicorns"
+            "url": "http://{{node}}:{{am_port_2}}/api/aircrafts?size=1000"
           }
         }
       ]
@@ -1167,7 +1167,7 @@
     },
     {
       "name": "4. A change travels to every copy",
-      "description": "The aircraft goes into maintenance on aircraft-maintenance-2: the event reaches the unicorns of every replica and the copy of flight-ops, which now refuses a flight with it.",
+      "description": "The aircraft goes into maintenance on aircraft-maintenance-2: the event reaches the read model of every replica and the copy of flight-ops, which now refuses a flight with it.",
       "item": [
         {
           "name": "Its version (for If-Match)",
@@ -1301,7 +1301,7 @@
           }
         },
         {
-          "name": "Unicorns on aircraft-maintenance-0 (its own read model)",
+          "name": "List of aircraft on aircraft-maintenance-0 (its own read model)",
           "event": [
             {
               "listen": "test",
@@ -1311,9 +1311,9 @@
                   "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"answered by aircraft-maintenance-0\", () => pm.expect(pm.response.headers.get(\"X-Node-Id\")).to.eql(\"aircraft-maintenance-0\"));",
                   "pm.test(\"from the read model (CQRS query side)\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
-                  "const mine = pm.response.json().find(u => u.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
+                  "const mine = Object.values(pm.response.json()._embedded || {}).flat().find(a => a.registrationNumber === pm.environment.get(\"a2_aircraft\"));",
                   "pm.test(\"lists the new aircraft\", () => pm.expect(mine).to.be.an(\"object\"));",
-                  "pm.test(\"GRUMPY\", () => pm.expect(mine.mood).to.eql(\"GRUMPY\"));"
+                  "pm.test(\"UNDER_MAINTENANCE\", () => pm.expect(mine.status).to.eql(\"UNDER_MAINTENANCE\"));"
                 ]
               }
             }
@@ -1323,10 +1323,10 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{technician_token}}"
+                "value": "Bearer {{atcc_token}}"
               }
             ],
-            "url": "http://{{node}}:{{am_port_0}}/api/v2/unicorns"
+            "url": "http://{{node}}:{{am_port_0}}/api/aircrafts?size=1000"
           }
         },
         {
@@ -1369,60 +1369,7 @@
       ]
     },
     {
-      "name": "5. /api/v2/unicorns",
-      "description": "The mock endpoint of Assignment 2: the mood of every aircraft, a pure query on the CQRS read side. Any signed-in role.",
-      "item": [
-        {
-          "name": "Every aircraft with a mood, as a technician, through the virtual IP",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"JSON list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);",
-                  "pm.test(\"from the read model\", () => pm.expect(pm.response.headers.get(\"X-Query-Side\")).to.eql(\"read-model\"));",
-                  "pm.test(\"each with registration, model, status, mood and reason\", () => pm.response.json().forEach(u => pm.expect(u).to.have.all.keys(\"registrationNumber\", \"model\", \"status\", \"mood\", \"reason\")));",
-                  "pm.test(\"known moods only\", () => pm.response.json().forEach(u => pm.expect(u.mood).to.be.oneOf([\"HAPPY\", \"GRUMPY\", \"SLEEPY\", \"EXCITED\", \"ANXIOUS\"])));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{technician_token}}"
-              }
-            ],
-            "url": "https://{{am_vip}}/api/v2/unicorns"
-          }
-        },
-        {
-          "name": "Without a token: refused",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"status 401 or 403\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "https://{{am_vip}}/api/v2/unicorns"
-          }
-        }
-      ]
-    },
-    {
-      "name": "6. Cleanup",
+      "name": "5. Cleanup",
       "description": "The test queue goes away; the aircraft of this run stays (it has a flight, as in the Assignment 1 collection).",
       "item": [
         {
