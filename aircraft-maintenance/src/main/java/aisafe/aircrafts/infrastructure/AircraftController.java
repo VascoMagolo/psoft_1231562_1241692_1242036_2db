@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +51,8 @@ public class AircraftController {
     private final GetAircraftUtilizationUseCase getAircraftUtilization;
     private final ViewFleetStatusUseCase viewFleetStatus;
     private final ImportAircraftsUseCase importAircrafts;
+    /** Which side answers the listing: the CQRS read model with events on, the peers without. */
+    private final String querySide;
 
     public AircraftController(ViewAircraftDetailsUseCase viewAircraftDetails, ListAircraftUseCase listAircraft,
                               RegisterAircraftUseCase registerAircraft, SearchAircraftUseCase searchAircraft,
@@ -57,7 +60,8 @@ public class AircraftController {
                               CalculateAircraftOperationalHoursUseCase calculateAircraftOperationalHours,
                               GetAircraftUtilizationUseCase getAircraftUtilization,
                               ViewFleetStatusUseCase viewFleetStatus,
-                              ImportAircraftsUseCase importAircrafts) {
+                              ImportAircraftsUseCase importAircrafts,
+                              @Value("${aisafe.events.enabled:false}") boolean eventsEnabled) {
         this.viewAircraftDetails = viewAircraftDetails;
         this.listAircraft = listAircraft;
         this.registerAircraft = registerAircraft;
@@ -68,6 +72,7 @@ public class AircraftController {
         this.getAircraftUtilization = getAircraftUtilization;
         this.viewFleetStatus = viewFleetStatus;
         this.importAircrafts = importAircrafts;
+        this.querySide = eventsEnabled ? "read-model" : "peers";
     }
 
     @Operation(summary = "Bulk import aircrafts via CSV")
@@ -116,7 +121,7 @@ public class AircraftController {
                                 .getAircraftByRegistrationNumber(aircraft.registrationNumber()))
                                 .withSelfRel()));
 
-        return ResponseEntity.ok(pagedModel);
+        return ResponseEntity.ok().header("X-Query-Side", querySide).body(pagedModel);
     }
 
     @Operation(summary = "Get aircraft details by registration number", description = "Returns complete technical and operational details for a specific aircraft using its unique registration identifier. (US103)")

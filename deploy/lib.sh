@@ -67,11 +67,13 @@ system_normal() {
   nodes=$(kube get nodes -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status} {.spec.taints[*].key}{"\n"}{end}' 2> /dev/null) || return 1
   [ "$(grep -c '^True' <<< "$nodes")" -eq "${#NODE_IPS[@]}" ] || return 1
   ! grep -q -E 'aisafe/|out-of-service|unreachable|not-ready' <<< "$nodes" || return 1
-  pods=$(kube -n aisafe get pods --no-headers -o wide 2> /dev/null) || return 1
-  awk '{ split($2, r, "/"); if ($3 != "Running" || r[1] != r[2]) bad = 1 } END { exit bad }' <<< "$pods" || return 1
+  # One line per pod: name, phase, ready of each container, deletion mark, node. Not "-o wide": its
+  # RESTARTS column ("4 (2h ago)") has spaces once a pod restarted, and shifts the columns after it.
+  pods=$(kube -n aisafe get pods --no-headers -o 'custom-columns=NAME:.metadata.name,PHASE:.status.phase,READY:.status.containerStatuses[*].ready,DELETING:.metadata.deletionTimestamp,NODE:.spec.nodeName' 2> /dev/null) || return 1
+  awk '{ if ($2 != "Running" || $3 !~ /^true(,true)*$/ || $4 != "<none>") bad = 1 } END { exit bad }' <<< "$pods" || return 1
   for app in aircraft-maintenance airports-routes flight-ops login rabbitmq; do
     [ "$(grep -c "^$app-[0-9]" <<< "$pods")" -eq "${#NODE_IPS[@]}" ] || return 1
-    [ "$(awk -v a="^$app-[0-9]" '$1 ~ a { print $7 }' <<< "$pods" | sort -u | wc -l)" -eq "${#NODE_IPS[@]}" ] || return 1
+    [ "$(awk -v a="^$app-[0-9]" '$1 ~ a { print $5 }' <<< "$pods" | sort -u | wc -l)" -eq "${#NODE_IPS[@]}" ] || return 1
   done
 }
 

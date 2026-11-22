@@ -2,7 +2,7 @@
 
 Documentation of the distributed version of AISafe (SIDIS, Assignment 1): the PSOFT monolith split
 into three services plus a login, each replicated three times on a k3s cluster. **Assignment 2**
-(RabbitMQ between the services, CQRS, a database per instance, `/api/v2/unicorns`) is in
+(RabbitMQ between the services, CQRS, a database per instance) is in
 [`assignment-2.md`](assignment-2.md); this document describes the base it builds on. The documentation of
 the original monolith (use cases, glossary, FURPS+, domain model) is in
 [`../docs_monolith/`](../docs_monolith/README.md).
@@ -10,7 +10,7 @@ the original monolith (use cases, glossary, FURPS+, domain model) is in
 |                  |                                                                                                                                                                                                                                                                                                                           |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Use cases        | [every user story](system-documentation/use-cases/README.md) in the distributed system: service, routes, how each request is served across replicas, SSD and SD                                                                                                                                                           |
-| Assignment 2     | [`assignment-2.md`](assignment-2.md): messaging (events, commands, queries), CQRS, database per instance, consistency, failures, unicorns                                                                                                                                                                                 |
+| Assignment 2     | [`assignment-2.md`](assignment-2.md): messaging (events, commands, queries), CQRS, database per instance, consistency, failures                                                                                                                                                                                           |
 | Contracts        | [C1-C5](system-documentation/contracts/README.md): the calls between services, one page and one SD each                                                                                                                                                                                                                   |
 | Global artifacts | [diagrams, glossary, FURPS+](system-documentation/global-artifacts/README.md)                                                                                                                                                                                                                                             |
 | Team             | [members, ownership and pull requests](TeamMembersAndTasks.md)                                                                                                                                                                                                                                                            |

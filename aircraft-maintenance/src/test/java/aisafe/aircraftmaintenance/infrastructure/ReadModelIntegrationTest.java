@@ -1,8 +1,6 @@
 package aisafe.aircraftmaintenance.infrastructure;
 
 import aisafe.aircrafts.application.AircraftAcrossReplicas;
-import aisafe.aircrafts.application.ViewAircraftMoodsUseCase;
-import aisafe.aircrafts.application.dtos.AircraftMoodResponse;
 import aisafe.aircrafts.domain.Aircraft;
 import aisafe.aircrafts.domain.AircraftModel;
 import aisafe.aircrafts.domain.AircraftModelImage;
@@ -86,7 +84,6 @@ class ReadModelIntegrationTest {
     @Autowired private AircraftAcrossReplicas aircraft;
     @Autowired private MaintenanceRecordsAcrossReplicas records;
     @Autowired private FlightCopiesAcrossReplicas flightCopies;
-    @Autowired private ViewAircraftMoodsUseCase moods;
     @Autowired private ReadModelListener listener;
     @Autowired private ReadModelReconciler reconciler;
     @Autowired private ReadModelStore store;
@@ -130,8 +127,9 @@ class ReadModelIntegrationTest {
         return modelRepository.findByModelName("Airbus A320neo").orElseThrow();
     }
 
-    private AircraftMoodResponse moodOf(String registration) {
-        return moods.execute().stream().filter(m -> m.registrationNumber().equals(registration)).findFirst().orElseThrow();
+    private AircraftStatus statusOf(String registration) {
+        return aircraft.findAll().stream().filter(a -> a.getRegistrationNumber().getNumber().equals(registration))
+                .findFirst().orElseThrow().getStatus();
     }
 
     @Test
@@ -142,13 +140,12 @@ class ReadModelIntegrationTest {
     }
 
     @Test
-    void ensureAircraftEventsReachTheFleetAndTheUnicorns() {
+    void ensureAircraftEventsReachTheFleet() {
         inTransaction(() -> aircraftRepository.save(new Aircraft(AircraftStatus.AVAILABLE, LocalDate.of(2022, 1, 1), a320(),
                 new RegistrationNumber("CS-RMA"), 150, 5000.0, List.of())));
         listener.onEvent(lastEvent("aircraft.created"));
 
-        assertTrue(aircraft.findAll().stream().anyMatch(a -> a.getRegistrationNumber().getNumber().equals("CS-RMA")));
-        assertEquals("HAPPY", moodOf("CS-RMA").mood());
+        assertEquals(AircraftStatus.AVAILABLE, statusOf("CS-RMA"));
 
         inTransaction(() -> {
             Aircraft stored = aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-RMA")).orElseThrow();
@@ -156,7 +153,7 @@ class ReadModelIntegrationTest {
                     a320(), stored.getRegistrationNumber(), stored.getSeatCapacity(), stored.getRange(), stored.getFeatures()));
         });
         listener.onEvent(lastEvent("aircraft.updated"));
-        assertEquals("GRUMPY", moodOf("CS-RMA").mood());
+        assertEquals(AircraftStatus.UNDER_MAINTENANCE, statusOf("CS-RMA"));
 
         inTransaction(() -> aircraftRepository.delete(aircraftRepository.findByRegistrationNumber(new RegistrationNumber("CS-RMA")).orElseThrow()));
         listener.onEvent(lastEvent("aircraft.deleted"));
