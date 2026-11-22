@@ -18,7 +18,7 @@ unit tests and a single replica on a laptop still run.
 | External endpoints stay HTTP REST               | Unchanged: the same routes and answers as in Assignment 1                                                                                                                                            | The Assignment 1 collection passes against the cluster with events on (86 requests, 199 checks) |
 | Database per service (one per instance)         | One H2 per replica, on the replica's own disk (k3s local-path); nothing reads another service's or replica's database (section 5)                                                                    | `X-Data-Node` on a read forwarded to the replica that holds the data (Postman A2 folder 2)      |
 | At least two instances of each microservice     | Three of each service, and three RabbitMQ brokers, one per VM                                                                                                                                        | `kubectl -n aisafe get pods -o wide`                                                            |
-| Integration tests in Postman                    | `docs/postman/aisafe-a2.postman_collection.json` (33 requests, 84 checks) and the Assignment 1 collection                                                                                            | [`postman/README.md`](postman/README.md)                                                        |
+| Integration tests in Postman                    | `docs/postman/aisafe-a2.postman_collection.json` (38 requests, 98 checks) and the Assignment 1 collection                                                                                            | [`postman/README.md`](postman/README.md)                                                        |
 | `/api/v2/unicorns`, and how it fits CQRS        | The mood of every aircraft, a pure query on the read side of aircraft-maintenance (section 8)                                                                                                        | Postman A2 folders 2, 4, 5                                                                      |
 | Decisions, consistency, communication, failures | Sections 3 to 7 and 10                                                                                                                                                                               | This document                                                                                   |
 | Deployment instructions                         | [`../deploy/README.md`](../deploy/README.md): `deploy/setup.sh` now also installs RabbitMQ and its users                                                                                             |                                                                                                 |
@@ -217,8 +217,8 @@ route of the new version of the API; the routes of version 1 did not change.
 | Test                                  | Result                                                                                                                                               |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unit and integration (`./mvnw test`)  | 1267 tests (common 136, aircraft-maintenance 485, airports-routes 435, flight-ops 153, login 58)                                                     |
-| Postman, Assignment 2                 | 33 requests, 84 checks, all passing on the cluster (three runs in a row)                                                                             |
-| Postman, Assignment 1, with events on | 86 requests, 199 checks, all passing: the external API did not change                                                                                |
+| Postman, Assignment 2                 | 38 requests, 98 checks, all passing on the cluster (three runs in a row, 2026-11-22, with the flight events and read model of flight-ops) |
+| Postman, Assignment 1, with events on | 86 requests, 199 checks, all passing (again on 2026-11-22): the external API did not change                                                          |
 | Broker down (local, 3 replicas)       | a route created with RabbitMQ stopped (201), its event kept in the outbox and delivered when the broker came back, then listed by the other replicas |
 | Failure test (`failure-test.sh`)      | below                                                                                                                                                |
 
@@ -235,6 +235,10 @@ the Saga over the broker) and 14 kinds of request running at the same time (as i
 | deploy (every service, one replica at a time) | 277 s          | 8642     | 1   | a route re-created right after its deletion got 409                                                          | 3.9 s   |
 | node-off (a VM loses power)                   | 113 s          | 4070     | 4   | 3 flight schedulings got 503 ("try again") between 15 s and 38 s; 1 route creation had no answer within 15 s | 15 s    |
 | node-freeze (a VM's kernel stops)             | 126 s          | 4375     | 1   | 1 delete had no answer within 15 s                                                                           | 15 s    |
+
+Repeated on 2026-11-22 on a second cluster (three VMs on another Proxmox), with the flight events and
+read model of flight-ops: rabbitmq-crash back to normal in 27 s, 1216 requests, 0 bad; flight-ops-crash
+in 17 s, 991 requests, 0 bad.
 
 Compared with Assignment 1 (`README.md`, section 9), losing a VM went from 174 bad requests to 4: the
 listings are answered by each replica's read model, so they are never partial.

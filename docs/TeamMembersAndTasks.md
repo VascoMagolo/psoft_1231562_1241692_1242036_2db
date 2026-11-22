@@ -32,6 +32,7 @@ must understand the whole system, not only the part they own.
 | `common` for every service (event outbox, read models, commands, snapshots), aircraft-maintenance (CQRS, C4, unicorns), login | Diogo Nogueira |
 | airports-routes and flight-ops reading the fleet from events, the Saga's C4 and C5 over the broker (reviewed by their owners) | Diogo Nogueira |
 | RabbitMQ in k3s, Postman of Assignment 2, [`assignment-2.md`](assignment-2.md)                                                | Diogo Nogueira |
+| `flight.*` events and the flight read model in the Postman of Assignment 2                                                     | Miguel Silva   |
 
 ## 3. What each pull request brought
 
@@ -53,3 +54,9 @@ must understand the whole system, not only the part they own.
 | #14 | Diogo Nogueira | 2026-10-30 | audit trail                                                                                       |
 | #15 | Diogo Nogueira | 2026-10-30 | parts import restricted to technicians and supervisors (US225)                                    |
 | #16 | Diogo Nogueira | 2026-10-30 | use cases with SSD and SD, contracts C1-C5, global artifacts, screenshots of the running system   |
+| #17 | Diogo Nogueira | 2026-10-31 | internal routes closed to clients, and the review fixes                                           |
+| #18 | Diogo Nogueira | 2026-11-05 | `common` messaging: event outbox, shared read models, AMQP commands and snapshots                 |
+| #22 | Diogo Nogueira | 2026-11-05 | [`assignment-2.md`](assignment-2.md) and the Postman collection of Assignment 2                   |
+| #23 | Diogo Nogueira | 2026-11-05 | RabbitMQ in k3s, events in every service, the Saga's C4 and C5 over the broker, C1-C3 as queries  |
+| #24 | Miguel Silva   | 2026-11-05 | airports-routes events and read model (routes, airports, flight copies), its live dashboard       |
+| -   | Vasco Magolo   | 2026-11-13 | flight-ops flight events and read model (`FlightProjection`, `ReadModelFlights`), direct commit   |
